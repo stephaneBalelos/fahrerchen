@@ -1,6 +1,6 @@
 <template>
     <UMain>
-        <UHeader :links="links">
+        <UHeader :links="links" :ui="{ container: 'max-w-full'}">
             <template #logo>
                 <Logo class="w-auto h-6" />
             </template>
