@@ -7,9 +7,12 @@ export default defineNuxtConfig({
     '/': { prerender: true },
   },
 
-  modules: ['@nuxtjs/supabase', '@nuxt/ui'],
+  modules: ['@nuxtjs/supabase', '@nuxt/ui', '@nuxtjs/i18n'],
   extends: ['@nuxt/ui-pro'],
   supabase: {
     redirect: false
+  },
+  i18n: {
+    vueI18n: './i18n.config.ts' 
   }
 });

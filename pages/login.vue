@@ -3,6 +3,7 @@
         <UAuthForm :fields="fields" :validate="validate" :providers="providers" title="Welcome back!" align="top"
             icon="i-heroicons-lock-closed" :ui="{ base: 'text-center', footer: 'text-center' }" @submit="onSubmit">
             <template #description>
+                {{ $t('welcome') }}
                 Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
             </template>
 
