@@ -26,6 +26,9 @@ definePageMeta({
     layout: 'auth'
 })
 
+const supabase = useSupabaseClient()
+
+
 const fields = [{
     name: 'email',
     type: 'text',
@@ -54,8 +57,11 @@ const providers = [{
     }
 }]
 
-function onSubmit(data: any) {
-    console.log('Submitted', data)
+async function onSubmit(data: any) {
+    console.log(data)
+    // const res = await supabase.auth.signInWithPassword({
+    //     email: 
+    // })
 }
 </script>
 
