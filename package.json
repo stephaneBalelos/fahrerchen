@@ -15,6 +15,8 @@
     "@nuxt/ui": "^2.14.2",
     "@nuxtjs/i18n": "^8.1.1",
     "@nuxtjs/supabase": "^1.1.7",
+    "@playwright/test": "^1.42.1",
+    "@types/node": "^20.11.27",
     "@vue/test-utils": "^2.4.4",
     "happy-dom": "^13.8.2",
     "nuxt": "^3.10.3",
