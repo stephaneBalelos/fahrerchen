@@ -7,7 +7,12 @@ export default defineNuxtConfig({
     '/': { prerender: true },
   },
 
-  modules: ['@nuxtjs/supabase', '@nuxt/ui', '@nuxtjs/i18n'],
+  modules: [
+    '@nuxtjs/supabase',
+    '@nuxt/ui',
+    '@nuxtjs/i18n',
+    '@nuxt/test-utils'
+  ],
   extends: ['@nuxt/ui-pro'],
   supabase: {
     redirect: false
