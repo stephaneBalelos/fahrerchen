@@ -15,7 +15,12 @@ export default defineNuxtConfig({
   ],
   extends: ['@nuxt/ui-pro'],
   supabase: {
-    redirect: false
+    redirect: true,
+    redirectOptions: {
+      login: '/login',
+      callback: '/confirm',
+      exclude: ['/forgot-password']
+    }
   },
   i18n: {
     vueI18n: './i18n.config.ts' 

@@ -29,6 +29,14 @@
                     <template #footer>
                         <!-- ~/components/UserDropdown.vue -->
                         <!-- <UserDropdown /> -->
+                        <div v-if="user">
+                            logged In as {{ user.email }} <br>
+                            <UButton @click="signOut">
+                                SignOut
+                            </UButton>
+
+                        </div>
+                        <div v-else> not logged in</div>
                     </template>
                 </UDashboardSidebar>
             </UDashboardPanel>
@@ -51,6 +59,11 @@
 const route = useRoute()
 const appConfig = useAppConfig()
 const { isHelpSlideoverOpen } = useDashboard()
+
+const user = useSupabaseUser()
+const supabase = useSupabaseClient()
+
+
 
 const links = [{
     id: 'home',
@@ -131,6 +144,12 @@ const groups = [{
 
 const defaultColors = ref(['green', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet'].map(color => ({ label: color, chip: color, click: () => console.log(color) })))
 const colors = computed(() => defaultColors.value.map(color => ({ ...color, active: false })))
+
+
+const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) console.log(error)
+}
 </script>
 
 <style scoped></style>
