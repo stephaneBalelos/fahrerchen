@@ -13,6 +13,14 @@
     >
       <template #description>
         Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
+
+        <UAlert
+            v-if="loginFailed"
+            role="alert"
+            color="red"
+            variant="subtle"
+            title="Invalid email or password."
+        />
       </template>
 
       <template #password-hint>
@@ -31,14 +39,13 @@
 import { z } from 'zod'
 import type { FormError, FormSubmitEvent } from '#ui/types'
 
-
-
-const toast = useToast()
 const supabase = useSupabaseClient()
 
 definePageMeta({
     layout: 'auth',
 })
+
+const loginFailed = ref(false)
 
 const fields = [{
   name: 'email',
@@ -77,7 +84,7 @@ async function onSubmit(credentials: any) {
     })
     if (error) {
         // Handle Error
-        toast.add({ title: 'Wrong Email or Password', color: 'red'})
+        loginFailed.value = true
         return;
     }
 

@@ -31,7 +31,7 @@
                         <!-- <UserDropdown /> -->
                         <div v-if="user">
                             logged In as {{ user.email }} <br>
-                            <UButton @click="signOut">
+                            <UButton id="logout-button" @click="signOut">
                                 SignOut
                             </UButton>
 
@@ -62,6 +62,7 @@ const { isHelpSlideoverOpen } = useDashboard()
 
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
+const toast = useToast()
 
 
 
@@ -148,7 +149,12 @@ const colors = computed(() => defaultColors.value.map(color => ({ ...color, acti
 
 const signOut = async () => {
     const { error } = await supabase.auth.signOut()
-    if (error) console.log(error)
+    if (error) {
+        toast.add({ title: 'Error', description: error.message, color: 'red', icon: 'i-heroicons-exclamation', timeout: 5000})
+        return
+    }
+
+    navigateTo('/login')
 }
 </script>
 
