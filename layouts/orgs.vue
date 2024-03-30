@@ -4,7 +4,7 @@
             <UDashboardPanel :width="250" :resizable="{ min: 200, max: 300 }" collapsible>
                 <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
                     <template #left>
-                        {{ orgData.name }}
+                        {{ orgData?.name }}
                     </template>
                 </UDashboardNavbar>
 
@@ -67,10 +67,6 @@ const toast = useToast()
 
 const { org, orgData } = useGlobalOrgState()
 
-if (!org.value) {
-    navigateTo('/')
-}
-
 
 
 const links = [{
@@ -90,6 +86,15 @@ const links = [{
     tooltip: {
         text: 'Users',
         shortcuts: ['G', 'U']
+    }
+}, {
+    id: 'courses',
+    label: 'Courses',
+    icon: 'i-heroicons-book-open',
+    to: '/my/courses',
+    tooltip: {
+        text: 'Courses',
+        shortcuts: ['G', 'C']
     }
 }, {
     id: 'settings',
