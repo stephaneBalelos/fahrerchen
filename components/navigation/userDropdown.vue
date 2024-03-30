@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const user = useSupabaseUser()
+const supabase = useSupabaseClient()
+const toast = useToast()
 const getDropdownItems = (u: typeof user.value) => {
     const items = [
         [{
@@ -20,11 +22,23 @@ const getDropdownItems = (u: typeof user.value) => {
             icon: 'i-heroicons-signal'
         }], [{
             label: 'Sign out',
-            icon: 'i-heroicons-arrow-left-on-rectangle'
+            icon: 'i-heroicons-arrow-left-on-rectangle',
+            class: '.logout-button',
+            click: () => signOut()
         }]
     ]
 
     return items
+}
+
+const signOut = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+        toast.add({ title: 'Error', description: error.message, color: 'red', icon: 'i-heroicons-exclamation', timeout: 5000 })
+        return
+    }
+
+    navigateTo('/login')
 }
 
 </script>

@@ -47,7 +47,7 @@ test.describe('Auth Flow', () => {
     await login(page, userEmail, userPassword);
     await page.waitForURL('http://localhost:3000')
 
-    const logoutButton = page.locator("#logout-button")
+    const logoutButton = page.locator(".logout-button")
     await expect(logoutButton).toBeAttached()
     await logoutButton.click()
     await page.waitForURL('http://localhost:3000/login')

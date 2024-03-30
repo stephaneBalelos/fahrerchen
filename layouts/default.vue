@@ -1,52 +1,18 @@
 <template>
     <UMain>
         <UDashboardLayout>
-            <UDashboardPanel :width="250" :resizable="{ min: 200, max: 300 }" collapsible>
-                <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
-                    <template #left>
-                        Head
-                    </template>
-                </UDashboardNavbar>
+            <UDashboardPage>
+                <UDashboardPanel grow>
+                <UDashboardNavbar title="Settings" />
+                
+                <slot></slot>
+                </UDashboardPanel>
+            </UDashboardPage>
 
-                <UDashboardSidebar>
-                    <template #header>
-                        <UDashboardSearchButton />
-                    </template>
-
-                    <UDashboardSidebarLinks :links="links" />
-
-                    <UDivider />
-
-                    <UDashboardSidebarLinks :links="[{ label: 'Colors', draggable: false, children: colors }]"
-                        @update:links="links => defaultColors = links" />
-
-                    <div class="flex-1" />
-
-                    <UDashboardSidebarLinks :links="footerLinks" />
-
-                    <UDivider class="sticky bottom-0" />
-
-                    <template #footer>
-                        <!-- ~/components/UserDropdown.vue -->
-                        <!-- <UserDropdown /> -->
-                        <div v-if="user">
-                            logged In as {{ user.email }} <br>
-                            <UButton id="logout-button" @click="signOut">
-                                SignOut
-                            </UButton>
-
-                        </div>
-                        <div v-else> not logged in</div>
-                    </template>
-                </UDashboardSidebar>
-            </UDashboardPanel>
-
-            <slot />
-
-            <!-- ~/components/HelpSlideover.vue -->
+            <!-- ~/components/HelpSlideover.vue
             <HelpSlideover />
-            <!-- ~/components/NotificationsSlideover.vue -->
-            <NotificationsSlideover />
+             ~/components/NotificationsSlideover.vue
+            <NotificationsSlideover /> -->
 
             <ClientOnly>
                 <LazyUDashboardSearch :groups="groups" />
@@ -67,23 +33,23 @@ const toast = useToast()
 
 
 const links = [{
-    id: 'home',
-    label: 'Home',
-    icon: 'i-heroicons-home',
+    id: 'dashboard',
+    label: 'Dashboard',
+    icon: 'i-heroicons-view-dashboard',
     to: '/',
     tooltip: {
-        text: 'Home',
-        shortcuts: ['G', 'H']
+        text: 'Dashboard',
+        shortcuts: ['G', 'D']
     }
 }, {
-    id: 'inbox',
-    label: 'Inbox',
-    icon: 'i-heroicons-inbox',
-    to: '/inbox',
+    id: 'orgs',
+    label: 'Organizations',
+    icon: 'i-heroicons-user-group',
+    to: '/orgs',
     badge: '4',
     tooltip: {
         text: 'Inbox',
-        shortcuts: ['G', 'I']
+        shortcuts: ['G', 'O']
     }
 }, {
     id: 'users',
