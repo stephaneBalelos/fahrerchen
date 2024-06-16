@@ -18,6 +18,10 @@
 import { z } from 'zod'
 import type { FormSubmitEvent } from '#ui/types'
 
+definePageMeta({
+    layout: 'auth',
+})
+
 const supabase = useSupabaseClient()
 
 const schema = z.object({

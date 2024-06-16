@@ -3,6 +3,9 @@
         <UHeader>
             <template #logo>
                 <Logo class="w-auto h-6" />
+                Auth: <div v-if="user">
+                    true {{ user.email }}
+                </div> sdsds
             </template>
 
             <template #right>
@@ -21,7 +24,8 @@
 </template>
 
 <script setup lang="ts">
-
+    const supabase = useSupabaseClient()
+    const user = useSupabaseUser()
 </script>
 
 <style scoped>
