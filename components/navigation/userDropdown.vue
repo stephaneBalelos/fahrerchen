@@ -9,8 +9,11 @@ const getDropdownItems = (u: typeof user.value) => {
             slot: 'account',
             disabled: true
         }], [{
-            label: 'Settings',
-            icon: 'i-heroicons-cog-8-tooth'
+            label: 'Profile',
+            icon: 'i-heroicons-cog-8-tooth',
+            click: () => {
+                navigateTo("/account")
+            }
         }], [{
             label: 'Documentation',
             icon: 'i-heroicons-book-open'

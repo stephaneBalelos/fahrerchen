@@ -20,7 +20,6 @@ const { data, error } = await useAsyncData('organisations', async () => {
 
 const newOrgName = ref('')
 const createOrganization = async () => {
-  console.log(user.value)
   if(user.value === null) {
     return
   }
@@ -31,7 +30,6 @@ const createOrganization = async () => {
   if (error) {
     throw error
   }
-  console.log(data)
   isOpen.value = false
 }
 
