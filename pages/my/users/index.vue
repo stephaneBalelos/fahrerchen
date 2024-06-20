@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import UsersTables from '~/components/tables/UsersTables.vue';
-import type { Database } from '~/types/database.types';
+import type { Database } from '~/types/app.types';
 import CreateUserForm from '~/components/forms/CreateUserForm.vue';
 
 
@@ -43,11 +43,11 @@ const columns = [{
 
 const client = useSupabaseClient<Database>()
 const { data: students } = await useAsyncData('students', async () => {
-    const { data, error } = await client.from('users').select('*')
+    const { data, error } = await client.from('user_roles_view').select('*').eq('role', 'student')
     if (error) {
         throw error
     }
-    return data
+    return data ?? []
 })
 
 const open = ref(false)

@@ -7,7 +7,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "test": "vitest"
+    "test": "vitest",
+    "gen_type": "supabase gen types typescript --local > ./types/database.types.ts"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.0.8",
@@ -35,6 +36,7 @@
     "@supabase/supabase-js": "^2.39.8",
     "@vueuse/core": "^10.9.0",
     "date-fns": "^3.6.0",
+    "type-fest": "^4.20.1",
     "v-calendar": "^3.1.2",
     "zod": "^3.23.8"
   }
