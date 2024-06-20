@@ -58,7 +58,7 @@ const isOpen = ref(false)
         <UButton @click="isOpen = true">Create an Organization</UButton>
       </template>
     </UDashboardToolbar>
-    <UPageCard v-for="org in data" :key="org.id" :title="org.name" :description="'Dasds'" icon="i-simple-icons-tailwindcss" @click="selectOrg(org.id)" />
+    <UPageCard v-for="org in data" :key="org.id" :title="org.name" :description="'Dasds'" icon="i-simple-icons-tailwindcss" @click="selectOrg(org.id)" :ui="{wrapper: 'relative group org-card',}" />
 
     <UPageCard v-if="data?.length == 0" :title="'No organizations found'"
       :description="'You have not created any organizations yet.'"

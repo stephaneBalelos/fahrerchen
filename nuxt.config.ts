@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     '@nuxtjs/supabase',
     '@nuxt/ui',
     '@nuxtjs/i18n',
-    '@nuxt/test-utils'
+    '@nuxt/test-utils/module'
   ],
   extends: ['@nuxt/ui-pro'],
   supabase: {

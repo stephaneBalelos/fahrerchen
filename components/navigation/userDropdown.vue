@@ -26,7 +26,7 @@ const getDropdownItems = (u: typeof user.value) => {
         }], [{
             label: 'Sign out',
             icon: 'i-heroicons-arrow-left-on-rectangle',
-            class: '.logout-button',
+            class: 'logout-button',
             click: () => signOut()
         }]
     ]

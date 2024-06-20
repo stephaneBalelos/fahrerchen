@@ -55,6 +55,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
     :state="state"
     class="space-y-4"
     @submit="onSubmit"
+    id="add-member-form"
   >
     <UFormGroup label="Email" name="email">
       <UInput

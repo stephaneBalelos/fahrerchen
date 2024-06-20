@@ -4,7 +4,9 @@
             <UDashboardPanel :width="250" :resizable="{ min: 200, max: 300 }" collapsible>
                 <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
                     <template #left>
-                        {{ orgData?.name }}
+                        <div class="org-dropdown">
+                            {{ orgData?.name }}
+                        </div>
                     </template>
                 </UDashboardNavbar>
 

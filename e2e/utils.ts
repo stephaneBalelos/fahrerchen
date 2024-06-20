@@ -22,7 +22,7 @@ function reseedDb() {
   const regex = /(?<=SERVICE_ROLE_KEY=")[^"]*/;
   const match = output.match(regex);
 
-  if (match) { // This will log 'desired_string' to the console
+  if (match) { 
     const serviceKey = match[0]
     const client = createClient('http://127.0.0.1:54321', serviceKey);
 
@@ -39,7 +39,7 @@ async function seedUsers(client: SupabaseClient) {
   const { data, error } = await client.auth.admin.listUsers()
 
   const users = [
-    { email: 'user1@balelos.com', password: 'password123' },
+    { email: 'user1@test.com', password: 'password123' },
     // Add more users as needed
   ];
 

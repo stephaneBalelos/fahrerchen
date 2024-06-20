@@ -5,7 +5,7 @@ import { login } from './utils';
 test.describe('Auth Flow', () => {
   const userEmailWrong = "test@test.io";
   const userPasswordWrong = "test123456";
-  const userEmail = "user1@balelos.com";
+  const userEmail = "user1@test.com";
   const userPassword = "password123";
   const userEmailNoData = "user2@balelos.com";
   const userPasswordNoData = "password123";
@@ -42,12 +42,13 @@ test.describe('Auth Flow', () => {
     await login(page, userEmail, userPassword);
     await page.waitForURL('http://localhost:3000')
   });
+
   test('logout should redirect to the login page', async ({ page }) => {
     await expect(page).toHaveURL('http://localhost:3000/login');
     await login(page, userEmail, userPassword);
     await page.waitForURL('http://localhost:3000')
 
-    const logoutButton = page.locator(".logout-button")
+    const logoutButton = page.locator(".logout-button") 
     await expect(logoutButton).toBeAttached()
     await logoutButton.click()
     await page.waitForURL('http://localhost:3000/login')
