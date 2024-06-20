@@ -27,7 +27,7 @@ const state = reactive<Schema>({
   lastname: "",
 });
 
-onBeforeMount(() => {
+onMounted(() => {
   if (user.value) {
     state.firstname = user.value.firstname ? user.value.firstname : "";
     state.lastname = user.value.lastname ? user.value.lastname : "";

@@ -25,6 +25,14 @@ create table public.organisations (
 );
 comment on table public.organisations is 'Organisation data.';
 
+-- ORGANISATION MEMBERS
+create table public.organisation_members (
+  id            uuid default uuid_generate_v4() primary key,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  organisation_id    uuid references public.organisations not null,
+  user_id    uuid references public.users not null
+);
+
 -- COURSES
 create table public.courses (
   id            uuid default uuid_generate_v4() primary key,
@@ -77,56 +85,38 @@ create table public.role_permissions (
 );
 comment on table public.role_permissions is 'Application permissions for each role.';
 
--- -- authorize with role-based access control (RBAC)
--- create function public.authorize(
---   requested_permission app_permission
--- )
--- returns boolean as $$
--- declare
---   bind_permissions int;
--- begin
---   select count(*)
---   from public.role_permissions
---   where role_permissions.permission = authorize.requested_permission
---     and role_permissions.role = (auth.jwt() ->> 'user_role')::public.app_role
---   into bind_permissions;
-  
---   return bind_permissions > 0;
--- end;
--- $$ language plpgsql security definer set search_path = public;
-
--- -- Secure the tables
--- alter table public.users enable row level security;
--- alter table public.organisations enable row level security;
--- alter table public.courses enable row level security;
--- alter table public.user_roles enable row level security;
--- alter table public.role_permissions enable row level security;
--- create policy "Allow logged-in read access" on public.users for select using ( auth.role() = 'authenticated' );
--- create policy "Allow individual insert access" on public.users for insert with check ( auth.uid() = id );
--- create policy "Allow individual update access" on public.users for update using ( auth.uid() = id );
--- create policy "Allow logged-in read access" on public.organisations for select using ( auth.role() = 'authenticated' );
--- create policy "Allow individual insert access" on public.organisations for insert with check ( auth.uid() = created_by );
--- create policy "Allow individual delete access" on public.organisations for delete using ( auth.uid() = created_by );
--- create policy "Allow authorized delete access" on public.organisations for delete using ( authorize('organisations.delete') );
--- create policy "Allow logged-in read access" on public.courses for select using ( auth.role() = 'authenticated' );
--- create policy "Allow individual insert access" on public.courses for insert with check ( auth.uid() = user_id );
--- create policy "Allow individual update access" on public.courses for update using ( auth.uid() = user_id );
--- create policy "Allow individual delete access" on public.courses for delete using ( auth.uid() = user_id );
--- create policy "Allow authorized delete access" on public.courses for delete using ( authorize('courses.delete') );
--- create policy "Allow individual read access" on public.user_roles for select using ( auth.uid() = user_id );
-
--- -- Send "previous data" on change 
--- alter table public.users replica identity full; 
--- alter table public.organisations replica identity full; 
--- alter table public.courses replica identity full;
-
--- -- inserts a row into public.users and assigns roles
 create function public.handle_new_user() 
 returns trigger as $$
 declare is_admin boolean;
+declare org_id uuid;
+declare role_name public.app_role;
 begin
   insert into public.users (id, email)
   values (new.id, new.email);
+
+  raise log 'User Meta Data: %', new;
+
+  org_id := new.raw_user_meta_data ->> 'orgid';
+  role_name := (new.raw_user_meta_data ->> 'role')::public.app_role;
+
+
+  if new.raw_user_meta_data ->> 'orgid' is null then
+    insert into public.organisations (id, name, owner_id)
+    values (extensions.uuid_generate_v4(), 'My Org', new.id);
+
+    role_name := 'owner'::public.app_role;
+    insert into public.user_roles (user_id, role)
+    values (new.id, role_name);
+    return new; 
+  end if;
+  
+
+  insert into public.organisation_members (id, organisation_id, user_id)
+  values (extensions.uuid_generate_v4(), org_id, new.id);
+
+
+  insert into public.user_roles (user_id, role)
+  values (new.id, role_name);
   
   return new;
 end;
@@ -177,3 +167,49 @@ create trigger on_auth_user_created
 --     return user_id;
 -- end;
 -- $$ language plpgsql;
+
+
+-- -- authorize with role-based access control (RBAC)
+-- create function public.authorize(
+--   requested_permission app_permission
+-- )
+-- returns boolean as $$
+-- declare
+--   bind_permissions int;
+-- begin
+--   select count(*)
+--   from public.role_permissions
+--   where role_permissions.permission = authorize.requested_permission
+--     and role_permissions.role = (auth.jwt() ->> 'user_role')::public.app_role
+--   into bind_permissions;
+  
+--   return bind_permissions > 0;
+-- end;
+-- $$ language plpgsql security definer set search_path = public;
+
+-- -- Secure the tables
+-- alter table public.users enable row level security;
+-- alter table public.organisations enable row level security;
+-- alter table public.courses enable row level security;
+-- alter table public.user_roles enable row level security;
+-- alter table public.role_permissions enable row level security;
+-- create policy "Allow logged-in read access" on public.users for select using ( auth.role() = 'authenticated' );
+-- create policy "Allow individual insert access" on public.users for insert with check ( auth.uid() = id );
+-- create policy "Allow individual update access" on public.users for update using ( auth.uid() = id );
+-- create policy "Allow logged-in read access" on public.organisations for select using ( auth.role() = 'authenticated' );
+-- create policy "Allow individual insert access" on public.organisations for insert with check ( auth.uid() = created_by );
+-- create policy "Allow individual delete access" on public.organisations for delete using ( auth.uid() = created_by );
+-- create policy "Allow authorized delete access" on public.organisations for delete using ( authorize('organisations.delete') );
+-- create policy "Allow logged-in read access" on public.courses for select using ( auth.role() = 'authenticated' );
+-- create policy "Allow individual insert access" on public.courses for insert with check ( auth.uid() = user_id );
+-- create policy "Allow individual update access" on public.courses for update using ( auth.uid() = user_id );
+-- create policy "Allow individual delete access" on public.courses for delete using ( auth.uid() = user_id );
+-- create policy "Allow authorized delete access" on public.courses for delete using ( authorize('courses.delete') );
+-- create policy "Allow individual read access" on public.user_roles for select using ( auth.uid() = user_id );
+
+-- -- Send "previous data" on change 
+-- alter table public.users replica identity full; 
+-- alter table public.organisations replica identity full; 
+-- alter table public.courses replica identity full;
+
+-- -- inserts a row into public.users and assigns roles

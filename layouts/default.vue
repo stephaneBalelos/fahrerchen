@@ -4,6 +4,12 @@
       <UDashboardPage>
         <UDashboardPanel grow>
           <UDashboardNavbar title="Dashboard" badge="premium">
+
+            <template #title>
+              <NuxtLink to="/">
+                Dashboard 
+              </NuxtLink>
+            </template>
             <template #right>
                 <UserDropdown></UserDropdown>
             </template>

@@ -40,6 +40,7 @@ import { z } from 'zod'
 import type { FormError, FormSubmitEvent } from '#ui/types'
 
 const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 
 definePageMeta({
     layout: 'auth',
@@ -74,6 +75,12 @@ const providers = [{
     console.log('Redirect to GitHub')
   }
 }]
+
+onMounted(() => {
+  if (user.value) {
+    navigateTo("/")
+  }
+})
 
 
 async function onSubmit(credentials: any) {
