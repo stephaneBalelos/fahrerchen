@@ -3,10 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from '~/types/database.types';
+import type { Database } from '~/types/app.types';
 
 type UsersData = {
-    data: Database['public']['Tables']['users']['Row'][]
+    data: Database['public']['Views']['user_roles_view']['Row'][]
 }
 
 const props = defineProps<UsersData>()
@@ -22,10 +22,7 @@ const columns = [{
     }, {
         key: 'email',
         label: 'Email'
-    }, {
-        key: 'role',
-        label: 'Role'
-}]
+    }]
 </script>
 
 <style scoped></style>

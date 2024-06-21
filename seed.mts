@@ -16,6 +16,8 @@ const seed = await createSeedClient({
   dryRun: process.env.DRY !== '0',
 });
 
+await seed.
+
 // Clears all existing data in the database, but keep the structure
 // await seed.$resetDatabase()
 

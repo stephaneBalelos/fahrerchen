@@ -98,7 +98,7 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "courses_subscription_user_id_fkey"
@@ -179,7 +179,7 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organisation_members_user_id_fkey"
@@ -259,7 +259,7 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_roles_view"
-            referencedColumns: ["user_id"]
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_roles_user_id_fkey"
@@ -311,14 +311,14 @@ export type Database = {
         Row: {
           email: string | null
           firstname: string | null
+          id: string | null
           lastname: string | null
           role: Database["public"]["Enums"]["app_role"] | null
-          user_id: string | null
         }
         Relationships: [
           {
             foreignKeyName: "users_id_fkey"
-            columns: ["user_id"]
+            columns: ["id"]
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -327,7 +327,23 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      create_student: {
+        Args: {
+          firstname: string
+          lastname: string
+          email: string
+          birth_date: string
+          organization_id: string
+        }
+        Returns: {
+          birth_date: string | null
+          email: string
+          firstname: string | null
+          id: string
+          lastname: string | null
+          status: Database["public"]["Enums"]["user_status"] | null
+        }
+      }
     }
     Enums: {
       app_permission: "organisations.delete" | "courses.delete"

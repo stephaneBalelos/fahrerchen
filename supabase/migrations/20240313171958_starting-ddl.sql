@@ -16,12 +16,13 @@ create table public.users (
 comment on table public.users is 'Profile data for each user.';
 comment on column public.users.id is 'References the internal Supabase Auth user.';
 
+
 -- ORGANISATION
 create table public.organisations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   name          text not null,
-  owner_id      uuid references auth.users not null
+  owner_id      uuid references public.users not null
 );
 comment on table public.organisations is 'Organisation data.';
 
@@ -32,6 +33,17 @@ create table public.organisation_members (
   organisation_id    uuid references public.organisations not null,
   user_id    uuid references public.users not null
 );
+
+create table public.students (
+  id          uuid default uuid_generate_v4() primary key,
+  user_id     uuid unique,
+  email       text not null unique,
+  firstname    text not null,
+  lastname    text not null,
+  birth_date   date not null,
+  organisation_id    uuid references public.organisations not null
+);
+comment on table public.students is 'Profile data for each student.';
 
 -- COURSES
 create table public.courses (
@@ -213,3 +225,14 @@ create trigger on_auth_user_created
 -- alter table public.courses replica identity full;
 
 -- -- inserts a row into public.users and assigns roles
+
+-- Create a view to show the user's roles
+create view public.user_roles_view as 
+select 
+  users.id,
+  users.email,
+  users.firstname,
+  users.lastname,
+  user_roles.role as role
+from public.users
+join public.user_roles on users.id = user_roles.user_id;
