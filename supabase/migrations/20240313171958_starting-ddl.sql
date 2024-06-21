@@ -36,7 +36,6 @@ create table public.organisation_members (
 
 create table public.students (
   id          uuid default uuid_generate_v4() primary key,
-  user_id     uuid unique,
   email       text not null unique,
   firstname    text not null,
   lastname    text not null,

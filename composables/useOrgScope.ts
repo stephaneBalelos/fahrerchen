@@ -14,7 +14,6 @@ export const useGlobalOrgState = createGlobalState(() => {
     const orgData = ref<AppOrganisation | null>(null)
 
     watch(() => org.value, async () => {
-        console.log('org changed', org.value)
         if (org.value === null) {
             navigateTo('/')
             orgData.value = null
@@ -28,6 +27,6 @@ export const useGlobalOrgState = createGlobalState(() => {
         }
         orgData.value = data
         // navigateTo('/my')
-      }, { immediate: true})
+      }, { immediate: true })
     return { org, orgData }
 })

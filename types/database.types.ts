@@ -214,6 +214,13 @@ export type Database = {
             foreignKeyName: "organisations_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organisations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -236,6 +243,44 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
+      }
+      students: {
+        Row: {
+          birth_date: string
+          email: string
+          firstname: string
+          id: string
+          lastname: string
+          organisation_id: string
+          user_id: string | null
+        }
+        Insert: {
+          birth_date: string
+          email: string
+          firstname: string
+          id?: string
+          lastname: string
+          organisation_id: string
+          user_id?: string | null
+        }
+        Update: {
+          birth_date?: string
+          email?: string
+          firstname?: string
+          id?: string
+          lastname?: string
+          organisation_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -333,7 +378,7 @@ export type Database = {
           lastname: string
           email: string
           birth_date: string
-          organization_id: string
+          organisation_id: string
         }
         Returns: {
           birth_date: string | null

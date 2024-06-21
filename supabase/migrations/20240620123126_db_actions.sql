@@ -1,13 +1,13 @@
-create or replace function public.create_student(firstname text, lastname text, email text, birth_date date, organization_id uuid)
-returns public.users as $$
+create or replace function public.create_student(firstname text, lastname text, email text, birth_date date, organisation_id uuid)
+returns public.students as $$
 declare
   user_id uuid;
 begin
     user_id := extensions.uuid_generate_v4();
     
-    insert into public.students (id, firstname, lastname, email, birth_date)
-        values (user_id, firstname, lastname, email, birth_date);
+    insert into public.students (firstname, lastname, email, birth_date, organisation_id)
+        values (firstname, lastname, email, birth_date, organisation_id);
         
-    return (select * from public.users where id = user_id);
+    return (select id from public.students where id = user_id);
 end;
 $$ language plpgsql security definer set search_path = public;

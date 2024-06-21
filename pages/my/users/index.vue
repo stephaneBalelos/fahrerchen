@@ -1,61 +1,149 @@
 <template>
-    <UDashboardPanelContent>
-        <UPageHeader headline="Fahrschüler:innen" title="Meine Fahrschüler:innen" description="Alle meine Fahrschüler:innen"
-            :links="[{ label: 'Neue Fahrschüler:in', color: 'white', icon: 'i-heroicons-folder-plus', click: () => open = !open }]" />
+  <UDashboardPanelContent>
+    <UPageHeader
+      headline="Fahrschüler:innen"
+      title="Meine Fahrschüler:innen"
+      description="Alle meine Fahrschüler:innen"
+      :links="[
+        {
+          label: 'Neue Fahrschüler:in',
+          color: 'white',
+          icon: 'i-heroicons-folder-plus',
+          click: () => (open = !open),
+        },
+      ]"
+    />
 
-            <UsersTables :data="students ? students : []"></UsersTables>
-    </UDashboardPanelContent>
+    <UTable :rows="students ?? []" :columns="columns" :loading="pending">
+      <template #actions-data="{ row }">
+        edit
+      </template>
+      <template #loading-state>
+        <div class="flex items-center justify-center h-32">
+          <i class="loader --6" />
+        </div>
+      </template>
+    </UTable>
+  </UDashboardPanelContent>
 
-    <UDashboardSlideover v-model="open" title="Create News Course">
-        <CreateUserForm @submit="createUser" />
-        <template #footer>
-            <UButton @click="open = false">Cancel</UButton>
-        </template>
-    </UDashboardSlideover>
+  <UDashboardSlideover v-model="open" title="Create News Course">
+    <CreateUserForm @submit="createUser" />
+    <template #footer>
+      <UButton @click="open = false">Cancel</UButton>
+    </template>
+  </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import UsersTables from '~/components/tables/UsersTables.vue';
-import type { Database } from '~/types/app.types';
-import CreateUserForm from '~/components/forms/CreateUserForm.vue';
+import type { Database, AppStudent } from "~/types/app.types";
+import CreateUserForm from "~/components/forms/CreateUserForm.vue";
 
+const { org } = useGlobalOrgState();
 
 definePageMeta({
-    layout: 'orgs',
-})
+  layout: "orgs",
+});
 
-const columns = [{
-        key: 'id',
-        label: 'ID'
-    }, {
-        key: 'name',
-        label: 'Name'
-    }, {
-        key: 'title',
-        label: 'Title'
-    }, {
-        key: 'email',
-        label: 'Email'
-    }, {
-        key: 'role',
-        label: 'Role'
-}]
+const open = ref(false);
+const client = useSupabaseClient<Database>();
 
-const client = useSupabaseClient<Database>()
-const { data: students } = await useAsyncData('students', async () => {
-    const { data, error } = await client.from('user_roles_view').select('*').eq('role', 'student')
-    if (error) {
-        throw error
-    }
-    return data ?? []
-})
+const {
+  data: students,
+  pending,
+  error,
+  refresh,
+} = await useAsyncData("students", async () => {
+  const { data } = await client
+    .from("students")
+    .select("*")
+    .eq("organisation_id", org.value);
 
-const open = ref(false)
+  return data;
+});
+
+const columns = [
+  {
+    key: "id",
+    label: "ID",
+  },
+  {
+    key: "firstname",
+    label: "Firstname",
+    sortable: true,
+  },
+  {
+    key: "lastname",
+    label: "Lastname",
+    sortable: true,
+  },
+  {
+    key: "email",
+    label: "Email",
+    sortable: true,
+  },
+  {
+    key: "actions",
+    label: "Actions",
+  },
+];
 
 const createUser = async (d: any) => {
-    console.log(d)
-}
-
+  console.log(d);
+};
 </script>
 
-<style scoped></style>
+<style scoped>
+/* https://codepen.io/jenning/pen/YzNmzaV */
+
+.loader {
+  --color: rgb(var(--color-primary-400));
+  --size-mid: 6vmin;
+  --size-dot: 1.5vmin;
+  --size-bar: 0.4vmin;
+  --size-square: 3vmin;
+
+  display: block;
+  position: relative;
+  width: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.loader::before,
+.loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+}
+
+/**
+    loader --6
+**/
+.loader.--6::before {
+  width: var(--size-square);
+  height: var(--size-square);
+  background-color: var(--color);
+  top: calc(50% - var(--size-square));
+  left: calc(50% - var(--size-square));
+  animation: loader-6 2.4s cubic-bezier(0, 0, 0.24, 1.21) infinite;
+}
+
+@keyframes loader-6 {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  25% {
+    transform: translateX(100%);
+  }
+
+  50% {
+    transform: translateX(100%) translateY(100%);
+  }
+
+  75% {
+    transform: translateY(100%);
+  }
+}
+</style>

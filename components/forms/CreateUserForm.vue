@@ -84,7 +84,7 @@ async function onSubmit(event: FormSubmitEvent<CreateUserSchema>) {
     try {
         const res = await client.rpc("create_student", {
       ...data,
-      organization_id: orgId,
+      organisation_id: orgId,
     });
     console.log(res);
     toast.add({
