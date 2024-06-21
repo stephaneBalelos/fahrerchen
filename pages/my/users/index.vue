@@ -27,7 +27,7 @@
   </UDashboardPanelContent>
 
   <UDashboardSlideover v-model="open" title="Create News Course">
-    <CreateUserForm @submit="createUser" />
+    <CreateUserForm @submitted="onUserCreated" />
     <template #footer>
       <UButton @click="open = false">Cancel</UButton>
     </template>
@@ -87,8 +87,8 @@ const columns = [
   },
 ];
 
-const createUser = async (d: any) => {
-  console.log(d);
+const onUserCreated = async (d: any) => {
+  refresh();
 };
 </script>
 

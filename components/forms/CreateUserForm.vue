@@ -35,7 +35,7 @@ import { format } from "date-fns";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 
 const emit = defineEmits<{
-  (e: "submit", value: CreateUserSchema): void;
+  (e: "submitted", value: CreateUserSchema): void;
 }>();
 
 const client = useSupabaseClient<Database>();
@@ -46,10 +46,7 @@ const schema = z.object({
   email: z.string().email(),
   firstname: z.string().min(2).max(255),
   lastname: z.string().min(2).max(255),
-  birth_date: z
-    .date()
-    .min(new Date(1900, 1, 1))
-    .max(new Date()),
+  birth_date: z.date().min(new Date(1900, 1, 1)).max(new Date()),
 });
 
 type CreateUserSchema = z.output<typeof schema>;
@@ -80,22 +77,30 @@ async function onSubmit(event: FormSubmitEvent<CreateUserSchema>) {
       email: event.data.email,
       birth_date: event.data.birth_date.toISOString(),
     };
-    
-    try {
-        const res = await client.rpc("create_student", {
-      ...data,
-      organisation_id: orgId,
-    });
-    console.log(res);
-    toast.add({
-      title: "Success",
-      description: "User created",
-        color: "green",
-    });
-    } catch (error) {
-    console.log(error); 
-    }
 
+    try {
+      const { data: student, error } = await client.rpc("create_student", {
+        ...data,
+        organisation_id: orgId,
+      });
+      console.log(student, error);
+      if (error) {
+        toast.add({
+          title: "Error",
+          description: error.message,
+          color: "red",
+        });
+      } else {
+        emit("submitted", event.data);
+        toast.add({
+          title: "Success",
+          description: "User created",
+          color: "green",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 </script>
