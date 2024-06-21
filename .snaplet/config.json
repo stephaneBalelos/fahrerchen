@@ -1,3 +1,4 @@
 {
-  "targetDatabaseUrl": "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
+  "projectId": "cltvaj68c1taclyvn6vdt3inf",
+  "adapter": "postgres"
 }
