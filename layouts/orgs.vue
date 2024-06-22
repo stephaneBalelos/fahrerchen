@@ -121,11 +121,7 @@ const links = [
       {
         label: "Members",
         to: "/my/settings/members",
-      },
-      {
-        label: "Notifications",
-        to: "/my/settings/notifications",
-      },
+      }
     ],
     tooltip: {
       text: "Settings",
@@ -138,7 +134,7 @@ const footerLinks = [
   {
     label: "Invite people",
     icon: "i-heroicons-plus",
-    to: "/settings/members",
+    to: "/my/settings/members",
   },
   {
     label: "Help & Support",
