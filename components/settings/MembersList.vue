@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import type { Database } from '~/types/database.types';
-
-type Member = Database['public']['Tables']['users']['Row']
+import type { AppUserWithRole, Database, UserRole } from '~/types/app.types';
 
 defineProps({
   members: {
-    type: Array as PropType<Member[]>,
+    type: Array as PropType<AppUserWithRole[]>,
     default: () => []
   }
 })
 
-function getItems(member: Member) {
+const { orgData } = useGlobalOrgState()
+
+const client = useSupabaseClient<Database>()
+const toast = useToast()
+const roles: UserRole[] = ['teacher', 'manager', 'owner']
+
+function getItems(member: AppUserWithRole) {
   return [[{
     label: 'Edit member',
     click: () => console.log('Edit', member)
@@ -21,9 +25,27 @@ function getItems(member: Member) {
   }]]
 }
 
-function onRoleChange(member: Member, role: string) {
+async function onRoleChange(member: AppUserWithRole, role: UserRole) {
   // Do something with data
   console.log(member.email, role)
+  try {
+    const { error } = await client.from('organisation_members').update({ role }).eq('user_id', member.id)
+    if (error) {
+      throw error
+    }
+    toast.add({
+      title: 'Success',
+      description: 'Role updated',
+      color: 'green'
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Error',
+      description: 'Could not update role',
+      color: 'red'
+    })
+  }
+
 }
 </script>
 
@@ -38,10 +60,10 @@ function onRoleChange(member: Member, role: string) {
       class="flex items-center justify-between gap-3 py-3 px-4 sm:px-6"
     >
       <div class="flex items-center gap-3 min-w-0">
-        <UAvatar
+        <!-- <UAvatar
           v-bind="member.avatar"
           size="md"
-        />
+        /> -->
 
         <div class="text-sm min-w-0">
           <p class="text-gray-900 dark:text-white font-medium truncate">
@@ -54,9 +76,11 @@ function onRoleChange(member: Member, role: string) {
       </div>
 
       <div class="flex items-center gap-3">
+
         <USelectMenu
+          v-if="orgData?.owner_id !== member.id"
           :model-value="member.role"
-          :options="['member', 'owner']"
+          :options="roles"
           color="white"
           :ui-menu="{ select: 'capitalize', option: { base: 'capitalize' } }"
           @update:model-value="onRoleChange(member, $event)"

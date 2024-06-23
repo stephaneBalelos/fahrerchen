@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import AddMemberForm from '~/components/forms/AddMemberForm.vue';
+import type { AppUserWithRole } from '~/types/app.types';
 import { type Database } from '~/types/database.types';
 
 const client = useSupabaseClient<Database>()
+const { org } = useGlobalOrgState()
 
-const { data, error } = await useAsyncData('members', async () => {
-  const { data, error } = await client.from('users').select('*')
+const { data, error, refresh } = await useAsyncData('members', async () => {
+  const { data, error } = await client.from('organisation_members').select('role, users(*)').eq('organisation_id', org.value)
   if (error) {
     throw error
   }
-  return data
+  return data.map((m) => {
+    return {
+      role: m.role,
+      ...m.users
+    } as AppUserWithRole
+  })
 })
 const q = ref('')
 const isInviteModalOpen = ref(false)
@@ -20,6 +27,11 @@ const filteredMembers = computed(() => {
         return member.firstname?.search(new RegExp(q.value, 'i')) !== -1 || member.lastname?.search(new RegExp(q.value, 'i')) !== -1
     })
 })
+
+async function onClose() {
+  refresh()
+  isInviteModalOpen.value = false
+}
 </script>
 
 <template>
@@ -64,7 +76,7 @@ const filteredMembers = computed(() => {
       :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
     >
       <!-- ~/components/settings/MembersForm.vue -->
-      <AddMemberForm @close="isInviteModalOpen = false" />
+      <AddMemberForm @close="onClose" />
     </UDashboardModal>
   </UDashboardPanelContent>
 </template>

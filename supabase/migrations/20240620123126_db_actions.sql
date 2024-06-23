@@ -10,4 +10,4 @@ begin
         
     return (select id from public.students where id = user_id);
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;

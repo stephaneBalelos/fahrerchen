@@ -15,6 +15,8 @@ type AddMemberFormProps = {
   email: string;
 };
 
+const toasts = useToast();
+
 const roles: UserRole[] = ["manager", "owner", "student", "teacher"];
 
 const state = reactive<AddMemberFormProps>({
@@ -35,13 +37,27 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   const orgId = orgData.value?.id
   if (orgId) {
-    const res = await client.functions.invoke("invite-team-member", {
+    const {data, error} = await client.functions.invoke("invite-team-member", {
     method: 'POST',
     body: {
       email: event.data.email,
       role: event.data.role,
       orgid: orgId,
     },
+  });
+  if (error) {
+    console.error(error);
+    toasts.add({
+      title: "Error",
+      description: "Could not invite member",
+      color: "red",
+    });
+    return;
+  }
+  toasts.add({
+    title: "Success",
+    description: "Member invited",
+    color: "green",
   });
   emit("close");
   }

@@ -109,61 +109,26 @@ export type Database = {
           },
         ]
       }
-      lessons: {
-        Row: {
-          course_id: string
-          description: string | null
-          id: string
-          inserted_at: string
-          mandatory: boolean
-          price: number
-          type: Database["public"]["Enums"]["lesson_type"]
-        }
-        Insert: {
-          course_id: string
-          description?: string | null
-          id?: string
-          inserted_at?: string
-          mandatory: boolean
-          price: number
-          type: Database["public"]["Enums"]["lesson_type"]
-        }
-        Update: {
-          course_id?: string
-          description?: string | null
-          id?: string
-          inserted_at?: string
-          mandatory?: boolean
-          price?: number
-          type?: Database["public"]["Enums"]["lesson_type"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lessons_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       organisation_members: {
         Row: {
           id: string
           inserted_at: string
           organisation_id: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
           id?: string
           inserted_at?: string
           organisation_id: string
+          role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
           id?: string
           inserted_at?: string
           organisation_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: [
@@ -252,7 +217,6 @@ export type Database = {
           id: string
           lastname: string
           organisation_id: string
-          user_id: string | null
         }
         Insert: {
           birth_date: string
@@ -261,7 +225,6 @@ export type Database = {
           id?: string
           lastname: string
           organisation_id: string
-          user_id?: string | null
         }
         Update: {
           birth_date?: string
@@ -270,7 +233,6 @@ export type Database = {
           id?: string
           lastname?: string
           organisation_id?: string
-          user_id?: string | null
         }
         Relationships: [
           {
@@ -317,7 +279,6 @@ export type Database = {
       }
       users: {
         Row: {
-          birth_date: string | null
           email: string
           firstname: string | null
           id: string
@@ -325,7 +286,6 @@ export type Database = {
           status: Database["public"]["Enums"]["user_status"] | null
         }
         Insert: {
-          birth_date?: string | null
           email: string
           firstname?: string | null
           id: string
@@ -333,7 +293,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["user_status"] | null
         }
         Update: {
-          birth_date?: string | null
           email?: string
           firstname?: string | null
           id?: string
@@ -372,6 +331,13 @@ export type Database = {
       }
     }
     Functions: {
+      authorize: {
+        Args: {
+          requested_permission: Database["public"]["Enums"]["app_permission"]
+          org_id: string
+        }
+        Returns: boolean
+      }
       create_student: {
         Args: {
           firstname: string
@@ -381,24 +347,35 @@ export type Database = {
           organisation_id: string
         }
         Returns: {
-          birth_date: string | null
+          birth_date: string
           email: string
-          firstname: string | null
+          firstname: string
           id: string
-          lastname: string | null
-          status: Database["public"]["Enums"]["user_status"] | null
+          lastname: string
+          organisation_id: string
         }
       }
     }
     Enums: {
-      app_permission: "organisations.delete" | "courses.delete"
-      app_role:
-        | "super_admin"
-        | "owner"
-        | "admin"
-        | "manager"
-        | "teacher"
-        | "student"
+      app_permission:
+        | "users.read"
+        | "users.update"
+        | "users.delete"
+        | "organisations.read"
+        | "organisations.update"
+        | "organisations.delete"
+        | "organisation_members.read"
+        | "organisation_members.update"
+        | "organisation_members.delete"
+        | "students.read"
+        | "students.create"
+        | "students.update"
+        | "students.delete"
+        | "courses.read"
+        | "courses.create"
+        | "courses.update"
+        | "courses.delete"
+      app_role: "owner" | "manager" | "teacher" | "student"
       lesson_type: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
       user_status: "ONLINE" | "OFFLINE"
     }

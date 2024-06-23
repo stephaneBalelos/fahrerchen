@@ -51,20 +51,6 @@
   },
   {
     "schemaName": "public",
-    "tableName": "lessons",
-    "predictions": [
-      {
-        "input": "public lessons description",
-        "column": "description",
-        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
-        "confidence": 0.7380769848823547,
-        "context": "GENERAL",
-        "confidenceContext": 0
-      }
-    ]
-  },
-  {
-    "schemaName": "public",
     "tableName": "organisations",
     "predictions": [
       {

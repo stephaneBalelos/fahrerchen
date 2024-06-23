@@ -8,7 +8,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "vitest",
-    "gen_type": "supabase gen types typescript --local > ./types/database.types.ts"
+    "gen_types": "supabase gen types typescript --local > ./types/database.types.ts"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.0.8",

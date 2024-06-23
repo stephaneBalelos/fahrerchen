@@ -475,20 +475,6 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false
-        },
-        {
-          "name": "lessons",
-          "type": "lessons",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "lessonsTocourses",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
         }
       ],
       "uniqueConstraints": [
@@ -1525,138 +1511,6 @@
         }
       ]
     },
-    "lessons": {
-      "id": "public.lessons",
-      "schemaName": "public",
-      "tableName": "lessons",
-      "fields": [
-        {
-          "id": "public.lessons.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.type",
-          "name": "type",
-          "columnName": "type",
-          "type": "lesson_type",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.mandatory",
-          "name": "mandatory",
-          "columnName": "mandatory",
-          "type": "bool",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.description",
-          "name": "description",
-          "columnName": "description",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.price",
-          "name": "price",
-          "columnName": "price",
-          "type": "numeric",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.lessons.course_id",
-          "name": "course_id",
-          "columnName": "course_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "courses",
-          "type": "courses",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "lessonsTocourses",
-          "relationFromFields": [
-            "course_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "lessons_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
     "mfa_amr_claims": {
       "id": "auth.mfa_amr_claims",
       "schemaName": "auth",
@@ -2422,6 +2276,20 @@
           "maxLength": null
         },
         {
+          "id": "public.organisation_members.role",
+          "name": "role",
+          "columnName": "role",
+          "type": "app_role",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "organisations",
           "type": "organisations",
           "isRequired": true,
@@ -2459,6 +2327,14 @@
         }
       ],
       "uniqueConstraints": [
+        {
+          "name": "organisation_members_organisation_id_user_id_key",
+          "fields": [
+            "organisation_id",
+            "user_id"
+          ],
+          "nullNotDistinct": false
+        },
         {
           "name": "organisation_members_pkey",
           "fields": [
@@ -3860,20 +3736,6 @@
           "maxLength": null
         },
         {
-          "id": "public.students.user_id",
-          "name": "user_id",
-          "columnName": "user_id",
-          "type": "uuid",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.students.email",
           "name": "email",
           "columnName": "email",
@@ -3974,13 +3836,6 @@
           "name": "students_pkey",
           "fields": [
             "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "students_user_id_key",
-          "fields": [
-            "user_id"
           ],
           "nullNotDistinct": false
         }
@@ -4733,20 +4588,6 @@
           "maxLength": null
         },
         {
-          "id": "public.users.birth_date",
-          "name": "birth_date",
-          "columnName": "birth_date",
-          "type": "date",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.users.status",
           "name": "status",
           "columnName": "status",
@@ -4974,19 +4815,61 @@
       "schemaName": "public",
       "values": [
         {
+          "name": "courses.create"
+        },
+        {
           "name": "courses.delete"
         },
         {
+          "name": "courses.read"
+        },
+        {
+          "name": "courses.update"
+        },
+        {
+          "name": "organisation_members.delete"
+        },
+        {
+          "name": "organisation_members.read"
+        },
+        {
+          "name": "organisation_members.update"
+        },
+        {
           "name": "organisations.delete"
+        },
+        {
+          "name": "organisations.read"
+        },
+        {
+          "name": "organisations.update"
+        },
+        {
+          "name": "students.create"
+        },
+        {
+          "name": "students.delete"
+        },
+        {
+          "name": "students.read"
+        },
+        {
+          "name": "students.update"
+        },
+        {
+          "name": "users.delete"
+        },
+        {
+          "name": "users.read"
+        },
+        {
+          "name": "users.update"
         }
       ]
     },
     "app_role": {
       "schemaName": "public",
       "values": [
-        {
-          "name": "admin"
-        },
         {
           "name": "manager"
         },
@@ -4995,9 +4878,6 @@
         },
         {
           "name": "student"
-        },
-        {
-          "name": "super_admin"
         },
         {
           "name": "teacher"

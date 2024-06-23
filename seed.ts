@@ -30,6 +30,7 @@ const main = async () => {
       user_id: seed.$store.auth_users[ctx.index].id,
       identity_data: {"sub": `${auth_user.id}`},
       provider: "email",
+      provider_id: auth_user.id,
       created_at: auth_user.created_at,
   }}))
 
