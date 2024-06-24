@@ -5,6 +5,12 @@ export default defineNuxtConfig({
     autoImport: true,
   },
 
+  runtimeConfig: {
+    public: {
+      supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
+    }
+  },
+
   // routeRules: {
   //   // prerender index route by default
   //   '/': { prerender: true },

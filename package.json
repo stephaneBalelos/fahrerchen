@@ -34,6 +34,10 @@
   "dependencies": {
     "@nuxt/ui-pro": "^1.0.2",
     "@supabase/supabase-js": "^2.39.8",
+    "@uppy/core": "^3.13.0",
+    "@uppy/dashboard": "^3.9.0",
+    "@uppy/tus": "^3.5.5",
+    "@uppy/vue": "^1.1.2",
     "@vueuse/core": "^10.9.0",
     "date-fns": "^3.6.0",
     "type-fest": "^4.20.1",

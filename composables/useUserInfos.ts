@@ -9,14 +9,15 @@ export const useUserInfos = createGlobalState(() => {
 
     const userInfos: Ref<UserInfos | null> = ref(null)
 
-    watch(() => user.value, async () => {
+
+    watchEffect(async (onCleanup) => {
         if(!user.value) {
             userInfos.value = null
             return
         }
-        const res = await client.from('users').select("*").eq('id', user.value?.id).single()
+        const res = await client.from('users').select("*").eq('id', user.value.id).single()
         userInfos.value = res.data
-    }, { immediate: true })
+    })
 
-    return userInfos
+    return { userInfos }
 })

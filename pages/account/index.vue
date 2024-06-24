@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
+import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 import { useUserInfos } from "~/composables/useUserInfos";
+import type { AppUser } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
 definePageMeta({
@@ -10,14 +12,12 @@ definePageMeta({
 
 const fileRef = ref<HTMLInputElement>();
 const isDeleteAccountModalOpen = ref(false);
-const user = useUserInfos();
+const {userInfos} = useUserInfos();
 const client = useSupabaseClient<Database>();
 
-const avatarUrl = ref<string | null>(null);
-
 const schema = z.object({
-  firstname: z.string().min(2, "Must be at least 8 characters"),
-  lastname: z.string().min(2, "Must be at least 8 characters"),
+  firstname: z.string().min(2, "Must be at least 2 characters"),
+  lastname: z.string().min(2, "Must be at least 2 characters"),
 });
 
 type Schema = z.output<typeof schema>;
@@ -27,32 +27,18 @@ const state = reactive<Schema>({
   lastname: "",
 });
 
-onMounted(() => {
-  if (user.value) {
-    state.firstname = user.value.firstname ? user.value.firstname : "";
-    state.lastname = user.value.lastname ? user.value.lastname : "";
+const stop = watchEffect((onCleanup) => {
+  if (userInfos.value) {
+    state.firstname = userInfos.value.firstname ? userInfos.value.firstname : "";
+    state.lastname = userInfos.value.lastname ?   userInfos.value.lastname : "";
   }
 });
 
+
 const toast = useToast();
 
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement;
-
-  if (!input.files?.length) {
-    return;
-  }
-
-  const fileObj = input.files[0];
-  avatarUrl.value = URL.createObjectURL(fileObj);
-}
-
-function onFileClick() {
-  fileRef.value?.click();
-}
-
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  if (user.value) {
+  if (userInfos.value) {
     try {
       const update = await client
         .from("users")
@@ -60,8 +46,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           firstname: event.data.firstname,
           lastname: event.data.lastname,
         })
-        .eq("id", user.value.id);
-        console.log(update)
+        .eq("id", userInfos.value.id);
+      console.log(update);
       if (update.error) {
         toast.add({
           title: "Error trying to update the profile",
@@ -79,66 +65,87 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     }
   }
 }
+
+onUnmounted(() => {
+  stop();
+});
 </script>
 
 <template>
-  <UDashboardPanelContent class="pb-24">
-    <UContainer>
-      <UDashboardSection
-        title="Theme"
-        description="Customize the look and feel of your dashboard."
-      >
-        <template #links>
-          <!-- <UColorModeSelect color="gray" /> -->
-          dsds
-        </template>
-      </UDashboardSection>
-
-      <UDivider class="mb-4" />
-
-      <UForm :state="state" :schema="schema" @submit="onSubmit">
+  <ClientOnly>
+    <UDashboardPanelContent class="pb-24">
+      <UContainer>
         <UDashboardSection
-          title="Profile"
-          description="This information will be displayed publicly so be careful what you share."
+          title="Theme"
+          description="Customize the look and feel of your dashboard."
         >
           <template #links>
-            <UButton type="submit" label="Save changes" color="black" />
+            <!-- <UColorModeSelect color="gray" /> -->
+            dsds
           </template>
+        </UDashboardSection>
 
-          <UFormGroup
-            name="firstname"
-            label="Firstname"
-            description="Will appear on receipts, invoices, and other communication."
-            required
-            class="grid grid-cols-2 gap-2 items-center"
-            :ui="{ container: '' }"
-          >
-            <UInput
-              v-model="state.firstname"
-              placeholder="Firstname"
-              autocomplete="off"
-              icon="i-heroicons-user"
-              size="md"
-            />
-          </UFormGroup>
-          <UFormGroup
-            name="lastname"
-            label="Lastname"
-            description="Will appear on receipts, invoices, and other communication."
-            required
-            class="grid grid-cols-2 gap-2 items-center"
-            :ui="{ container: '' }"
-          >
-            <UInput
-              v-model="state.lastname"
-              placeholder="Lastname"
-              autocomplete="off"
-              icon="i-heroicons-user"
-              size="md"
-            />
-          </UFormGroup>
+        <UDivider class="mb-4" />
 
-          <!-- <UFormGroup
+        <UForm :state="state" :schema="schema" @submit="onSubmit" v-if="userInfos">
+          <UDashboardSection
+            title="Profile"
+            description="This information will be displayed publicly so be careful what you share."
+          >
+            <template #links>
+              <UButton type="submit" label="Save changes" color="black" />
+            </template>
+
+            <UFormGroup
+              name="avatar"
+              label="Avatar"
+              class="grid grid-cols-2 gap-2"
+              help="JPG, GIF or PNG. 1MB Max."
+              :ui="{
+                container: 'flex flex-wrap items-center gap-3',
+                help: 'mt-0',
+              }"
+            >
+              <FileUploader
+                :bucket-id="'users_avatars'"
+                :path="userInfos.id"
+              ></FileUploader>
+            </UFormGroup>
+
+            <UFormGroup
+              name="firstname"
+              label="Firstname"
+              description="Will appear on receipts, invoices, and other communication."
+              required
+              class="grid grid-cols-2 gap-2 items-center"
+              :ui="{ container: '' }"
+            >
+              <UInput
+                v-model="state.firstname"
+                placeholder="Firstname"
+                autocomplete="off"
+                icon="i-heroicons-user"
+                size="md"
+              />
+            </UFormGroup>
+            <UFormGroup
+              name="lastname"
+              label="Lastname"
+              description="Will appear on receipts, invoices, and other communication."
+              required
+              class="grid grid-cols-2 gap-2 items-center"
+              :ui="{ container: '' }"
+            >
+              <UInput
+                v-model="state.lastname"
+                placeholder="Lastname"
+                autocomplete="off"
+                icon="i-heroicons-user"
+                size="md"
+              />
+            </UFormGroup>
+
+            <!-- <UFormGroup
             name="email"
             label="Email"
             description="Used to sign in, for email receipts and product updates."
@@ -155,55 +162,28 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
               size="md"
             />
           </UFormGroup> -->
+          </UDashboardSection>
+        </UForm>
 
-          <UFormGroup
-            name="avatar"
-            label="Avatar"
-            class="grid grid-cols-2 gap-2"
-            help="JPG, GIF or PNG. 1MB Max."
-            :ui="{
-              container: 'flex flex-wrap items-center gap-3',
-              help: 'mt-0',
-            }"
-          >
-            <UAvatar :src="state.avatar" :alt="state.name" size="lg" />
+        <UDivider class="mb-4" />
 
+        <UDashboardSection
+          title="Account"
+          description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
+        >
+          <div>
             <UButton
-              label="Choose"
-              color="white"
+              color="red"
+              label="Delete account"
               size="md"
-              @click="onFileClick"
+              @click="isDeleteAccountModalOpen = true"
             />
-
-            <input
-              ref="fileRef"
-              type="file"
-              class="hidden"
-              accept=".jpg, .jpeg, .png, .gif"
-              @change="onFileChange"
-            />
-          </UFormGroup>
+          </div>
         </UDashboardSection>
-      </UForm>
 
-      <UDivider class="mb-4" />
-
-      <UDashboardSection
-        title="Account"
-        description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
-      >
-        <div>
-          <UButton
-            color="red"
-            label="Delete account"
-            size="md"
-            @click="isDeleteAccountModalOpen = true"
-          />
-        </div>
-      </UDashboardSection>
-
-      <!-- ~/components/settings/DeleteAccountModal.vue -->
-      <!-- <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" /> -->
-    </UContainer>
-  </UDashboardPanelContent>
+        <!-- ~/components/settings/DeleteAccountModal.vue -->
+        <!-- <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" /> -->
+      </UContainer>
+    </UDashboardPanelContent>
+  </ClientOnly>
 </template>
