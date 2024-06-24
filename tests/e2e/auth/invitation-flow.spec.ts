@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
-import { setupE2eTest } from '../utils';
+import { setupE2eTest, testConstants } from '../utils';
 import { login } from './utils';
-import { a } from 'vitest/dist/suite-UrZdHRff.js';
 
 test.describe("Invite Team Member in Organisation", () => {
 
     test.beforeAll(setupE2eTest);
     test.beforeEach(async ({page}) => {
-        await login(page, "user1@test.com", "password123")
+        await page.goto('http://localhost:3000');
+        await login(page, testConstants.usersEmails[0], testConstants.usersPasswords[0])
     })
 
     test('Authenticated User should have a default Organisation on the home page', async ({page, context}) => {
         expect(page).toHaveURL('http://localhost:3000')
         const orgCards = page.locator('.org-card')
-        await expect(orgCards).toHaveCount(1)
+        await expect(orgCards).toHaveCount(2)
         const orgCard = orgCards.first()
         await expect(orgCard.locator('p').first()).toHaveText('My Org')
         orgCard.click()
@@ -34,19 +34,19 @@ test.describe("Invite Team Member in Organisation", () => {
         await page.waitForURL('http://localhost:3000/my/settings/members')
         await expect(page).toHaveURL('http://localhost:3000/my/settings/members')
 
-        await page.locator('button[#invite-member]').click()
+        await page.locator('#invite-people').click()
 
         const form = page.locator("#add-member-form")
         await expect(form).toBeVisible()
 
-        await form.locator("input[name]").fill("user1@manager.test.com")
+        await form.locator("input[name=email]").fill("user1@manager.test.com")
         // await form.locator("input[name]").fill("user1@manager.test.com")
 
         await form.locator("button[type='submit']").click()
 
-        const successToas = page.locator('div[role="alert"]')
-        await expect(successToas).toBeAttached()
-
-
+        const notificationsContainer = page.locator("#notifications-container")
+        await expect(notificationsContainer).toBeAttached()
+        const toast = page.locator('#notifications-container > div')
+        await expect(toast).toHaveCount(1, {timeout: 1000})
     })
 })

@@ -48,7 +48,7 @@ const signOut = async () => {
 
 <template>
     <UDropdown v-if="user" :items="getDropdownItems(user)" :ui="{ item: { disabled: 'cursor-text select-text' } }"
-        :popper="{ placement: 'bottom-start' }">
+        :popper="{ placement: 'bottom-start' }" id="user-dropdown">
         <UAvatar src="https://avatars.githubusercontent.com/u/739984?v=4" />
 
         <template #account="{ item }">

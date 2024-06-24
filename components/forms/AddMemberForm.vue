@@ -48,6 +48,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   if (error) {
     console.error(error);
     toasts.add({
+      id: "member-invited-error",
       title: "Error",
       description: "Could not invite member",
       color: "red",
@@ -55,6 +56,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
     return;
   }
   toasts.add({
+    id: "member-invited",
     title: "Success",
     description: "Member invited",
     color: "green",

@@ -1,14 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { setupE2eTest } from '../utils';
+import { setupE2eTest, testConstants } from '../utils';
 import { login } from './utils';
 
 test.describe('Auth Flow', () => {
   const userEmailWrong = "test@test.io";
   const userPasswordWrong = "test123456";
-  const userEmail = "user1@test.com";
-  const userPassword = "password123";
-  const userEmailNoData = "user2@balelos.com";
-  const userPasswordNoData = "password123";
+  const userEmail = testConstants.usersEmails[0];
+  const userPassword = testConstants.usersPasswords[0];
   test.beforeAll(setupE2eTest);
   test.beforeEach(async ({ page }) => {
     // Go to the starting url before each test.
@@ -48,6 +46,9 @@ test.describe('Auth Flow', () => {
     await login(page, userEmail, userPassword);
     await page.waitForURL('http://localhost:3000')
 
+    const userDropdown = page.locator("#user-dropdown")
+    await userDropdown.click()
+    
     const logoutButton = page.locator(".logout-button") 
     await expect(logoutButton).toBeAttached()
     await logoutButton.click()

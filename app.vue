@@ -2,6 +2,6 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
-  <UNotifications />
+  <UNotifications id="notifications-container" />
 
 </template>
