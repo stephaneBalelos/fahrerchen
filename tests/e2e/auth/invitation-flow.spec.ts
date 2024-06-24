@@ -7,7 +7,13 @@ test.describe("Invite Team Member in Organisation", () => {
     test.beforeAll(setupE2eTest);
     test.beforeEach(async ({page}) => {
         await page.goto('http://localhost:3000');
-        await login(page, testConstants.usersEmails[0], testConstants.usersPasswords[0])
+        
+        if (page.url() === 'http://localhost:3000/login') {
+            console.log("Logging in");
+            await login(page, testConstants.usersEmails[0], testConstants.usersPasswords[0])
+        }
+
+        
     })
 
     test('Authenticated User should have a default Organisation on the home page', async ({page, context}) => {
