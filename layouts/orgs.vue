@@ -63,8 +63,6 @@
 </template>
 
 <script setup lang="ts">
-import UserDropdown from "~/components/navigation/UserDropdown.vue";
-import { useGlobalOrgState } from "~/composables/useOrgScope";
 
 const route = useRoute();
 const appConfig = useAppConfig();

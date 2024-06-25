@@ -1,6 +1,7 @@
 {
   "private": true,
   "type": "module",
+  "name": "fahrerchen",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
