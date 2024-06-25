@@ -10,9 +10,12 @@ export default defineNuxtConfig({
   vite: {
     resolve: {
       alias: [
-        { find: '@/components', replacement: resolve(__dirname, 'components')}
+        { find: '@', replacement: resolve(__dirname, 'components')}
       ]
     }
+  },
+  nitro: {
+    preset: 'vercel-edge',
   },
 
   runtimeConfig: {
