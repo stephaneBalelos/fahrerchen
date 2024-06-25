@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import UserDropdown from '@/navigation/UserDropdown.vue';
+import UserDropdown from '@/navigation/UserMenu.vue';
 const route = useRoute();
 const appConfig = useAppConfig();
 const { isHelpSlideoverOpen } = useDashboard();
