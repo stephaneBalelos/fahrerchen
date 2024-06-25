@@ -10,18 +10,12 @@
         "confidence": 0.5718593597412109,
         "context": "GENERAL",
         "confidenceContext": 0
-      }
-    ]
-  },
-  {
-    "schemaName": "public",
-    "tableName": "courses_subscription",
-    "predictions": [
+      },
       {
-        "input": "public courses_subscription description",
-        "column": "description",
-        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
-        "confidence": 0.8210980892181396,
+        "input": "public courses name",
+        "column": "name",
+        "shape": "EDUCATION_INSTITUTION_NAME",
+        "confidence": 0.7,
         "context": "GENERAL",
         "confidenceContext": 0
       }

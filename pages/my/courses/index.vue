@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { type Database } from '~/types/database.types';
 import CreateCourseForm from '~/components/forms/CreateCourseForm.vue';
+import type { AppCourse } from '~/types/app.types';
 
 definePageMeta({
     layout: 'orgs',
@@ -28,19 +29,8 @@ onMounted(async () => {
     await refresh()
 })
 
-const createCourse = async (d: any) => {
-    console.log(d)
-    if (orgState.org.value && d.description) {
-        const { data, error } = await supabase.from('courses').insert({ description: d.description, organisation_id: orgState.org.value}).select('*')
-        if (error) {
-            toast.add({ title: 'Error', description: error.message, color: 'red', icon: 'i-heroicons-exclamation', timeout: 5000})
-        } else {
-            toast.add({ title: 'Super!', description: 'New Course Created', color: 'green', icon: 'i-heroicons-exclamation', timeout: 3000})
-            open.value = false
-            navigateTo('/my/courses/' + data[0].id)
-
-        }
-    }
+const onCourseCreated = async (d: AppCourse) => {
+    navigateTo('/my/courses/' + d.id)
 }
 
 </script>
@@ -60,10 +50,9 @@ const createCourse = async (d: any) => {
     </UDashboardPanelContent>
 
     <UDashboardSlideover v-model="open" title="Create News Course">
-        <CreateCourseForm @submit="createCourse" />
+        <CreateCourseForm @course-created="onCourseCreated" />
         <template #footer>
             <UButton @click="open = false">Cancel</UButton>
-            <UButton @click="createCourse">Create</UButton>
         </template>
     </UDashboardSlideover>
 

@@ -34,24 +34,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      courses: {
+      course_types: {
         Row: {
-          description: string | null
-          id: string
-          inserted_at: string
-          organisation_id: string
+          description: string
+          id: number
+          type: Database["public"]["Enums"]["course_type"]
         }
         Insert: {
-          description?: string | null
-          id?: string
-          inserted_at?: string
-          organisation_id: string
+          description: string
+          id?: number
+          type: Database["public"]["Enums"]["course_type"]
         }
         Update: {
-          description?: string | null
+          description?: string
+          id?: number
+          type?: Database["public"]["Enums"]["course_type"]
+        }
+        Relationships: []
+      }
+      courses: {
+        Row: {
+          description: string
+          id: string
+          inserted_at: string
+          name: string
+          organisation_id: string
+          type: number
+        }
+        Insert: {
+          description: string
           id?: string
           inserted_at?: string
+          name: string
+          organisation_id: string
+          type: number
+        }
+        Update: {
+          description?: string
+          id?: string
+          inserted_at?: string
+          name?: string
           organisation_id?: string
+          type?: number
         }
         Relationships: [
           {
@@ -61,47 +85,64 @@ export type Database = {
             referencedRelation: "organisations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "courses_type_fkey"
+            columns: ["type"]
+            isOneToOne: false
+            referencedRelation: "course_types"
+            referencedColumns: ["id"]
+          },
         ]
       }
-      courses_subscription: {
+      courses_subscriptions: {
         Row: {
+          archived_at: string | null
           course_id: string
-          description: string | null
           id: string
           inserted_at: string
+          organisation_id: string
           user_id: string
         }
         Insert: {
+          archived_at?: string | null
           course_id: string
-          description?: string | null
           id?: string
           inserted_at?: string
+          organisation_id: string
           user_id: string
         }
         Update: {
+          archived_at?: string | null
           course_id?: string
-          description?: string | null
           id?: string
           inserted_at?: string
+          organisation_id?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "courses_subscription_course_id_fkey"
+            foreignKeyName: "courses_subscriptions_course_id_fkey"
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "courses_subscription_user_id_fkey"
+            foreignKeyName: "courses_subscriptions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "courses_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_roles_view"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "courses_subscription_user_id_fkey"
+            foreignKeyName: "courses_subscriptions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -375,7 +416,28 @@ export type Database = {
         | "courses.create"
         | "courses.update"
         | "courses.delete"
+        | "course_subscriptions.read"
+        | "course_subscriptions.create"
+        | "course_subscriptions.update"
+        | "course_subscriptions.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
+      course_type:
+        | "AM"
+        | "A1"
+        | "A2"
+        | "A"
+        | "B"
+        | "BE"
+        | "C1"
+        | "C1E"
+        | "C"
+        | "CE"
+        | "D1"
+        | "D1E"
+        | "D"
+        | "DE"
+        | "L"
+        | "T"
       lesson_type: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
       user_status: "ONLINE" | "OFFLINE"
     }
