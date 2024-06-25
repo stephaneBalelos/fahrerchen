@@ -13,8 +13,11 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-    - name: "Install Supabase CLI"
-      run: "sudo apk add --allow-untrusted supabase_1.178.2_linux_amd64.apk"
+    - uses: supabase/setup-cli@v1
+      with:
+        version: latest
+    - run: supabase db start
+    - run: supabase db reset
     - name: Install dependencies
       run: npm install -g pnpm && pnpm install
     - name: Install Playwright Browsers
