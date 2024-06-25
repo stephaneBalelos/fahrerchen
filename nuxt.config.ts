@@ -15,7 +15,6 @@ export default defineNuxtConfig({
   //   // prerender index route by default
   //   '/': { prerender: true },
   // },
-
   modules: [
     '@nuxtjs/supabase',
     '@nuxt/ui',
