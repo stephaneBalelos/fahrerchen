@@ -2,5 +2,5 @@
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
-  <UNotifications id="notifications-container" />
+  <UNotifications id="notifications-container"/>
 </template>
