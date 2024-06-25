@@ -16,6 +16,7 @@ jobs:
     - uses: supabase/setup-cli@v1
       with:
         version: latest
+    - run: supabase start
     - name: Install dependencies
       run: npm install -g pnpm && pnpm install
     - name: Install Playwright Browsers
