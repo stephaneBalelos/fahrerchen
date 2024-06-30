@@ -89,12 +89,12 @@ const links = [
     },
   },
   {
-    id: "users",
-    label: "Users",
+    id: "students",
+    label: "Students",
     icon: "i-heroicons-user-group",
-    to: "/my/users",
+    to: "/my/students",
     tooltip: {
-      text: "Users",
+      text: "Students",
       shortcuts: ["G", "U"],
     },
   },
