@@ -1,6 +1,20 @@
 [
   {
     "schemaName": "public",
+    "tableName": "course_types",
+    "predictions": [
+      {
+        "input": "public course_types description",
+        "column": "description",
+        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
+        "confidence": 0.270814061164856,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
     "tableName": "courses",
     "predictions": [
       {

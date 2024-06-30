@@ -57,6 +57,7 @@
             <slot></slot>
           </ClientOnly>
         </UDashboardPanel>
+
       </UDashboardPage>
     </UDashboardLayout>
   </UMain>

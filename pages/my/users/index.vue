@@ -36,7 +36,7 @@
 
 <script setup lang="ts">
 import type { Database, AppStudent } from "~/types/app.types";
-import CreateUserForm from "~/components/forms/CreateUserForm.vue";
+import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
 
 const { org } = useGlobalOrgState();
 

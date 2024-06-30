@@ -130,10 +130,10 @@ create table public.courses_subscriptions (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   course_id    uuid references public.courses on delete cascade not null,
-  user_id    uuid references public.users on delete cascade not null,
+  student_id    uuid references public.students on delete cascade not null,
   archived_at   timestamp with time zone default null,
   organisation_id    uuid references public.organisations on delete cascade not null,
-  unique (course_id, user_id)
+  unique (course_id, student_id)
 );
 comment on table public.courses_subscriptions is 'COURSES AVAILABLE.';
 

@@ -101,7 +101,7 @@ export type Database = {
           id: string
           inserted_at: string
           organisation_id: string
-          user_id: string
+          student_id: string
         }
         Insert: {
           archived_at?: string | null
@@ -109,7 +109,7 @@ export type Database = {
           id?: string
           inserted_at?: string
           organisation_id: string
-          user_id: string
+          student_id: string
         }
         Update: {
           archived_at?: string | null
@@ -117,7 +117,7 @@ export type Database = {
           id?: string
           inserted_at?: string
           organisation_id?: string
-          user_id?: string
+          student_id?: string
         }
         Relationships: [
           {
@@ -135,17 +135,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "courses_subscriptions_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "courses_subscriptions_student_id_fkey"
+            columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_subscriptions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
