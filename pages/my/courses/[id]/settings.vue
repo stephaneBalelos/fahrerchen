@@ -1,111 +1,85 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
+      <UDashboardPanelContent class="p-0 pb-24 divide-y divide-gray-200 dark:divide-gray-800">
 
+    <UDashboardSection
+      :title="'Course Requirements'"
+      :description="'Set the requirements for this course.'"
+      orientation="horizontal"
+      class="px-4 py-6"
+    >
+    <template #links>
+      <UButton color="primary" icon="i-heroicons-plus" variant="soft" size="2xs" @click="openEditRequirementForm('')">Add Requirement</UButton>
+    </template>
+      <UCard :ui="{ body: { base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col' } }">
+        <div
+          v-for="field in course_requirements"
+          class="flex items-center justify-between pt-4 first:pt-0 gap-2"
+        >
+          <div class="flex flex-col gap-1">
+            <div class="flex gap-1">
+              <p class="font-semibold">{{ field.name }}</p> <UBadge color="primary" variant="subtle" size="sm">{{ field.required }}</UBadge>
+            </div>
+            <span class="text-sm text-gray-500">{{ field.description }} dakjsdjasd</span>
+          </div>
+        <UButton color="gray" variant="solid" @click="openEditRequirementForm(field.id)">Edit</UButton>
+      </div>
+      </UCard>
+    </UDashboardSection>
+  </udashboardpanelcontent>
 
     </UDashboardPanel>
   </UDashboardPage>
 </template>
 
 <script setup lang="ts">
-import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
 import type { AppStudent, Database } from "~/types/app.types";
+import EditCourseRequirementFrom from "~/components/forms/EditCourseRequirementFrom.vue";
 
 type Props = {
   orgid: string;
   courseid: string;
 };
 
-const props = defineProps<Props>();
-
-const defaultColumns = [
-  {
-    key: "fistname",
-    label: "First Name",
-    sortable: true,
-  },
-  {
-    key: "lastname",
-    label: "Last Name",
-    sortable: true,
-  },
-  {
-    key: "email",
-    label: "Email",
-    sortable: true,
-  }
-];
+const props = useAttrs() as Props;
 
 const supabase = useSupabaseClient<Database>();
+const slideover = useSlideover();
+const toast = useToast();
 
-const q = ref("");
-const selected = ref<AppStudent[]>([]);
-const selectedColumns = ref(defaultColumns);
-const selectedStatuses = ref([]);
-const selectedLocations = ref([]);
-const sort = ref({ column: "id", direction: "asc" as const });
-const input = ref<{ input: HTMLInputElement }>();
-const isNewStudentSlideOverOpen = ref(false);
-
-const columns = computed(() =>
-  defaultColumns.filter((column) => selectedColumns.value.includes(column))
-);
-
-const query = computed(() => ({
-  q: q.value,
-  statuses: selectedStatuses.value,
-  locations: selectedLocations.value,
-  sort: sort.value.column,
-  order: sort.value.direction,
-}));
-
-const { data: students, pending } = await useAsyncData(
-  `students_${props.orgid}`,
-  async () => {
-    const { data, error } = await supabase
-      .from("students")
-      .select("*")
-      .eq("organisation_id", props.orgid);
-    if (error) {
-      throw error;
-    }
-    return data;
-  },
-  { watch: [query], immediate: true }
-);
-
-// const defaultLocations = users.value.reduce((acc, user) => {
-//   if (!acc.includes(user.location)) {
-//     acc.push(user.location)
-//   }
-//   return acc
-// }, [] as string[])
-
-// const defaultStatuses = users.value.reduce((acc, user) => {
-//   if (!acc.includes(user.status)) {
-//     acc.push(user.status)
-//   }
-//   return acc
-// }, [] as string[])
-
-function onSelect(row: AppStudent) {
-  const index = selected.value.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    selected.value.push(row);
-  } else {
-    selected.value.splice(index, 1);
-  }
-}
-
-function onStudentAdded() {
-  console.log("student added");
-}
-
-defineShortcuts({
-  "/": () => {
-    input.value?.input?.focus();
-  },
+const { data: course_requirements, error, pending, refresh } = useAsyncData(`course_requirement_${props.courseid}`, async () => {
+  const { data } = await supabase.from('course_requirements').select('*').eq('course_id', props.courseid);
+  return data;
 });
+
+
+const openEditRequirementForm = (id: string) => {
+  console.log('Edit requirement form opened')
+  slideover.open(EditCourseRequirementFrom, {
+      courseid: props.courseid,
+      orgid: props.orgid,
+      requirementid: id,
+      "onRequirement-saved": () => {
+        console.log('Requirement saved')
+        refresh()
+        toast.add({
+          title: 'Requirement saved',
+          description: 'The requirement has been saved successfully.',
+          color: 'green'
+        })
+      },
+      "onRequirement-created": () => {
+        console.log('Requirement created')
+        refresh()
+        toast.add({
+          title: 'Requirement created',
+          description: 'The requirement has been created successfully.',
+          color: 'green'
+        })
+      }
+    });
+}
 </script>
 
 <style scoped></style>

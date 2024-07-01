@@ -6,7 +6,7 @@
           <UHorizontalNavigation :links="links" />
         </UDashboardToolbar>
   
-        <NuxtPage />
+        <NuxtPage :orgid="org" :courseid="courseid" />
       </UDashboardPanel>
     </UDashboardPage>
   </template>
@@ -17,6 +17,10 @@
   })
   
   const route = useRoute()
+  const { org } = useGlobalOrgState()
+  const courseid = route.params.id as string
+
+
   
   
   const links = [[{

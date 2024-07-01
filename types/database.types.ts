@@ -34,6 +34,343 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_activite_schedule: {
+        Row: {
+          activity_id: string
+          day_of_week: number
+          end_at: string
+          id: string
+          organisation_id: string
+          repeat: boolean
+          start_at: string
+        }
+        Insert: {
+          activity_id: string
+          day_of_week: number
+          end_at: string
+          id?: string
+          organisation_id: string
+          repeat?: boolean
+          start_at: string
+        }
+        Update: {
+          activity_id?: string
+          day_of_week?: number
+          end_at?: string
+          id?: string
+          organisation_id?: string
+          repeat?: boolean
+          start_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activite_schedule_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activite_schedule_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_activities: {
+        Row: {
+          assigned_to: string | null
+          course_id: string
+          date: string
+          description: string
+          id: string
+          name: string
+          organisation_id: string
+          price: number
+          requirement_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          course_id: string
+          date: string
+          description: string
+          id?: string
+          name: string
+          organisation_id: string
+          price?: number
+          requirement_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          course_id?: string
+          date?: string
+          description?: string
+          id?: string
+          name?: string
+          organisation_id?: string
+          price?: number
+          requirement_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activities_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "user_roles_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "course_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_activity_attendances: {
+        Row: {
+          activity_id: string
+          attended_at: string | null
+          course_subscription_id: string
+          id: string
+          organisation_id: string
+          student_id: string
+        }
+        Insert: {
+          activity_id: string
+          attended_at?: string | null
+          course_subscription_id: string
+          id?: string
+          organisation_id: string
+          student_id: string
+        }
+        Update: {
+          activity_id?: string
+          attended_at?: string | null
+          course_subscription_id?: string
+          id?: string
+          organisation_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activity_attendances_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_requirements: {
+        Row: {
+          course_id: string
+          description: string | null
+          id: string
+          name: string
+          organisation_id: string
+          required: number
+          requirements_type: number
+        }
+        Insert: {
+          course_id: string
+          description?: string | null
+          id?: string
+          name: string
+          organisation_id: string
+          required: number
+          requirements_type: number
+        }
+        Update: {
+          course_id?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organisation_id?: string
+          required?: number
+          requirements_type?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_requirements_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_requirements_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_requirements_requirements_type_fkey"
+            columns: ["requirements_type"]
+            isOneToOne: false
+            referencedRelation: "course_requirements_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_requirements_types: {
+        Row: {
+          description: string
+          id: number
+          name: string
+          type: Database["public"]["Enums"]["requirements_types"]
+        }
+        Insert: {
+          description: string
+          id?: number
+          name: string
+          type: Database["public"]["Enums"]["requirements_types"]
+        }
+        Update: {
+          description?: string
+          id?: number
+          name?: string
+          type?: Database["public"]["Enums"]["requirements_types"]
+        }
+        Relationships: []
+      }
+      course_subscription_bills: {
+        Row: {
+          amount: number
+          course_subscription_id: string
+          id: string
+          organisation_id: string
+          paid_at: string | null
+        }
+        Insert: {
+          amount?: number
+          course_subscription_id: string
+          id?: string
+          organisation_id: string
+          paid_at?: string | null
+        }
+        Update: {
+          amount?: number
+          course_subscription_id?: string
+          id?: string
+          organisation_id?: string
+          paid_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscription_bills_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: true
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bills_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_subscriptions: {
+        Row: {
+          archived_at: string | null
+          costs: number
+          course_id: string
+          id: string
+          inserted_at: string
+          organisation_id: string
+          student_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          costs?: number
+          course_id: string
+          id?: string
+          inserted_at?: string
+          organisation_id: string
+          student_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          costs?: number
+          course_id?: string
+          id?: string
+          inserted_at?: string
+          organisation_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscriptions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscriptions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscriptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_types: {
         Row: {
           description: string
@@ -90,55 +427,6 @@ export type Database = {
             columns: ["type"]
             isOneToOne: false
             referencedRelation: "course_types"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_subscriptions: {
-        Row: {
-          archived_at: string | null
-          course_id: string
-          id: string
-          inserted_at: string
-          organisation_id: string
-          student_id: string
-        }
-        Insert: {
-          archived_at?: string | null
-          course_id: string
-          id?: string
-          inserted_at?: string
-          organisation_id: string
-          student_id: string
-        }
-        Update: {
-          archived_at?: string | null
-          course_id?: string
-          id?: string
-          inserted_at?: string
-          organisation_id?: string
-          student_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_subscriptions_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_subscriptions_organisation_id_fkey"
-            columns: ["organisation_id"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_subscriptions_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
@@ -413,6 +701,22 @@ export type Database = {
         | "course_subscriptions.create"
         | "course_subscriptions.update"
         | "course_subscriptions.delete"
+        | "course_requirements.read"
+        | "course_requirements.create"
+        | "course_requirements.update"
+        | "course_requirements.delete"
+        | "course_activities.read"
+        | "course_activities.create"
+        | "course_activities.update"
+        | "course_activities.delete"
+        | "course_activity_attendances.read"
+        | "course_activity_attendances.create"
+        | "course_activity_attendances.update"
+        | "course_activity_attendances.delete"
+        | "course_subscription_bills.read"
+        | "course_subscription_bills.create"
+        | "course_subscription_bills.update"
+        | "course_subscription_bills.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
       course_type:
         | "AM"
@@ -431,7 +735,7 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
-      lesson_type: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
+      requirements_types: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
       user_status: "ONLINE" | "OFFLINE"
     }
     CompositeTypes: {

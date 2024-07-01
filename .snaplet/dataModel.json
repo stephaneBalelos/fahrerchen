@@ -623,6 +623,1190 @@
         }
       ]
     },
+    "course_activite_schedule": {
+      "id": "public.course_activite_schedule",
+      "schemaName": "public",
+      "tableName": "course_activite_schedule",
+      "fields": [
+        {
+          "id": "public.course_activite_schedule.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.activity_id",
+          "name": "activity_id",
+          "columnName": "activity_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.day_of_week",
+          "name": "day_of_week",
+          "columnName": "day_of_week",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.start_at",
+          "name": "start_at",
+          "columnName": "start_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.end_at",
+          "name": "end_at",
+          "columnName": "end_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.repeat",
+          "name": "repeat",
+          "columnName": "repeat",
+          "type": "bool",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activite_schedule.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activite_scheduleTocourse_activities",
+          "relationFromFields": [
+            "activity_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activite_scheduleToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_activite_schedule_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_activities": {
+      "id": "public.course_activities",
+      "schemaName": "public",
+      "tableName": "course_activities",
+      "fields": [
+        {
+          "id": "public.course_activities.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.name",
+          "name": "name",
+          "columnName": "name",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.description",
+          "name": "description",
+          "columnName": "description",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.date",
+          "name": "date",
+          "columnName": "date",
+          "type": "date",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.assigned_to",
+          "name": "assigned_to",
+          "columnName": "assigned_to",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.requirement_id",
+          "name": "requirement_id",
+          "columnName": "requirement_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_requirements",
+          "type": "course_requirements",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activitiesTocourse_requirements",
+          "relationFromFields": [
+            "requirement_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activitiesTocourses",
+          "relationFromFields": [
+            "course_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activitiesToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "public_users",
+          "type": "public_users",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activitiesTopublic_users",
+          "relationFromFields": [
+            "assigned_to"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activite_schedule",
+          "type": "course_activite_schedule",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activite_scheduleTocourse_activities",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_activities",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_activities_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_activity_attendances": {
+      "id": "public.course_activity_attendances",
+      "schemaName": "public",
+      "tableName": "course_activity_attendances",
+      "fields": [
+        {
+          "id": "public.course_activity_attendances.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.activity_id",
+          "name": "activity_id",
+          "columnName": "activity_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.student_id",
+          "name": "student_id",
+          "columnName": "student_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.course_subscription_id",
+          "name": "course_subscription_id",
+          "columnName": "course_subscription_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.attended_at",
+          "name": "attended_at",
+          "columnName": "attended_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_activities",
+          "relationFromFields": [
+            "activity_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscriptions",
+          "type": "course_subscriptions",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_subscriptions",
+          "relationFromFields": [
+            "course_subscription_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_attendancesToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "students",
+          "type": "students",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTostudents",
+          "relationFromFields": [
+            "student_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_activity_attendances_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_requirements": {
+      "id": "public.course_requirements",
+      "schemaName": "public",
+      "tableName": "course_requirements",
+      "fields": [
+        {
+          "id": "public.course_requirements.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.requirements_type",
+          "name": "requirements_type",
+          "columnName": "requirements_type",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.name",
+          "name": "name",
+          "columnName": "name",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.description",
+          "name": "description",
+          "columnName": "description",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.required",
+          "name": "required",
+          "columnName": "required",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_requirements_types",
+          "type": "course_requirements_types",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_requirementsTocourse_requirements_types",
+          "relationFromFields": [
+            "requirements_type"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_requirementsTocourses",
+          "relationFromFields": [
+            "course_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_requirementsToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activitiesTocourse_requirements",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_requirements_course_id_requirements_type_key",
+          "fields": [
+            "course_id",
+            "requirements_type"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "course_requirements_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_requirements_types": {
+      "id": "public.course_requirements_types",
+      "schemaName": "public",
+      "tableName": "course_requirements_types",
+      "fields": [
+        {
+          "id": "public.course_requirements_types.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "int8",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "\"public\".\"course_requirements_types_id_seq\"",
+            "increment": 1,
+            "start": 1
+          },
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements_types.type",
+          "name": "type",
+          "columnName": "type",
+          "type": "requirements_types",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements_types.name",
+          "name": "name",
+          "columnName": "name",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements_types.description",
+          "name": "description",
+          "columnName": "description",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_requirements",
+          "type": "course_requirements",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_requirementsTocourse_requirements_types",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_requirements_types_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "course_requirements_types_type_key",
+          "fields": [
+            "type"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_subscription_bills": {
+      "id": "public.course_subscription_bills",
+      "schemaName": "public",
+      "tableName": "course_subscription_bills",
+      "fields": [
+        {
+          "id": "public.course_subscription_bills.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bills.course_subscription_id",
+          "name": "course_subscription_id",
+          "columnName": "course_subscription_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bills.amount",
+          "name": "amount",
+          "columnName": "amount",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bills.paid_at",
+          "name": "paid_at",
+          "columnName": "paid_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bills.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_subscriptions",
+          "type": "course_subscriptions",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscription_billsTocourse_subscriptions",
+          "relationFromFields": [
+            "course_subscription_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscription_billsToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_subscription_bills_course_subscription_id_key",
+          "fields": [
+            "course_subscription_id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "course_subscription_bills_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_subscriptions": {
+      "id": "public.course_subscriptions",
+      "schemaName": "public",
+      "tableName": "course_subscriptions",
+      "fields": [
+        {
+          "id": "public.course_subscriptions.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.inserted_at",
+          "name": "inserted_at",
+          "columnName": "inserted_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.student_id",
+          "name": "student_id",
+          "columnName": "student_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.archived_at",
+          "name": "archived_at",
+          "columnName": "archived_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.costs",
+          "name": "costs",
+          "columnName": "costs",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscriptionsTocourses",
+          "relationFromFields": [
+            "course_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscriptionsToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "students",
+          "type": "students",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscriptionsTostudents",
+          "relationFromFields": [
+            "student_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_subscriptions",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bills",
+          "type": "course_subscription_bills",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_billsTocourse_subscriptions",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_subscriptions_course_id_student_id_key",
+          "fields": [
+            "course_id",
+            "student_id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "course_subscriptions_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
     "course_types": {
       "id": "public.course_types",
       "schemaName": "public",
@@ -832,11 +2016,39 @@
           "hasDefaultValue": false
         },
         {
-          "name": "courses_subscriptions",
-          "type": "courses_subscriptions",
+          "name": "course_activities",
+          "type": "course_activities",
           "isRequired": false,
           "kind": "object",
-          "relationName": "courses_subscriptionsTocourses",
+          "relationName": "course_activitiesTocourses",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_requirements",
+          "type": "course_requirements",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_requirementsTocourses",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscriptions",
+          "type": "course_subscriptions",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscriptionsTocourses",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -857,168 +2069,6 @@
         },
         {
           "name": "courses_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "courses_subscriptions": {
-      "id": "public.courses_subscriptions",
-      "schemaName": "public",
-      "tableName": "courses_subscriptions",
-      "fields": [
-        {
-          "id": "public.courses_subscriptions.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.courses_subscriptions.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.courses_subscriptions.course_id",
-          "name": "course_id",
-          "columnName": "course_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.courses_subscriptions.student_id",
-          "name": "student_id",
-          "columnName": "student_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.courses_subscriptions.archived_at",
-          "name": "archived_at",
-          "columnName": "archived_at",
-          "type": "timestamptz",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.courses_subscriptions.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "courses",
-          "type": "courses",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "courses_subscriptionsTocourses",
-          "relationFromFields": [
-            "course_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "organisations",
-          "type": "organisations",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "courses_subscriptionsToorganisations",
-          "relationFromFields": [
-            "organisation_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "students",
-          "type": "students",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "courses_subscriptionsTostudents",
-          "relationFromFields": [
-            "student_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "courses_subscriptions_course_id_student_id_key",
-          "fields": [
-            "course_id",
-            "student_id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "courses_subscriptions_pkey",
           "fields": [
             "id"
           ],
@@ -1942,13 +2992,13 @@
         }
       ]
     },
-    "log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac": {
-      "id": "_analytics.log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac",
+    "log_events_163964d8_b86d_4e61_9c5d_170aae80829c": {
+      "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c",
       "schemaName": "_analytics",
-      "tableName": "log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac",
+      "tableName": "log_events_163964d8_b86d_4e61_9c5d_170aae80829c",
       "fields": [
         {
-          "id": "_analytics.log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.id",
+          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -1962,7 +3012,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.body",
+          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -1976,7 +3026,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.event_message",
+          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -1990,7 +3040,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.timestamp",
+          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2006,7 +3056,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac_pkey",
+          "name": "log_events_163964d8_b86d_4e61_9c5d_170aae80829c_pkey",
           "fields": [
             "id"
           ],
@@ -2014,13 +3064,13 @@
         }
       ]
     },
-    "log_events_396e025e_c63e_4e5e_876f_667ab1eba45c": {
-      "id": "_analytics.log_events_396e025e_c63e_4e5e_876f_667ab1eba45c",
+    "log_events_38b8f623_de44_4b82_a81b_391ff3381987": {
+      "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987",
       "schemaName": "_analytics",
-      "tableName": "log_events_396e025e_c63e_4e5e_876f_667ab1eba45c",
+      "tableName": "log_events_38b8f623_de44_4b82_a81b_391ff3381987",
       "fields": [
         {
-          "id": "_analytics.log_events_396e025e_c63e_4e5e_876f_667ab1eba45c.id",
+          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2034,7 +3084,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_396e025e_c63e_4e5e_876f_667ab1eba45c.body",
+          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2048,7 +3098,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_396e025e_c63e_4e5e_876f_667ab1eba45c.event_message",
+          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2062,7 +3112,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_396e025e_c63e_4e5e_876f_667ab1eba45c.timestamp",
+          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2078,7 +3128,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_396e025e_c63e_4e5e_876f_667ab1eba45c_pkey",
+          "name": "log_events_38b8f623_de44_4b82_a81b_391ff3381987_pkey",
           "fields": [
             "id"
           ],
@@ -2086,13 +3136,13 @@
         }
       ]
     },
-    "log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6": {
-      "id": "_analytics.log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6",
+    "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845": {
+      "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845",
       "schemaName": "_analytics",
-      "tableName": "log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6",
+      "tableName": "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845",
       "fields": [
         {
-          "id": "_analytics.log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6.id",
+          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2106,7 +3156,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6.body",
+          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2120,7 +3170,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6.event_message",
+          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2134,7 +3184,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6.timestamp",
+          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2150,7 +3200,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_53c4c91b_ae50_4137_8743_2c5710f74bb6_pkey",
+          "name": "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845_pkey",
           "fields": [
             "id"
           ],
@@ -2158,13 +3208,13 @@
         }
       ]
     },
-    "log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d": {
-      "id": "_analytics.log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d",
+    "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc": {
+      "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
       "schemaName": "_analytics",
-      "tableName": "log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d",
+      "tableName": "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
       "fields": [
         {
-          "id": "_analytics.log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.id",
+          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2178,7 +3228,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.body",
+          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2192,7 +3242,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.event_message",
+          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2206,7 +3256,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.timestamp",
+          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2222,7 +3272,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d_pkey",
+          "name": "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc_pkey",
           "fields": [
             "id"
           ],
@@ -2230,13 +3280,13 @@
         }
       ]
     },
-    "log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc": {
-      "id": "_analytics.log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc",
+    "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221": {
+      "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
       "schemaName": "_analytics",
-      "tableName": "log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc",
+      "tableName": "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
       "fields": [
         {
-          "id": "_analytics.log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc.id",
+          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2250,7 +3300,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc.body",
+          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2264,7 +3314,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc.event_message",
+          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2278,7 +3328,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc.timestamp",
+          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2294,7 +3344,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_950961ee_6d67_4ece_bb6e_fa6947b719cc_pkey",
+          "name": "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221_pkey",
           "fields": [
             "id"
           ],
@@ -2302,13 +3352,13 @@
         }
       ]
     },
-    "log_events_9f777749_84f8_4545_92b7_582cd39641b8": {
-      "id": "_analytics.log_events_9f777749_84f8_4545_92b7_582cd39641b8",
+    "log_events_77a67a9e_312e_406f_a709_5593ac4696da": {
+      "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da",
       "schemaName": "_analytics",
-      "tableName": "log_events_9f777749_84f8_4545_92b7_582cd39641b8",
+      "tableName": "log_events_77a67a9e_312e_406f_a709_5593ac4696da",
       "fields": [
         {
-          "id": "_analytics.log_events_9f777749_84f8_4545_92b7_582cd39641b8.id",
+          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2322,7 +3372,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_9f777749_84f8_4545_92b7_582cd39641b8.body",
+          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2336,7 +3386,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_9f777749_84f8_4545_92b7_582cd39641b8.event_message",
+          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2350,7 +3400,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_9f777749_84f8_4545_92b7_582cd39641b8.timestamp",
+          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2366,7 +3416,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_9f777749_84f8_4545_92b7_582cd39641b8_pkey",
+          "name": "log_events_77a67a9e_312e_406f_a709_5593ac4696da_pkey",
           "fields": [
             "id"
           ],
@@ -2374,13 +3424,13 @@
         }
       ]
     },
-    "log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69": {
-      "id": "_analytics.log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69",
+    "log_events_b34dfe09_762e_426b_a602_21321fa9e070": {
+      "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070",
       "schemaName": "_analytics",
-      "tableName": "log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69",
+      "tableName": "log_events_b34dfe09_762e_426b_a602_21321fa9e070",
       "fields": [
         {
-          "id": "_analytics.log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.id",
+          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2394,7 +3444,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.body",
+          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2408,7 +3458,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.event_message",
+          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2422,7 +3472,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.timestamp",
+          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2438,7 +3488,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69_pkey",
+          "name": "log_events_b34dfe09_762e_426b_a602_21321fa9e070_pkey",
           "fields": [
             "id"
           ],
@@ -2446,13 +3496,13 @@
         }
       ]
     },
-    "log_events_bf3fb376_f08d_4030_a24c_d22519c06496": {
-      "id": "_analytics.log_events_bf3fb376_f08d_4030_a24c_d22519c06496",
+    "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7": {
+      "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
       "schemaName": "_analytics",
-      "tableName": "log_events_bf3fb376_f08d_4030_a24c_d22519c06496",
+      "tableName": "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
       "fields": [
         {
-          "id": "_analytics.log_events_bf3fb376_f08d_4030_a24c_d22519c06496.id",
+          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2466,7 +3516,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_bf3fb376_f08d_4030_a24c_d22519c06496.body",
+          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2480,7 +3530,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_bf3fb376_f08d_4030_a24c_d22519c06496.event_message",
+          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2494,7 +3544,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_bf3fb376_f08d_4030_a24c_d22519c06496.timestamp",
+          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2510,7 +3560,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_bf3fb376_f08d_4030_a24c_d22519c06496_pkey",
+          "name": "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7_pkey",
           "fields": [
             "id"
           ],
@@ -2518,13 +3568,13 @@
         }
       ]
     },
-    "log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907": {
-      "id": "_analytics.log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907",
+    "log_events_f9a546b1_c564_4f05_890e_4362d7462713": {
+      "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713",
       "schemaName": "_analytics",
-      "tableName": "log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907",
+      "tableName": "log_events_f9a546b1_c564_4f05_890e_4362d7462713",
       "fields": [
         {
-          "id": "_analytics.log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.id",
+          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -2538,7 +3588,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.body",
+          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -2552,7 +3602,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.event_message",
+          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -2566,7 +3616,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.timestamp",
+          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -2582,7 +3632,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907_pkey",
+          "name": "log_events_f9a546b1_c564_4f05_890e_4362d7462713_pkey",
           "fields": [
             "id"
           ],
@@ -3643,11 +4693,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "courses",
-          "type": "courses",
+          "name": "course_activite_schedule",
+          "type": "course_activite_schedule",
           "isRequired": false,
           "kind": "object",
-          "relationName": "coursesToorganisations",
+          "relationName": "course_activite_scheduleToorganisations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -3657,11 +4707,81 @@
           "hasDefaultValue": false
         },
         {
-          "name": "courses_subscriptions",
-          "type": "courses_subscriptions",
+          "name": "course_activities",
+          "type": "course_activities",
           "isRequired": false,
           "kind": "object",
-          "relationName": "courses_subscriptionsToorganisations",
+          "relationName": "course_activitiesToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_requirements",
+          "type": "course_requirements",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_requirementsToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bills",
+          "type": "course_subscription_bills",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_billsToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscriptions",
+          "type": "course_subscriptions",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscriptionsToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "coursesToorganisations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4858,13 +5978,13 @@
         }
       ]
     },
-    "schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac": {
-      "id": "_analytics.schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac",
+    "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c": {
+      "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac",
+      "tableName": "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.version",
+          "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -4878,7 +5998,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac.inserted_at",
+          "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -4894,7 +6014,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_2ba50a10_7bf5_4b43_a7e4_ece2eeb02eac_pkey",
+          "name": "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c_pkey",
           "fields": [
             "version"
           ],
@@ -4902,13 +6022,13 @@
         }
       ]
     },
-    "schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c": {
-      "id": "_analytics.schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c",
+    "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987": {
+      "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c",
+      "tableName": "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c.version",
+          "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -4922,7 +6042,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c.inserted_at",
+          "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -4938,7 +6058,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_396e025e_c63e_4e5e_876f_667ab1eba45c_pkey",
+          "name": "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987_pkey",
           "fields": [
             "version"
           ],
@@ -4946,13 +6066,13 @@
         }
       ]
     },
-    "schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6": {
-      "id": "_analytics.schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6",
+    "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845": {
+      "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6",
+      "tableName": "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6.version",
+          "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -4966,7 +6086,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6.inserted_at",
+          "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -4982,7 +6102,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_53c4c91b_ae50_4137_8743_2c5710f74bb6_pkey",
+          "name": "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845_pkey",
           "fields": [
             "version"
           ],
@@ -4990,13 +6110,13 @@
         }
       ]
     },
-    "schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d": {
-      "id": "_analytics.schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d",
+    "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc": {
+      "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d",
+      "tableName": "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.version",
+          "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5010,7 +6130,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d.inserted_at",
+          "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5026,7 +6146,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_87f5f32a_0cff_4b41_a0e4_e916f1ed2f8d_pkey",
+          "name": "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc_pkey",
           "fields": [
             "version"
           ],
@@ -5034,13 +6154,13 @@
         }
       ]
     },
-    "schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc": {
-      "id": "_analytics.schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc",
+    "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221": {
+      "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc",
+      "tableName": "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc.version",
+          "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5054,7 +6174,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc.inserted_at",
+          "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5070,7 +6190,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_950961ee_6d67_4ece_bb6e_fa6947b719cc_pkey",
+          "name": "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221_pkey",
           "fields": [
             "version"
           ],
@@ -5078,13 +6198,13 @@
         }
       ]
     },
-    "schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8": {
-      "id": "_analytics.schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8",
+    "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da": {
+      "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8",
+      "tableName": "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8.version",
+          "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5098,7 +6218,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8.inserted_at",
+          "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5114,7 +6234,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_9f777749_84f8_4545_92b7_582cd39641b8_pkey",
+          "name": "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da_pkey",
           "fields": [
             "version"
           ],
@@ -5122,13 +6242,13 @@
         }
       ]
     },
-    "schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69": {
-      "id": "_analytics.schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69",
+    "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070": {
+      "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69",
+      "tableName": "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.version",
+          "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5142,7 +6262,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69.inserted_at",
+          "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5158,7 +6278,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_bbf2cdd2_4e52_4bc4_a711_5e84b6a34c69_pkey",
+          "name": "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070_pkey",
           "fields": [
             "version"
           ],
@@ -5166,13 +6286,13 @@
         }
       ]
     },
-    "schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496": {
-      "id": "_analytics.schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496",
+    "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7": {
+      "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496",
+      "tableName": "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496.version",
+          "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5186,7 +6306,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496.inserted_at",
+          "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5202,7 +6322,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_bf3fb376_f08d_4030_a24c_d22519c06496_pkey",
+          "name": "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7_pkey",
           "fields": [
             "version"
           ],
@@ -5210,13 +6330,13 @@
         }
       ]
     },
-    "schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907": {
-      "id": "_analytics.schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907",
+    "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713": {
+      "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907",
+      "tableName": "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.version",
+          "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5230,7 +6350,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907.inserted_at",
+          "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -5246,7 +6366,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_ed5bf3b8_0c98_4d1f_b6ae_ebd618c8c907_pkey",
+          "name": "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713_pkey",
           "fields": [
             "version"
           ],
@@ -5942,11 +7062,25 @@
           "hasDefaultValue": false
         },
         {
-          "name": "courses_subscriptions",
-          "type": "courses_subscriptions",
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
           "isRequired": false,
           "kind": "object",
-          "relationName": "courses_subscriptionsTostudents",
+          "relationName": "course_activity_attendancesTostudents",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscriptions",
+          "type": "course_subscriptions",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscriptionsTostudents",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -6900,6 +8034,20 @@
           "hasDefaultValue": false
         },
         {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activitiesTopublic_users",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
           "name": "organisation_members",
           "type": "organisation_members",
           "isRequired": false,
@@ -7104,6 +8252,54 @@
       "schemaName": "public",
       "values": [
         {
+          "name": "course_activities.create"
+        },
+        {
+          "name": "course_activities.delete"
+        },
+        {
+          "name": "course_activities.read"
+        },
+        {
+          "name": "course_activities.update"
+        },
+        {
+          "name": "course_activity_attendances.create"
+        },
+        {
+          "name": "course_activity_attendances.delete"
+        },
+        {
+          "name": "course_activity_attendances.read"
+        },
+        {
+          "name": "course_activity_attendances.update"
+        },
+        {
+          "name": "course_requirements.create"
+        },
+        {
+          "name": "course_requirements.delete"
+        },
+        {
+          "name": "course_requirements.read"
+        },
+        {
+          "name": "course_requirements.update"
+        },
+        {
+          "name": "course_subscription_bills.create"
+        },
+        {
+          "name": "course_subscription_bills.delete"
+        },
+        {
+          "name": "course_subscription_bills.read"
+        },
+        {
+          "name": "course_subscription_bills.update"
+        },
+        {
           "name": "course_subscriptions.create"
         },
         {
@@ -7238,7 +8434,7 @@
         }
       ]
     },
-    "lesson_type": {
+    "requirements_types": {
       "schemaName": "public",
       "values": [
         {

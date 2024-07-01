@@ -1,6 +1,72 @@
 [
   {
     "schemaName": "public",
+    "tableName": "course_activities",
+    "predictions": [
+      {
+        "input": "public course_activities description",
+        "column": "description",
+        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
+        "confidence": 0.537105143070221,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public course_activities name",
+        "column": "name",
+        "shape": "SYSTEM_FILE_NAME",
+        "confidence": 0.4719762802124023,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "course_requirements",
+    "predictions": [
+      {
+        "input": "public course_requirements description",
+        "column": "description",
+        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
+        "confidence": 0.5489407777786255,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public course_requirements name",
+        "column": "name",
+        "shape": "COMMERCE_PRODUCT_NAME",
+        "confidence": 0.4472060203552246,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "course_requirements_types",
+    "predictions": [
+      {
+        "input": "public course_requirements_types description",
+        "column": "description",
+        "shape": "FINANCE_TRANSACTION_DESCRIPTION",
+        "confidence": 0.4030510187149048,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      },
+      {
+        "input": "public course_requirements_types name",
+        "column": "name",
+        "shape": "SYSTEM_FILE_TYPE",
+        "confidence": 0.5607261061668396,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
     "tableName": "course_types",
     "predictions": [
       {
