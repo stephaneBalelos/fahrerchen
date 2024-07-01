@@ -186,6 +186,7 @@ create table public.course_requirements (
   name          text not null,
   description   text,
   required     integer not null,
+  price        integer default 0 not null check (price >= 0),
   organisation_id    uuid references public.organisations on delete cascade not null,
   unique (course_id, requirements_type)
 );
@@ -199,7 +200,6 @@ create table public.course_activities (
   name          text not null,
   description   text not null,
   date          date not null,
-  price        integer default 0 not null check (price >= 0),
   assigned_to    uuid references public.users on delete set null,
   requirement_id    uuid references public.course_requirements on delete cascade,
   organisation_id    uuid references public.organisations on delete cascade not null

@@ -17,11 +17,13 @@
           v-for="field in course_requirements"
           class="flex items-center justify-between pt-4 first:pt-0 gap-2"
         >
-          <div class="flex flex-col gap-1">
-            <div class="flex gap-1">
-              <p class="font-semibold">{{ field.name }}</p> <UBadge color="primary" variant="subtle" size="sm">{{ field.required }}</UBadge>
-            </div>
-            <span class="text-sm text-gray-500">{{ field.description }} dakjsdjasd</span>
+          <div class="flex flex-col gap-1 grow">
+            <p class="font-semibold">{{ field.name }}</p> 
+            <div class="flex justify-start gap-1">
+              <UBadge color="primary" variant="subtle" size="xs">{{ field.required }} required</UBadge>
+              <UBadge color="primary" variant="subtle" size="xs">{{ field.price }} &euro;</UBadge>
+          </div>
+            <span class="text-sm text-gray-500">{{ field.description }}</span>
           </div>
         <UButton color="gray" variant="solid" @click="openEditRequirementForm(field.id)">Edit</UButton>
       </div>

@@ -849,20 +849,6 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activities.price",
-          "name": "price",
-          "columnName": "price",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.course_activities.assigned_to",
           "name": "assigned_to",
           "columnName": "assigned_to",
@@ -1273,6 +1259,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_requirements.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
@@ -2992,13 +2992,13 @@
         }
       ]
     },
-    "log_events_163964d8_b86d_4e61_9c5d_170aae80829c": {
-      "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c",
+    "log_events_07121355_b80b_42a1_94b2_804220ef1ed4": {
+      "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
       "schemaName": "_analytics",
-      "tableName": "log_events_163964d8_b86d_4e61_9c5d_170aae80829c",
+      "tableName": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
       "fields": [
         {
-          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.id",
+          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3012,7 +3012,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.body",
+          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3026,7 +3026,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.event_message",
+          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3040,7 +3040,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_163964d8_b86d_4e61_9c5d_170aae80829c.timestamp",
+          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3056,7 +3056,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_163964d8_b86d_4e61_9c5d_170aae80829c_pkey",
+          "name": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
           "fields": [
             "id"
           ],
@@ -3064,13 +3064,13 @@
         }
       ]
     },
-    "log_events_38b8f623_de44_4b82_a81b_391ff3381987": {
-      "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987",
+    "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
+      "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
       "schemaName": "_analytics",
-      "tableName": "log_events_38b8f623_de44_4b82_a81b_391ff3381987",
+      "tableName": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
       "fields": [
         {
-          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.id",
+          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3084,7 +3084,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.body",
+          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3098,7 +3098,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.event_message",
+          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3112,7 +3112,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_38b8f623_de44_4b82_a81b_391ff3381987.timestamp",
+          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3128,7 +3128,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_38b8f623_de44_4b82_a81b_391ff3381987_pkey",
+          "name": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
           "fields": [
             "id"
           ],
@@ -3136,13 +3136,13 @@
         }
       ]
     },
-    "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845": {
-      "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845",
+    "log_events_60fa7018_b5c0_459f_bad3_34677810ee39": {
+      "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
       "schemaName": "_analytics",
-      "tableName": "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845",
+      "tableName": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
       "fields": [
         {
-          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.id",
+          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3156,7 +3156,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.body",
+          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3170,7 +3170,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.event_message",
+          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3184,7 +3184,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_469a14b6_6e2b_431b_b0a0_3034caac7845.timestamp",
+          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3200,7 +3200,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_469a14b6_6e2b_431b_b0a0_3034caac7845_pkey",
+          "name": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
           "fields": [
             "id"
           ],
@@ -3208,13 +3208,13 @@
         }
       ]
     },
-    "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc": {
-      "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
+    "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226": {
+      "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
       "schemaName": "_analytics",
-      "tableName": "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
+      "tableName": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
       "fields": [
         {
-          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.id",
+          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3228,7 +3228,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.body",
+          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3242,7 +3242,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.event_message",
+          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3256,7 +3256,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.timestamp",
+          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3272,7 +3272,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_4ca28a86_67ce_4554_b804_dc2f3dea2bbc_pkey",
+          "name": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
           "fields": [
             "id"
           ],
@@ -3280,13 +3280,13 @@
         }
       ]
     },
-    "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221": {
-      "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
+    "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
+      "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
       "schemaName": "_analytics",
-      "tableName": "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
+      "tableName": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
       "fields": [
         {
-          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.id",
+          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3300,7 +3300,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.body",
+          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3314,7 +3314,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.event_message",
+          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3328,7 +3328,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.timestamp",
+          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3344,7 +3344,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_5cfb92c0_f56a_452d_8a8b_4baf9fed3221_pkey",
+          "name": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
           "fields": [
             "id"
           ],
@@ -3352,13 +3352,13 @@
         }
       ]
     },
-    "log_events_77a67a9e_312e_406f_a709_5593ac4696da": {
-      "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da",
+    "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
+      "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
       "schemaName": "_analytics",
-      "tableName": "log_events_77a67a9e_312e_406f_a709_5593ac4696da",
+      "tableName": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
       "fields": [
         {
-          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.id",
+          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3372,7 +3372,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.body",
+          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3386,7 +3386,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.event_message",
+          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3400,7 +3400,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_77a67a9e_312e_406f_a709_5593ac4696da.timestamp",
+          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3416,7 +3416,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_77a67a9e_312e_406f_a709_5593ac4696da_pkey",
+          "name": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
           "fields": [
             "id"
           ],
@@ -3424,13 +3424,13 @@
         }
       ]
     },
-    "log_events_b34dfe09_762e_426b_a602_21321fa9e070": {
-      "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070",
+    "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
+      "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
       "schemaName": "_analytics",
-      "tableName": "log_events_b34dfe09_762e_426b_a602_21321fa9e070",
+      "tableName": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
       "fields": [
         {
-          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.id",
+          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3444,7 +3444,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.body",
+          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3458,7 +3458,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.event_message",
+          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3472,7 +3472,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_b34dfe09_762e_426b_a602_21321fa9e070.timestamp",
+          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3488,7 +3488,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_b34dfe09_762e_426b_a602_21321fa9e070_pkey",
+          "name": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
           "fields": [
             "id"
           ],
@@ -3496,13 +3496,13 @@
         }
       ]
     },
-    "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7": {
-      "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
+    "log_events_eb54f357_8fee_4313_8d76_6003927e3317": {
+      "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317",
       "schemaName": "_analytics",
-      "tableName": "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
+      "tableName": "log_events_eb54f357_8fee_4313_8d76_6003927e3317",
       "fields": [
         {
-          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.id",
+          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3516,7 +3516,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.body",
+          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3530,7 +3530,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.event_message",
+          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3544,7 +3544,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.timestamp",
+          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3560,7 +3560,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_c1d3d235_aa2d_4b29_bba4_314a51a0fba7_pkey",
+          "name": "log_events_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
           "fields": [
             "id"
           ],
@@ -3568,13 +3568,13 @@
         }
       ]
     },
-    "log_events_f9a546b1_c564_4f05_890e_4362d7462713": {
-      "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713",
+    "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
+      "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
       "schemaName": "_analytics",
-      "tableName": "log_events_f9a546b1_c564_4f05_890e_4362d7462713",
+      "tableName": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
       "fields": [
         {
-          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.id",
+          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3588,7 +3588,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.body",
+          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3602,7 +3602,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.event_message",
+          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3616,7 +3616,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_f9a546b1_c564_4f05_890e_4362d7462713.timestamp",
+          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3632,7 +3632,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_f9a546b1_c564_4f05_890e_4362d7462713_pkey",
+          "name": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
           "fields": [
             "id"
           ],
@@ -5978,13 +5978,13 @@
         }
       ]
     },
-    "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c": {
-      "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c",
+    "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4": {
+      "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c",
+      "tableName": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c.version",
+          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5998,7 +5998,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c.inserted_at",
+          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6014,7 +6014,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_163964d8_b86d_4e61_9c5d_170aae80829c_pkey",
+          "name": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
           "fields": [
             "version"
           ],
@@ -6022,13 +6022,13 @@
         }
       ]
     },
-    "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987": {
-      "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987",
+    "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
+      "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987",
+      "tableName": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987.version",
+          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6042,7 +6042,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987.inserted_at",
+          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6058,7 +6058,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_38b8f623_de44_4b82_a81b_391ff3381987_pkey",
+          "name": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
           "fields": [
             "version"
           ],
@@ -6066,13 +6066,13 @@
         }
       ]
     },
-    "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845": {
-      "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845",
+    "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39": {
+      "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845",
+      "tableName": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845.version",
+          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6086,7 +6086,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845.inserted_at",
+          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6102,7 +6102,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_469a14b6_6e2b_431b_b0a0_3034caac7845_pkey",
+          "name": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
           "fields": [
             "version"
           ],
@@ -6110,13 +6110,13 @@
         }
       ]
     },
-    "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc": {
-      "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
+    "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226": {
+      "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc",
+      "tableName": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.version",
+          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6130,7 +6130,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc.inserted_at",
+          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6146,7 +6146,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_4ca28a86_67ce_4554_b804_dc2f3dea2bbc_pkey",
+          "name": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
           "fields": [
             "version"
           ],
@@ -6154,13 +6154,13 @@
         }
       ]
     },
-    "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221": {
-      "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
+    "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
+      "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221",
+      "tableName": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.version",
+          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6174,7 +6174,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221.inserted_at",
+          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6190,7 +6190,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_5cfb92c0_f56a_452d_8a8b_4baf9fed3221_pkey",
+          "name": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
           "fields": [
             "version"
           ],
@@ -6198,13 +6198,13 @@
         }
       ]
     },
-    "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da": {
-      "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da",
+    "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
+      "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da",
+      "tableName": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da.version",
+          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6218,7 +6218,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da.inserted_at",
+          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6234,7 +6234,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_77a67a9e_312e_406f_a709_5593ac4696da_pkey",
+          "name": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
           "fields": [
             "version"
           ],
@@ -6242,13 +6242,13 @@
         }
       ]
     },
-    "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070": {
-      "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070",
+    "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
+      "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070",
+      "tableName": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070.version",
+          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6262,7 +6262,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070.inserted_at",
+          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6278,7 +6278,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_b34dfe09_762e_426b_a602_21321fa9e070_pkey",
+          "name": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
           "fields": [
             "version"
           ],
@@ -6286,13 +6286,13 @@
         }
       ]
     },
-    "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7": {
-      "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
+    "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317": {
+      "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7",
+      "tableName": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.version",
+          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6306,7 +6306,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7.inserted_at",
+          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6322,7 +6322,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_c1d3d235_aa2d_4b29_bba4_314a51a0fba7_pkey",
+          "name": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
           "fields": [
             "version"
           ],
@@ -6330,13 +6330,13 @@
         }
       ]
     },
-    "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713": {
-      "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713",
+    "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
+      "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713",
+      "tableName": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713.version",
+          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6350,7 +6350,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713.inserted_at",
+          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6366,7 +6366,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_f9a546b1_c564_4f05_890e_4362d7462713_pkey",
+          "name": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
           "fields": [
             "version"
           ],

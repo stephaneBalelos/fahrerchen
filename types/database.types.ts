@@ -88,7 +88,6 @@ export type Database = {
           id: string
           name: string
           organisation_id: string
-          price: number
           requirement_id: string | null
         }
         Insert: {
@@ -99,7 +98,6 @@ export type Database = {
           id?: string
           name: string
           organisation_id: string
-          price?: number
           requirement_id?: string | null
         }
         Update: {
@@ -110,7 +108,6 @@ export type Database = {
           id?: string
           name?: string
           organisation_id?: string
-          price?: number
           requirement_id?: string | null
         }
         Relationships: [
@@ -214,6 +211,7 @@ export type Database = {
           id: string
           name: string
           organisation_id: string
+          price: number
           required: number
           requirements_type: number
         }
@@ -223,6 +221,7 @@ export type Database = {
           id?: string
           name: string
           organisation_id: string
+          price?: number
           required: number
           requirements_type: number
         }
@@ -232,6 +231,7 @@ export type Database = {
           id?: string
           name?: string
           organisation_id?: string
+          price?: number
           required?: number
           requirements_type?: number
         }
