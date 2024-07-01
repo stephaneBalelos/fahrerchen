@@ -1,7 +1,5 @@
 <template>
-  <UDashboardPage>
-    <UDashboardPanel grow>
-      <UDashboardToolbar>
+    <UDashboardToolbar>
         <template #left>
           <!-- <USelectMenu
               v-model="selectedStatuses"
@@ -84,7 +82,6 @@
           </UDropdown>
         </template>
       </UTable>
-    </UDashboardPanel>
     <UDashboardSlideover
         v-model="isNewStudentSlideOverOpen"
         title="Create News Course"
@@ -98,7 +95,6 @@
           <UButton @click="isNewStudentSlideOverOpen = false">Cancel</UButton>
         </template>
       </UDashboardSlideover>
-  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
@@ -184,7 +180,7 @@ const {
 
 const students = computed(() => {
   if (!course_subscriptions.value) return [];
-  return course_subscriptions.value.map((sub) => sub.students as AppStudent);
+  return course_subscriptions.value.map((sub) => sub.students as AppStudent[]);
 });
 
 // const defaultLocations = users.value.reduce((acc, user) => {

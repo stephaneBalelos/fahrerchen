@@ -1,5 +1,4 @@
 <template>
-  <UMain>
     <UDashboardLayout>
       <UDashboardPage>
         <UDashboardPanel grow>
@@ -19,7 +18,6 @@
         </UDashboardPanel>
       </UDashboardPage>
     </UDashboardLayout>
-  </UMain>
 </template>
 
 <script setup lang="ts">

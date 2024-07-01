@@ -1,5 +1,4 @@
 <template>
-  <UMain>
     <UDashboardLayout>
       <UDashboardPanel
         :width="250"
@@ -48,7 +47,6 @@
                   </UChip>
                 </UButton>
               </UTooltip>
-
               <UserDropdown></UserDropdown>
             </template>
           </UDashboardNavbar>
@@ -60,7 +58,6 @@
 
       </UDashboardPage>
     </UDashboardLayout>
-  </UMain>
 </template>
 
 <script setup lang="ts">
