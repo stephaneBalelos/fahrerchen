@@ -79,9 +79,10 @@ const {
   async () => {
     const { data, error } = await supabase
       .from("students")
-      .select("*, courses_subscriptions(*)").eq("courses_subscriptions.course_id", props.courseid)
-      .is("courses_subscriptions", null);
+      .select("*, course_subscriptions(*)").eq("course_subscriptions.course_id", props.courseid)
+      .is("course_subscriptions", null);
     if (error) {
+      console.error(error);
       throw error;
     }
     console.log(data);
@@ -104,7 +105,7 @@ function addStudents() {
   console.log(selected.value);
   selected.value.forEach(async (studentId) => {
     const { data, error } = await supabase
-      .from("courses_subscriptions")
+      .from("course_subscriptions")
       .upsert({student_id: studentId, course_id: props.courseid, organisation_id: props.orgid});
     if (error) {
       toast.add({

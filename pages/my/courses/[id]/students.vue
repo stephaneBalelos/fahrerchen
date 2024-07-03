@@ -1,7 +1,8 @@
 <template>
+  <div>
     <UDashboardToolbar>
-        <template #left>
-          <!-- <USelectMenu
+      <template #left>
+        <!-- <USelectMenu
               v-model="selectedStatuses"
               icon="i-heroicons-check-circle"
               placeholder="Status"
@@ -16,85 +17,86 @@
               :options="defaultLocations"
               multiple
             /> -->
-        </template>
+      </template>
 
-        <template #right>
-          <USelectMenu
-            v-model="selectedColumns"
-            icon="i-heroicons-adjustments-horizontal-solid"
-            :options="defaultColumns"
-            multiple
-            class="hidden lg:block"
-          >
-            <template #label> Display </template>
-          </USelectMenu>
-          <UButton
-            label="Add Student"
-            trailing-icon="i-heroicons-plus"
-            color="gray"
-            @click="isNewStudentSlideOverOpen = true"
-          />
-        </template>
-      </UDashboardToolbar>
-
-      <UTable
-        v-model="selected"
-        v-model:sort="sort"
-        :rows="students ? students : []"
-        :columns="columns"
-        :loading="pending"
-        sort-mode="manual"
-        class="w-full"
-        :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-        @select="onSelect"
-      >
-        <template #name-data="{ row }">
-          <div class="flex items-center gap-3">
-            <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
-
-            <span class="text-gray-900 dark:text-white font-medium">{{
-              row.name
-            }}</span>
-          </div>
-        </template>
-
-        <template #status-data="{ row }">
-          <UBadge
-            :label="row.status"
-            :color="
-              row.status === 'subscribed'
-                ? 'green'
-                : row.status === 'bounced'
-                ? 'orange'
-                : 'red'
-            "
-            variant="subtle"
-            class="capitalize"
-          />
-        </template>
-        <template #actions-data="{ row }">
-          <UDropdown :items="items(row)">
-            <UButton
-              color="gray"
-              variant="ghost"
-              icon="i-heroicons-ellipsis-horizontal-20-solid"
-            />
-          </UDropdown>
-        </template>
-      </UTable>
-    <UDashboardSlideover
-        v-model="isNewStudentSlideOverOpen"
-        title="Create News Course"
-      >
-        <AddStudentsForm
-          @student-added="onStudentAdded"
-          :orgid="org"
-          :courseid="courseid"
+      <template #right>
+        <USelectMenu
+          v-model="selectedColumns"
+          icon="i-heroicons-adjustments-horizontal-solid"
+          :options="defaultColumns"
+          multiple
+          class="hidden lg:block"
+        >
+          <template #label> Display </template>
+        </USelectMenu>
+        <UButton
+          label="Add Student"
+          trailing-icon="i-heroicons-plus"
+          color="gray"
+          @click="isNewStudentSlideOverOpen = true"
         />
-        <template #footer>
-          <UButton @click="isNewStudentSlideOverOpen = false">Cancel</UButton>
-        </template>
-      </UDashboardSlideover>
+      </template>
+    </UDashboardToolbar>
+
+    <UTable
+      v-model="selected"
+      v-model:sort="sort"
+      :rows="students ? students : []"
+      :columns="columns"
+      :loading="pending"
+      sort-mode="manual"
+      class="w-full"
+      :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
+      @select="onSelect"
+    >
+      <template #name-data="{ row }">
+        <div class="flex items-center gap-3">
+          <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
+
+          <span class="text-gray-900 dark:text-white font-medium">{{
+            row.name
+          }}</span>
+        </div>
+      </template>
+
+      <template #status-data="{ row }">
+        <UBadge
+          :label="row.status"
+          :color="
+            row.status === 'subscribed'
+              ? 'green'
+              : row.status === 'bounced'
+              ? 'orange'
+              : 'red'
+          "
+          variant="subtle"
+          class="capitalize"
+        />
+      </template>
+      <template #actions-data="{ row }">
+        <UDropdown :items="items(row)">
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-ellipsis-horizontal-20-solid"
+          />
+        </UDropdown>
+      </template>
+    </UTable>
+    <UDashboardSlideover
+      v-model="isNewStudentSlideOverOpen"
+      title="Create News Course"
+    >
+      <AddStudentsForm
+        @student-added="onStudentAdded"
+        :orgid="org"
+        :courseid="courseid"
+      />
+      <template #footer>
+        <UButton @click="isNewStudentSlideOverOpen = false">Cancel</UButton>
+      </template>
+    </UDashboardSlideover>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -104,7 +106,7 @@ import type { AppStudent, Database } from "~/types/app.types";
 
 const { org } = useGlobalOrgState();
 const route = useRoute();
-const slideover = useSlideover()
+const slideover = useSlideover();
 
 const courseid = route.params.id as string;
 
@@ -166,11 +168,12 @@ const {
   `students_${org.value}`,
   async () => {
     const { data, error } = await supabase
-      .from("courses_subscriptions")
+      .from("course_subscriptions")
       .select("id, inserted_at, students(*)")
       .eq("organisation_id", org.value)
       .eq("course_id", courseid);
     if (error) {
+      console.log(error);
       throw error;
     }
     return data;
@@ -180,7 +183,7 @@ const {
 
 const students = computed(() => {
   if (!course_subscriptions.value) return [];
-  return course_subscriptions.value.map((sub) => sub.students as AppStudent[]);
+  return course_subscriptions.value.map((sub) => sub.students as AppStudent);
 });
 
 // const defaultLocations = users.value.reduce((acc, user) => {
@@ -217,26 +220,36 @@ defineShortcuts({
 });
 
 const items = (row: AppStudent) => [
-  [{
-    label: 'Edit',
-    icon: 'i-heroicons-pencil-square-20-solid',
-    click: () => {
-      slideover.open(EditStudentForm, { student: row })
-    }
-  }, {
-    label: 'Duplicate',
-    icon: 'i-heroicons-document-duplicate-20-solid'
-  }], [{
-    label: 'Archive',
-    icon: 'i-heroicons-archive-box-20-solid'
-  }, {
-    label: 'Move',
-    icon: 'i-heroicons-arrow-right-circle-20-solid'
-  }], [{
-    label: 'Delete',
-    icon: 'i-heroicons-trash-20-solid'
-  }]
-]
+  [
+    {
+      label: "Edit",
+      icon: "i-heroicons-pencil-square-20-solid",
+      click: () => {
+        slideover.open(EditStudentForm, { student: row });
+      },
+    },
+    {
+      label: "Duplicate",
+      icon: "i-heroicons-document-duplicate-20-solid",
+    },
+  ],
+  [
+    {
+      label: "Archive",
+      icon: "i-heroicons-archive-box-20-solid",
+    },
+    {
+      label: "Move",
+      icon: "i-heroicons-arrow-right-circle-20-solid",
+    },
+  ],
+  [
+    {
+      label: "Delete",
+      icon: "i-heroicons-trash-20-solid",
+    },
+  ],
+];
 </script>
 
 <style scoped></style>
