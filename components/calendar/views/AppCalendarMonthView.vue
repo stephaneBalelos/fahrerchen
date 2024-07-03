@@ -16,8 +16,10 @@
           }}
         </div>
       </template>
-      next: {{ day.isNextMonth }} <br />
-      prev: {{ day.isPrevMonth }} <br />
+      <slot name="body" :day="day">
+        next: {{ day.isNextMonth }} <br />
+        prev: {{ day.isPrevMonth }} <br />
+      </slot>
     </UCard>
   </div>
 </template>
