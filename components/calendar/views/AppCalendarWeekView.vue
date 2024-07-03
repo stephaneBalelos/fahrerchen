@@ -1,48 +1,54 @@
 <template>
   <UTable :rows="hours" :columns="days" :ui="tableConfig.ui">
     <template #empty-state>
-      <div class="flex flex-col items-center justify-center py-6 gap-3">
-        <span class="italic text-sm">No one here!</span>
-        <UButton label="Add people" />
-      </div>
+
     </template>
   </UTable>
 </template>
 
 <script setup lang="ts">
-import { format, setHours, setMinutes } from "date-fns";
+import { addDays, format, setHours, setMinutes, subDays } from "date-fns";
 
 type Hour = {
   id: number;
   label: string;
 };
 
+type Day = {
+  label: string;
+  key: string;
+};
+
 const props = defineProps<{
   selectedDate: Date;
 }>();
 
-const days = ref([
-  { label: "Hour", key: "label" },
-  { label: "Monday", key: "monday" },
-  { label: "Tuesday", key: "tuesday" },
-  { label: "Wednesday", key: "wednesday" },
-  { label: "Thursday", key: "thursday" },
-  { label: "Friday", key: "friday" },
-  { label: "Saturday", key: "saturday" },
-  { label: "Sunday", key: "sunday" },
-]);
+const days = ref<Day[]>([]);
 
 const hours = ref<Hour[]>([]);
 
 watch(() => props.selectedDate, load, { immediate: true });
 
 function load() {
+    days.value = []
+    hours.value = []
   for (let i = 0; i < 24; i++) {
     hours.value.push({
       id: i,
       label: format(setMinutes(setHours(props.selectedDate, i), 0), "HH:mm"),
     });
   }
+  days.value = Array.from({ length: 8 }, (_, i) => {
+    if (i == 0) {
+      return { label: "hour", key: "label" };
+    }
+    const date = subDays(props.selectedDate, props.selectedDate.getDay() - i);
+    const key = format(date, "yyyy-MM-dd");
+    const label = format(date, "EEEE dd.");
+
+    return {label: label, key};
+  });
+
 }
 
 const tableConfig = {
