@@ -7,6 +7,7 @@ export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Ro
 export type AppOrganisation = DatabaseGenerated['public']['Tables']['organisations']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
+export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']
 
 export type Database = MergeDeep<DatabaseGenerated,   {
     public: {

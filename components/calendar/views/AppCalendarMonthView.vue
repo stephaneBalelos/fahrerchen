@@ -45,7 +45,7 @@ const uiCardConfig = {
   rounded: "rounded-none",
   shadow: "shadow",
   body: {
-    base: "",
+    base: "h-full",
     background: "",
     padding: "px-4 py-2 sm:p-4 sm:py-2",
   },
@@ -61,7 +61,7 @@ const uiCardConfig = {
   },
 };
 
-type Day = {
+export type AppCalendarDay = {
   date: Date;
   idx: number;
   isToday?: boolean;
@@ -79,7 +79,7 @@ const start = ref(startOfMonth(props.selectedDate));
 const end = ref(endOfMonth(props.selectedDate));
 const startDay = ref(0);
 
-const days = ref<Day[]>([]);
+const days = ref<AppCalendarDay[]>([]);
 
 const rows = 5;
 const cols = 7;
@@ -106,13 +106,13 @@ function load() {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       const index = j + i * cols;
-      const day: Day = getDayAtIndex(index);
+      const day: AppCalendarDay = getDayAtIndex(index);
       days.value.push(day);
     }
   }
 }
 
-function getDayAtIndex(index: number): Day {
+function getDayAtIndex(index: number): AppCalendarDay {
   let date;
   let isPrevMonth = false;
   let isNextMonth = false;
