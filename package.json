@@ -2,6 +2,7 @@
   "private": true,
   "type": "module",
   "name": "fahrerchen",
+  "version": "0.0.2",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -9,7 +10,8 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "playwright test",
-    "gen_types": "supabase gen types typescript --local > ./types/database.types.ts"
+    "gen_types": "supabase gen types typescript --local > ./types/database.types.ts",
+    "gen_seed": "pnpm exec @snaplet/seed --local"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.0.8",

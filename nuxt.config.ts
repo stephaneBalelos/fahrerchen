@@ -1,4 +1,5 @@
 import { resolve } from "path";
+import * as pjson from './package.json'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -22,7 +23,7 @@ export default defineNuxtConfig({
     
     public: {
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
-      app_version: process.env.NUXT_APP_VERSION,
+      app_version: pjson.version,
     }
   },
 
