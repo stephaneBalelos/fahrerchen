@@ -9,7 +9,11 @@
     >
       <UDashboardSection
         title="Course Activity"
-        description="These informations will be visible to all your students."
+        :description="
+          props.course_activity_id
+            ? 'Edit the course activity'
+            : 'Add a new course activity'
+        "
       >
         <UFormGroup
           name="name"
@@ -114,7 +118,13 @@
     </UForm>
 
     <template #footer>
-      <UButton v-if="props.course_activity_id" @click="deleteCourseActivity(props.course_activity_id)" color="red" variant="ghost" >Delete</UButton>
+      <UButton
+        v-if="props.course_activity_id"
+        @click="deleteCourseActivity(props.course_activity_id)"
+        color="red"
+        variant="ghost"
+        >Delete</UButton
+      >
       <UButton @click="form?.submit()">Save</UButton>
     </template>
   </UDashboardSlideover>
@@ -127,7 +137,10 @@ import { format } from "date-fns";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 import UserSelect from "./Inputs/UserSelect.vue";
 
-type CourseActivityEdit = Omit<AppCourseActivity, "id" | "date"> & {
+type CourseActivityEdit = Omit<
+  AppCourseActivity,
+  "id" | "date" | "course_id" | "organisation_id"
+> & {
   date: Date;
 };
 type Props = {
@@ -137,9 +150,14 @@ type Props = {
   course_activity_id?: string;
 };
 
+type Emits = {
+  (event: "activity-saved", payload?: AppCourseActivity): void;
+  (event: "activity-deleted", payload?: AppCourseActivity): void;
+};
+
 const slideover = useSlideover();
 
-const toast = useToast()
+const toast = useToast();
 
 const props = defineProps<Props>();
 
@@ -149,7 +167,7 @@ const date = ref(new Date());
 
 const client = useSupabaseClient<Database>();
 
-const $emit = defineEmits(["activity-saved", "activity-added", "activity-deleted"]);
+const $emit = defineEmits<Emits>();
 
 const { data: course_requirements, error } = await useAsyncData(
   `course_requirements_${props.courseid}`,
@@ -172,19 +190,17 @@ const state = reactive<CourseActivityEdit>({
   assigned_to: null,
   date: props.date,
   requirement_id: null,
-  organisation_id: props.orgid,
-  course_id: props.courseid,
 });
 
 onMounted(async () => {
   if (props.course_activity_id) {
     // load the course activity
     try {
-        const { data, error } = await client
-      .from("course_activities")
-      .select("*")
-      .eq("id", props.course_activity_id)
-      .single();
+      const { data, error } = await client
+        .from("course_activities")
+        .select("*")
+        .eq("id", props.course_activity_id)
+        .single();
 
       if (error) {
         console.error(error);
@@ -202,14 +218,19 @@ onMounted(async () => {
         state.requirement_id = data.requirement_id;
       }
     } catch (error) {
-        console.log(error);
-        toast.add({
-          title: "Error",
-          description: "An error occured while loading the activity",
-          color: "red",
-        }); 
+      console.log(error);
+      toast.add({
+        title: "Error",
+        description: "An error occured while loading the activity",
+        color: "red",
+      });
     }
   }
+});
+
+onUnmounted(() => {
+  console.log("unmounted");
+  slideover.reset();
 });
 
 const validate = (state: CourseActivityEdit) => {
@@ -223,107 +244,92 @@ const validate = (state: CourseActivityEdit) => {
   return errors;
 };
 
-const saveCourseActivity = async (
-  event: FormSubmitEvent<CourseActivityEdit>
-) => {
-    if (props.course_activity_id) {
-        return updateCourseActivity(event);
-    }
-  try {
-    const { data, error } = await client
-      .from("course_activities")
-      .insert({
-        name: state.name,
-        description: state.description,
-        assigned_to: state.assigned_to,
-        date: state.date.toDateString(),
-        requirement_id: state.requirement_id,
-        organisation_id: state.organisation_id,
-        course_id: state.course_id,
-      })
-      .select("*").single();
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    console.log(data);
-    $emit('activity-added');
-    slideover.close();
-  } catch (error) {
-    console.log(error);
-    toast.add({
-      title: "Error",
-      description: "An error occured while saving the activity",
-      color: "red",
-    });
-
+async function saveCourseActivity(event: FormSubmitEvent<CourseActivityEdit>) {
+  if (props.course_activity_id) {
+    await updateCourseActivity(state);
+  } else {
+    await createCourseActivity(state);
   }
-};
+}
 
-const updateCourseActivity = async (event: FormSubmitEvent<CourseActivityEdit>) => {
-    if (!props.course_activity_id) {
-        toast.add({
-            title: "Error",
-            description: "No course activity id provided",
-            color: "red",
-        });
-        return
-    }
+async function updateCourseActivity(params: CourseActivityEdit) {
+  if (!props.course_activity_id) return;
   try {
     const { data, error } = await client
       .from("course_activities")
-      .update({
-        name: state.name,
-        description: state.description,
-        assigned_to: state.assigned_to,
-        date: state.date.toDateString(),
-        requirement_id: state.requirement_id,
-      })
+      .update({...params, date: params.date.toISOString()})
       .eq("id", props.course_activity_id)
-      .select("*").single();
-    if (error) {
-      console.error(error);
-      throw error;
+    if (error) { 
+      console.error(error)
+      throw error
     }
-    console.log(data);
-    $emit('activity-saved');
-    slideover.close();
+    $emit("activity-saved");
+    toast.add({
+      title: "Activity saved",
+      description: "The activity has been saved successfully.",
+      color: "green",
+    });
   } catch (error) {
     console.log(error);
     toast.add({
       title: "Error",
-      description: "An error occured while saving the activity",
+      description: "An error occured while updating the activity",
       color: "red",
     });
   }
-};
+}
+async function createCourseActivity(params: CourseActivityEdit) {
+  try {
+    const { data, error } = await client
+      .from("course_activities")
+      .insert({...params, date: params.date.toDateString(), course_id: props.courseid, organisation_id: props.orgid})
+      .select("*").single()
+    if (error) { 
+      console.error(error)
+      throw error
+    }
+    console.log(data);
+    $emit("activity-saved");
+    toast.add({
+      title: "Activity saved",
+      description: "The activity has been saved successfully.",
+      color: "green",
+    });
+  } catch (error) {
+    console.log(error);
+    toast.add({
+      title: "Error",
+      description: "An error occured while updating the activity",
+      color: "red",
+    });
+  }
+}
 
 const deleteCourseActivity = async (id: string) => {
-    try {
-        const { data, error } = await client
+  try {
+    const { data, error } = await client
       .from("course_activities")
       .delete()
-      .eq("id", id)
-      .single();
-      if (error) {
-        console.error(error);
-        throw error;
-      }
-
-      $emit('activity-deleted');
-      toast.add({
-        title: "Activity deleted",
-        description: "The activity has been deleted successfully.",
-        color: "green",
-      });
-    } catch (error) {
-        console.log(error);
-        toast.add({
-          title: "Error",
-          description: "An error occured while deleting the activity",
-          color: "red",
-        });
+      .eq("id", id).select()
+    if (error) {
+      console.error(error);
+      throw error;
     }
+
+    $emit("activity-deleted");
+    toast.add({
+      title: "Activity deleted",
+      description: "The activity has been deleted successfully.",
+      color: "green",
+    });
+  } catch (error) {
+    console.log(error);
+    toast.add({
+      title: "Error",
+      description: "An error occured while deleting the activity",
+      color: "red",
+    });
+  }
 };
 </script>
 

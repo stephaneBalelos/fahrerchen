@@ -41,7 +41,7 @@
         :selected-date="selectedDate"
       >
         <template #month-body="{ day }">
-          <CourseActivityCalendarDay :course-activities="getCourseActivityForDay(day.date)" :day="day" :onEmptyClick="() => openAddCourseActivityForm(day.date)">
+          <CourseActivityCalendarDay :course-activities="getCourseActivityForDay(day.date)" :day="day" :onEmptyClick="() => openAddCourseActivityForm(day.date)" @change="refresh()">
           </CourseActivityCalendarDay>
         </template>
       </AppCalendar>
@@ -99,7 +99,6 @@ const {
     console.error(error);
     throw error;
   }
-  console.log(data);
   return data;
 });
 
@@ -154,16 +153,11 @@ function openAddCourseActivityForm(date: Date) {
       courseid: props.courseid,
       orgid: props.orgid,
       date,
-      
-      "onActivity-added": () => {
-        console.log('activity added')
-        refresh();
-      },
-      "onActivity-saved": () => {
+      "onActivity-saved": (payload) => {
         console.log('activity saved')
         refresh()
       },
-      "onActivity-deleted": () => {
+      "onActivity-deleted": (payload) => {
         console.log('activity deleted')
         refresh()
       },
