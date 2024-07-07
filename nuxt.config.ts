@@ -19,8 +19,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    
     public: {
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
+      app_version: process.env.NUXT_APP_VERSION,
     }
   },
 

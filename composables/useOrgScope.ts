@@ -26,7 +26,7 @@ export const useGlobalOrgState = createGlobalState(() => {
             return
         }
         orgData.value = data
-        // navigateTo('/my')
+        navigateTo('/my')
       }, { immediate: true })
     return { org, orgData }
 })

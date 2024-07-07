@@ -3,7 +3,6 @@
     <UAuthForm
       :fields="fields"
       :validate="validate"
-      :providers="providers"
       title="Welcome back!"
       align="top"
       icon="i-heroicons-lock-closed"
@@ -12,7 +11,7 @@
       @submit="onSubmit"
     >
       <template #description>
-        Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
+        <!-- Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>. -->
 
         <UAlert
             v-if="loginFailed"

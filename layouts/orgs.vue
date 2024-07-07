@@ -7,9 +7,9 @@
       >
         <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
           <template #left>
-            <div class="org-dropdown">
-              {{ orgData?.name }}
-            </div>
+            <ClientOnly>
+              <TeamsDropdown />
+            </ClientOnly>
           </template>
         </UDashboardNavbar>
 
@@ -52,7 +52,7 @@
           </UDashboardNavbar>
 
           <ClientOnly>
-            <slot></slot>
+            <slot :orgid="org"></slot>
           </ClientOnly>
         </UDashboardPanel>
 
@@ -61,12 +61,15 @@
 </template>
 
 <script setup lang="ts">
+import TeamsDropdown from '~/components/sidebar/TeamsDropdown.vue';
 import UserDropdown from '@/navigation/UserMenu.vue';
 
 
 const route = useRoute();
 const appConfig = useAppConfig();
 const { isHelpSlideoverOpen } = useDashboard();
+const runtimeConfig = useRuntimeConfig();
+
 
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
@@ -77,7 +80,7 @@ const { org, orgData } = useGlobalOrgState();
 const links = [
   {
     id: "dashboard",
-    label: "Dashboard",
+    label: "Dashboard [NOT IMPLEMENTED]",
     icon: "i-heroicons-view-dashboard",
     to: "/my",
     tooltip: {
@@ -112,7 +115,7 @@ const links = [
     icon: "i-heroicons-cog-8-tooth",
     children: [
       {
-        label: "General",
+        label: "General [NOT IMPLEMENTED]",
         to: "/my/settings",
         exact: true,
       },
@@ -135,9 +138,7 @@ const footerLinks = [
     to: "/my/settings/members",
   },
   {
-    label: "Help & Support",
-    icon: "i-heroicons-question-mark-circle",
-    click: () => (isHelpSlideoverOpen.value = true),
+    label: "v" + runtimeConfig.public.app_version,
   },
 ];
 

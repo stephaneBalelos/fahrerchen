@@ -1,56 +1,80 @@
 <template>
-     <UCard class="max-w-sm w-full">
-        <UAuthForm :fields="fields" :validate="validate" title="Welcome back!" align="top"
-            icon="i-heroicons-lock-closed" :ui="{ base: 'text-center', footer: 'text-center' }" @submit="onSubmit">
-            <template #description>
-                {{ $t('welcome') }}
-                Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>.
-            </template>
+  <UCard class="max-w-sm w-full">
+    <UAuthForm
+      :fields="fields"
+      :validate="validate"
+      title="Welcome back!"
+      align="top"
+      icon="i-heroicons-lock-closed"
+      :ui="{ base: 'text-center', footer: 'text-center' }"
+      @submit="onSubmit"
+    >
+      <template #description>
+        {{ $t("welcome") }}
+        do you remember your password now? <NuxtLink to="/login" class="text-primary font-medium">Login</NuxtLink>.
+      </template>
 
-            <template #password-hint>
-                <NuxtLink to="/" class="text-primary font-medium">Forgot password?</NuxtLink>
-            </template>
-
-            <template #footer>
-                By signing in, you agree to our <NuxtLink to="/" class="text-primary font-medium">Terms of Service
-                </NuxtLink>.
-            </template>
-        </UAuthForm>
-    </UCard>
+    </UAuthForm>
+  </UCard>
 </template>
 
 <script setup lang="ts">
-import type { FormError } from '#ui/types'
+import type { FormError } from "#ui/types";
 
 definePageMeta({
-    layout: 'auth'
-})
+  layout: "auth",
+});
 
-const supabase = useSupabaseClient()
+const supabase = useSupabaseClient();
+const toasts = useToast();
 
-
-const fields = [{
-    name: 'email',
-    type: 'text',
-    label: 'Email',
-    placeholder: 'Enter your email'
-}]
+const fields = [
+  {
+    name: "email",
+    type: "text",
+    label: "Email",
+    placeholder: "Enter your email",
+  },
+];
 
 const validate = (state: any) => {
-    const errors: FormError[] = []
-    if (!state.email) errors.push({ path: 'email', message: 'Email is required' })
-    return errors
-}
+  const errors: FormError[] = [];
+  if (!state.email)
+    errors.push({ path: "email", message: "Email is required" });
+  return errors;
+};
 
 const onSubmit = async (data: any) => {
-    const res = await supabase.auth.resetPasswordForEmail(data.email, {
-        redirectTo: 'http://localhost:3000/account/password-reset',
-    })
+  try {
+    const { data: res, error } = await supabase.auth.resetPasswordForEmail(
+      data.email,
+      {
+        redirectTo: "http://localhost:3000/account/password-reset",
+      }
+    );
 
-    console.log(res)
-}
+    if (error) {
+      toasts.add({
+        title: "Error",
+        description: error.message,
+        color: "red",
+      })
+      return;
+    }
+    toasts.add({
+      title: "Success",
+      description: "Password reset email sent",
+      color: "green",
+    });
+  } catch (error) {
+    console.error(error);
+    toasts.add({
+      title: "Error",
+      description: "An error occured while sending the password reset email",
+      color: "red",
+    });
+  }
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
