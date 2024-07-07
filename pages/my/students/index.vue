@@ -140,6 +140,7 @@ const {
 
   return data;
 }, {
+  watch: [org],
   transform: (data) => {
     return data ? data.map((item: any) => {
       return {

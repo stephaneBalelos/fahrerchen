@@ -12,6 +12,8 @@ export const useGlobalOrgState = createGlobalState(() => {
     const org = useStorage('org-scope', '') // returns Ref<string>
 
     const orgData = ref<AppOrganisation | null>(null)
+    const route = useRoute()
+    
 
     watch(() => org.value, async () => {
         if (org.value === null) {
@@ -26,7 +28,10 @@ export const useGlobalOrgState = createGlobalState(() => {
             return
         }
         orgData.value = data
-        navigateTo('/my')
+
+        const firstRoute = route.path.split('/')[2]
+        
+        navigateTo('/my/' + firstRoute)
       }, { immediate: true })
     return { org, orgData }
 })
