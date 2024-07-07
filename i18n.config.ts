@@ -8,6 +8,6 @@ export default defineI18nConfig(() => ({
       fr: {
         welcome: 'Bienvenue'
       }
-    }
+    },
   }))
   

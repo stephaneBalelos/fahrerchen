@@ -39,9 +39,9 @@ const onCourseCreated = async (d: AppCourse) => {
     <UDashboardPanelContent>
         <UPageHeader headline="Course" title="My Courses" description="All Courses" :links="[{ label: 'Create New Course', color: 'white', icon: 'i-heroicons-folder-plus', click: () => open = true }]" />
         <div v-if="data && data?.length > 0">
-            <UDashboardCard v-for="d, index in data" :key="index" :title="d.id"
+            <UDashboardCard v-for="d, index in data" :key="index" :title="d.name"
                 :description="d.description ? d.description : 'No description'"
-                :links="[{ label: 'Learn more', color: 'gray', trailingIcon: 'i-heroicons-arrow-right-20-solid', to: '/my/courses/' + d.id }]" />
+                :links="[{ label: 'Details', color: 'gray', trailingIcon: 'i-heroicons-arrow-right-20-solid', to: '/my/courses/' + d.id }]" />
         </div>
         <div v-else>
             // No data
