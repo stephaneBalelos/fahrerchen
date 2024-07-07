@@ -32,10 +32,9 @@ export const useGlobalOrgState = createGlobalState(() => {
         const inRoot = route.path.split('/')[1] === ''
         if (!inRoot) {
             const firstRoute = route.path.split('/')[2] ?? ''
-            console.log('firstRoute', firstRoute)
             
             navigateTo('/my/' + firstRoute)
         }
-      }, { immediate: true })
+      }, { immediate: false })
     return { org, orgData }
 })

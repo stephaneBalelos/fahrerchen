@@ -1,63 +1,46 @@
 <template>
-  <UDashboardPanelContent class="p-0">
-    <UDashboardToolbar>
-      <template #left>
-        <UButtonGroup size="xs" orientation="horizontal">
-          <UButton
-            icon="i-heroicons-chevron-left-20-solid"
-            color="gray"
-            variant="ghost"
-            @click="prevMonth"
-          />
-          <UButton
-            icon="i-heroicons-chevron-right-20-solid"
-            color="gray"
-            variant="ghost"
-            @click="nextMonth"
-          />
-        </UButtonGroup>
+  <UDashboardPanelContent>
+    <UDashboardCard
+    v-for="course_activity in course_activities"
+    :title="course_activity.name"
+    description="You made 128 sales this month."
+    icon="i-heroicons-chart-bar-20-solid"
+    :links="[
+      { label: 'Add', icon: 'i-heroicons-plus-20-solid', click: () => openAddCourseScheduleForm(course_activity.id)},
+    ]"
+  >
+    <NuxtLink
+      v-for="(s, index) in course_activity.course_activity_schedules"
+      :key="index"
+      class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
+    >
+      <UAvatar
+        :alt="'AM'"
+        size="md"
+      />
+
+      <div class="text-sm flex-1">
         <div>
-          {{
-            selectedDate.toLocaleDateString(locale, {
-              month: "long",
-              year: "numeric",
-            })
-          }}
+          <p class="text-gray-900 dark:text-white font-medium">
+            {{ s.activity_id }}
+          </p>
+          <p class="text-gray-500 dark:text-gray-400">
+            {{ s.start_at }}
+          </p>
         </div>
-      </template>
-      <template #right>
-        <USelectMenu
-          v-model="selectedView"
-          :options="viewOptions"
-          value-attribute="value"
-          option-attribute="label"
-        />
-      </template>
-    </UDashboardToolbar>
-    <UDashboardPanelContent class="p-0">
-      <AppCalendar
-        v-if="!pending"
-        :view="selectedView"
-        :selected-date="selectedDate"
-      >
-        <template #month-body="{ day }">
-          <CourseActivityCalendarDay :course-activities="getCourseActivityForDay(day.date)" :day="day" :onEmptyClick="() => openAddCourseActivityForm(day.date)" @change="refresh()">
-          </CourseActivityCalendarDay>
-        </template>
-      </AppCalendar>
-    </UDashboardPanelContent>
+      </div>
+
+      <p class="text-gray-900 dark:text-white font-medium text-lg">
+        
+      </p>
+    </NuxtLink>
+  </UDashboardCard>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import type { CreateLessonSchema } from "~/components/forms/CreateLessonForm.vue";
+import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import type { Database } from "~/types/database.types";
-import AppCalendar from "~/components/calendar/AppCalendar.vue";
-import type { AppCalendarProps } from "~/components/calendar/AppCalendar.vue";
-import { addDays, addMonths, addWeeks, endOfMonth, format, startOfMonth, subDays, subMonths, subWeeks } from "date-fns";
-import AddCourseActivityForm from "~/components/forms/AddCourseActivityForm.vue";
-import type { AppCourseActivity } from "~/types/app.types";
-import CourseActivityCalendarDay from "~/components/courses/CourseActivityCalendarDay.vue";
 
 type Props = {
   orgid: string;
@@ -66,126 +49,36 @@ type Props = {
 definePageMeta({
   layout: "orgs",
 });
+
 const props = useAttrs() as Props;
-const route = useRoute();
-const supabase = useSupabaseClient<Database>();
+const client = useSupabaseClient<Database>();
 const { locale } = useI18n();
 const toast = useToast();
 
-const selectedDate = ref(new Date());
-const selectedView = ref<AppCalendarProps['view']>("month");
-const viewOptions = ref([
-  { label: "Month", value: "month" },
-  { label: "Week", value: "week" },
-  { label: "Day", value: "day" },
-]);
-
 const slideover = useSlideover();
 
-const {
-  data: course,
-  error,
-  pending,
-  refresh,
-} = await useAsyncData(`course_${props.courseid}`, async () => {
-  const { data, error } = await supabase
-    .from("courses")
-    .select("*, course_activities(*)")
-    .eq("id", props.courseid)
-    .gte("course_activities.date", startOfMonth(selectedDate.value).toISOString())
-    .lte("course_activities.date", endOfMonth(selectedDate.value).toISOString())
-    .single();
+const { data: course_activities, error } = useAsyncData('course_activity_schedules', async () => {
+  const { data, error } = await client.from('course_activities').select('id, name, course_activity_schedules(*)').eq('course_id', props.courseid);
   if (error) {
-    console.error(error);
     throw error;
   }
+  console.log(data)
   return data;
-});
+})
 
-watch(
-  () => route.params,
-  async () => {
-    await refresh();
-  },
-  { deep: true }
-);
 
-watch(selectedDate, async () => {
-  await refresh();
-});
 
-// onMounted(async () => {
-//     console.log('mounted')
-//     await refresh()
-// })
 
-const open = ref(false);
 
-function prevMonth() {
-  switch (selectedView.value) {
-    case "month":
-      selectedDate.value = subMonths(selectedDate.value, 1);
-      break;
-    case "week":
-      selectedDate.value = subWeeks(selectedDate.value, 1);
-      break;
-    case "day":
-      selectedDate.value = subDays(selectedDate.value, 1);
-      break;
-  }
-}
-function nextMonth() {
-  switch (selectedView.value) {
-    case "month":
-      selectedDate.value = addMonths(selectedDate.value, 1);
-      break;
-    case "week":
-      selectedDate.value = addWeeks(selectedDate.value, 1);
-      break;
-    case "day":
-      selectedDate.value = addDays(selectedDate.value, 1);
-      break;
-  }
-}
+function openAddCourseScheduleForm(course_activity_id: string, activity_schedule_id?: string, date?: Date,) {
+  slideover.open(EditCourseActivitySchedule, {
+    orgid: props.orgid,
+    courseid: props.courseid,
+    activityid: course_activity_id,
+    activity_schedule_id: activity_schedule_id,
+    date: date,
 
-function openAddCourseActivityForm(date: Date) {
-  slideover.open(AddCourseActivityForm, {
-      courseid: props.courseid,
-      orgid: props.orgid,
-      date,
-      "onActivity-saved": (payload) => {
-        console.log('activity saved')
-        refresh()
-      },
-      "onActivity-deleted": (payload) => {
-        console.log('activity deleted')
-        refresh()
-      },
-    });
-
-}
-
-function onActivityAdded(data?: AppCourseActivity) {
-  console.log('activity added')
-  refresh();
-
-}
-function onActivitySaved(data: AppCourseActivity) {
-  console.log('activity saved')
-  refresh();
-
-}
-function onActivityDeleted(data: AppCourseActivity) {
-  console.log('activity deleted')
-  refresh();
-}
-
-function getCourseActivityForDay(day: Date) {
-  if (!course.value) return [];
-
-  return course.value.course_activities.filter((activity) => {
-    return format(new Date(activity.date), 'dd.mm.yyyy') === format(day, 'dd.mm.yyyy');
-  });
+  })
 }
 
 </script>

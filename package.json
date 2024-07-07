@@ -10,8 +10,9 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "playwright test",
-    "gen_types": "supabase gen types typescript --local > ./types/database.types.ts",
-    "gen_seed": "pnpm exec @snaplet/seed --local"
+    "db_gen_types": "supabase gen types typescript --local > ./types/database.types.ts",
+    "db_seed_sync": "pnpx @snaplet/seed sync",
+    "db_gen_seed": "pnpx tsx seed.ts > supabase/seed.sql"
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.0.8",

@@ -67,17 +67,6 @@
             size="md"
           />
         </UFormGroup>
-
-        <UFormGroup
-          name="price"
-          label="Price"
-          description="Will appear on receipts, invoices, and other communication."
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UInput v-model="state.price" autocomplete="on" size="md" />
-        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
@@ -139,7 +128,6 @@ const state = reactive<CourseRequirementEdit>({
   description: "",
   requirements_type: 1,
   required: 1,
-  price: 0,
 });
 
 onMounted(() => {
@@ -148,7 +136,6 @@ onMounted(() => {
     state.description = requirement.value.description;
     state.requirements_type = requirement.value.requirements_type;
     state.required = requirement.value.required;
-    state.price = requirement.value.price;
   }
 });
 

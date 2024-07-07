@@ -28,39 +28,6 @@
         </UFormGroup>
 
         <UFormGroup
-          name="date"
-          label="Date"
-          description="When"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UPopover :popper="{ placement: 'bottom-start' }">
-            <UButton
-              block
-              color="white"
-              trailing-icon="i-heroicons-chevron-down-20-solid"
-              :label="format(state.date, 'd MMM, yyy')"
-            />
-
-            <template #panel="{ close }">
-              <DatePicker v-model="state.date" is-required @close="close" />
-            </template>
-          </UPopover>
-        </UFormGroup>
-
-        <UFormGroup
-          name="assigned_to"
-          :label="`Assigned To`"
-          description="Who is assigned to this activity."
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UserSelect v-model="state.assigned_to" />
-        </UFormGroup>
-
-        <UFormGroup
           name="requirement_id"
           :label="`Course Requirement`"
           description="Welche Anforderung wird durch diese Aktivität erfüllt."
@@ -91,6 +58,17 @@
         </UFormGroup>
 
         <UFormGroup
+          name="price"
+          label="Price"
+          description="Will appear on receipts, invoices, and other communication."
+          required
+          class="grid grid-cols-1 gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+          <UInput v-model="state.price" autocomplete="on" size="md" />
+        </UFormGroup>
+
+        <UFormGroup
           name="description"
           label="Course Description"
           description="Describe your course in detail."
@@ -104,16 +82,6 @@
             size="md"
           />
         </UFormGroup>
-        <!-- <UFormGroup
-          name="price"
-          label="Price"
-          description="Will appear on receipts, invoices, and other communication."
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UInput v-model="state.price" autocomplete="on" size="md" />
-        </UFormGroup> -->
       </UDashboardSection>
     </UForm>
 
@@ -139,14 +107,11 @@ import UserSelect from "./Inputs/UserSelect.vue";
 
 type CourseActivityEdit = Omit<
   AppCourseActivity,
-  "id" | "date" | "course_id" | "organisation_id"
-> & {
-  date: Date;
-};
+  "id" | "course_id" | "organisation_id"
+>;
 type Props = {
   courseid: string;
   orgid: string;
-  date: Date;
   course_activity_id?: string;
 };
 
@@ -187,9 +152,8 @@ const { data: course_requirements, error } = await useAsyncData(
 const state = reactive<CourseActivityEdit>({
   name: "",
   description: "",
-  assigned_to: null,
-  date: props.date,
   requirement_id: null,
+  price: 0,
 });
 
 onMounted(async () => {
@@ -213,8 +177,7 @@ onMounted(async () => {
       } else {
         state.name = data.name;
         state.description = data.description;
-        state.assigned_to = data.assigned_to;
-        state.date = new Date(data.date);
+        state.price = data.price;
         state.requirement_id = data.requirement_id;
       }
     } catch (error) {
@@ -239,8 +202,8 @@ const validate = (state: CourseActivityEdit) => {
     errors.push({ path: "name", message: "Please enter a name" });
   if (!state.description)
     errors.push({ path: "description", message: "Please enter a description" });
-  if (!state.date)
-    errors.push({ path: "date", message: "Please enter a date" });
+  if (!state.price)
+    errors.push({ path: "price", message: "Please enter a price" });
   return errors;
 };
 
@@ -257,7 +220,7 @@ async function updateCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .update({...params, date: params.date.toISOString()})
+      .update({...params})
       .eq("id", props.course_activity_id)
     if (error) { 
       console.error(error)
@@ -282,7 +245,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .insert({...params, date: params.date.toDateString(), course_id: props.courseid, organisation_id: props.orgid})
+      .insert({...params, course_id: props.courseid, organisation_id: props.orgid})
       .select("*").single()
     if (error) { 
       console.error(error)

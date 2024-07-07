@@ -68,6 +68,20 @@ const main = async () => {
     }
   }))
 
+  // seed 2 courses in all organisations
+  const orgs = seed.$store.organisations;
+  for (let i = 0; i < orgs.length; i++) {
+    await seed.courses((x) => x(2, (ctx) => {
+      return {
+        name: "Course " + ctx.index,
+        description: copycat.sentence(ctx.index),
+        organisation_id: orgs[i].id,
+        created_at: new Date(),
+        type: copycat.int(i + ctx.index, {min: 1, max: 9,}),
+      }
+    }))
+    }
+
   // Type completion not working? You might want to reload your TypeScript Server to pick up the changes
   process.exit();
 };

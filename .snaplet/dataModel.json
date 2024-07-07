@@ -623,156 +623,6 @@
         }
       ]
     },
-    "course_activite_schedule": {
-      "id": "public.course_activite_schedule",
-      "schemaName": "public",
-      "tableName": "course_activite_schedule",
-      "fields": [
-        {
-          "id": "public.course_activite_schedule.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.activity_id",
-          "name": "activity_id",
-          "columnName": "activity_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.day_of_week",
-          "name": "day_of_week",
-          "columnName": "day_of_week",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.start_at",
-          "name": "start_at",
-          "columnName": "start_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.end_at",
-          "name": "end_at",
-          "columnName": "end_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.repeat",
-          "name": "repeat",
-          "columnName": "repeat",
-          "type": "bool",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "course_activities",
-          "type": "course_activities",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activite_scheduleTocourse_activities",
-          "relationFromFields": [
-            "activity_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "organisations",
-          "type": "organisations",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activite_scheduleToorganisations",
-          "relationFromFields": [
-            "organisation_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "course_activite_schedule_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
     "course_activities": {
       "id": "public.course_activities",
       "schemaName": "public",
@@ -835,34 +685,6 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activities.date",
-          "name": "date",
-          "columnName": "date",
-          "type": "date",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activities.assigned_to",
-          "name": "assigned_to",
-          "columnName": "assigned_to",
-          "type": "uuid",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.course_activities.requirement_id",
           "name": "requirement_id",
           "columnName": "requirement_id",
@@ -873,6 +695,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activities.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
@@ -945,29 +781,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "public_users",
-          "type": "public_users",
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activitiesTopublic_users",
-          "relationFromFields": [
-            "assigned_to"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "course_activite_schedule",
-          "type": "course_activite_schedule",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activite_scheduleTocourse_activities",
+          "relationName": "course_activity_attendancesTocourse_activities",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -977,11 +795,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activity_attendances",
-          "type": "course_activity_attendances",
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activity_attendancesTocourse_activities",
+          "relationName": "course_activity_schedulesTocourse_activities",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -1021,9 +839,51 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activity_attendances.activity_id",
-          "name": "activity_id",
-          "columnName": "activity_id",
+          "id": "public.course_activity_attendances.course_activity",
+          "name": "course_activity",
+          "columnName": "course_activity",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.activity_schedule_id",
+          "name": "activity_schedule_id",
+          "columnName": "activity_schedule_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.course_subscription_id",
+          "name": "course_subscription_id",
+          "columnName": "course_subscription_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1038,20 +898,6 @@
           "id": "public.course_activity_attendances.student_id",
           "name": "student_id",
           "columnName": "student_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activity_attendances.course_subscription_id",
-          "name": "course_subscription_id",
-          "columnName": "course_subscription_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1097,7 +943,25 @@
           "kind": "object",
           "relationName": "course_activity_attendancesTocourse_activities",
           "relationFromFields": [
-            "activity_id"
+            "course_activity"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_activity_schedules",
+          "relationFromFields": [
+            "activity_schedule_id"
           ],
           "relationToFields": [
             "id"
@@ -1116,6 +980,24 @@
           "relationName": "course_activity_attendancesTocourse_subscriptions",
           "relationFromFields": [
             "course_subscription_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourses",
+          "relationFromFields": [
+            "course_id"
           ],
           "relationToFields": [
             "id"
@@ -1166,6 +1048,202 @@
       "uniqueConstraints": [
         {
           "name": "course_activity_attendances_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_activity_schedules": {
+      "id": "public.course_activity_schedules",
+      "schemaName": "public",
+      "tableName": "course_activity_schedules",
+      "fields": [
+        {
+          "id": "public.course_activity_schedules.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.activity_id",
+          "name": "activity_id",
+          "columnName": "activity_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.day_of_week",
+          "name": "day_of_week",
+          "columnName": "day_of_week",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.start_at",
+          "name": "start_at",
+          "columnName": "start_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.end_at",
+          "name": "end_at",
+          "columnName": "end_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.repeat",
+          "name": "repeat",
+          "columnName": "repeat",
+          "type": "bool",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.assigned_to",
+          "name": "assigned_to",
+          "columnName": "assigned_to",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.organisation_id",
+          "name": "organisation_id",
+          "columnName": "organisation_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_schedulesTocourse_activities",
+          "relationFromFields": [
+            "activity_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisation_members",
+          "type": "organisation_members",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganisation_members",
+          "relationFromFields": [
+            "assigned_to"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organisations",
+          "type": "organisations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganisations",
+          "relationFromFields": [
+            "organisation_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_activity_schedules",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_activity_schedules_pkey",
           "fields": [
             "id"
           ],
@@ -1259,20 +1337,6 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.price",
-          "name": "price",
-          "columnName": "price",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
@@ -2021,6 +2085,20 @@
           "isRequired": false,
           "kind": "object",
           "relationName": "course_activitiesTocourses",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourses",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -2992,13 +3070,13 @@
         }
       ]
     },
-    "log_events_07121355_b80b_42a1_94b2_804220ef1ed4": {
-      "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
+    "log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6": {
+      "id": "_analytics.log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6",
       "schemaName": "_analytics",
-      "tableName": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
+      "tableName": "log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6",
       "fields": [
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.id",
+          "id": "_analytics.log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3012,7 +3090,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.body",
+          "id": "_analytics.log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3026,7 +3104,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.event_message",
+          "id": "_analytics.log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3040,7 +3118,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.timestamp",
+          "id": "_analytics.log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3056,7 +3134,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
+          "name": "log_events_0839d5e9_dbc4_443c_a747_bf8b51a83fb6_pkey",
           "fields": [
             "id"
           ],
@@ -3064,13 +3142,13 @@
         }
       ]
     },
-    "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
-      "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
+    "log_events_1099b78c_30e6_480f_bc1d_c997ed3db895": {
+      "id": "_analytics.log_events_1099b78c_30e6_480f_bc1d_c997ed3db895",
       "schemaName": "_analytics",
-      "tableName": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
+      "tableName": "log_events_1099b78c_30e6_480f_bc1d_c997ed3db895",
       "fields": [
         {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.id",
+          "id": "_analytics.log_events_1099b78c_30e6_480f_bc1d_c997ed3db895.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3084,7 +3162,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.body",
+          "id": "_analytics.log_events_1099b78c_30e6_480f_bc1d_c997ed3db895.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3098,7 +3176,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.event_message",
+          "id": "_analytics.log_events_1099b78c_30e6_480f_bc1d_c997ed3db895.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3112,7 +3190,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.timestamp",
+          "id": "_analytics.log_events_1099b78c_30e6_480f_bc1d_c997ed3db895.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3128,7 +3206,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
+          "name": "log_events_1099b78c_30e6_480f_bc1d_c997ed3db895_pkey",
           "fields": [
             "id"
           ],
@@ -3136,13 +3214,13 @@
         }
       ]
     },
-    "log_events_60fa7018_b5c0_459f_bad3_34677810ee39": {
-      "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
+    "log_events_239682b5_f72b_4bee_9497_6f53213d57e8": {
+      "id": "_analytics.log_events_239682b5_f72b_4bee_9497_6f53213d57e8",
       "schemaName": "_analytics",
-      "tableName": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
+      "tableName": "log_events_239682b5_f72b_4bee_9497_6f53213d57e8",
       "fields": [
         {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.id",
+          "id": "_analytics.log_events_239682b5_f72b_4bee_9497_6f53213d57e8.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3156,7 +3234,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.body",
+          "id": "_analytics.log_events_239682b5_f72b_4bee_9497_6f53213d57e8.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3170,7 +3248,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.event_message",
+          "id": "_analytics.log_events_239682b5_f72b_4bee_9497_6f53213d57e8.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3184,7 +3262,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.timestamp",
+          "id": "_analytics.log_events_239682b5_f72b_4bee_9497_6f53213d57e8.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3200,7 +3278,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
+          "name": "log_events_239682b5_f72b_4bee_9497_6f53213d57e8_pkey",
           "fields": [
             "id"
           ],
@@ -3208,13 +3286,13 @@
         }
       ]
     },
-    "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226": {
-      "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
+    "log_events_269f7df6_b2ad_4556_b604_1278235d6596": {
+      "id": "_analytics.log_events_269f7df6_b2ad_4556_b604_1278235d6596",
       "schemaName": "_analytics",
-      "tableName": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
+      "tableName": "log_events_269f7df6_b2ad_4556_b604_1278235d6596",
       "fields": [
         {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.id",
+          "id": "_analytics.log_events_269f7df6_b2ad_4556_b604_1278235d6596.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3228,7 +3306,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.body",
+          "id": "_analytics.log_events_269f7df6_b2ad_4556_b604_1278235d6596.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3242,7 +3320,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.event_message",
+          "id": "_analytics.log_events_269f7df6_b2ad_4556_b604_1278235d6596.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3256,7 +3334,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.timestamp",
+          "id": "_analytics.log_events_269f7df6_b2ad_4556_b604_1278235d6596.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3272,7 +3350,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
+          "name": "log_events_269f7df6_b2ad_4556_b604_1278235d6596_pkey",
           "fields": [
             "id"
           ],
@@ -3280,13 +3358,13 @@
         }
       ]
     },
-    "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
-      "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
+    "log_events_670bc260_b6ac_42df_9acc_29e618fdae65": {
+      "id": "_analytics.log_events_670bc260_b6ac_42df_9acc_29e618fdae65",
       "schemaName": "_analytics",
-      "tableName": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
+      "tableName": "log_events_670bc260_b6ac_42df_9acc_29e618fdae65",
       "fields": [
         {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.id",
+          "id": "_analytics.log_events_670bc260_b6ac_42df_9acc_29e618fdae65.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3300,7 +3378,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.body",
+          "id": "_analytics.log_events_670bc260_b6ac_42df_9acc_29e618fdae65.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3314,7 +3392,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.event_message",
+          "id": "_analytics.log_events_670bc260_b6ac_42df_9acc_29e618fdae65.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3328,7 +3406,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.timestamp",
+          "id": "_analytics.log_events_670bc260_b6ac_42df_9acc_29e618fdae65.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3344,7 +3422,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
+          "name": "log_events_670bc260_b6ac_42df_9acc_29e618fdae65_pkey",
           "fields": [
             "id"
           ],
@@ -3352,13 +3430,13 @@
         }
       ]
     },
-    "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
-      "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
+    "log_events_a0c85f1d_8087_431f_818b_ccce85b0712b": {
+      "id": "_analytics.log_events_a0c85f1d_8087_431f_818b_ccce85b0712b",
       "schemaName": "_analytics",
-      "tableName": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
+      "tableName": "log_events_a0c85f1d_8087_431f_818b_ccce85b0712b",
       "fields": [
         {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.id",
+          "id": "_analytics.log_events_a0c85f1d_8087_431f_818b_ccce85b0712b.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3372,7 +3450,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.body",
+          "id": "_analytics.log_events_a0c85f1d_8087_431f_818b_ccce85b0712b.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3386,7 +3464,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.event_message",
+          "id": "_analytics.log_events_a0c85f1d_8087_431f_818b_ccce85b0712b.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3400,7 +3478,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.timestamp",
+          "id": "_analytics.log_events_a0c85f1d_8087_431f_818b_ccce85b0712b.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3416,7 +3494,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
+          "name": "log_events_a0c85f1d_8087_431f_818b_ccce85b0712b_pkey",
           "fields": [
             "id"
           ],
@@ -3424,13 +3502,13 @@
         }
       ]
     },
-    "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
-      "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
+    "log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017": {
+      "id": "_analytics.log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017",
       "schemaName": "_analytics",
-      "tableName": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
+      "tableName": "log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017",
       "fields": [
         {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.id",
+          "id": "_analytics.log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3444,7 +3522,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.body",
+          "id": "_analytics.log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3458,7 +3536,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.event_message",
+          "id": "_analytics.log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3472,7 +3550,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.timestamp",
+          "id": "_analytics.log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3488,7 +3566,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
+          "name": "log_events_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017_pkey",
           "fields": [
             "id"
           ],
@@ -3496,13 +3574,13 @@
         }
       ]
     },
-    "log_events_eb54f357_8fee_4313_8d76_6003927e3317": {
-      "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317",
+    "log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82": {
+      "id": "_analytics.log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82",
       "schemaName": "_analytics",
-      "tableName": "log_events_eb54f357_8fee_4313_8d76_6003927e3317",
+      "tableName": "log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82",
       "fields": [
         {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.id",
+          "id": "_analytics.log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3516,7 +3594,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.body",
+          "id": "_analytics.log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3530,7 +3608,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.event_message",
+          "id": "_analytics.log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3544,7 +3622,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.timestamp",
+          "id": "_analytics.log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3560,7 +3638,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
+          "name": "log_events_d2f156eb_cd91_4488_8f33_8b8c806e3a82_pkey",
           "fields": [
             "id"
           ],
@@ -3568,13 +3646,13 @@
         }
       ]
     },
-    "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
-      "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
+    "log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed": {
+      "id": "_analytics.log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed",
       "schemaName": "_analytics",
-      "tableName": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
+      "tableName": "log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed",
       "fields": [
         {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.id",
+          "id": "_analytics.log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3588,7 +3666,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.body",
+          "id": "_analytics.log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3602,7 +3680,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.event_message",
+          "id": "_analytics.log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3616,7 +3694,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.timestamp",
+          "id": "_analytics.log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3632,7 +3710,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
+          "name": "log_events_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed_pkey",
           "fields": [
             "id"
           ],
@@ -4593,6 +4671,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganisation_members",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
         }
       ],
       "uniqueConstraints": [
@@ -4693,20 +4785,6 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activite_schedule",
-          "type": "course_activite_schedule",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activite_scheduleToorganisations",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
           "name": "course_activities",
           "type": "course_activities",
           "isRequired": false,
@@ -4726,6 +4804,20 @@
           "isRequired": false,
           "kind": "object",
           "relationName": "course_activity_attendancesToorganisations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganisations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -5978,13 +6070,13 @@
         }
       ]
     },
-    "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4": {
-      "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
+    "schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6": {
+      "id": "_analytics.schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
+      "tableName": "schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.version",
+          "id": "_analytics.schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -5998,7 +6090,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.inserted_at",
+          "id": "_analytics.schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6014,7 +6106,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
+          "name": "schema_migrations_0839d5e9_dbc4_443c_a747_bf8b51a83fb6_pkey",
           "fields": [
             "version"
           ],
@@ -6022,13 +6114,13 @@
         }
       ]
     },
-    "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
-      "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
+    "schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895": {
+      "id": "_analytics.schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
+      "tableName": "schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.version",
+          "id": "_analytics.schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6042,7 +6134,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.inserted_at",
+          "id": "_analytics.schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6058,7 +6150,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
+          "name": "schema_migrations_1099b78c_30e6_480f_bc1d_c997ed3db895_pkey",
           "fields": [
             "version"
           ],
@@ -6066,13 +6158,13 @@
         }
       ]
     },
-    "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39": {
-      "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
+    "schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8": {
+      "id": "_analytics.schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
+      "tableName": "schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.version",
+          "id": "_analytics.schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6086,7 +6178,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.inserted_at",
+          "id": "_analytics.schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6102,7 +6194,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
+          "name": "schema_migrations_239682b5_f72b_4bee_9497_6f53213d57e8_pkey",
           "fields": [
             "version"
           ],
@@ -6110,13 +6202,13 @@
         }
       ]
     },
-    "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226": {
-      "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
+    "schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596": {
+      "id": "_analytics.schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
+      "tableName": "schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.version",
+          "id": "_analytics.schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6130,7 +6222,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.inserted_at",
+          "id": "_analytics.schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6146,7 +6238,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
+          "name": "schema_migrations_269f7df6_b2ad_4556_b604_1278235d6596_pkey",
           "fields": [
             "version"
           ],
@@ -6154,13 +6246,13 @@
         }
       ]
     },
-    "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
-      "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
+    "schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65": {
+      "id": "_analytics.schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
+      "tableName": "schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.version",
+          "id": "_analytics.schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6174,7 +6266,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.inserted_at",
+          "id": "_analytics.schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6190,7 +6282,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
+          "name": "schema_migrations_670bc260_b6ac_42df_9acc_29e618fdae65_pkey",
           "fields": [
             "version"
           ],
@@ -6198,13 +6290,13 @@
         }
       ]
     },
-    "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
-      "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
+    "schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b": {
+      "id": "_analytics.schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
+      "tableName": "schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.version",
+          "id": "_analytics.schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6218,7 +6310,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.inserted_at",
+          "id": "_analytics.schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6234,7 +6326,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
+          "name": "schema_migrations_a0c85f1d_8087_431f_818b_ccce85b0712b_pkey",
           "fields": [
             "version"
           ],
@@ -6242,13 +6334,13 @@
         }
       ]
     },
-    "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
-      "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
+    "schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017": {
+      "id": "_analytics.schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
+      "tableName": "schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.version",
+          "id": "_analytics.schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6262,7 +6354,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.inserted_at",
+          "id": "_analytics.schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6278,7 +6370,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
+          "name": "schema_migrations_b1ae8d99_b2f6_4481_9ecc_f6c54b7f5017_pkey",
           "fields": [
             "version"
           ],
@@ -6286,13 +6378,13 @@
         }
       ]
     },
-    "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317": {
-      "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
+    "schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82": {
+      "id": "_analytics.schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
+      "tableName": "schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.version",
+          "id": "_analytics.schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6306,7 +6398,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.inserted_at",
+          "id": "_analytics.schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6322,7 +6414,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
+          "name": "schema_migrations_d2f156eb_cd91_4488_8f33_8b8c806e3a82_pkey",
           "fields": [
             "version"
           ],
@@ -6330,13 +6422,13 @@
         }
       ]
     },
-    "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
-      "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
+    "schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed": {
+      "id": "_analytics.schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
+      "tableName": "schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.version",
+          "id": "_analytics.schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6350,7 +6442,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.inserted_at",
+          "id": "_analytics.schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6366,7 +6458,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
+          "name": "schema_migrations_e8b1119b_495a_4d7f_98ef_5e9237b5a7ed_pkey",
           "fields": [
             "version"
           ],
@@ -8028,20 +8120,6 @@
             "id"
           ],
           "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "course_activities",
-          "type": "course_activities",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activitiesTopublic_users",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
           "isId": false,
           "isGenerated": false,
           "sequence": false,

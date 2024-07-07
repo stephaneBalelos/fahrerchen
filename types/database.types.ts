@@ -34,97 +34,35 @@ export type Database = {
   }
   public: {
     Tables: {
-      course_activite_schedule: {
-        Row: {
-          activity_id: string
-          day_of_week: number
-          end_at: string
-          id: string
-          organisation_id: string
-          repeat: boolean
-          start_at: string
-        }
-        Insert: {
-          activity_id: string
-          day_of_week: number
-          end_at: string
-          id?: string
-          organisation_id: string
-          repeat?: boolean
-          start_at: string
-        }
-        Update: {
-          activity_id?: string
-          day_of_week?: number
-          end_at?: string
-          id?: string
-          organisation_id?: string
-          repeat?: boolean
-          start_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_activite_schedule_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activite_schedule_organisation_id_fkey"
-            columns: ["organisation_id"]
-            isOneToOne: false
-            referencedRelation: "organisations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_activities: {
         Row: {
-          assigned_to: string | null
           course_id: string
-          date: string
           description: string
           id: string
           name: string
           organisation_id: string
+          price: number
           requirement_id: string | null
         }
         Insert: {
-          assigned_to?: string | null
           course_id: string
-          date: string
           description: string
           id?: string
           name: string
           organisation_id: string
+          price?: number
           requirement_id?: string | null
         }
         Update: {
-          assigned_to?: string | null
           course_id?: string
-          date?: string
           description?: string
           id?: string
           name?: string
           organisation_id?: string
+          price?: number
           requirement_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "course_activities_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "user_roles_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activities_assigned_to_fkey"
-            columns: ["assigned_to"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "course_activities_course_id_fkey"
             columns: ["course_id"]
@@ -150,24 +88,30 @@ export type Database = {
       }
       course_activity_attendances: {
         Row: {
-          activity_id: string
+          activity_schedule_id: string | null
           attended_at: string | null
+          course_activity: string
+          course_id: string
           course_subscription_id: string
           id: string
           organisation_id: string
           student_id: string
         }
         Insert: {
-          activity_id: string
+          activity_schedule_id?: string | null
           attended_at?: string | null
+          course_activity: string
+          course_id: string
           course_subscription_id: string
           id?: string
           organisation_id: string
           student_id: string
         }
         Update: {
-          activity_id?: string
+          activity_schedule_id?: string | null
           attended_at?: string | null
+          course_activity?: string
+          course_id?: string
           course_subscription_id?: string
           id?: string
           organisation_id?: string
@@ -175,10 +119,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_activity_attendances_activity_id_fkey"
-            columns: ["activity_id"]
+            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
+            columns: ["activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_activity_fkey"
+            columns: ["course_activity"]
             isOneToOne: false
             referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
           {
@@ -204,6 +162,61 @@ export type Database = {
           },
         ]
       }
+      course_activity_schedules: {
+        Row: {
+          activity_id: string
+          assigned_to: string | null
+          day_of_week: number
+          end_at: string
+          id: string
+          organisation_id: string
+          repeat: boolean
+          start_at: string
+        }
+        Insert: {
+          activity_id: string
+          assigned_to?: string | null
+          day_of_week: number
+          end_at: string
+          id?: string
+          organisation_id: string
+          repeat?: boolean
+          start_at: string
+        }
+        Update: {
+          activity_id?: string
+          assigned_to?: string | null
+          day_of_week?: number
+          end_at?: string
+          id?: string
+          organisation_id?: string
+          repeat?: boolean
+          start_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activity_schedules_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "organisation_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_requirements: {
         Row: {
           course_id: string
@@ -211,7 +224,6 @@ export type Database = {
           id: string
           name: string
           organisation_id: string
-          price: number
           required: number
           requirements_type: number
         }
@@ -221,7 +233,6 @@ export type Database = {
           id?: string
           name: string
           organisation_id: string
-          price?: number
           required: number
           requirements_type: number
         }
@@ -231,7 +242,6 @@ export type Database = {
           id?: string
           name?: string
           organisation_id?: string
-          price?: number
           required?: number
           requirements_type?: number
         }

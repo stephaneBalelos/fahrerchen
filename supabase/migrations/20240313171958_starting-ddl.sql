@@ -186,9 +186,7 @@ create table public.course_requirements (
   name          text not null,
   description   text,
   required     integer not null,
-  price        integer default 0 not null check (price >= 0),
-  organisation_id    uuid references public.organisations on delete cascade not null,
-  unique (course_id, requirements_type)
+  organisation_id    uuid references public.organisations on delete cascade not null
 );
 comment on table public.course_requirements is 'COURSE REQUIREMENTS.';
 
@@ -199,36 +197,39 @@ create table public.course_activities (
   course_id    uuid references public.courses on delete cascade not null,
   name          text not null,
   description   text not null,
-  date          date not null,
-  assigned_to    uuid references public.users on delete set null,
   requirement_id    uuid references public.course_requirements on delete cascade,
+  price        integer default 0 not null check (price >= 0),
   organisation_id    uuid references public.organisations on delete cascade not null
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
 
-alter table public.course_activities enable row level security;
-
-create table public.course_activity_attendances (
-  id            uuid default uuid_generate_v4() primary key,
-  activity_id    uuid references public.course_activities on delete cascade not null,
-  student_id    uuid references public.students on delete cascade not null,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  attended_at   timestamp with time zone default null,
-  organisation_id    uuid references public.organisations on delete cascade not null
-);
-comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
-
-alter table public.course_activity_attendances enable row level security;
-
-create table public.course_activite_schedule (
+create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
   activity_id    uuid references public.course_activities on delete cascade not null,
   day_of_week    integer not null check (day_of_week >= 0 and day_of_week <= 6),
   start_at      timestamp with time zone not null,
   end_at        timestamp with time zone not null,
   repeat        boolean default false not null,
+  assigned_to   uuid references public.organisation_members on delete set null,
   organisation_id    uuid references public.organisations on delete cascade not null
 );
+comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
+
+alter table public.course_activities enable row level security;
+
+create table public.course_activity_attendances (
+  id            uuid default uuid_generate_v4() primary key,
+  course_activity   uuid references public.course_activities on delete cascade not null,
+  activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
+  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  course_id    uuid references public.courses on delete cascade not null,
+  student_id    uuid references public.students on delete cascade not null,
+  attended_at   timestamp with time zone default null,
+  organisation_id    uuid references public.organisations on delete cascade not null
+);
+comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
+
+alter table public.course_activity_attendances enable row level security;
 
 
 create function public.handle_new_user() 
@@ -293,7 +294,9 @@ begin
   insert into public.course_requirements (course_id, name, requirements_type, required, organisation_id)
   values (new.id, 'Praxis Stunden', 2, 12, org_id);
   insert into public.course_requirements (course_id, name, requirements_type, required, organisation_id)
-  values (new.id, 'Prüfung Theorie', 3, 2, org_id);
+  values (new.id, 'Theoretische Prüfung', 3, 1, org_id);
+  insert into public.course_requirements (course_id, name, requirements_type, required, organisation_id)
+  values (new.id, 'Praktische Prüfung', 3, 1, org_id);
 
   return new;
 end;
@@ -304,22 +307,24 @@ create trigger on_course_created
   for each row execute procedure public.handle_new_course();
 
 
--- create default actitivies for a course
-create function public.handle_new_course_requirements()
-returns trigger as $$
-declare org_id uuid;
-begin
-  org_id := new.organisation_id;
-  insert into public.course_activities (course_id, name, description, date, requirement_id, organisation_id)
-  values (new.course_id, new.requirements_type::text, 'Theorieunterricht', '2024-03-13', new.id, org_id);
+-- -- handle new course subscription
+-- create function public.handle_new_course_subscription()
+-- returns trigger as $$
+-- declare org_id uuid;
+-- begin
+--   org_id := new.organisation_id;
+--   course_id := new.course_id;
 
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course is created
-create trigger on_course_requirements_created
-  after insert on public.course_requirements
-  for each row execute procedure public.handle_new_course_requirements();
+--   insert into public.course_subscription_bills (course_subscription_id, amount, organisation_id)
+--   values (new.id, new.costs, org_id);
+
+--   return new;
+-- end;
+-- $$ language plpgsql security definer set search_path = public;
+-- -- trigger the function every time a course subscription is created
+-- create trigger on_course_subscription_created
+--   after insert on public.course_subscriptions
+--   for each row execute procedure public.handle_new_course_subscription();
 
 
 
