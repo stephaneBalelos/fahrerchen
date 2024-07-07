@@ -11,7 +11,7 @@
       @submit="onSubmit"
     >
       <template #description>
-        <!-- Don't have an account? <NuxtLink to="/" class="text-primary font-medium">Sign up</NuxtLink>. -->
+        Loggen Sie sich ein, um fortzufahren.
 
         <UAlert
             v-if="loginFailed"
