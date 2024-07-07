@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useGlobalOrgState } from '~/composables/useOrgScope';
-import Orgs from '~/layouts/orgs.vue';
 import { type Database } from '~/types/database.types';
 
 const route = useRoute()
@@ -45,20 +44,9 @@ const isOpen = ref(false)
 </script>
 
 <template>
-  <UContainer>
-    <UPageHeader headline="Organizations" title="My Organizations" description="All your organizations in one place." />
-    <UDashboardToolbar>
-      <template #left>
-        <USelectMenu icon="i-heroicons-check" placeholder="Status" multiple />
-        <USelectMenu icon="i-heroicons-map-pin" placeholder="Location" multiple />
-      </template>
-
-      <template #right>
-        <USelectMenu label="Display" icon="i-heroicons-computer-desktop" multiple />
-        <UButton @click="isOpen = true">Create an Organization</UButton>
-      </template>
-    </UDashboardToolbar>
-    <UPageCard v-for="org in data" :key="org.id" :title="org.name" :description="'Dasds'" icon="i-simple-icons-tailwindcss" @click="selectOrg(org.id)" :ui="{wrapper: 'relative group org-card',}" />
+  <UContainer class="w-full">
+    <UPageHeader headline="Organizations" title="My Organizations" description="All your organizations in one place." :links="[{label: 'Create new Organisation', click: () => isOpen = true}]" />
+    <UPageCard class="mb-4" v-for="org in data" :key="org.id" :title="org.name" :description="new Date(org.inserted_at).toLocaleDateString('de')" icon="i-simple-icons-tailwindcss" @click="selectOrg(org.id)" :ui="{wrapper: 'relative group org-card',}" />
 
     <UPageCard v-if="data?.length == 0" :title="'No organizations found'"
       :description="'You have not created any organizations yet.'"

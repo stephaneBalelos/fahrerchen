@@ -60,6 +60,7 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+const $emit = defineEmits(['change']);
 const slideover = useSlideover();
 
 const openAddCourseActivityForm = (activity: AppCourseActivity) => {
@@ -68,6 +69,14 @@ const openAddCourseActivityForm = (activity: AppCourseActivity) => {
     orgid: activity.organisation_id,
     date: props.day.date,
     course_activity_id: activity.id,
+    "onActivity-deleted": () => {
+      slideover.close();
+      $emit("change");
+    },
+    "onActivity-saved": () => {
+      slideover.close();
+      $emit("change");
+    },
   });
 };
 </script>
