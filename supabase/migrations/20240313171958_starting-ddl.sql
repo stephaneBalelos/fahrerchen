@@ -29,6 +29,10 @@ create type public.app_permission as enum (
   'course_activities.create',
   'course_activities.update',
   'course_activities.delete',
+  'course_activity_schedules.read',
+  'course_activity_schedules.create',
+  'course_activity_schedules.update',
+  'course_activity_schedules.delete',
   'course_activity_attendances.read',
   'course_activity_attendances.create',
   'course_activity_attendances.update',
@@ -41,6 +45,7 @@ create type public.app_permission as enum (
 create type public.app_role as enum ('owner','manager', 'teacher', 'student' );
 create type public.user_status as enum ('ONLINE', 'OFFLINE');
 create type public.requirements_types as enum ('THEORY', 'PRACTICE', 'EXAM', 'OTHER');
+create type public.schedule_type as enum ('ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
 
 -- enum for führerscheinklassen
 create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
@@ -81,6 +86,7 @@ create table public.users (
   email       text not null unique,
   firstname    text,
   lastname    text,
+  fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
   status      user_status default 'OFFLINE'::public.user_status
 );
 comment on table public.users is 'Profile data for each user.';
@@ -203,23 +209,31 @@ create table public.course_activities (
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
 
+alter table public.course_activities enable row level security;
+
 create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
   activity_id    uuid references public.course_activities on delete cascade not null,
-  day_of_week    integer not null check (day_of_week >= 0 and day_of_week <= 6),
-  start_at      timestamp with time zone not null,
-  end_at        timestamp with time zone not null,
-  repeat        boolean default false not null,
   assigned_to   uuid references public.organisation_members on delete set null,
-  organisation_id    uuid references public.organisations on delete cascade not null
+  organisation_id    uuid references public.organisations on delete cascade not null,
+  start_at     timestamp with time zone not null,
+  end_at       timestamp with time zone not null,
+  hour        integer check (hour >= 0 and hour <= 23),
+  minute      integer check (minute >= 0 and minute <= 59),
+  day_of_week integer[] not null,
+  day         integer check (day >= 1 and day <= 31),
+  month       integer check (month >= 1 and month <= 12),
+  year        integer check (year >= 2021 and year <= 2100),
+  repeat      schedule_type default 'ONCE'::public.schedule_type not null
 );
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 
-alter table public.course_activities enable row level security;
+alter table public.course_activity_schedules enable row level security;
 
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity   uuid references public.course_activities on delete cascade not null,
+  supervisor_id    uuid references public.organisation_members on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   course_id    uuid references public.courses on delete cascade not null,
@@ -463,6 +477,27 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 
 create policy "Owner can delete course_activities" on public.course_activities for delete to authenticated using (public.authorize('course_activities.delete', organisation_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.delete');
+
+create policy "Everyone can see course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organisation_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.read');
+insert into public.role_permissions (role, permission) values ('student', 'course_activity_schedules.read');
+
+create policy "Owner, Manager & Teacher can insert course_activity_schedules" on public.course_activity_schedules for insert to authenticated with check (public.authorize('course_activity_schedules.create', organisation_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.create');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.create');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.create');
+
+create policy "Owner, Manager & Teacher can update course_activity_schedules" on public.course_activity_schedules for update to authenticated using (public.authorize('course_activity_schedules.update', organisation_id)) with check (public.authorize('course_activity_schedules.update', organisation_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.update');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.update');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.update');
+
+create policy "Owner, Manger % Teacher can delete course_activity_schedules" on public.course_activity_schedules for delete to authenticated using (public.authorize('course_activity_schedules.delete', organisation_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.delete');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.delete');
 
 
 create policy "Everyone can see course_activity_attendances" on public.course_activity_attendances for select to authenticated using (public.authorize('course_activity_attendances.read', organisation_id));

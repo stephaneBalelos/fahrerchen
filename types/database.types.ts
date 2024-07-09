@@ -96,6 +96,7 @@ export type Database = {
           id: string
           organisation_id: string
           student_id: string
+          supervisor_id: string | null
         }
         Insert: {
           activity_schedule_id?: string | null
@@ -106,6 +107,7 @@ export type Database = {
           id?: string
           organisation_id: string
           student_id: string
+          supervisor_id?: string | null
         }
         Update: {
           activity_schedule_id?: string | null
@@ -116,6 +118,7 @@ export type Database = {
           id?: string
           organisation_id?: string
           student_id?: string
+          supervisor_id?: string | null
         }
         Relationships: [
           {
@@ -160,38 +163,60 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_activity_attendances_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "organisation_members"
+            referencedColumns: ["id"]
+          },
         ]
       }
       course_activity_schedules: {
         Row: {
           activity_id: string
           assigned_to: string | null
-          day_of_week: number
+          day: number | null
+          day_of_week: number[]
           end_at: string
+          hour: number | null
           id: string
+          minute: number | null
+          month: number | null
           organisation_id: string
-          repeat: boolean
+          repeat: Database["public"]["Enums"]["schedule_type"]
           start_at: string
+          year: number | null
         }
         Insert: {
           activity_id: string
           assigned_to?: string | null
-          day_of_week: number
+          day?: number | null
+          day_of_week: number[]
           end_at: string
+          hour?: number | null
           id?: string
+          minute?: number | null
+          month?: number | null
           organisation_id: string
-          repeat?: boolean
+          repeat?: Database["public"]["Enums"]["schedule_type"]
           start_at: string
+          year?: number | null
         }
         Update: {
           activity_id?: string
           assigned_to?: string | null
-          day_of_week?: number
+          day?: number | null
+          day_of_week?: number[]
           end_at?: string
+          hour?: number | null
           id?: string
+          minute?: number | null
+          month?: number | null
           organisation_id?: string
-          repeat?: boolean
+          repeat?: Database["public"]["Enums"]["schedule_type"]
           start_at?: string
+          year?: number | null
         }
         Relationships: [
           {
@@ -613,6 +638,7 @@ export type Database = {
         Row: {
           email: string
           firstname: string | null
+          fullname: string | null
           id: string
           lastname: string | null
           status: Database["public"]["Enums"]["user_status"] | null
@@ -620,6 +646,7 @@ export type Database = {
         Insert: {
           email: string
           firstname?: string | null
+          fullname?: string | null
           id: string
           lastname?: string | null
           status?: Database["public"]["Enums"]["user_status"] | null
@@ -627,6 +654,7 @@ export type Database = {
         Update: {
           email?: string
           firstname?: string | null
+          fullname?: string | null
           id?: string
           lastname?: string | null
           status?: Database["public"]["Enums"]["user_status"] | null
@@ -719,6 +747,10 @@ export type Database = {
         | "course_activities.create"
         | "course_activities.update"
         | "course_activities.delete"
+        | "course_activity_schedules.read"
+        | "course_activity_schedules.create"
+        | "course_activity_schedules.update"
+        | "course_activity_schedules.delete"
         | "course_activity_attendances.read"
         | "course_activity_attendances.create"
         | "course_activity_attendances.update"
@@ -746,6 +778,7 @@ export type Database = {
         | "L"
         | "T"
       requirements_types: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
+      schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
     }
     CompositeTypes: {
