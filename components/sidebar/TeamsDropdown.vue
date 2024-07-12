@@ -70,6 +70,7 @@ const team = computed(() => {
 
 <template>
   <UDropdown
+    id="teams-dropdown"
     v-if="teams"
     v-slot="{ open }"
     mode="hover"
