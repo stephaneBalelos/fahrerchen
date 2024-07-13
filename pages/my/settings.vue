@@ -4,6 +4,9 @@
 definePageMeta({
   layout: "orgs",
 });
+
+const { org } = useGlobalOrgState();
+
 const links = [
   [
     {
@@ -45,6 +48,6 @@ const links = [
   </UDashboardToolbar>
   <UDashboardPanelContent>
 
-    <NuxtPage />
+    <NuxtPage :orgid="org"/>
   </UDashboardPanelContent>
 </template>
