@@ -35,7 +35,7 @@ async function onClose() {
 </script>
 
 <template>
-  <UDashboardPanelContent class="pb-24">
+  <div>
     <UDashboardSection
       title="Manage access"
       description="Invite new members by email address."
@@ -78,5 +78,5 @@ async function onClose() {
       <!-- ~/components/settings/MembersForm.vue -->
       <AddMemberForm @close="onClose" />
     </UDashboardModal>
-  </UDashboardPanelContent>
+  </div>
 </template>

@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import TeamsDropdown from '~/components/sidebar/TeamsDropdown.vue';
-import UserDropdown from '@/navigation/UserMenu.vue';
+import UserDropdown from '~/components/navigation/UserMenu.vue';
 
 
 const route = useRoute();
@@ -122,6 +122,10 @@ const links = [
       {
         label: "Members",
         to: "/my/settings/members",
+      },
+      {
+        label: "Payments",
+        to: "/my/settings/payments",
       }
     ],
     tooltip: {

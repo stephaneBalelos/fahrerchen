@@ -48,7 +48,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <UDashboardPanelContent class="pb-24">
+  <div>
     <UDashboardSection
       title="Theme"
       description="Customize the look and feel of your dashboard."
@@ -219,6 +219,6 @@ async function onSubmit(event: FormSubmitEvent<any>) {
     </UDashboardSection>
 
     <!-- ~/components/settings/DeleteAccountModal.vue -->
-    <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" />
-  </UDashboardPanelContent>
+    <!-- <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" /> -->
+  </div>
 </template>
