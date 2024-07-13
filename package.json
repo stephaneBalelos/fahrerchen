@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@nuxt/ui-pro": "^1.0.2",
+    "@stripe/stripe-js": "^4.1.0",
     "@supabase/supabase-js": "^2.39.8",
     "@types/bcrypt": "^5.0.2",
     "@uppy/core": "^3.13.0",
@@ -45,6 +46,7 @@
     "@vueuse/core": "^10.9.0",
     "bcrypt": "^5.1.1",
     "date-fns": "^3.6.0",
+    "stripe": "^16.2.0",
     "type-fest": "^4.20.1",
     "v-calendar": "^3.1.2",
     "zod": "^3.23.8"

@@ -20,6 +20,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+
+    stripe_pk: process.env.STRIPE_PK,
+    stripe_sk: process.env.STRIPE_SK,
+    stripe_wh: process.env.STRIPE_WEBHOOK_SECRET,
     
     public: {
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,

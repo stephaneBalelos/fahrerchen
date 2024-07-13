@@ -7,11 +7,6 @@ export default defineEventHandler(async (event) => {
 
     if (user) {
         event.context.auth = user
-    } else {
-        throw createError({
-            statusCode: 400,
-            statusMessage: 'Should be authenticated',
-          })
     }
 
 })

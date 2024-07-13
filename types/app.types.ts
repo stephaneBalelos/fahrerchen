@@ -12,6 +12,11 @@ export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_ac
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 
+
+export type StripeConnectPostBody = {
+  org_id: string
+}
+
 export type Database = MergeDeep<DatabaseGenerated,   {
     public: {
       Views: {
