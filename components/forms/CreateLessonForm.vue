@@ -10,7 +10,7 @@ const { org } = useGlobalOrgState()
 const fileRef = ref<HTMLInputElement>()
 const toast = useToast()
 
-const lessonTypes: readonly string[] = ["EXAM", "OTHER", "PRACTICE", "THEORY"]
+const lessonTypes: string[] = ["EXAM", "OTHER", "PRACTICE", "THEORY"]
 
 const schema = z.object({
     type: z.enum(["DEFAULT", ...lessonTypes]),
