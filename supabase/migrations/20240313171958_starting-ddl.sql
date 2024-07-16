@@ -393,23 +393,19 @@ create policy "Owner can update organisation_members" on public.organisation_mem
 insert into public.role_permissions (role, permission) values ('owner', 'organisation_members.update');
 
 create policy "Everyone except students can see students" on public.students for select to authenticated using (public.authorize('students.read', organisation_id));
-create policy "Everyone except students can see student documents" on public.student_documents for select to authenticated using (public.authorize('students.read', organisation_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.read');
 insert into public.role_permissions (role, permission) values ('manager', 'students.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'students.read');
 
 create policy "Owner & Manager can insert students" on public.students for insert to authenticated with check (public.authorize('students.create', organisation_id));
-create policy "Owner & Manager can insert students documents" on public.student_documents for insert to authenticated with check (public.authorize('students.create', organisation_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.create');
 insert into public.role_permissions (role, permission) values ('manager', 'students.create');
 
 create policy "Owner & Manager can update students" on public.students for update to authenticated using (public.authorize('students.update', organisation_id)) with check (public.authorize('students.update', organisation_id));
-create policy "Owner & Manager can update student documents" on public.student_documents for update to authenticated using (public.authorize('students.update', organisation_id)) with check (public.authorize('students.update', organisation_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.update');
 insert into public.role_permissions (role, permission) values ('manager', 'students.update');
 
 create policy "Owner & Manager can delete students" on public.students for delete to authenticated using (public.authorize('students.delete', organisation_id));
-create policy "Owner & Manager can delete student documents" on public.student_documents for delete to authenticated using (public.authorize('students.delete', organisation_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.delete');
 insert into public.role_permissions (role, permission) values ('manager', 'students.delete');
 
