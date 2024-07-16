@@ -1,25 +1,16 @@
 <template>
-  <UAvatar :src="file" :alt="fileAlt" size="lg" />
-  <UButton
-    v-if="uploadState == 'idle'"
-    label="Choose"
-    color="white"
-    size="md"
-    @click="onFileClick"
-  />
-  <UProgress
-    v-if="uploadState == 'uploading'"
-    :value="uploadProgress"
-    indicator
-  />
-  <input 
-    ref="fileRef"
-    type="file"
-    class="hidden"
-    accept=".jpg, .jpeg, .png, .gif"
-    @change="onFileChange"
-  />
-  
+  <slot>
+    <UInput
+      ref="fileRef"
+      type="file"
+      size="md"
+      icon="i-heroicons-folder"
+      @change="onFileChange"
+      :loading="uploadState === 'uploading'"
+      :disabled="uploadState === 'uploading'"
+    />
+  </slot>
+
 </template>
 
 <script setup lang="ts">
@@ -31,41 +22,39 @@ import "@uppy/core/dist/style.css";
 type Props = {
   bucketId: string;
   path: string;
+  extensions?: string[];
+  onCompleted?: () => void;
+  mode?: "single" | "multiple";
 };
 
-const user = useSupabaseUser();
-const { userInfos } = useUserInfos();
+const { org } = useGlobalOrgState();
+
+const props = defineProps<Props>();
+const $emits = defineEmits(["uploaded"]);
 const runtimeConfig = useRuntimeConfig();
-const client = useSupabaseClient();
+const session = useSupabaseSession()
 const file = ref<string>();
 const fileRef = ref<HTMLInputElement>();
-const uploadState = ref<"idle" | "uploading">("idle");
-const fileAlt = computed(() => {
-  if (userInfos.value) {
-    return userInfos.value.firstname + " " + userInfos.value.lastname;
-  } else {
-    return "";
-  }
-});
-const props = defineProps<Props>();
+const uploadState = ref<"idle" | "uploading" | "completed" | "failed">("idle");
 const uploadProgress = ref(0);
 const uppy = ref<Uppy>();
-const toast = useToast();
+const uploadId = computed(() => {
+  return props.bucketId + "/" + props.path;
+});
 
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement;
+function onFileChange(files: FileList) {
 
-  if (!input.files?.length) {
+  if (files.length === 0) {
     return;
   }
 
   uppy.value?.addFile({
-    name: input.files[0].name,
-    type: input.files[0].type,
-    data: input.files[0],
+    name: files[0].name,
+    type: files[0].type,
+    data: files[0],
   });
 
-  file.value = URL.createObjectURL(input.files[0]);
+  file.value = URL.createObjectURL(files[0]);
 }
 
 function onFileClick() {
@@ -73,85 +62,65 @@ function onFileClick() {
 }
 
 onMounted(async () => {
-  try {
-    const { data, error } = await client.storage
-      .from(props.bucketId)
-      .download(`${props.path}.png`);
-    if (error) {
-      //   console.log(error);
+  if (!session.value) {
+    throw new Error("Not logged in");
+  }
+
+  uppy.value = new Uppy().use(Tus, {
+    endpoint: runtimeConfig.public.supabase_storage_url + "/upload/resumable",
+    retryDelays: [0, 1000, 3000, 5000],
+    headers: {
+      authorization: `Bearer ${session.value.access_token}`,
+      "x-upsert": "true",
+    },
+    uploadDataDuringCreation: true,
+    removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
+    chunkSize: 6 * 1024 * 1024,
+    allowedMetaFields: [
+      "bucketName",
+      "objectName",
+      "contentType",
+      "cacheControl",
+    ],
+  });
+
+  uppy.value.on("file-added", (file) => {
+    const filename = org.value + "/" + props.path + "/" + file.name;
+    file.name = filename;
+    const supabaseMetadata = {
+      bucketName: props.bucketId,
+      objectName: filename,
+      contentType: file.type,
+      cacheControl: "3600",
+    };
+
+    console.log(supabaseMetadata)
+
+    file.meta = {
+      ...file.meta,
+      ...supabaseMetadata,
+    };
+    uploadState.value = "idle";
+    uppy.value?.upload();
+  });
+  uppy.value.on("upload", (progress) => {
+    uploadState.value = "uploading";
+  });
+  uppy.value.on("progress", (progress) => {
+    uploadProgress.value = progress;
+  });
+  uppy.value.on("complete", (result) => {
+    if (result.failed.length > 0) {
+      uploadState.value = "failed";
     } else {
-      file.value = URL.createObjectURL(data);
+      $emits("uploaded");
+      uploadState.value = "completed";
     }
-  } catch (error) {
-    // console.log(error)
-  }
-
-  const {
-    data: { session },
-  } = await client.auth.getSession();
-
-  if (!session) {
-    client.auth.signOut();
-  } else {
-    uppy.value = new Uppy().use(Tus, {
-      endpoint: runtimeConfig.public.supabase_storage_url,
-	  retryDelays: [0, 1000, 3000, 5000],
-      headers: {
-        authorization: `Bearer ${session.access_token}`,
-        "x-upsert": "true",
-      },
-      uploadDataDuringCreation: true,
-	  removeFingerprintOnSuccess: true, // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
-      chunkSize: 6 * 1024 * 1024,
-      allowedMetaFields: [
-        "bucketName",
-        "objectName",
-        "contentType",
-        "cacheControl",
-      ],
-    });
-
-    uppy.value.on("file-added", (file) => {
-		const filename = props.path + "." + file.extension;
-		file.name = filename;
-      const supabaseMetadata = {
-        bucketName: props.bucketId,
-        objectName: filename,
-        contentType: file.type,
-		cacheControl: "3600",
-      };
-
-      file.meta = {
-        ...file.meta,
-        ...supabaseMetadata,
-      };
-        uppy.value?.upload();
-    });
-    uppy.value.on("upload", (progress) => {
-      uploadState.value = "uploading";
-    });
-    uppy.value.on("progress", (progress) => {
-      uploadProgress.value = progress;
-    });
-    uppy.value.on("complete", (result) => {
-      uploadState.value = "idle";
-	  console.log(result);
-	  if (result.failed.length > 0) {
-		toast.add({
-		  title: "Failed to upload the file",
-		  color: "red",
-		});
-	  } else {
-		toast.add({
-		  title: "File uploaded!",
-		  icon: "i-heroicons-check-circle",
-		});
-	  }
-    });
-    uppy.value.on("error", (error) => {
-      console.error("Upload error:", error);
-    });
-  }
+  });
+  uppy.value.on("error", (error) => {
+    console.error("Upload error:", error);
+    uploadState.value = "failed";
+  });
 });
 </script>
 

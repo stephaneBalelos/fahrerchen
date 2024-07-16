@@ -13,24 +13,42 @@ export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['c
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 
 
+
 export type StripeConnectPostBody = {
   org_id: string
 }
 
-export type Database = MergeDeep<DatabaseGenerated,   {
-    public: {
-      Views: {
-        user_roles_view: {
-          Row: {
-            email: string
-            firstname: string | null
-            lastname: string | null
-            role: Database["public"]["Enums"]["app_role"]
-            user_id: string
-          };
+export type Database = MergeDeep<DatabaseGenerated, {
+  public: {
+    Views: {
+      user_roles_view: {
+        Row: {
+          email: string
+          firstname: string | null
+          lastname: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         };
       };
     };
-  }>;
+  };
+  storage: {
+    Tables: {
+      objects: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          metadata: {
+            name?: string,
+            beschreibung?: string,
+          }
+          name: string
+          object_id: string
+        }
+      }
+    }
+  }
+}>;
 
-
+export type AppFileObject = Omit<Database["storage"]["Tables"]["objects"]["Row"], "path_tokens" | "owner_id" | "version" | "object_id">
