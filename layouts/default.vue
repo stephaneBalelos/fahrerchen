@@ -10,7 +10,7 @@
             <NuxtLink to="/"> Dashboard </NuxtLink>
           </template>
           <template #right>
-            <UserDropdown></UserDropdown>
+            <NavigationUserMenu></NavigationUserMenu>
           </template>
         </UDashboardNavbar>
 
@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import UserDropdown from "@/navigation/UserMenu.vue";
 const route = useRoute();
 const appConfig = useAppConfig();
 const { isHelpSlideoverOpen } = useDashboard();
