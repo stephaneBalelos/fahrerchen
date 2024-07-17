@@ -21,12 +21,12 @@ export default defineEventHandler(async (event) => {
 
         const client = await serverSupabaseClient<Database>(event)
     
-        const { data:org, error } = await client.from('organisations').select('*').eq('id', body.org_id).single()
+        const { data:org, error } = await client.from('organizations').select('*').eq('id', body.org_id).single()
     
         if (error) {
             throw createError({
                 status: 500,
-                message: 'Failed to load organisation'
+                message: 'Failed to load organization'
             })
         }
 

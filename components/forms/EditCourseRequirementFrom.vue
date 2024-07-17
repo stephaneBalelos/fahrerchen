@@ -90,7 +90,7 @@ type Props = {
 
 type CourseRequirementEdit = Omit<
   Database["public"]["Tables"]["course_requirements"]["Row"],
-  "id" | "organisation_id" | "course_id"
+  "id" | "organization_id" | "course_id"
 >;
 
 const props = defineProps<Props>();
@@ -180,7 +180,7 @@ const createCourseRequirement = async () => {
     try {
         const {data, error} = await client.from("course_requirements").insert({
             ...state,
-            organisation_id: props.orgid,
+            organization_id: props.orgid,
             course_id: props.courseid,
         });
         if (error) throw error;

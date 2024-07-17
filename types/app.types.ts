@@ -4,8 +4,8 @@ import type { Database as DatabaseGenerated } from "./database.types";
 export type UserRole = DatabaseGenerated['public']['Enums']['app_role']
 export type AppUser = DatabaseGenerated['public']['Tables']['users']['Row']
 export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Row'] & { role: UserRole }
-export type AppOrganisation = DatabaseGenerated['public']['Tables']['organisations']['Row']
-export type AppOrganisationMember = DatabaseGenerated['public']['Tables']['organisation_members']['Row']
+export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
+export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
 export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']

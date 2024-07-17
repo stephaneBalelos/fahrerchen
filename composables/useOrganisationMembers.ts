@@ -1,17 +1,17 @@
-import type { AppOrganisationMember, AppUser, AppUserWithRole, Database, UserRole } from "~/types/app.types";
+import type { AppOrganizationMember, AppUser, AppUserWithRole, Database, UserRole } from "~/types/app.types";
 
-export type OrganisationMember = AppUser & {role: UserRole, member_id: string}
+export type OrganizationMember = AppUser & {role: UserRole, member_id: string}
 
-export function useOrganisationMembers(organisationId: string, role?: UserRole) {
+export function useOrganizationMembers(organizationId: string, role?: UserRole) {
     const client = useSupabaseClient<Database>()
 
-    const organisation_id = ref<string>(organisationId)
+    const organization_id = ref<string>(organizationId)
 
-    const organisation_members = ref<OrganisationMember[]>([])
+    const organization_members = ref<OrganizationMember[]>([])
 
-    watch(() => organisation_id, async () => {
+    watch(() => organization_id, async () => {
 
-        const query = client.from('organisation_members').select("*, users(*)").eq('organisation_id', organisation_id.value)
+        const query = client.from('organization_members').select("*, users(*)").eq('organization_id', organization_id.value)
 
         if(role) {
             query.eq('role', role)
@@ -20,10 +20,10 @@ export function useOrganisationMembers(organisationId: string, role?: UserRole) 
         const { data, error } = await query
         if(error) {
             console.error(error)
-            organisation_members.value = []
+            organization_members.value = []
         }
         if(data) {
-            organisation_members.value = data.map((member) => {
+            organization_members.value = data.map((member) => {
                 if (member.users == null) {
                     return null
                 }
@@ -36,5 +36,5 @@ export function useOrganisationMembers(organisationId: string, role?: UserRole) 
         }
     }, { immediate: true })
 
-    return { organisation_id, organisation_members }
+    return { organization_id, organization_members }
 }

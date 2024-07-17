@@ -29,7 +29,7 @@ async function onRoleChange(member: AppUserWithRole, role: UserRole) {
   // Do something with data
   console.log(member.email, role)
   try {
-    const { error } = await client.from('organisation_members').update({ role }).eq('user_id', member.id)
+    const { error } = await client.from('organization_members').update({ role }).eq('user_id', member.id)
     if (error) {
       throw error
     }

@@ -81,7 +81,7 @@ async function onSubmit(event: FormSubmitEvent<CreateUserSchema>) {
     try {
       const { data: student, error } = await client.rpc("create_student", {
         ...data,
-        organisation_id: orgId,
+        organization_id: orgId,
       });
       console.log(student, error);
       if (error) {

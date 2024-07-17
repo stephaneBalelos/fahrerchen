@@ -29,7 +29,7 @@ const state = reactive<CreateCourseFormProps>({
   name: "",
   type: 1,
   description: "",
-  organisation_id: org.value,
+  organization_id: org.value,
 });
 
 const selected_type = computed(() => {
@@ -81,7 +81,7 @@ const createCourse = async (props: CreateCourseFormProps) => {
     });
     return;
   }
-  props.organisation_id = org.value;
+  props.organization_id = org.value;
   const { data, error } = await supabase
     .from("courses")
     .insert({

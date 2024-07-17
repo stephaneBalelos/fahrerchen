@@ -8,8 +8,8 @@ const client = useSupabaseClient<Database>()
 const user = useSupabaseUser()
 const { org, orgData } = useGlobalOrgState()
 
-const { data, error } = await useAsyncData('organisations', async () => {
-  const { data, error } = await client.from('organisations').select('*')
+const { data, error } = await useAsyncData('organizations', async () => {
+  const { data, error } = await client.from('organizations').select('*')
   if (error) {
     throw error
   }
@@ -25,7 +25,7 @@ const createOrganization = async () => {
   if(newOrgName.value === '') {
     return
   }
-  const { data, error } = await client.from('organisations').insert({ name: newOrgName.value, owner_id: user.value.id})
+  const { data, error } = await client.from('organizations').insert({ name: newOrgName.value, owner_id: user.value.id})
   if (error) {
     throw error
   }
@@ -45,7 +45,7 @@ const isOpen = ref(false)
 
 <template>
   <UContainer class="w-full">
-    <UPageHeader headline="Organizations" title="My Organizations" description="All your organizations in one place." :links="[{label: 'Create new Organisation', click: () => isOpen = true}]" />
+    <UPageHeader headline="Organizations" title="My Organizations" description="All your organizations in one place." :links="[{label: 'Create new organization', click: () => isOpen = true}]" />
     <UPageCard class="mb-4" v-for="org in data" :key="org.id" :title="org.name" :description="new Date(org.inserted_at).toLocaleDateString('de')" icon="i-simple-icons-tailwindcss" @click="selectOrg(org.id)" :ui="{wrapper: 'relative group org-card',}" />
 
     <UPageCard v-if="data?.length == 0" :title="'No organizations found'"

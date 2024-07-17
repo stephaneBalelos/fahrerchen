@@ -2,7 +2,7 @@ import test, { expect } from "@playwright/test";
 import { login } from "../auth/utils";
 import { testConstants } from "../utils";
 
-test.describe("Organisations Management", () => {
+test.describe("organizations Management", () => {
     test.beforeEach(async ({page}) => {
         await page.goto('http://localhost:3000');
         
@@ -12,7 +12,7 @@ test.describe("Organisations Management", () => {
         }
     })
 
-    test('Authenticated User should have a default Organisation on the home page', async ({page}) => {
+    test('Authenticated User should have a default organization on the home page', async ({page}) => {
         expect(page).toHaveURL('http://localhost:3000')
         const orgCards = page.locator('.org-card')
         await expect(orgCards).toHaveCount(2)

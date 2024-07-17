@@ -16,7 +16,7 @@ const toast = useToast()
 console.log(orgState.org.value)
 
 const { data, pending, status, refresh } = await useAsyncData('courses', async () => {
-    const { data, error } = await supabase.from('courses').select('*').eq('organisation_id', orgState.org.value)
+    const { data, error } = await supabase.from('courses').select('*').eq('organization_id', orgState.org.value)
     if (error) {
         throw error
     }

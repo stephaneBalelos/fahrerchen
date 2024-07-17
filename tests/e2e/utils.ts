@@ -3,10 +3,10 @@ import detect from "detect-port";
 
 export const testConstants = {
   usersEmails: [
-    'owner1@organisation1.com',
-    'owner2@organisation2.com',
-    'manager1@organisation1.com',
-    'manager2@organisation2.com',
+    'owner1@organization1.com',
+    'owner2@organization2.com',
+    'manager1@organization1.com',
+    'manager2@organization2.com',
   ],
   usersPasswords: [
     'password',

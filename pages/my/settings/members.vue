@@ -7,7 +7,7 @@ const client = useSupabaseClient<Database>()
 const { org } = useGlobalOrgState()
 
 const { data, error, refresh } = await useAsyncData('members', async () => {
-  const { data, error } = await client.from('organisation_members').select('role, users(*)').eq('organisation_id', org.value)
+  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', org.value)
   if (error) {
     throw error
   }

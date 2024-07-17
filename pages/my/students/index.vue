@@ -136,7 +136,7 @@ const {
   const { data } = await client
     .from("students")
     .select("*")
-    .eq("organisation_id", org.value);
+    .eq("organization_id", org.value);
 
   return data;
 }, {

@@ -107,7 +107,7 @@ import UserSelect from "./Inputs/UserSelect.vue";
 
 type CourseActivityEdit = Omit<
   AppCourseActivity,
-  "id" | "course_id" | "organisation_id"
+  "id" | "course_id" | "organization_id"
 >;
 type Props = {
   courseid: string;
@@ -245,7 +245,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .insert({...params, course_id: props.courseid, organisation_id: props.orgid})
+      .insert({...params, course_id: props.courseid, organization_id: props.orgid})
       .select("*").single()
     if (error) { 
       console.error(error)

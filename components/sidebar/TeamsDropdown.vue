@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AppOrganisation, Database } from "~/types/app.types";
+import type { AppOrganization, Database } from "~/types/app.types";
 
 const actions = [
   {
@@ -28,8 +28,8 @@ const {
       return [];
     }
     const { data, error } = await client
-      .from("organisation_members")
-      .select("user_id, organisations(*)")
+      .from("organization_members")
+      .select("user_id, organizations(*)")
       .eq("user_id", userInfos.value.id);
 
     if (error) {
@@ -42,7 +42,7 @@ const {
     immediate: true,
     transform: (data) => {
       const orgs = data
-        .map((d) => d.organisations)
+        .map((d) => d.organizations)
         .filter((org) => org !== null);
       return orgs.map((d, index) => {
         return {

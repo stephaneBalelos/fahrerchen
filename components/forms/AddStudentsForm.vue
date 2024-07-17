@@ -106,7 +106,7 @@ function addStudents() {
   selected.value.forEach(async (studentId) => {
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .upsert({student_id: studentId, course_id: props.courseid, organisation_id: props.orgid});
+      .upsert({student_id: studentId, course_id: props.courseid, organization_id: props.orgid});
     if (error) {
       toast.add({
         title: "Error",

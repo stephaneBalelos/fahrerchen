@@ -55,14 +55,14 @@
         >
           <USelectMenu
             v-model="state.assigned_to"
-            :options="organisation_members"
+            :options="organization_members"
             value-attribute="member_id"
             option-attribute="email"
           >
             <template #label>
-              <div v-if="state.assigned_to && organisation_members.length > 0">
+              <div v-if="state.assigned_to && organization_members.length > 0">
                 <span class="truncate">{{
-                  organisation_members.find((m) => m.member_id === state.assigned_to)
+                  organization_members.find((m) => m.member_id === state.assigned_to)
                     ?.email
                 }}</span>
               </div>
@@ -201,7 +201,7 @@ import DatePicker from "./Inputs/Datepicker.vue";
 
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
-  "id" | "organisation_id"
+  "id" | "organization_id"
 >;
 
 type RepeatMode = AppScheduleType
@@ -266,7 +266,7 @@ const state = reactive<Schema>({
 });
 
 const { course_activities } = useCourseActivities(props.courseid);
-const { organisation_members } = useOrganisationMembers(props.orgid);
+const { organization_members } = useorganizationMembers(props.orgid);
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
 
@@ -296,7 +296,7 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
       .from("course_activity_schedules")
       .insert({
         ...data,
-        organisation_id: props.orgid,
+        organization_id: props.orgid,
       }).select();
 
     if (error) {

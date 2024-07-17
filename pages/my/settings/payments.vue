@@ -23,9 +23,9 @@ type Props = {
 const props = useAttrs() as Props;
 const client = useSupabaseClient<Database>();
 
-  const { data:org, error, status } = await useAsyncData(`organisation_${props.orgid}`, async () => {
+  const { data:org, error, status } = await useAsyncData(`organization_${props.orgid}`, async () => {
   const { data, error } = await client
-    .from("organisations")
+    .from("organizations")
     .select("*")
     .eq("id", props.orgid)
     .single();

@@ -170,7 +170,7 @@ const {
     const { data, error } = await supabase
       .from("course_subscriptions")
       .select("id, inserted_at, students(*)")
-      .eq("organisation_id", org.value)
+      .eq("organization_id", org.value)
       .eq("course_id", courseid);
     if (error) {
       console.log(error);

@@ -66,7 +66,7 @@ const slideover = useSlideover();
 const openAddCourseActivityForm = (activity: AppCourseActivity) => {
   slideover.open(AddCourseActivityForm, {
     courseid: activity.course_id,
-    orgid: activity.organisation_id,
+    orgid: activity.organization_id,
     date: props.day.date,
     course_activity_id: activity.id,
     "onActivity-deleted": () => {
