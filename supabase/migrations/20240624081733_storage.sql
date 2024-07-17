@@ -38,12 +38,12 @@ create policy "Owner & Manager can insert courses" on storage.objects for insert
 create policy "Owner & Manager can update courses" on storage.objects for update to authenticated using (public.authorize('courses.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('courses.update', ((storage.foldername(name))[1])::uuid));
 create policy "Owner & Manager can delete courses" on storage.objects for delete to authenticated using (public.authorize('courses.delete', ((storage.foldername(name))[1])::uuid));
 
--- Course Subscriptions Documents
+-- Course Required Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types)
 values
-  ('course_subscriptions_documents', 'course_subscriptions_documents', false, '{image/*, application/pdf, application/msword}');
-create policy "Everyone can see course subscriptions Documents" on storage.objects for select to authenticated using (public.authorize('course_subscriptions.read', (((storage.foldername(name))[1])::uuid)::uuid));
-create policy "Owner & Manager can insert course subscriptions Documents" on storage.objects for insert to authenticated with check (public.authorize('course_subscriptions.create', ((storage.foldername(name))[1])::uuid));
-create policy "Owner & Manager can update course subscriptions Documents" on storage.objects for update to authenticated using (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid));
-create policy "Owner & Manager can delete course subscriptions Documents" on storage.objects for delete to authenticated using (public.authorize('course_subscriptions.delete', ((storage.foldername(name))[1])::uuid));
+  ('course_required_documents', 'course_required_documents', false, '{image/*, application/pdf, application/msword}');
+create policy "Everyone can see course required Documents" on storage.objects for select to authenticated using (public.authorize('course_subscriptions.read', (((storage.foldername(name))[1])::uuid)::uuid));
+create policy "Owner & Manager can insert course required Documents" on storage.objects for insert to authenticated with check (public.authorize('course_subscriptions.create', ((storage.foldername(name))[1])::uuid));
+create policy "Owner & Manager can update course required Documents" on storage.objects for update to authenticated using (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid));
+create policy "Owner & Manager can delete course required Documents" on storage.objects for delete to authenticated using (public.authorize('course_subscriptions.delete', ((storage.foldername(name))[1])::uuid));

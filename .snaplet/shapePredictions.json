@@ -23,21 +23,21 @@
   },
   {
     "schemaName": "public",
-    "tableName": "course_requirements",
+    "tableName": "course_documents",
     "predictions": [
       {
-        "input": "public course_requirements description",
+        "input": "public course_documents description",
         "column": "description",
-        "shape": "COMMERCE_PRODUCT_DESCRIPTION",
-        "confidence": 0.5489407777786255,
+        "shape": "COMPANY_CATCH_PHRASE",
+        "confidence": 0.360771656036377,
         "context": "GENERAL",
         "confidenceContext": 0
       },
       {
-        "input": "public course_requirements name",
+        "input": "public course_documents name",
         "column": "name",
-        "shape": "COMMERCE_PRODUCT_NAME",
-        "confidence": 0.4472060203552246,
+        "shape": "SYSTEM_FILE_NAME",
+        "confidence": 0.9657835960388184,
         "context": "GENERAL",
         "confidenceContext": 0
       }
@@ -45,21 +45,35 @@
   },
   {
     "schemaName": "public",
-    "tableName": "course_requirements_types",
+    "tableName": "course_required_documents",
     "predictions": [
       {
-        "input": "public course_requirements_types description",
+        "input": "public course_required_documents description",
         "column": "description",
-        "shape": "FINANCE_TRANSACTION_DESCRIPTION",
-        "confidence": 0.4030510187149048,
+        "shape": "SYSTEM_FILE_NAME",
+        "confidence": 0.679058849811554,
         "context": "GENERAL",
         "confidenceContext": 0
       },
       {
-        "input": "public course_requirements_types name",
+        "input": "public course_required_documents name",
         "column": "name",
-        "shape": "SYSTEM_FILE_TYPE",
-        "confidence": 0.5607261061668396,
+        "shape": "SYSTEM_FILE_NAME",
+        "confidence": 0.9823424220085144,
+        "context": "GENERAL",
+        "confidenceContext": 0
+      }
+    ]
+  },
+  {
+    "schemaName": "public",
+    "tableName": "course_subscription_bill_items",
+    "predictions": [
+      {
+        "input": "public course_subscription_bill_items description",
+        "column": "description",
+        "shape": "FINANCE_TRANSACTION_DESCRIPTION",
+        "confidence": 0.7889696955680847,
         "context": "GENERAL",
         "confidenceContext": 0
       }
@@ -125,13 +139,13 @@
   },
   {
     "schemaName": "public",
-    "tableName": "organisations",
+    "tableName": "organizations",
     "predictions": [
       {
-        "input": "public organisations name",
+        "input": "public organizations name",
         "column": "name",
         "shape": "COMPANY_NAME",
-        "confidence": 0.8991165161132812,
+        "confidence": 0.9054569602012634,
         "context": "GENERAL",
         "confidenceContext": 0
       }
