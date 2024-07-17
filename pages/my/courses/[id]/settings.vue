@@ -11,8 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import CourseActivitiesList from "~/components/settings/CourseActivitiesList.vue";
-import CourseRequirementsList from "~/components/settings/CourseRequirementList.vue";
+import CourseActivitiesList from "~/components/courses/settings/CourseActivitiesList.vue";
+import CourseRequirementsList from "~/components/courses/settings/CourseRequiredDocumentsList.vue";
 
 type Props = {
   orgid: string;

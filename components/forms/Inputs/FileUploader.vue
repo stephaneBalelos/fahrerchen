@@ -27,7 +27,7 @@ type Props = {
   mode?: "single" | "multiple";
 };
 
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 
 const props = defineProps<Props>();
 const $emits = defineEmits(["uploaded"]);

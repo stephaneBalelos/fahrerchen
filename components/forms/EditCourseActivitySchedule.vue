@@ -266,7 +266,7 @@ const state = reactive<Schema>({
 });
 
 const { course_activities } = useCourseActivities(props.courseid);
-const { organization_members } = useorganizationMembers(props.orgid);
+const { organization_members } = useOrganizationMembers(props.orgid);
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
 

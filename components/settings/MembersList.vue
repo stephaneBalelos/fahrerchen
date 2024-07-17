@@ -8,7 +8,7 @@ defineProps({
   }
 })
 
-const { orgData } = useGlobalOrgState()
+const { selected_organization } = useUserOrganizations()
 
 const client = useSupabaseClient<Database>()
 const toast = useToast()
@@ -78,7 +78,7 @@ async function onRoleChange(member: AppUserWithRole, role: UserRole) {
       <div class="flex items-center gap-3">
 
         <USelectMenu
-          v-if="orgData?.owner_id !== member.id"
+          v-if="selected_organization?.owner_id !== member.id"
           :model-value="member.role"
           :options="roles"
           color="white"

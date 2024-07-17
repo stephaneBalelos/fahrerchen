@@ -63,7 +63,6 @@ const { data: course_activities, error } = useAsyncData('course_activity_schedul
   if (error) {
     throw error;
   }
-  console.log(data)
   return data;
 })
 

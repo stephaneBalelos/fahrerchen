@@ -6,7 +6,7 @@ import type { AppCourse } from "~/types/app.types";
 type CreateCourseFormProps = Omit<AppCourse, "id" | "inserted_at">;
 
 const supabase = useSupabaseClient<Database>();
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 
 const fileRef = ref<HTMLInputElement>();
 const toast = useToast();

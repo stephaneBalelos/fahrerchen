@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import { useGlobalOrgState } from '~/composables/useOrgScope';
 import { type Database } from '~/types/database.types';
 
 const route = useRoute()
 
 const client = useSupabaseClient<Database>()
 const user = useSupabaseUser()
-const { org, orgData } = useGlobalOrgState()
+const { selected_organization_id, selected_organization } = useUserOrganizations()
 
 const { data, error } = await useAsyncData('organizations', async () => {
   const { data, error } = await client.from('organizations').select('*')
   if (error) {
     throw error
   }
-  console.log(data)
   return data
 })
 
@@ -33,7 +31,7 @@ const createOrganization = async () => {
 }
 
 const selectOrg = (o: string) => {
-  org.value = o
+  selected_organization_id.value = o
   navigateTo(`/my/`)
 
 }

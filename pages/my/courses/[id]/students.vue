@@ -89,7 +89,7 @@
     >
       <AddStudentsForm
         @student-added="onStudentAdded"
-        :orgid="org"
+        :orgid="selected_organization_id"
         :courseid="courseid"
       />
       <template #footer>
@@ -104,7 +104,7 @@ import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import type { AppStudent, Database } from "~/types/app.types";
 
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 const route = useRoute();
 const slideover = useSlideover();
 
@@ -165,12 +165,12 @@ const {
   pending,
   refresh,
 } = await useAsyncData(
-  `students_${org.value}`,
+  `students_${selected_organization_id.value}`,
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
       .select("id, inserted_at, students(*)")
-      .eq("organization_id", org.value)
+      .eq("organization_id", selected_organization_id.value)
       .eq("course_id", courseid);
     if (error) {
       console.log(error);

@@ -118,7 +118,7 @@
 import type { AppUser, Database } from "~/types/app.types";
 import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
 
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 
 definePageMeta({
   layout: "orgs",
@@ -136,11 +136,11 @@ const {
   const { data } = await client
     .from("students")
     .select("*")
-    .eq("organization_id", org.value);
+    .eq("organization_id", selected_organization_id.value);
 
   return data;
 }, {
-  watch: [org],
+  watch: [selected_organization_id],
   transform: (data) => {
     return data ? data.map((item: any) => {
       return {

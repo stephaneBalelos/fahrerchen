@@ -39,7 +39,7 @@ const emit = defineEmits<{
 }>();
 
 const client = useSupabaseClient<Database>();
-const { orgData } = useGlobalOrgState();
+const { orgData } = useUserOrganizations();
 const toast = useToast();
 
 const schema = z.object({

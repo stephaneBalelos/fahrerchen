@@ -53,7 +53,7 @@ type Props = {
   description?: string;
 };
 
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 const slideover = useSlideover();
 
 const props = withDefaults(defineProps<Props>(), {

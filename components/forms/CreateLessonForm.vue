@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 
 const supabase = useSupabaseClient<Database>();
-const { org } = useGlobalOrgState()
+const { selected_organization_id } = useUserOrganizations()
 
 const fileRef = ref<HTMLInputElement>()
 const toast = useToast()

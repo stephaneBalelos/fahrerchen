@@ -20,7 +20,7 @@
       <template #panel>
         <UDashboardCard :title="activity.name">
           <template #description>
-            {{ `${new Date(activity.date).toLocaleDateString("de")}` }}
+            <!-- {{ `${new Date(activity.date).toLocaleDateString("de")}` }} -->
           </template>
           <template #links>
             <UButton color="gray" variant="solid" @click.stop="openAddCourseActivityForm(activity)">
@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import type { AppCourseActivity } from "~/types/app.types";
 import type { AppCalendarDay } from "../calendar/views/AppCalendarMonthView.vue";
-import AddCourseActivityForm from "../forms/AddCourseActivityForm.vue";
 
 type Props = {
   courseActivities: AppCourseActivity[];
@@ -64,20 +63,20 @@ const $emit = defineEmits(['change']);
 const slideover = useSlideover();
 
 const openAddCourseActivityForm = (activity: AppCourseActivity) => {
-  slideover.open(AddCourseActivityForm, {
-    courseid: activity.course_id,
-    orgid: activity.organization_id,
-    date: props.day.date,
-    course_activity_id: activity.id,
-    "onActivity-deleted": () => {
-      slideover.close();
-      $emit("change");
-    },
-    "onActivity-saved": () => {
-      slideover.close();
-      $emit("change");
-    },
-  });
+  // slideover.open(AddCourseActivityForm, {
+  //   courseid: activity.course_id,
+  //   orgid: activity.organization_id,
+  //   date: props.day.date,
+  //   course_activity_id: activity.id,
+  //   "onActivity-deleted": () => {
+  //     slideover.close();
+  //     $emit("change");
+  //   },
+  //   "onActivity-saved": () => {
+  //     slideover.close();
+  //     $emit("change");
+  //   },
+  // });
 };
 </script>
 

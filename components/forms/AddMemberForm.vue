@@ -7,7 +7,7 @@ import type { Database } from "~/types/database.types";
 
 const emit = defineEmits(["close"]);
 
-const { orgData } = useGlobalOrgState();
+const { orgData } = useUserOrganizations();
 
 const client = useSupabaseClient<Database>();
 type AddMemberFormProps = {

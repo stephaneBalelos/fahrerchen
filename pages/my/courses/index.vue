@@ -8,21 +8,20 @@ definePageMeta({
 })
 
 const supabase = useSupabaseClient<Database>();
-const orgState = useGlobalOrgState()
+const orgState = useUserOrganizations()
 const open = ref(false)
 const toast = useToast()
 
 
-console.log(orgState.org.value)
 
-const { data, pending, status, refresh } = await useAsyncData('courses', async () => {
-    const { data, error } = await supabase.from('courses').select('*').eq('organization_id', orgState.org.value)
+const { data, error, status, refresh } = await useAsyncData('courses', async () => {
+    const { data, error } = await supabase.from('courses').select('*').eq('organization_id', orgState.selected_organization_id.value)
     if (error) {
         throw error
     }
     console.log(data)
     return data
-}, { watch: [orgState.org], immediate: true})
+}, { watch: [orgState.selected_organization_id], immediate: true})
 
 onMounted(async () => {
     console.log('mounted')
@@ -37,15 +36,15 @@ const onCourseCreated = async (d: AppCourse) => {
 
 <template>
     <UDashboardPanelContent>
-        <UPageHeader headline="Course" title="My Courses" description="All Courses" :links="[{ label: 'Create New Course', color: 'white', icon: 'i-heroicons-folder-plus', click: () => open = true }]" />
+        <UPageHeader class="courses-header" headline="Course" title="My Courses" description="All Courses" :links="[{ label: 'Create New Course', color: 'white', icon: 'i-heroicons-folder-plus', click: () => open = true }]" />
         <div v-if="data && data?.length > 0">
-            <UDashboardCard v-for="d, index in data" :key="index" :title="d.name"
+            <UDashboardCard v-for="d, index in data" :key="index" :title="d.name" class="course-card"
                 :description="d.description ? d.description : 'No description'"
                 :links="[{ label: 'Details', color: 'gray', trailingIcon: 'i-heroicons-arrow-right-20-solid', to: '/my/courses/' + d.id }]" />
         </div>
         <div v-else>
             // No data
-            <UButton @click="open = true">Create your first course</UButton>
+            <UButton id="create-course-btn" @click="open = true">Create your first course</UButton>
         </div>
     </UDashboardPanelContent>
 

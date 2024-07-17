@@ -14,7 +14,7 @@ const actions = [
 
 const client = useSupabaseClient<Database>();
 const props = useAttrs() as { orgid: string };
-const orgState = useGlobalOrgState();
+const orgState = useUserOrganizations();
 const { userInfos } = useUserInfos();
 
 const {
@@ -38,7 +38,7 @@ const {
     return data;
   },
   {
-    watch: [orgState.org, userInfos],
+    watch: [orgState.selected_organization_id, userInfos],
     immediate: true,
     transform: (data) => {
       const orgs = data
@@ -53,7 +53,7 @@ const {
           },
           icon: "i-heroicons-globe-europe-africa",
           click: () => {
-            orgState.org.value = d.id;
+            orgState.selected_organization_id.value = d.id;
           },
         };
       });
@@ -63,7 +63,7 @@ const {
 
 const team = computed(() => {
   if (!teams.value) return null;
-  return teams.value.find((t) => t.id === orgState.org.value);
+  return teams.value.find((t) => t.id === orgState.selected_organization_id.value);
 });
 </script>
 

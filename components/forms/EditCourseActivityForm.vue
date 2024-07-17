@@ -8,11 +8,11 @@
       :onSubmit="saveCourseActivity"
     >
       <UDashboardSection
-        title="Course Activity"
+        :title="t('form_section_title')"
         :description="
           props.course_activity_id
-            ? 'Edit the course activity'
-            : 'Add a new course activity'
+            ? t('form_section_desc')
+            : t('form_section_desc_new')
         "
       >
         <UFormGroup
@@ -36,23 +36,23 @@
           :ui="{ container: '' }"
         >
           <USelectMenu
-            v-model="state.requirement_id"
-            :options="course_requirements ?? []"
+            v-model="state.activity_type"
+            :options="activity_types"
             value-attribute="id"
           >
             <template #label>
-              <div v-if="state.requirement_id && course_requirements">
+              <div v-if="state.activity_type && activity_types">
                 <span class="truncate">{{
-                  course_requirements.find((r) => r.id === state.requirement_id)
-                    ?.name
+                  activity_types.find((r) => r.id === state.activity_type)
+                    ?.type
                 }}</span>
               </div>
               <div v-else>
-                <span class="truncate">Select a requirement</span>
+                <span class="truncate">{{ t('select_activity_type') }}</span>
               </div>
             </template>
             <template #option="{ option }">
-              <span class="truncate">{{ option.name }}</span>
+              <span class="truncate">{{ option.type }}</span>
             </template>
           </USelectMenu>
         </UFormGroup>
@@ -104,6 +104,7 @@ import type { Form, FormSubmitEvent } from "#ui/types";
 import { format } from "date-fns";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 import UserSelect from "./Inputs/UserSelect.vue";
+import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
 
 type CourseActivityEdit = Omit<
   AppCourseActivity,
@@ -120,6 +121,10 @@ type Emits = {
   (event: "activity-deleted", payload?: AppCourseActivity): void;
 };
 
+const { t } = useI18n({
+  useScope: 'local'
+})
+
 const slideover = useSlideover();
 
 const toast = useToast();
@@ -128,31 +133,18 @@ const props = defineProps<Props>();
 
 const form = ref<Form<CourseActivityEdit> | null>(null);
 
-const date = ref(new Date());
-
 const client = useSupabaseClient<Database>();
 
 const $emit = defineEmits<Emits>();
 
-const { data: course_requirements, error } = await useAsyncData(
-  `course_requirements_${props.courseid}`,
-  async () => {
-    const { data, error } = await client
-      .from("course_requirements")
-      .select("*")
-      .eq("course_id", props.courseid);
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    return data;
-  }
-);
+const activity_types = await useCourseActivityTypes()
+
 
 const state = reactive<CourseActivityEdit>({
   name: "",
   description: "",
-  requirement_id: null,
+  activity_type: 0,
+  required: 0,
   price: 0,
 });
 
@@ -178,7 +170,7 @@ onMounted(async () => {
         state.name = data.name;
         state.description = data.description;
         state.price = data.price;
-        state.requirement_id = data.requirement_id;
+        state.activity_type = data.activity_type
       }
     } catch (error) {
       console.log(error);
@@ -297,3 +289,22 @@ const deleteCourseActivity = async (id: string) => {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+  {
+    "de": {
+      "form_section_title": "Kurs Aktivität",
+      "form_section_desc": "Änderungen vornehmen",
+      "form_section_desc_new": "Kurs Aktivität erstellen",
+      "form_group_name_label": "Activity Name",
+      "select_activity_type": "Äktivitättyp auswählen"
+    },
+    "en": {
+      "form_section_title": "Kurs Aktivität",
+      "form_section_desc": "Änderungen vornehmen",
+      "form_section_desc_new": "Kurs Aktivität erstellen",
+      "form_group_name_label": "Activity Name",
+      "select_activity_type": "Äktivitättyp auswählen"
+    }
+  }
+</i18n>

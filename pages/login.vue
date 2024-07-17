@@ -91,6 +91,7 @@ async function onSubmit(credentials: any) {
     if (error) {
         // Handle Error
         loginFailed.value = true
+        console.error(error)
         return;
     }
 

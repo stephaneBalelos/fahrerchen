@@ -4,10 +4,10 @@ import type { AppUserWithRole } from '~/types/app.types';
 import { type Database } from '~/types/database.types';
 
 const client = useSupabaseClient<Database>()
-const { org } = useGlobalOrgState()
+const { selected_organization_id } = useUserOrganizations()
 
 const { data, error, refresh } = await useAsyncData('members', async () => {
-  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', org.value)
+  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', selected_organization_id.value)
   if (error) {
     throw error
   }

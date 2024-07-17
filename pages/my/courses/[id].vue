@@ -3,7 +3,7 @@
     <UHorizontalNavigation :links="links" />
   </UDashboardToolbar>
 
-  <NuxtPage :orgid="org" :courseid="courseid" />
+  <NuxtPage :orgid="selected_organization_id" :courseid="courseid" />
 </template>
 
 <script setup lang="ts">
@@ -12,7 +12,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 const courseid = route.params.id as string;
 
 const links = [

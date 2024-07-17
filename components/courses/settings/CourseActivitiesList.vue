@@ -4,7 +4,7 @@
       :description="'Set the Activities for this course.'"
       orientation="horizontal"
       class="px-4 py-6"
-    >
+    > 
       <template #links>
         <UButton
           color="primary"
@@ -48,7 +48,7 @@
 
 <script setup lang="ts">
     import type { Database } from '~/types/app.types';
-import EditCourseActivityForm from '../forms/EditCourseActivityForm.vue';
+import EditCourseActivityForm from '~/components/forms/EditCourseActivityForm.vue';
 
 const supabase = useSupabaseClient<Database>();
 const slideover = useSlideover();
@@ -62,7 +62,7 @@ const props = defineProps<{
 const {
   data: course_activities,
   error,
-  pending,
+  status,
   refresh,
 } = useAsyncData(`course_activities_${props.courseid}`, async () => {
   const { data } = await supabase

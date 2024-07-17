@@ -22,10 +22,10 @@
 
           <UDivider />
 
-          <UDashboardSidebarLinks
+          <!-- <UDashboardSidebarLinks
             :links="[{ label: 'Colors', draggable: false, children: colors }]"
             @update:links="(links) => (defaultColors = links)"
-          />
+          /> -->
 
           <div class="flex-1" />
 
@@ -52,7 +52,7 @@
           </UDashboardNavbar>
 
           <ClientOnly>
-            <slot :orgid="org"></slot>
+            <slot :orgid="selected_organization_id"></slot>
           </ClientOnly>
         </UDashboardPanel>
 
@@ -63,6 +63,7 @@
 <script setup lang="ts">
 import TeamsDropdown from '~/components/sidebar/TeamsDropdown.vue';
 import UserDropdown from '~/components/navigation/UserMenu.vue';
+import { useUserOrganizations } from '~/composables/useUserOrganizations';
 
 
 const route = useRoute();
@@ -75,7 +76,7 @@ const user = useSupabaseUser();
 const supabase = useSupabaseClient();
 const toast = useToast();
 
-const { org, orgData } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations()
 
 const links = [
   {
