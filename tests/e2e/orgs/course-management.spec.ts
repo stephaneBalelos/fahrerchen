@@ -1,6 +1,6 @@
 import test, { expect } from "@playwright/test";
 import { login } from "../auth/utils";
-import { testConstants } from "../utils";
+import { selectFromSelectMenu, testConstants } from "../utils";
 
 
 test.describe("Course Management", () => {
@@ -32,9 +32,10 @@ test.describe("Course Management", () => {
         const modal = page.locator('#create-course-slideover');
         await expect(modal).toBeVisible();
         await modal.locator('input[type=text]').fill('My new Course');
-        await modal.locator('input[type=hidden]').fill('1');
+        const select = modal.locator('.app-select');
+        await selectFromSelectMenu(page, select, 6);
         await modal.locator('textarea').fill('This is a new course');
-        const createButton = modal.locator('button[type=submit]');
+        const createButton = modal.locator('.app-btn-submit');
         await createButton.click();
 
         const notificationsContainer = page.locator("#notifications-container")
@@ -42,7 +43,8 @@ test.describe("Course Management", () => {
         const toast = page.locator('#notifications-container > div')
         await expect(toast).toHaveCount(1, {timeout: 1000})
 
-        const regex = /^(http:\/\/localhost:3000\/my\/courses\/)\S+/
+        await page.waitForURL(/^(http:\/\/localhost:3000\/my\/courses\/)(.+?)\/settings/)
+        const regex = /^(http:\/\/localhost:3000\/my\/courses\/)(.+?)\/settings/
         expect(page).toHaveURL(regex)
 
     });

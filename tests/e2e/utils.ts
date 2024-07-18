@@ -1,3 +1,4 @@
+import type { Locator, Page } from "@playwright/test";
 import { execSync } from "child_process";
 import detect from "detect-port";
 
@@ -49,4 +50,13 @@ function reseedDb() {
   //   });
   // });
   // return p;
+}
+
+
+export async function selectFromSelectMenu(page: Page, selectMenu: Locator, option: number) {
+  await selectMenu.click();
+  await page.waitForSelector('.app-select-menu');
+  await page.waitForSelector('.app-select-menu-option');
+  const options = await page.locator('.app-select-menu-option').all();
+  await options[option].click();
 }
