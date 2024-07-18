@@ -76,7 +76,7 @@ async function onClose() {
       :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
     >
       <!-- ~/components/settings/MembersForm.vue -->
-      <AddMemberForm @close="onClose" />
+      <AddMemberForm :orgid="selected_organization_id" @close="onClose" />
     </UDashboardModal>
   </div>
 </template>

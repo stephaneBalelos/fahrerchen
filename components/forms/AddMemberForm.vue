@@ -5,9 +5,11 @@ import { z } from "zod";
 import type { UserRole } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
-const emit = defineEmits(["close"]);
+const props = defineProps<{
+  orgid: string;
+}>();
 
-const { orgData } = useUserOrganizations();
+const emit = defineEmits(["close"]);
 
 const client = useSupabaseClient<Database>();
 type AddMemberFormProps = {
@@ -35,7 +37,7 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 };
 
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
-  const orgId = orgData.value?.id
+  const orgId = props.orgid
   if (orgId) {
     const {data, error} = await client.functions.invoke("invite-team-member", {
     method: 'POST',
