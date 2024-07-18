@@ -63,7 +63,7 @@ const openCreateCourseForm = () => {
         },
       ]"
     />
-    <div v-if="data && data?.length > 0">
+    <div class="grid grid-cols-1 gap-3" v-if="data && data?.length > 0">
       <UDashboardCard
         v-for="(d, index) in data"
         :key="index"

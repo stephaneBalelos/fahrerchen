@@ -8,7 +8,9 @@ export type AppOrganization = DatabaseGenerated['public']['Tables']['organizatio
 export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
+export type AppCourseType = DatabaseGenerated['public']['Tables']['course_types']['Row']
 export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']
+export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['course_activity_types']['Row']
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 

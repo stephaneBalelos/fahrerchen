@@ -1,5 +1,5 @@
 <template>
-  <UDashboardSlideover :title="'New Course'" ref="slideover" prevent-close id="create-course-slideover">
+  <UDashboardSlideover :title="`${props.course_id ? state.name : 'New Course'}`" ref="slideover" prevent-close id="create-course-slideover">
     <UForm
     ref="form"
       :state="state"
@@ -76,7 +76,8 @@
       </UDashboardSection>
     </UForm>
     <template #footer>
-      <UButton class="app-btn-submit" block @click="form?.submit()" label="Create Course" />
+      <UButton v-if="props.course_id" class="app-btn-submit" block @click="form?.submit()" label="Update Course" />
+      <UButton v-else class="app-btn-submit" block @click="form?.submit()" label="Create Course" />
     </template>
   </UDashboardSlideover>
 </template>
@@ -105,6 +106,7 @@ const toast = useToast();
 
 const emit = defineEmits<{
   (e: "course-created", value: AppCourse): void;
+  (e: "course-updated", value: AppCourse): void;
 }>();
 
 const {
@@ -127,19 +129,24 @@ const selected_type = computed(() => {
   return course_types.value?.find((t) => t.id === state.type);
 });
 
-// function onFileChange(e: Event) {
-//     const input = e.target as HTMLInputElement
-
-//     if (!input.files?.length) {
-//         return
-//     }
-
-//     state.avatar = URL.createObjectURL(input.files[0])
-// }
-
-// function onFileClick() {
-//     fileRef.value?.click()
-// }
+onMounted(async () => {
+  if (props.course_id) {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("id", props.course_id)
+      .single();
+    if (error) {
+      console.error(error);
+      return;
+    }
+    if (data) {
+      state.name = data.name;
+      state.type = data.type;
+      state.description = data.description;
+    }
+  }
+});
 
 const validate = (state: EditCourseFormProps): FormError[] => {
   const errors = [];
@@ -161,8 +168,11 @@ const validate = (state: EditCourseFormProps): FormError[] => {
 };
 
 async function onSubmit(event: FormSubmitEvent<any>) {
-  // Emit event
-  createCourse(event.data);
+  if (props.course_id) {
+    updateCourse(props.course_id, event.data);
+  } else {
+    createCourse(event.data);
+  }
 }
 
 const createCourse = async (d: EditCourseFormProps) => {
@@ -195,6 +205,41 @@ const createCourse = async (d: EditCourseFormProps) => {
     toast.add({
       title: "Error",
       description: "Could not create course",
+      color: "red",
+    });
+  }
+};
+const updateCourse = async (course_id: string, d: EditCourseFormProps) => {
+  try {
+    const { data, error } = await supabase
+      .from("courses")
+      .update({
+        ...d,
+        organization_id: selected_organization_id.value,
+      })
+      .eq("id", course_id)
+      .select("*");
+    if (error) {
+      toast.add({
+        title: "Error",
+        description: "Could not Update course",
+        color: "red",
+      });
+      throw error;
+    }
+    toast.add({
+      title: "Success",
+      description: "Course Informations Updated",
+      color: "green",
+    });
+    if (data) {
+      emit("course-updated", data[0]);
+    }
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "Could not Update Course",
       color: "red",
     });
   }
