@@ -104,9 +104,14 @@ const filteredStudents = computed(() => {
 function addStudents() {
   console.log(selected.value);
   selected.value.forEach(async (studentId) => {
+    console.log(studentId, props.courseid, props.orgid);
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .upsert({student_id: studentId, course_id: props.courseid, organization_id: props.orgid});
+      .insert({
+        course_id: props.courseid,
+        student_id: studentId,
+        organization_id: props.orgid,
+      });
     if (error) {
       toast.add({
         title: "Error",

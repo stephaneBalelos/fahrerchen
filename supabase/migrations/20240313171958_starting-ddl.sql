@@ -342,18 +342,19 @@ create trigger on_course_created
 create function public.handle_new_course_subscription()
 returns trigger as $$
 declare org_id uuid;
-declare course_id uuid;
+declare subscription_bill_id uuid;
 declare activity record;
 begin
   org_id := new.organization_id;
-  course_id := new.course_id;
+
 
   insert into public.course_subscription_bills (course_subscription_id, total, organization_id)
-  values (new.id, 0, org_id);
+  values (new.id, 0, org_id)
+  returning id into subscription_bill_id;
 
-  for activity in select * from public.course_activities where course_id = course_id loop
+  for activity in select * from public.course_activities where course_id = new.course_id loop
     insert into public.course_subscription_bill_items (bill_id, description, price, amount, organization_id)
-    values (new.id, activity.name, activity.price, 0, activity.organization_id);
+    values (subscription_bill_id, activity.name, activity.price, 0, activity.organization_id);
   end loop;
 
   return new;
