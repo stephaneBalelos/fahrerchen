@@ -24,14 +24,12 @@ const { data, error, status, refresh } = await useAsyncData(
     if (error) {
       throw error;
     }
-    console.log(data);
     return data;
   },
   { watch: [orgState.selected_organization_id], immediate: true }
 );
 
 onMounted(async () => {
-  console.log("mounted");
   await refresh();
 });
 
