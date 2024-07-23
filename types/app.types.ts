@@ -21,6 +21,10 @@ export type StripeConnectPostBody = {
   org_id: string
 }
 
+export type StripeConnectLinkAccountPostBody = {
+  org_id: string
+}
+
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
     Views: {

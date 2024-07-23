@@ -579,18 +579,21 @@ export type Database = {
           inserted_at: string
           name: string
           owner_id: string
+          stripe_account_id: string | null
         }
         Insert: {
           id?: string
           inserted_at?: string
           name: string
           owner_id: string
+          stripe_account_id?: string | null
         }
         Update: {
           id?: string
           inserted_at?: string
           name?: string
           owner_id?: string
+          stripe_account_id?: string | null
         }
         Relationships: [
           {

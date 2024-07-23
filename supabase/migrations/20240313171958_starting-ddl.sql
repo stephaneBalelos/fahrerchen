@@ -92,7 +92,8 @@ create table public.organizations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   name          text not null,
-  owner_id      uuid references public.users not null
+  owner_id      uuid references public.users not null,
+  stripe_account_id  text
 );
 comment on table public.organizations is 'organization data.';
 
