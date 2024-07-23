@@ -100,10 +100,10 @@
 </template>
 
 <script setup lang="ts">
+import CourseSubscriptionBill from "~/components/courses/CourseSubscriptionBill.vue";
 import StudentCourseProfile from "~/components/courses/StudentCourseProfile.vue";
 import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
-import EditStudentForm from "~/components/forms/EditStudentForm.vue";
-import type { AppStudent, Database } from "~/types/app.types";
+import type { AppCourseSubscription, AppStudent, Database } from "~/types/app.types";
 
 const { selected_organization_id } = useUserOrganizations();
 const route = useRoute();
@@ -184,6 +184,7 @@ const {
       return {
         ...sub,
         status: sub.archived_at ? "archived" : "subscribed",
+        fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
       }
     })
   }}
@@ -191,13 +192,7 @@ const {
 
 const subscriptions = computed(() => {
   if (!course_subscriptions.value) return [];
-  return course_subscriptions.value.filter((sub) => sub.students !== null).map((sub) => {
-    return {
-      ...sub.students,
-      status: sub.status,
-      fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
-    }
-  });
+  return course_subscriptions.value.filter((sub) => sub.students !== null);
 });
 
 // const defaultLocations = users.value.reduce((acc, user) => {
@@ -233,7 +228,7 @@ defineShortcuts({
   },
 });
 
-const items = (row: AppStudent) => [
+const items = (row: AppCourseSubscription) => [
   [
     {
       label: "Course Profile",
@@ -243,8 +238,11 @@ const items = (row: AppStudent) => [
       },
     },
     {
-      label: "Duplicate",
+      label: "Rechnung",
       icon: "i-heroicons-document-duplicate-20-solid",
+      click: () => {
+        slideover.open(CourseSubscriptionBill, { subscription_id: row.id });
+      },
     },
   ],
   [
