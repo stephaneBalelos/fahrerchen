@@ -41,20 +41,20 @@
     <UTable
       v-model="selected"
       v-model:sort="sort"
-      :rows="students ? students : []"
+      :rows="subscriptions ? subscriptions : []"
       :columns="columns"
-      :loading="pending"
+      :loading="status === 'pending'"
       sort-mode="manual"
       class="w-full"
       :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
       @select="onSelect"
     >
-      <template #name-data="{ row }">
+      <template #fullname-data="{ row }">
         <div class="flex items-center gap-3">
-          <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
+          <UAvatar :alt="row.fullname" size="xs" />
 
           <span class="text-gray-900 dark:text-white font-medium">{{
-            row.name
+            row.fullname
           }}</span>
         </div>
       </template>
@@ -65,7 +65,7 @@
           :color="
             row.status === 'subscribed'
               ? 'green'
-              : row.status === 'bounced'
+              : row.status === 'archived'
               ? 'orange'
               : 'red'
           "
@@ -74,7 +74,7 @@
         />
       </template>
       <template #actions-data="{ row }">
-        <UDropdown :items="items(row)">
+        <UDropdown :items="items(row)" @click.stop>
           <UButton
             color="gray"
             variant="ghost"
@@ -100,6 +100,7 @@
 </template>
 
 <script setup lang="ts">
+import StudentCourseProfile from "~/components/courses/StudentCourseProfile.vue";
 import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import type { AppStudent, Database } from "~/types/app.types";
@@ -108,17 +109,17 @@ const { selected_organization_id } = useUserOrganizations();
 const route = useRoute();
 const slideover = useSlideover();
 
-const courseid = route.params.id as string;
+type Props = {
+  orgid: string;
+  courseid: string;
+};
+
+const { courseid, orgid } = useAttrs() as Props;
 
 const defaultColumns = [
   {
-    key: "firstname",
-    label: "First Name",
-    sortable: true,
-  },
-  {
-    key: "lastname",
-    label: "Last Name",
+    key: "fullname",
+    label: "name",
     sortable: true,
   },
   {
@@ -162,14 +163,14 @@ const query = computed(() => ({
 
 const {
   data: course_subscriptions,
-  pending,
+  status,
   refresh,
 } = await useAsyncData(
-  `students_${selected_organization_id.value}`,
+  `subscriptions_${selected_organization_id.value}`,
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .select("id, inserted_at, students(*)")
+      .select("*, students(*)")
       .eq("organization_id", selected_organization_id.value)
       .eq("course_id", courseid);
     if (error) {
@@ -178,12 +179,25 @@ const {
     }
     return data;
   },
-  { watch: [query], immediate: true }
+  { watch: [query], immediate: true, transform:(data) => {
+    return data.map((sub) => {
+      return {
+        ...sub,
+        status: sub.archived_at ? "archived" : "subscribed",
+      }
+    })
+  }}
 );
 
-const students = computed(() => {
+const subscriptions = computed(() => {
   if (!course_subscriptions.value) return [];
-  return course_subscriptions.value.map((sub) => sub.students as AppStudent);
+  return course_subscriptions.value.filter((sub) => sub.students !== null).map((sub) => {
+    return {
+      ...sub.students,
+      status: sub.status,
+      fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
+    }
+  });
 });
 
 // const defaultLocations = users.value.reduce((acc, user) => {
@@ -222,10 +236,10 @@ defineShortcuts({
 const items = (row: AppStudent) => [
   [
     {
-      label: "Edit",
+      label: "Course Profile",
       icon: "i-heroicons-pencil-square-20-solid",
       click: () => {
-        slideover.open(EditStudentForm, { student: row });
+        slideover.open(StudentCourseProfile);
       },
     },
     {
@@ -241,12 +255,6 @@ const items = (row: AppStudent) => [
     {
       label: "Move",
       icon: "i-heroicons-arrow-right-circle-20-solid",
-    },
-  ],
-  [
-    {
-      label: "Delete",
-      icon: "i-heroicons-trash-20-solid",
     },
   ],
 ];

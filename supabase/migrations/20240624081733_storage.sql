@@ -28,6 +28,7 @@ create policy "Owner & Manager can update students" on storage.objects for updat
 create policy "Owner & Manager can delete students" on storage.objects for delete to authenticated using (public.authorize('students.delete', ((storage.foldername(name))[1])::uuid));
 
 
+
 -- course Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types)

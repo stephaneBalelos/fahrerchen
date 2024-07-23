@@ -107,7 +107,7 @@ function addStudents() {
     console.log(studentId, props.courseid, props.orgid);
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .insert({
+      .upsert({
         course_id: props.courseid,
         student_id: studentId,
         organization_id: props.orgid,

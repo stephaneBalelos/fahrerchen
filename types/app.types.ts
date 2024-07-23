@@ -13,6 +13,7 @@ export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_ac
 export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['course_activity_types']['Row']
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
+export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
 
 
 
