@@ -162,7 +162,7 @@ create table public.course_subscriptions (
   student_id    uuid references public.students on delete cascade not null,
   archived_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  costs        integer default 0 not null check (costs >= 0),
+  costs        numeric default 0 not null check (costs >= 0),
   unique (course_id, student_id)
 );
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
@@ -173,7 +173,8 @@ alter table public.course_subscriptions enable row level security;
 create table public.course_subscription_bills (
   id            uuid default uuid_generate_v4() primary key,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  total        integer default 0 not null check (total >= 0),
+  total        numeric default 0 not null check (total >= 0),
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_subscription_id)
@@ -187,8 +188,9 @@ create table public.course_subscription_bill_items (
   id            uuid default uuid_generate_v4() primary key,
   bill_id      uuid references public.course_subscription_bills on delete cascade not null,
   description   text not null,
-  price       integer default 0 not null check (price >= 0),
+  price       numeric default 0 not null check (price >= 0),
   amount        integer default 0 not null check (amount >= 0),
+  total        numeric generated always as (price * amount) stored,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
@@ -214,7 +216,7 @@ create table public.course_activities (
   description   text not null,
   activity_type  integer references public.course_activity_types not null,
   required     integer default 0 not null check (required >= 0),
-  price        integer default 0 not null check (price >= 0),
+  price        numeric default 0 not null check (price >= 0),
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
@@ -355,7 +357,7 @@ begin
 
   for activity in select * from public.course_activities where course_id = new.course_id loop
     insert into public.course_subscription_bill_items (bill_id, description, price, amount, organization_id)
-    values (subscription_bill_id, activity.name, activity.price, 0, activity.organization_id);
+    values (subscription_bill_id, activity.name, activity.price, activity.required, activity.organization_id);
   end loop;
 
   return new;
@@ -365,6 +367,27 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_subscription_created
   after insert on public.course_subscriptions
   for each row execute procedure public.handle_new_course_subscription();
+
+
+
+-- handle new Bill Item
+create function public.handle_new_bill_item()
+returns trigger as $$
+declare org_id uuid;
+begin
+  org_id := new.organization_id;
+
+  -- Aggragate the total of the bill
+  update public.course_subscription_bills set total = total + (new.total)
+  where id = new.bill_id;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course subscription bill item is created
+create trigger on_course_subscription_bill_item_created
+  after insert on public.course_subscription_bill_items
+  for each row execute procedure public.handle_new_bill_item();
 
 
 

@@ -349,6 +349,7 @@ export type Database = {
           id: string
           organization_id: string
           price: number
+          total: number | null
         }
         Insert: {
           amount?: number
@@ -357,6 +358,7 @@ export type Database = {
           id?: string
           organization_id: string
           price?: number
+          total?: number | null
         }
         Update: {
           amount?: number
@@ -365,6 +367,7 @@ export type Database = {
           id?: string
           organization_id?: string
           price?: number
+          total?: number | null
         }
         Relationships: [
           {
@@ -386,6 +389,7 @@ export type Database = {
       course_subscription_bills: {
         Row: {
           course_subscription_id: string
+          created_at: string
           id: string
           organization_id: string
           paid_at: string | null
@@ -393,6 +397,7 @@ export type Database = {
         }
         Insert: {
           course_subscription_id: string
+          created_at?: string
           id?: string
           organization_id: string
           paid_at?: string | null
@@ -400,6 +405,7 @@ export type Database = {
         }
         Update: {
           course_subscription_id?: string
+          created_at?: string
           id?: string
           organization_id?: string
           paid_at?: string | null

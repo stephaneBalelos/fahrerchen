@@ -110,6 +110,16 @@ const links = [
     },
   },
   {
+    id: "bills",
+    label: "Bills",
+    icon: "i-heroicons-credit-card",
+    to: "/my/bills",
+    tooltip: {
+      text: "Bills",
+      shortcuts: ["G", "B"],
+    },
+  },
+  {
     id: "settings",
     label: "Settings",
     to: "/my/settings",
