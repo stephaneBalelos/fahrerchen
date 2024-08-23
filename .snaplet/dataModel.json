@@ -713,6 +713,20 @@
           "maxLength": null
         },
         {
+          "id": "public.course_activities.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "numeric",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "id": "public.course_activities.organization_id",
           "name": "organization_id",
           "columnName": "organization_id",
@@ -781,20 +795,6 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activities_costs",
-          "type": "course_activities_costs",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activities_costsTocourse_activities",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
           "name": "course_activity_attendances",
           "type": "course_activity_attendances",
           "isRequired": false,
@@ -826,135 +826,6 @@
       "uniqueConstraints": [
         {
           "name": "course_activities_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "course_activities_costs": {
-      "id": "public.course_activities_costs",
-      "schemaName": "public",
-      "tableName": "course_activities_costs",
-      "fields": [
-        {
-          "id": "public.course_activities_costs.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activities_costs.course_activity_id",
-          "name": "course_activity_id",
-          "columnName": "course_activity_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activities_costs.price",
-          "name": "price",
-          "columnName": "price",
-          "type": "numeric",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activities_costs.include_in_bill",
-          "name": "include_in_bill",
-          "columnName": "include_in_bill",
-          "type": "bool",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activities_costs.organization_id",
-          "name": "organization_id",
-          "columnName": "organization_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "course_activities",
-          "type": "course_activities",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activities_costsTocourse_activities",
-          "relationFromFields": [
-            "course_activity_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "organizations",
-          "type": "organizations",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activities_costsToorganizations",
-          "relationFromFields": [
-            "organization_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "course_activities_costs_course_activity_id_key",
-          "fields": [
-            "course_activity_id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "course_activities_costs_pkey",
           "fields": [
             "id"
           ],
@@ -1857,20 +1728,6 @@
           "maxLength": null
         },
         {
-          "id": "public.course_subscription_bill_items.title",
-          "name": "title",
-          "columnName": "title",
-          "type": "text",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
           "id": "public.course_subscription_bill_items.description",
           "name": "description",
           "columnName": "description",
@@ -2230,6 +2087,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscriptions.costs",
+          "name": "costs",
+          "columnName": "costs",
+          "type": "numeric",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
@@ -3547,13 +3418,13 @@
         }
       ]
     },
-    "log_events_0af815df_c00d_452a_84d9_264c69e66d98": {
-      "id": "_analytics.log_events_0af815df_c00d_452a_84d9_264c69e66d98",
+    "log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5": {
+      "id": "_analytics.log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5",
       "schemaName": "_analytics",
-      "tableName": "log_events_0af815df_c00d_452a_84d9_264c69e66d98",
+      "tableName": "log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5",
       "fields": [
         {
-          "id": "_analytics.log_events_0af815df_c00d_452a_84d9_264c69e66d98.id",
+          "id": "_analytics.log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3567,7 +3438,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_0af815df_c00d_452a_84d9_264c69e66d98.body",
+          "id": "_analytics.log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3581,7 +3452,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_0af815df_c00d_452a_84d9_264c69e66d98.event_message",
+          "id": "_analytics.log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3595,7 +3466,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_0af815df_c00d_452a_84d9_264c69e66d98.timestamp",
+          "id": "_analytics.log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3611,7 +3482,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_0af815df_c00d_452a_84d9_264c69e66d98_pkey",
+          "name": "log_events_128b1f61_34c2_4b4c_b644_ff223b07a0d5_pkey",
           "fields": [
             "id"
           ],
@@ -3619,13 +3490,13 @@
         }
       ]
     },
-    "log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9": {
-      "id": "_analytics.log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9",
+    "log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9": {
+      "id": "_analytics.log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9",
       "schemaName": "_analytics",
-      "tableName": "log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9",
+      "tableName": "log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9",
       "fields": [
         {
-          "id": "_analytics.log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9.id",
+          "id": "_analytics.log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3639,7 +3510,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9.body",
+          "id": "_analytics.log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3653,7 +3524,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9.event_message",
+          "id": "_analytics.log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3667,7 +3538,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9.timestamp",
+          "id": "_analytics.log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3683,7 +3554,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_13895bbb_cbc4_4938_95ec_4eeb768d30d9_pkey",
+          "name": "log_events_243e2eea_bea2_4004_bd6e_0ce5c05f09b9_pkey",
           "fields": [
             "id"
           ],
@@ -3691,13 +3562,13 @@
         }
       ]
     },
-    "log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06": {
-      "id": "_analytics.log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06",
+    "log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37": {
+      "id": "_analytics.log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37",
       "schemaName": "_analytics",
-      "tableName": "log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06",
+      "tableName": "log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37",
       "fields": [
         {
-          "id": "_analytics.log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.id",
+          "id": "_analytics.log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3711,7 +3582,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.body",
+          "id": "_analytics.log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3725,7 +3596,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.event_message",
+          "id": "_analytics.log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3739,7 +3610,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.timestamp",
+          "id": "_analytics.log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3755,7 +3626,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_1fbd625e_1d1b_470b_a18e_a63d2e74cd06_pkey",
+          "name": "log_events_9ff775ea_5c08_4267_a08e_5fe97b1caa37_pkey",
           "fields": [
             "id"
           ],
@@ -3763,13 +3634,13 @@
         }
       ]
     },
-    "log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b": {
-      "id": "_analytics.log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b",
+    "log_events_a443628d_a312_4065_af49_9b619f8664f5": {
+      "id": "_analytics.log_events_a443628d_a312_4065_af49_9b619f8664f5",
       "schemaName": "_analytics",
-      "tableName": "log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b",
+      "tableName": "log_events_a443628d_a312_4065_af49_9b619f8664f5",
       "fields": [
         {
-          "id": "_analytics.log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b.id",
+          "id": "_analytics.log_events_a443628d_a312_4065_af49_9b619f8664f5.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3783,7 +3654,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b.body",
+          "id": "_analytics.log_events_a443628d_a312_4065_af49_9b619f8664f5.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3797,7 +3668,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b.event_message",
+          "id": "_analytics.log_events_a443628d_a312_4065_af49_9b619f8664f5.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3811,7 +3682,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b.timestamp",
+          "id": "_analytics.log_events_a443628d_a312_4065_af49_9b619f8664f5.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3827,7 +3698,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_28e925b1_2953_41fb_9aae_4d62f52ba12b_pkey",
+          "name": "log_events_a443628d_a312_4065_af49_9b619f8664f5_pkey",
           "fields": [
             "id"
           ],
@@ -3835,13 +3706,13 @@
         }
       ]
     },
-    "log_events_355b56c4_c443_4b3e_a3b5_422406736d23": {
-      "id": "_analytics.log_events_355b56c4_c443_4b3e_a3b5_422406736d23",
+    "log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9": {
+      "id": "_analytics.log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9",
       "schemaName": "_analytics",
-      "tableName": "log_events_355b56c4_c443_4b3e_a3b5_422406736d23",
+      "tableName": "log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9",
       "fields": [
         {
-          "id": "_analytics.log_events_355b56c4_c443_4b3e_a3b5_422406736d23.id",
+          "id": "_analytics.log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3855,7 +3726,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_355b56c4_c443_4b3e_a3b5_422406736d23.body",
+          "id": "_analytics.log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3869,7 +3740,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_355b56c4_c443_4b3e_a3b5_422406736d23.event_message",
+          "id": "_analytics.log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3883,7 +3754,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_355b56c4_c443_4b3e_a3b5_422406736d23.timestamp",
+          "id": "_analytics.log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3899,7 +3770,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_355b56c4_c443_4b3e_a3b5_422406736d23_pkey",
+          "name": "log_events_b50ba73b_46d7_4105_8a2a_60de5808d9c9_pkey",
           "fields": [
             "id"
           ],
@@ -3907,13 +3778,13 @@
         }
       ]
     },
-    "log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819": {
-      "id": "_analytics.log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819",
+    "log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b": {
+      "id": "_analytics.log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b",
       "schemaName": "_analytics",
-      "tableName": "log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819",
+      "tableName": "log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b",
       "fields": [
         {
-          "id": "_analytics.log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819.id",
+          "id": "_analytics.log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3927,7 +3798,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819.body",
+          "id": "_analytics.log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -3941,7 +3812,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819.event_message",
+          "id": "_analytics.log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -3955,7 +3826,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819.timestamp",
+          "id": "_analytics.log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -3971,7 +3842,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_559c53b3_ef43_4f71_b01d_20bcd4d3a819_pkey",
+          "name": "log_events_b5696bc0_1888_42f2_bb64_8e7e317f041b_pkey",
           "fields": [
             "id"
           ],
@@ -3979,13 +3850,13 @@
         }
       ]
     },
-    "log_events_6e626118_6c54_46a2_96da_fe0ea086d58b": {
-      "id": "_analytics.log_events_6e626118_6c54_46a2_96da_fe0ea086d58b",
+    "log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e": {
+      "id": "_analytics.log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e",
       "schemaName": "_analytics",
-      "tableName": "log_events_6e626118_6c54_46a2_96da_fe0ea086d58b",
+      "tableName": "log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e",
       "fields": [
         {
-          "id": "_analytics.log_events_6e626118_6c54_46a2_96da_fe0ea086d58b.id",
+          "id": "_analytics.log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -3999,7 +3870,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_6e626118_6c54_46a2_96da_fe0ea086d58b.body",
+          "id": "_analytics.log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -4013,7 +3884,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_6e626118_6c54_46a2_96da_fe0ea086d58b.event_message",
+          "id": "_analytics.log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -4027,7 +3898,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_6e626118_6c54_46a2_96da_fe0ea086d58b.timestamp",
+          "id": "_analytics.log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -4043,7 +3914,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_6e626118_6c54_46a2_96da_fe0ea086d58b_pkey",
+          "name": "log_events_d089bfbd_92a8_4a72_b326_7693afb4c30e_pkey",
           "fields": [
             "id"
           ],
@@ -4051,13 +3922,13 @@
         }
       ]
     },
-    "log_events_eaeb2497_b677_448d_bc8b_8050fa27b197": {
-      "id": "_analytics.log_events_eaeb2497_b677_448d_bc8b_8050fa27b197",
+    "log_events_e04dca11_6297_419c_a5ab_40097983a2b8": {
+      "id": "_analytics.log_events_e04dca11_6297_419c_a5ab_40097983a2b8",
       "schemaName": "_analytics",
-      "tableName": "log_events_eaeb2497_b677_448d_bc8b_8050fa27b197",
+      "tableName": "log_events_e04dca11_6297_419c_a5ab_40097983a2b8",
       "fields": [
         {
-          "id": "_analytics.log_events_eaeb2497_b677_448d_bc8b_8050fa27b197.id",
+          "id": "_analytics.log_events_e04dca11_6297_419c_a5ab_40097983a2b8.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -4071,7 +3942,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_eaeb2497_b677_448d_bc8b_8050fa27b197.body",
+          "id": "_analytics.log_events_e04dca11_6297_419c_a5ab_40097983a2b8.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -4085,7 +3956,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_eaeb2497_b677_448d_bc8b_8050fa27b197.event_message",
+          "id": "_analytics.log_events_e04dca11_6297_419c_a5ab_40097983a2b8.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -4099,7 +3970,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_eaeb2497_b677_448d_bc8b_8050fa27b197.timestamp",
+          "id": "_analytics.log_events_e04dca11_6297_419c_a5ab_40097983a2b8.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -4115,7 +3986,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_eaeb2497_b677_448d_bc8b_8050fa27b197_pkey",
+          "name": "log_events_e04dca11_6297_419c_a5ab_40097983a2b8_pkey",
           "fields": [
             "id"
           ],
@@ -4123,13 +3994,13 @@
         }
       ]
     },
-    "log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f": {
-      "id": "_analytics.log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f",
+    "log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c": {
+      "id": "_analytics.log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c",
       "schemaName": "_analytics",
-      "tableName": "log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f",
+      "tableName": "log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c",
       "fields": [
         {
-          "id": "_analytics.log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.id",
+          "id": "_analytics.log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.id",
           "name": "id",
           "columnName": "id",
           "type": "varchar",
@@ -4143,7 +4014,7 @@
           "maxLength": 255
         },
         {
-          "id": "_analytics.log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.body",
+          "id": "_analytics.log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.body",
           "name": "body",
           "columnName": "body",
           "type": "jsonb",
@@ -4157,7 +4028,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.event_message",
+          "id": "_analytics.log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.event_message",
           "name": "event_message",
           "columnName": "event_message",
           "type": "text",
@@ -4171,7 +4042,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.timestamp",
+          "id": "_analytics.log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.timestamp",
           "name": "timestamp",
           "columnName": "timestamp",
           "type": "timestamp",
@@ -4187,7 +4058,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_ef1f2286_0dee_429f_a5ef_ad04f21afa0f_pkey",
+          "name": "log_events_e905beb3_c8ac_48f8_ac6e_89c54fd5140c_pkey",
           "fields": [
             "id"
           ],
@@ -5295,20 +5166,6 @@
           "isRequired": false,
           "kind": "object",
           "relationName": "course_activitiesToorganizations",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "course_activities_costs",
-          "type": "course_activities_costs",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activities_costsToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -6617,13 +6474,13 @@
         }
       ]
     },
-    "schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98": {
-      "id": "_analytics.schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98",
+    "schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5": {
+      "id": "_analytics.schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98",
+      "tableName": "schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98.version",
+          "id": "_analytics.schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6637,7 +6494,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98.inserted_at",
+          "id": "_analytics.schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6653,7 +6510,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_0af815df_c00d_452a_84d9_264c69e66d98_pkey",
+          "name": "schema_migrations_128b1f61_34c2_4b4c_b644_ff223b07a0d5_pkey",
           "fields": [
             "version"
           ],
@@ -6661,13 +6518,13 @@
         }
       ]
     },
-    "schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9": {
-      "id": "_analytics.schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9",
+    "schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9": {
+      "id": "_analytics.schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9",
+      "tableName": "schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9.version",
+          "id": "_analytics.schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6681,7 +6538,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9.inserted_at",
+          "id": "_analytics.schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6697,7 +6554,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_13895bbb_cbc4_4938_95ec_4eeb768d30d9_pkey",
+          "name": "schema_migrations_243e2eea_bea2_4004_bd6e_0ce5c05f09b9_pkey",
           "fields": [
             "version"
           ],
@@ -6705,13 +6562,13 @@
         }
       ]
     },
-    "schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06": {
-      "id": "_analytics.schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06",
+    "schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37": {
+      "id": "_analytics.schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06",
+      "tableName": "schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.version",
+          "id": "_analytics.schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6725,7 +6582,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06.inserted_at",
+          "id": "_analytics.schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6741,7 +6598,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_1fbd625e_1d1b_470b_a18e_a63d2e74cd06_pkey",
+          "name": "schema_migrations_9ff775ea_5c08_4267_a08e_5fe97b1caa37_pkey",
           "fields": [
             "version"
           ],
@@ -6749,13 +6606,13 @@
         }
       ]
     },
-    "schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b": {
-      "id": "_analytics.schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b",
+    "schema_migrations_a443628d_a312_4065_af49_9b619f8664f5": {
+      "id": "_analytics.schema_migrations_a443628d_a312_4065_af49_9b619f8664f5",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b",
+      "tableName": "schema_migrations_a443628d_a312_4065_af49_9b619f8664f5",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b.version",
+          "id": "_analytics.schema_migrations_a443628d_a312_4065_af49_9b619f8664f5.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6769,7 +6626,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b.inserted_at",
+          "id": "_analytics.schema_migrations_a443628d_a312_4065_af49_9b619f8664f5.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6785,7 +6642,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_28e925b1_2953_41fb_9aae_4d62f52ba12b_pkey",
+          "name": "schema_migrations_a443628d_a312_4065_af49_9b619f8664f5_pkey",
           "fields": [
             "version"
           ],
@@ -6793,13 +6650,13 @@
         }
       ]
     },
-    "schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23": {
-      "id": "_analytics.schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23",
+    "schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9": {
+      "id": "_analytics.schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23",
+      "tableName": "schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23.version",
+          "id": "_analytics.schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6813,7 +6670,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23.inserted_at",
+          "id": "_analytics.schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6829,7 +6686,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_355b56c4_c443_4b3e_a3b5_422406736d23_pkey",
+          "name": "schema_migrations_b50ba73b_46d7_4105_8a2a_60de5808d9c9_pkey",
           "fields": [
             "version"
           ],
@@ -6837,13 +6694,13 @@
         }
       ]
     },
-    "schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819": {
-      "id": "_analytics.schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819",
+    "schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b": {
+      "id": "_analytics.schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819",
+      "tableName": "schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819.version",
+          "id": "_analytics.schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6857,7 +6714,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819.inserted_at",
+          "id": "_analytics.schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6873,7 +6730,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_559c53b3_ef43_4f71_b01d_20bcd4d3a819_pkey",
+          "name": "schema_migrations_b5696bc0_1888_42f2_bb64_8e7e317f041b_pkey",
           "fields": [
             "version"
           ],
@@ -6881,13 +6738,13 @@
         }
       ]
     },
-    "schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b": {
-      "id": "_analytics.schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b",
+    "schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e": {
+      "id": "_analytics.schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b",
+      "tableName": "schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b.version",
+          "id": "_analytics.schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6901,7 +6758,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b.inserted_at",
+          "id": "_analytics.schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6917,7 +6774,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_6e626118_6c54_46a2_96da_fe0ea086d58b_pkey",
+          "name": "schema_migrations_d089bfbd_92a8_4a72_b326_7693afb4c30e_pkey",
           "fields": [
             "version"
           ],
@@ -6925,13 +6782,13 @@
         }
       ]
     },
-    "schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197": {
-      "id": "_analytics.schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197",
+    "schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8": {
+      "id": "_analytics.schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197",
+      "tableName": "schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197.version",
+          "id": "_analytics.schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6945,7 +6802,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197.inserted_at",
+          "id": "_analytics.schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -6961,7 +6818,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_eaeb2497_b677_448d_bc8b_8050fa27b197_pkey",
+          "name": "schema_migrations_e04dca11_6297_419c_a5ab_40097983a2b8_pkey",
           "fields": [
             "version"
           ],
@@ -6969,13 +6826,13 @@
         }
       ]
     },
-    "schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f": {
-      "id": "_analytics.schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f",
+    "schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c": {
+      "id": "_analytics.schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c",
       "schemaName": "_analytics",
-      "tableName": "schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f",
+      "tableName": "schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c",
       "fields": [
         {
-          "id": "_analytics.schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.version",
+          "id": "_analytics.schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.version",
           "name": "version",
           "columnName": "version",
           "type": "int8",
@@ -6989,7 +6846,7 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f.inserted_at",
+          "id": "_analytics.schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamp",
@@ -7005,7 +6862,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "schema_migrations_ef1f2286_0dee_429f_a5ef_ad04f21afa0f_pkey",
+          "name": "schema_migrations_e905beb3_c8ac_48f8_ac6e_89c54fd5140c_pkey",
           "fields": [
             "version"
           ],

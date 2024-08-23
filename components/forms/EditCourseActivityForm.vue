@@ -28,6 +28,21 @@
         </UFormGroup>
 
         <UFormGroup
+          name="description"
+          label="Course Description"
+          description="Describe your course in detail."
+          class="grid gap-2"
+          :ui="{ container: '' }"
+        >
+          <UTextarea
+            v-model="state.description"
+            :rows="5"
+            autoresize
+            size="md"
+          />
+        </UFormGroup>
+
+        <UFormGroup
           name="requirement_id"
           :label="`Course Requirement`"
           description="Welche Anforderung wird durch diese Aktivität erfüllt."
@@ -68,20 +83,6 @@
           <UInput v-model="state.price" autocomplete="on" size="md" />
         </UFormGroup>
 
-        <UFormGroup
-          name="description"
-          label="Course Description"
-          description="Describe your course in detail."
-          class="grid gap-2"
-          :ui="{ container: '' }"
-        >
-          <UTextarea
-            v-model="state.description"
-            :rows="5"
-            autoresize
-            size="md"
-          />
-        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
