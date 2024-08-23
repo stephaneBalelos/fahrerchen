@@ -6275,8 +6275,8 @@ packages:
       boolbase: 1.0.0
     dev: true
 
-  /nuxi@3.12.0:
-    resolution: {integrity: sha512-6vRdiXTw9SajEQOUi6Ze/XaIXzy1q/sD5UqHQSv3yqTu7Pot5S7fEihNXV8LpcgLz+9HzjVt70r7jYe7R99c2w==}
+  /nuxi@3.13.0:
+    resolution: {integrity: sha512-15cnHePX+A0Vwwpgj/X+BQGcGulJQr6ddzfMXpvevpEsuAr/hHe5HioHVqYwqMSqiQLVtZLhPxeVOrg8eJn09Q==}
     engines: {node: ^16.10.0 || >=18.0.0}
     hasBin: true
     optionalDependencies:
@@ -6330,7 +6330,7 @@ packages:
       magic-string: 0.30.11
       mlly: 1.7.1
       nitropack: 2.9.7
-      nuxi: 3.12.0
+      nuxi: 3.13.0
       nypm: 0.3.9
       ofetch: 1.3.4
       ohash: 1.1.3
