@@ -82,7 +82,7 @@ const links = [
   {
     id: "dashboard",
     label: "Dashboard [NOT IMPLEMENTED]",
-    icon: "i-heroicons-view-dashboard",
+    icon: "i-heroicons-chart-pie",
     to: "/my",
     tooltip: {
       text: "Dashboard",
