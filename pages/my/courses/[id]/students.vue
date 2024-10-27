@@ -33,7 +33,7 @@
           label="Add Student"
           trailing-icon="i-heroicons-plus"
           color="gray"
-          @click="isNewStudentSlideOverOpen = true"
+          @click="openAddStudentForm"
         />
       </template>
     </UDashboardToolbar>
@@ -83,19 +83,6 @@
         </UDropdown>
       </template>
     </UTable>
-    <UDashboardSlideover
-      v-model="isNewStudentSlideOverOpen"
-      title="Create News Course"
-    >
-      <AddStudentsForm
-        @student-added="onStudentAdded"
-        :orgid="selected_organization_id"
-        :courseid="courseid"
-      />
-      <template #footer>
-        <UButton @click="isNewStudentSlideOverOpen = false">Cancel</UButton>
-      </template>
-    </UDashboardSlideover>
   </div>
 </template>
 
@@ -103,7 +90,11 @@
 import CourseSubscriptionBill from "~/components/courses/CourseSubscriptionBill.vue";
 import StudentCourseProfile from "~/components/courses/StudentCourseProfile.vue";
 import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
-import type { AppCourseSubscription, AppStudent, Database } from "~/types/app.types";
+import type {
+  AppCourseSubscription,
+  AppStudent,
+  Database,
+} from "~/types/app.types";
 
 const { selected_organization_id } = useUserOrganizations();
 const route = useRoute();
@@ -134,6 +125,7 @@ const defaultColumns = [
   },
   {
     key: "actions",
+    label: "Actions",
   },
 ];
 
@@ -146,8 +138,6 @@ const selectedStatuses = ref([]);
 const selectedLocations = ref([]);
 const sort = ref({ column: "id", direction: "asc" as const });
 const input = ref<{ input: HTMLInputElement }>();
-const isNewStudentSlideOverOpen = ref(false);
-const isEditStudentSlideOverOpen = ref(false);
 
 const columns = computed(() =>
   defaultColumns.filter((column) => selectedColumns.value.includes(column))
@@ -179,15 +169,20 @@ const {
     }
     return data;
   },
-  { watch: [query], immediate: true, transform:(data) => {
-    return data.map((sub) => {
-      return {
-        ...sub,
-        status: sub.archived_at ? "archived" : "subscribed",
-        fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
-      }
-    })
-  }}
+  {
+    watch: [query],
+    immediate: true,
+    transform: (data) => {
+      return data.map((sub) => {
+        return {
+          ...sub,
+          status: sub.archived_at ? "archived" : "subscribed",
+          email: sub.students?.email,
+          fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
+        };
+      });
+    },
+  }
 );
 
 const subscriptions = computed(() => {
@@ -216,10 +211,6 @@ function onSelect(row: AppStudent) {
   } else {
     selected.value.splice(index, 1);
   }
-}
-
-function onStudentAdded() {
-  console.log("student added");
 }
 
 defineShortcuts({
@@ -256,6 +247,16 @@ const items = (row: AppCourseSubscription) => [
     },
   ],
 ];
+
+function openAddStudentForm() {
+  slideover.open(AddStudentsForm, {
+    courseid,
+    orgid,
+    "onStudent-added": () => {
+      refresh();
+    },
+  });
+}
 </script>
 
 <style scoped></style>

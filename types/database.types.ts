@@ -94,10 +94,10 @@ export type Database = {
           activity_schedule_id: string | null
           attended_at: string | null
           course_activity: string
-          course_id: string
           course_subscription_id: string
           id: string
           organization_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
           student_id: string
           supervisor_id: string | null
         }
@@ -105,10 +105,10 @@ export type Database = {
           activity_schedule_id?: string | null
           attended_at?: string | null
           course_activity: string
-          course_id: string
           course_subscription_id: string
           id?: string
           organization_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
           student_id: string
           supervisor_id?: string | null
         }
@@ -116,10 +116,10 @@ export type Database = {
           activity_schedule_id?: string | null
           attended_at?: string | null
           course_activity?: string
-          course_id?: string
           course_subscription_id?: string
           id?: string
           organization_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
           student_id?: string
           supervisor_id?: string | null
         }
@@ -136,13 +136,6 @@ export type Database = {
             columns: ["course_activity"]
             isOneToOne: false
             referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
           {
@@ -179,47 +172,32 @@ export type Database = {
         Row: {
           activity_id: string
           assigned_to: string | null
-          day: number | null
-          day_of_week: number[]
+          course_id: string
           end_at: string
-          hour: number | null
           id: string
-          minute: number | null
-          month: number | null
           organization_id: string
-          repeat: Database["public"]["Enums"]["schedule_type"]
           start_at: string
-          year: number | null
+          status: Database["public"]["Enums"]["schedule_status"]
         }
         Insert: {
           activity_id: string
           assigned_to?: string | null
-          day?: number | null
-          day_of_week: number[]
+          course_id: string
           end_at: string
-          hour?: number | null
           id?: string
-          minute?: number | null
-          month?: number | null
           organization_id: string
-          repeat?: Database["public"]["Enums"]["schedule_type"]
           start_at: string
-          year?: number | null
+          status?: Database["public"]["Enums"]["schedule_status"]
         }
         Update: {
           activity_id?: string
           assigned_to?: string | null
-          day?: number | null
-          day_of_week?: number[]
+          course_id?: string
           end_at?: string
-          hour?: number | null
           id?: string
-          minute?: number | null
-          month?: number | null
           organization_id?: string
-          repeat?: Database["public"]["Enums"]["schedule_type"]
           start_at?: string
-          year?: number | null
+          status?: Database["public"]["Enums"]["schedule_status"]
         }
         Relationships: [
           {
@@ -234,6 +212,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
           {
@@ -343,33 +328,40 @@ export type Database = {
       }
       course_subscription_bill_items: {
         Row: {
-          amount: number
           bill_id: string
+          canceled_at: string | null
+          course_activity_attendance_id: string | null
           description: string
           id: string
           organization_id: string
           price: number
-          total: number | null
         }
         Insert: {
-          amount?: number
           bill_id: string
+          canceled_at?: string | null
+          course_activity_attendance_id?: string | null
           description: string
           id?: string
           organization_id: string
           price?: number
-          total?: number | null
         }
         Update: {
-          amount?: number
           bill_id?: string
+          canceled_at?: string | null
+          course_activity_attendance_id?: string | null
           description?: string
           id?: string
           organization_id?: string
           price?: number
-          total?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
+            columns: ["course_activity_attendance_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_attendances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
@@ -699,15 +691,7 @@ export type Database = {
           lastname?: string | null
           status?: Database["public"]["Enums"]["user_status"] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -781,6 +765,7 @@ export type Database = {
         | "course_subscription_bills.update"
         | "course_subscription_bills.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
+      attendance_status: "REGISTERED" | "ATTENDED" | "CANCELED"
       course_type:
         | "AM"
         | "A1"
@@ -798,6 +783,7 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
+      schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
     }
@@ -879,6 +865,7 @@ export type Database = {
           owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
+          user_metadata: Json | null
           version: string | null
         }
         Insert: {
@@ -892,6 +879,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Update: {
@@ -905,6 +893,7 @@ export type Database = {
           owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
+          user_metadata?: Json | null
           version?: string | null
         }
         Relationships: [
@@ -926,6 +915,7 @@ export type Database = {
           key: string
           owner_id: string | null
           upload_signature: string
+          user_metadata: Json | null
           version: string
         }
         Insert: {
@@ -936,6 +926,7 @@ export type Database = {
           key: string
           owner_id?: string | null
           upload_signature: string
+          user_metadata?: Json | null
           version: string
         }
         Update: {
@@ -946,6 +937,7 @@ export type Database = {
           key?: string
           owner_id?: string | null
           upload_signature?: string
+          user_metadata?: Json | null
           version?: string
         }
         Relationships: [
@@ -1082,6 +1074,10 @@ export type Database = {
           updated_at: string
         }[]
       }
+      operation: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       search: {
         Args: {
           prefix: string
@@ -1192,5 +1188,20 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 

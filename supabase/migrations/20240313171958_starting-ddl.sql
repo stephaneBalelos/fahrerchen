@@ -42,6 +42,8 @@ create type public.app_role as enum ('owner','manager', 'teacher', 'student' );
 create type public.user_status as enum ('ONLINE', 'OFFLINE');
 create type public.activity_types as enum ('THEORY', 'PRACTICE', 'EXAM', 'OTHER');
 create type public.schedule_type as enum ('ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
+create type public.schedule_status as enum ('PLANNED', 'COMPLETED', 'CANCELED');
+create type public.attendance_status as enum ('REGISTERED', 'ATTENDED', 'CANCELED');
 
 -- enum for führerscheinklassen
 create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
@@ -87,7 +89,7 @@ comment on column public.users.id is 'References the internal Supabase Auth user
 alter table public.users enable row level security;
 
 
--- organization
+-- ORGANIZATIONS
 create table public.organizations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -100,7 +102,7 @@ comment on table public.organizations is 'organization data.';
 alter table public.organizations enable row level security;
 
 
--- organization MEMBERS
+-- ORGANIZATION MEMBERS
 create table public.organization_members (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -153,6 +155,18 @@ create table public.course_documents (
 );
 comment on table public.course_documents is 'COURSE DOCUMENTS MADE AVAILABLE FOR STUDENTS.';
 
+-- COURSE REQUIRED DOCUMENTS
+create table public.course_required_documents (
+  id            uuid default uuid_generate_v4() primary key,
+  course_id    uuid references public.courses on delete cascade not null,
+  name          text not null,
+  name_slug     text generated always as (replace(lower(name), ' ', '_')) stored,
+  description   text not null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
+alter table public.course_required_documents enable row level security;
+
 
 -- COURSES SUBSCRIPTIONS
 create table public.course_subscriptions (
@@ -168,45 +182,6 @@ create table public.course_subscriptions (
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 
 alter table public.course_subscriptions enable row level security;
-
--- COURSE SUBSCRIPTION BILLS
-create table public.course_subscription_bills (
-  id            uuid default uuid_generate_v4() primary key,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  total        numeric default 0 not null check (total >= 0),
-  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  paid_at       timestamp with time zone default null,
-  organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_subscription_id)
-);
-comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
-
-alter table public.course_subscription_bills enable row level security;
-
--- COURSE SUBSCRIPTION BILL ITEMS
-create table public.course_subscription_bill_items (
-  id            uuid default uuid_generate_v4() primary key,
-  bill_id      uuid references public.course_subscription_bills on delete cascade not null,
-  description   text not null,
-  price       numeric default 0 not null check (price >= 0),
-  amount        integer default 0 not null check (amount >= 0),
-  total        numeric generated always as (price * amount) stored,
-  organization_id    uuid references public.organizations on delete cascade not null
-);
-comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
-alter table public.course_subscription_bill_items enable row level security;
-
--- COURSE REQUIRED DOCUMENTS
-create table public.course_required_documents (
-  id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
-  name          text not null,
-  name_slug     text generated always as (replace(lower(name), ' ', '_')) stored,
-  description   text not null,
-  organization_id    uuid references public.organizations on delete cascade not null
-);
-comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
-alter table public.course_required_documents enable row level security;
 
 -- COURSE ACTIVITIES
 create table public.course_activities (
@@ -226,18 +201,13 @@ alter table public.course_activities enable row level security;
 -- COURSE ACTIVITY SCHEDULES
 create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
+  course_id    uuid references public.courses on delete cascade not null,
   activity_id    uuid references public.course_activities on delete cascade not null,
   assigned_to   uuid references public.organization_members on delete set null,
   organization_id    uuid references public.organizations on delete cascade not null,
+  status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
   start_at     timestamp with time zone not null,
-  end_at       timestamp with time zone not null,
-  hour        integer check (hour >= 0 and hour <= 23),
-  minute      integer check (minute >= 0 and minute <= 59),
-  day_of_week integer[] not null,
-  day         integer check (day >= 1 and day <= 31),
-  month       integer check (month >= 1 and month <= 12),
-  year        integer check (year >= 2021 and year <= 2100),
-  repeat      schedule_type default 'ONCE'::public.schedule_type not null
+  end_at       timestamp with time zone not null
 );
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 
@@ -250,14 +220,41 @@ create table public.course_activity_attendances (
   supervisor_id    uuid references public.organization_members on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  course_id    uuid references public.courses on delete cascade not null,
   student_id    uuid references public.students on delete cascade not null,
   attended_at   timestamp with time zone default null,
+  status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
 
 alter table public.course_activity_attendances enable row level security;
+
+-- COURSE SUBSCRIPTION BILLS
+create table public.course_subscription_bills (
+  id            uuid default uuid_generate_v4() primary key,
+  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  total        numeric default 0 not null check (total >= 0),
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  paid_at       timestamp with time zone default null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_subscription_id)
+);
+comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
+
+alter table public.course_subscription_bills enable row level security;
+
+-- COURSE SUBSCRIPTION BILL ITEMS
+create table public.course_subscription_bill_items (
+  id            uuid default uuid_generate_v4() primary key,
+  bill_id      uuid references public.course_subscription_bills on delete cascade not null,
+  course_activity_attendance_id    uuid references public.course_activity_attendances on delete set null,
+  description   text not null,
+  price       numeric default 0 not null check (price >= 0),
+  canceled_at   timestamp with time zone default null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
+alter table public.course_subscription_bill_items enable row level security;
 
 
 
@@ -341,33 +338,43 @@ create trigger on_course_created
   for each row execute procedure public.handle_new_course();
 
 
--- handle new course subscription
-create function public.handle_new_course_subscription()
+-- handle new activity attendance
+create function public.handle_new_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
-declare subscription_bill_id uuid;
-declare activity record;
+declare bill_id uuid;
+declare activity_id uuid;
+declare activity_price numeric;
+declare activity_name text;
 begin
   org_id := new.organization_id;
 
+  -- lookup if a bill already exists for the course subscription and has not been paid
+  select id into bill_id from public.course_subscription_bills
+  where course_subscription_id = new.course_subscription_id and paid_at is null;
 
-  insert into public.course_subscription_bills (course_subscription_id, total, organization_id)
-  values (new.id, 0, org_id)
-  returning id into subscription_bill_id;
+  -- if no bill exists, create a new one
+  if bill_id is null then
+    insert into public.course_subscription_bills (course_subscription_id, organization_id)
+    values (new.course_subscription_id, org_id)
+    returning id into bill_id;
+  end if;
 
-  for activity in select * from public.course_activities where course_id = new.course_id loop
-    insert into public.course_subscription_bill_items (bill_id, description, price, amount, organization_id)
-    values (subscription_bill_id, activity.name, activity.price, activity.required, activity.organization_id);
-  end loop;
+  -- lookup the activity name & price
+  select activity_id into activity_id from public.course_activity_schedules where id = new.activity_schedule_id;
+  select name, price into activity_name, activity_price from public.course_activities where id = activity_id;
+
+  -- insert the bill item
+  insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, description, price, organization_id)
+  values (bill_id, new.id, activity_name, activity_price, org_id);
 
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course subscription is created
-create trigger on_course_subscription_created
-  after insert on public.course_subscriptions
-  for each row execute procedure public.handle_new_course_subscription();
-
+-- trigger the function every time a course activity attendance is created
+create trigger on_course_activity_attendance_created
+  after insert on public.course_activity_attendances
+  for each row execute procedure public.handle_new_activity_attendance();
 
 
 -- handle new Bill Item
@@ -388,6 +395,40 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_subscription_bill_item_created
   after insert on public.course_subscription_bill_items
   for each row execute procedure public.handle_new_bill_item();
+
+
+-- hnadle attendance status change
+create function public.handle_attendance_status_change()
+returns trigger as $$
+declare org_id uuid;
+declare bill_paid boolean;
+begin
+  org_id := new.organization_id;
+
+  -- prevent resetting the status to REGISTERED
+  if new.status = 'REGISTERED' then
+    raise exception 'Status cannot be reset to REGISTERED';
+  end if;
+
+  -- if the status is ATTENDED, update the bill item to be paid
+  if new.status = 'ATTENDED' then
+    update public.course_subscription_bill_items set canceled_at = null
+    where id = new.id;
+  end if;
+
+  -- if the status is CANCELED, update the bill item to be canceled
+  if new.status = 'CANCELED' then
+    update public.course_subscription_bill_items set canceled_at = timezone('utc'::text, now())
+    where id = new.id;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course activity attendance's status is updated
+create trigger on_course_activity_attendance_status_updated
+  after update of status on public.course_activity_attendances
+  for each row execute procedure public.handle_attendance_status_change();
 
 
 
