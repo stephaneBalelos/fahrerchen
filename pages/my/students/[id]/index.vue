@@ -15,39 +15,16 @@
         <template #description>
           <UBadge color="white" variant="solid">Aktiv</UBadge> <br />
         </template>
-        <UProgress :value="course_progression" :max="40" :color="color">
-          <template #indicator="{ percent }">
-            <div class="text-right" :style="{ width: `${percent}%` }">
-              <span v-if="course_progression < 10" class="text-blue-500"
-                >Frischling</span
-              >
-              <span v-else-if="course_progression < 20" class="text-green-500"
-                >Bereits für die Theorie</span
-              >
-              <span v-else-if="course_progression < 99" class="text-green-500"
-                >Bereits für die Praxis</span
-              >
-              <span v-else class="text-green-500 font-bold">Bestanden!</span>
-            </div>
-          </template>
-        </UProgress>
       </UPageHeader>
-      <div v-if="status == 'pending'" class="flex items-center space-x-4">
-        <USkeleton class="h-12 w-12" :ui="{ rounded: 'rounded-full' }" />
-        <div class="space-y-2">
-          <USkeleton class="h-4 w-[250px]" />
-          <USkeleton class="h-4 w-[200px]" />
-        </div>
-      </div>
 
-      <div class="grid lg:grid-cols-1 lg:items-start gap-8 mt-8" v-if="student?.id">
+      <!-- <div class="grid lg:grid-cols-1 lg:items-start gap-8 mt-8" v-if="student?.id">
         <FileListCard
           bucketId="student_documents"
           :path="student?.id"
           title="Dokumente"
           description="Alle Dokumente die der Schüler hochgeladen hat.">
         </FileListCard>
-      </div>
+      </div> -->
     </UDashboardPanelContent>
   </UDashboardPanel>
 </template>

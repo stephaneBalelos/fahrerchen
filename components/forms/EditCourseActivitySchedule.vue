@@ -28,6 +28,7 @@
             :options="course_activities"
             value-attribute="id"
             label-attribute="name"
+            :disabled="!!props.activity_schedule_id"
           >
             <template #label>
               <div v-if="state.activity_id && course_activities">
@@ -119,58 +120,6 @@
             </UPopover>
           </div>
         </UFormGroup>
-        <UFormGroup
-          name="repeat"
-          :label="`Activity Repeat`"
-          description="Wann soll die Aktivität wiederholt werden"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <div class="grid grid-cols-1 gap-2 my-4">
-            <div>Wiederholen</div>
-            <USelectMenu
-              v-model="state.repeat"
-              :options="repeatOptions"
-              :value-attribute="'value'"
-              placeholder="Wiederholen"
-            />
-          </div>
-
-          <div v-if="state.repeat == 'weekly'" class="grid grid-cols-1 gap-4 my-4">
-            <div>An welcher tag</div>
-            <USelectMenu
-              v-model="state.day_of_week"
-              :options="dayOfWeekOptions"
-              :value-attribute="'value'"
-              multiple
-              placeholder="Days"
-            />
-          </div>
-
-          <div class="grid grid_cols-1 gap-4">
-            <UAlert
-              v-if="state.repeat == 'daily'"
-              :description="`jeden Tag um ${format(
-                new Date(state.start_at),
-                'HH:mm'
-              )}`"
-            />
-            <UAlert
-              v-if="state.repeat == 'weekly'"
-              :description="`Jede Woche am ${state.day_of_week
-                .map((d) => dayOfWeekOptions.find((o) => o.value === d)?.label)
-                .join(', ')} um ${format(new Date(state.start_at), 'HH:mm')}`"
-            />
-            <UAlert
-              v-if="state.repeat == 'monthly'"
-              :description="`Jede Monat am ${format(
-                state.start_at,
-                'dd.'
-              )} um ${format(new Date(state.start_at), 'HH:mm')}`"
-            />
-          </div>
-        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
@@ -198,10 +147,11 @@ import type { Form, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
 import { addHours, format, set } from "date-fns";
 import DatePicker from "./Inputs/Datepicker.vue";
+import { useCourseActivities } from "~/composables/useCourseActivities";
 
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
-  "id" | "organization_id"
+  "id" | "organization_id" | "status"
 >;
 
 type RepeatMode = AppScheduleType
@@ -244,8 +194,6 @@ const schema = z.object({
   assigned_to: z.string().uuid().optional(),
   start_at: z.date(),
   end_at: z.date(),
-  repeat: z.enum(repeatOptions.map((o) => o.value) as [string, ...string[]]),
-  day_of_week: z.array(zDayOfWeek).max(7),
 });
 
 schema.refine((date) => {
@@ -259,10 +207,8 @@ const form = ref<Form<Schema>>();
 const state = reactive<Schema>({
   start_at: new Date(),
   end_at: addHours(new Date(), 1),
-  repeat: "once",
   activity_id: props.activityid,
   assigned_to: "",
-  day_of_week: [],
 });
 
 const { course_activities } = useCourseActivities(props.courseid);
@@ -270,20 +216,13 @@ const { organization_members } = useOrganizationMembers(props.orgid);
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
 
-  console.log("Submit", event);
-
   const data: CourseActivityScheduleEdit = {
     activity_id: state.activity_id,
+    course_id: props.courseid,
+
     assigned_to: state.assigned_to ?? null,
     start_at: state.start_at.toISOString(),
     end_at: state.end_at.toISOString(),
-    repeat: state.repeat as RepeatMode,
-    day_of_week: state.day_of_week,
-    hour: state.start_at.getHours(),
-    minute: state.start_at.getMinutes(),
-    day: state.start_at.getDate(),
-    month: state.start_at.getMonth(),
-    year: state.start_at.getFullYear(),
   };
 
   createCourseActivitySchedule(data);
@@ -332,9 +271,6 @@ function onUpdateStartDate(date: Date) {
   state.start_at = date;
   state.end_at = addHours(date, 1);
   const dayOfWeekStart = date.getDay() === 0 ? 7 : date.getDay();
-  state.day_of_week = dayOfWeekOptions
-    .filter((d) => d.value == dayOfWeekStart)
-    .map((d) => d.value);
 }
 
 function onChangeRepeat(value: RepeatMode) {
