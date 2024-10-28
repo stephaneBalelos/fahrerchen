@@ -641,9 +641,9 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activity_attendances.course_activity",
-          "name": "course_activity",
-          "columnName": "course_activity",
+          "id": "public.course_activity_attendances.course_activity_id",
+          "name": "course_activity_id",
+          "columnName": "course_activity_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -686,20 +686,6 @@
           "id": "public.course_activity_attendances.course_subscription_id",
           "name": "course_subscription_id",
           "columnName": "course_subscription_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activity_attendances.student_id",
-          "name": "student_id",
-          "columnName": "student_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -759,7 +745,7 @@
           "kind": "object",
           "relationName": "course_activity_attendancesTocourse_activities",
           "relationFromFields": [
-            "course_activity"
+            "course_activity_id"
           ],
           "relationToFields": [
             "id"
@@ -843,24 +829,6 @@
           "hasDefaultValue": false
         },
         {
-          "name": "students",
-          "type": "students",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activity_attendancesTostudents",
-          "relationFromFields": [
-            "student_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
           "name": "course_subscription_bill_items",
           "type": "course_subscription_bill_items",
           "isRequired": false,
@@ -876,6 +844,14 @@
         }
       ],
       "uniqueConstraints": [
+        {
+          "name": "course_activity_attendances_course_subscription_id_activity_key",
+          "fields": [
+            "activity_schedule_id",
+            "course_subscription_id"
+          ],
+          "nullNotDistinct": false
+        },
         {
           "name": "course_activity_attendances_pkey",
           "fields": [
@@ -1735,13 +1711,6 @@
         }
       ],
       "uniqueConstraints": [
-        {
-          "name": "course_subscription_bills_course_subscription_id_key",
-          "fields": [
-            "course_subscription_id"
-          ],
-          "nullNotDistinct": false
-        },
         {
           "name": "course_subscription_bills_pkey",
           "fields": [
@@ -6570,20 +6539,6 @@
             "id"
           ],
           "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "course_activity_attendances",
-          "type": "course_activity_attendances",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activity_attendancesTostudents",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
           "isId": false,
           "isGenerated": false,
           "sequence": false,

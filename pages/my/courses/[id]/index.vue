@@ -18,8 +18,8 @@
             course_activity.course_activity_schedules &&
             course_activity.course_activity_schedules.length > 0
           "
-          @click="openAddCourseScheduleForm(course_activity.id, s.id)"
           v-for="(s, index) in course_activity.course_activity_schedules"
+          @click="openAddStudentsAttendanceForm(s)"
           :key="index"
           class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
         >
@@ -30,7 +30,7 @@
                 {{ s.assigned_to ? s.assigned_to : 'No assigned' }}
               </p>
               <p class="text-gray-500 dark:text-gray-400">
-                {{ new Date(s.start_at).toLocaleDateString("de") }}
+                {{ format(new Date(s.start_at), 'PPPP') }}
               </p>
             </div>
           </div>
@@ -48,7 +48,10 @@
 </template>
 
 <script setup lang="ts">
+import { format } from "date-fns";
+import AddStudentsAttendanceForm from "~/components/forms/AddStudentsAttendanceForm.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
+import type { AppCourseActivity, AppCourseActivitySchedule } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
 type Props = {
@@ -98,6 +101,13 @@ function openAddCourseScheduleForm(
       await refresh();
       slideover.close();
     },
+  });
+}
+
+function openAddStudentsAttendanceForm(course_activity_schedule: AppCourseActivitySchedule) {
+  slideover.open(AddStudentsAttendanceForm, {
+    courseid: props.courseid,
+    courseActivitySchedule: course_activity_schedule,
   });
 }
 </script>

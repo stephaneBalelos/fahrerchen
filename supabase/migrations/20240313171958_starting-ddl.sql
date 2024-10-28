@@ -216,14 +216,14 @@ alter table public.course_activity_schedules enable row level security;
 -- ACTIVITY ATTENDANCES
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
-  course_activity   uuid references public.course_activities on delete cascade not null,
+  course_activity_id   uuid references public.course_activities on delete cascade not null,
   supervisor_id    uuid references public.organization_members on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  student_id    uuid references public.students on delete cascade not null,
   attended_at   timestamp with time zone default null,
   status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_subscription_id, activity_schedule_id)
 );
 comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
 
@@ -236,8 +236,7 @@ create table public.course_subscription_bills (
   total        numeric default 0 not null check (total >= 0),
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
-  organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_subscription_id)
+  organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
 
@@ -293,7 +292,7 @@ create trigger on_auth_user_created
 
 
 
-create function public.handle_new_organization() 
+create or replace function public.handle_new_organization() 
 returns trigger as $$
 declare org_id uuid;
 begin
@@ -310,7 +309,7 @@ create trigger on_org_created
   for each row execute procedure public.handle_new_organization();
 
 
-create function public.handle_new_course()
+create or replace function public.handle_new_course()
 returns trigger as $$
 declare org_id uuid;
 begin
@@ -339,11 +338,11 @@ create trigger on_course_created
 
 
 -- handle new activity attendance
-create function public.handle_new_activity_attendance()
+create or replace function public.handle_new_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
 declare bill_id uuid;
-declare activity_id uuid;
+declare course_activity_id uuid;
 declare activity_price numeric;
 declare activity_name text;
 begin
@@ -361,8 +360,8 @@ begin
   end if;
 
   -- lookup the activity name & price
-  select activity_id into activity_id from public.course_activity_schedules where id = new.activity_schedule_id;
-  select name, price into activity_name, activity_price from public.course_activities where id = activity_id;
+  select activity_id into course_activity_id from public.course_activity_schedules where id = new.activity_schedule_id;
+  select name, price into activity_name, activity_price from public.course_activities where id = course_activity_id;
 
   -- insert the bill item
   insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, description, price, organization_id)
@@ -378,14 +377,17 @@ create trigger on_course_activity_attendance_created
 
 
 -- handle new Bill Item
-create function public.handle_new_bill_item()
+create or replace function public.handle_new_bill_item()
 returns trigger as $$
 declare org_id uuid;
+declare bill_total numeric;
 begin
   org_id := new.organization_id;
 
+  select sum(price) into bill_total from public.course_subscription_bill_items where bill_id = new.bill_id;
+
   -- Aggragate the total of the bill
-  update public.course_subscription_bills set total = total + (new.total)
+  update public.course_subscription_bills set total = bill_total
   where id = new.bill_id;
 
   return new;
@@ -398,7 +400,7 @@ create trigger on_course_subscription_bill_item_created
 
 
 -- hnadle attendance status change
-create function public.handle_attendance_status_change()
+create or replace function public.handle_attendance_status_change()
 returns trigger as $$
 declare org_id uuid;
 declare bill_paid boolean;

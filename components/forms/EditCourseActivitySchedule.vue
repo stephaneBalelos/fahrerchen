@@ -193,7 +193,7 @@ const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
-const { course_activities } = useCourseActivities(props.courseid);
+const course_activities = await useCourseActivities(props.courseid);
 const { organization_members } = useOrganizationMembers(props.orgid);
 
 const zDayOfWeek = z.number().int().min(1).max(7);

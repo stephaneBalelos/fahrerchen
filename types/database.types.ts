@@ -93,34 +93,31 @@ export type Database = {
         Row: {
           activity_schedule_id: string | null
           attended_at: string | null
-          course_activity: string
+          course_activity_id: string
           course_subscription_id: string
           id: string
           organization_id: string
           status: Database["public"]["Enums"]["attendance_status"]
-          student_id: string
           supervisor_id: string | null
         }
         Insert: {
           activity_schedule_id?: string | null
           attended_at?: string | null
-          course_activity: string
+          course_activity_id: string
           course_subscription_id: string
           id?: string
           organization_id: string
           status?: Database["public"]["Enums"]["attendance_status"]
-          student_id: string
           supervisor_id?: string | null
         }
         Update: {
           activity_schedule_id?: string | null
           attended_at?: string | null
-          course_activity?: string
+          course_activity_id?: string
           course_subscription_id?: string
           id?: string
           organization_id?: string
           status?: Database["public"]["Enums"]["attendance_status"]
-          student_id?: string
           supervisor_id?: string | null
         }
         Relationships: [
@@ -132,8 +129,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_activity_attendances_course_activity_fkey"
-            columns: ["course_activity"]
+            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
+            columns: ["course_activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
             referencedColumns: ["id"]
@@ -150,13 +147,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
             referencedColumns: ["id"]
           },
           {
@@ -407,7 +397,7 @@ export type Database = {
           {
             foreignKeyName: "course_subscription_bills_course_subscription_id_fkey"
             columns: ["course_subscription_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "course_subscriptions"
             referencedColumns: ["id"]
           },

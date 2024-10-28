@@ -14,6 +14,7 @@ export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['cours
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
+export type AppCourseActivityAttendance = DatabaseGenerated['public']['Tables']['course_activity_attendances']['Row']
 
 
 

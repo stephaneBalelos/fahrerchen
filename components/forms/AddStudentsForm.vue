@@ -98,7 +98,6 @@ const {
       console.error(error);
       throw error;
     }
-    console.log(data);
     return data;
   },
   { immediate: true }

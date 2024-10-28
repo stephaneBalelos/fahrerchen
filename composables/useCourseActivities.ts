@@ -1,23 +1,27 @@
 import type { AppCourseActivity, Database } from "~/types/app.types";
 
-export function useCourseActivities(courseId: string) {
+export async function useCourseActivities(courseid: string, id: string): Promise<AppCourseActivity>;
+export async function useCourseActivities(courseid: string): Promise<AppCourseActivity[]>;
+
+export async function useCourseActivities(courseid: string, id?: string,) {
     const client = useSupabaseClient<Database>()
+    const { selected_organization_id } = useUserOrganizations()
 
+    const res = ref<AppCourseActivity[]>([])
 
-    const course_id = ref<string>(courseId)
-    const course_activities = ref<AppCourseActivity[]>([])
-
-    watch(course_id, async (newCourseId) => {
-        if(!newCourseId) {
-            course_activities.value = []
+    try {
+        const { data, error } = await client.from('course_activities').select('*').eq('organization_id', selected_organization_id.value).eq('course_id', courseid)
+        if (error) {
+            throw error
         }
-        const { data, error } = await client.from('course_activities').select("*").eq('course_id', newCourseId)
-        if(error) {
-            console.error(error)
-            course_activities.value = []
-        }
-        course_activities.value = data ?? []
-    }, { immediate: true })
+        res.value = data ?? []
+    } catch (error) {
+        console.log(error)
+    }
 
-    return { course_id, course_activities }
+    if (id) {
+        return res.value.find((course: AppCourseActivity) => course.id === id)
+    }
+
+    return res.value
 }
