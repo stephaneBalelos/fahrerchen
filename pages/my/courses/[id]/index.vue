@@ -66,7 +66,7 @@ const toast = useToast();
 
 const slideover = useSlideover();
 
-const { data: course_activities, error } = useAsyncData(
+const { data: course_activities, error, refresh } = useAsyncData(
   "course_activity_schedules",
   async () => {
     const { data, error } = await client
@@ -93,6 +93,11 @@ function openAddCourseScheduleForm(
     activityid: course_activity_id,
     activity_schedule_id: activity_schedule_id,
     date: date,
+
+    "onActivity-saved": async () => {
+      await refresh();
+      slideover.close();
+    },
   });
 }
 </script>

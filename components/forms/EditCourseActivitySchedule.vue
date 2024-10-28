@@ -1,5 +1,9 @@
 <template>
-  <UDashboardSlideover :title="'New Activity Schedule'" ref="slideover" prevent-close>
+  <UDashboardSlideover
+    :title="'New Activity Schedule'"
+    ref="slideover"
+    id="edit-activity-schedule"
+  >
     <UForm
       ref="form"
       :state="state"
@@ -63,8 +67,9 @@
             <template #label>
               <div v-if="state.assigned_to && organization_members.length > 0">
                 <span class="truncate">{{
-                  organization_members.find((m) => m.member_id === state.assigned_to)
-                    ?.email
+                  organization_members.find(
+                    (m) => m.member_id === state.assigned_to
+                  )?.email
                 }}</span>
               </div>
               <div v-else>
@@ -72,7 +77,9 @@
               </div>
             </template>
             <template #option="{ option }">
-              <span v-if="option.firstname && option.lastname" class="truncate">{{ option.firstname }} {{ option.lastname }}</span>
+              <span v-if="option.firstname && option.lastname" class="truncate"
+                >{{ option.firstname }} {{ option.lastname }}</span
+              >
               <span v-else class="truncate">{{ option.email }}</span>
             </template>
           </USelectMenu>
@@ -154,7 +161,7 @@ type CourseActivityScheduleEdit = Omit<
   "id" | "organization_id" | "status"
 >;
 
-type RepeatMode = AppScheduleType
+type RepeatMode = AppScheduleType;
 
 const repeatOptions = [
   { label: "Once", value: "ONCE" },
@@ -183,9 +190,11 @@ type Props = {
 };
 
 const props = defineProps<Props>();
+const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
-
+const { course_activities } = useCourseActivities(props.courseid);
+const { organization_members } = useOrganizationMembers(props.orgid);
 
 const zDayOfWeek = z.number().int().min(1).max(7);
 
@@ -208,14 +217,44 @@ const state = reactive<Schema>({
   start_at: new Date(),
   end_at: addHours(new Date(), 1),
   activity_id: props.activityid,
-  assigned_to: "",
+  assigned_to: undefined,
 });
 
-const { course_activities } = useCourseActivities(props.courseid);
-const { organization_members } = useOrganizationMembers(props.orgid);
+onMounted(async () => {
+  if (props.activity_schedule_id) {
+    // load the course activity schedule
+    try {
+      const { data, error } = await client
+        .from("course_activity_schedules")
+        .select("*")
+        .eq("id", props.activity_schedule_id)
+        .single();
+
+      if (error) {
+        console.error(error);
+        toast.add({
+          title: "Error",
+          description: "Failed to load course activity schedule",
+          color: "red",
+        });
+      } else {
+        console.log(data);
+        state.start_at = new Date(data.start_at);
+        state.end_at = new Date(data.end_at);
+        state.assigned_to = data.assigned_to ?? undefined;
+      }
+    } catch (error) {
+      console.error(error);
+      toast.add({
+        title: "Error",
+        description: "Failed to load course activity schedule",
+        color: "red",
+      });
+    }
+  }
+})
 
 function onSubmit(event: FormSubmitEvent<Schema>) {
-
   const data: CourseActivityScheduleEdit = {
     activity_id: state.activity_id,
     course_id: props.courseid,
@@ -225,40 +264,84 @@ function onSubmit(event: FormSubmitEvent<Schema>) {
     end_at: state.end_at.toISOString(),
   };
 
-  createCourseActivitySchedule(data);
+  if (props.activity_schedule_id) {
+    // update the course activity schedule
+    updateCourseActivitySchedule(props.activity_schedule_id, data);
+  } else {
+    // create a new course activity schedule
+    createCourseActivitySchedule(data);
+  }
 }
 
 async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
-  console.log(data)
   try {
-    const { data:res, error } = await client
+    const { data: res, error } = await client
       .from("course_activity_schedules")
       .insert({
         ...data,
         organization_id: props.orgid,
-      }).select();
+      })
+      .select();
 
     if (error) {
       console.error(error);
       toast.add({
         title: "Error",
         description: "Failed to create course activity schedule",
-        color: 'red',
+        color: "red",
       });
     } else {
-      console.log(res)
+      console.log(res);
       toast.add({
         title: "Success",
         description: "Course activity schedule created",
-        color: 'green',
+        color: "green",
       });
+      emits('activity-saved');
     }
   } catch (error) {
     console.error(error);
     toast.add({
       title: "Error",
       description: "Failed to create course activity schedule",
-      color: 'red',
+      color: "red",
+    });
+  }
+}
+
+async function updateCourseActivitySchedule(
+  id: string,
+  data: CourseActivityScheduleEdit
+) {
+  try {
+    const { data: res, error } = await client
+      .from("course_activity_schedules")
+      .update(data)
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      console.error(error);
+      toast.add({
+        title: "Error",
+        description: "Failed to update course activity schedule",
+        color: "red",
+      });
+    } else {
+      console.log(res);
+      toast.add({
+        title: "Success",
+        description: "Course activity schedule updated",
+        color: "green",
+      });
+      emits('activity-saved');
+    }
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "Failed to update course activity schedule",
+      color: "red",
     });
   }
 }
