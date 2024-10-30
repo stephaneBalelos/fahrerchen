@@ -1,33 +1,38 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardToolbar>
-      <template #left>
-        <USelectMenu icon="i-heroicons-check" placeholder="Status" multiple />
-        <USelectMenu
-          icon="i-heroicons-map-pin"
-          placeholder="Location"
-          multiple
-        />
-      </template>
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardNavbar>
+        <template #left> 
+          <p class="font-semibold">
+            Bill #{{ bill?.id }}
+          </p>
+        </template>
 
-      <template #right>
-        <UButton color="gray" variant="solid" size="xs" @click="markAsPaid">
-          <i class="i-heroicons-check"></i>
-          <span>Mark as paid</span>
-        </UButton>
-      </template>
-    </UDashboardToolbar>
-    <div class="grid grid-cols-2 gap-2 h-full">
-      <UDashboardPanelContent class="">
-        <StudentsStudentProfileSection
-          :student_id="'5ce0b7bd-3312-5b3e-ab6b-ffcf05b50752'"
-        >
-        </StudentsStudentProfileSection>
-        <BillsBillingList :bill_id="id" />
-      </UDashboardPanelContent>
-      <UDashboardPanelContent> </UDashboardPanelContent>
-    </div>
-  </UDashboardPanel>
+        <template #right>
+          <UButton color="gray" variant="solid" size="xs" @click="markAsPaid">
+            <i class="i-heroicons-check"></i>
+            <span>Mark as paid</span>
+          </UButton>
+        </template>
+      </UDashboardNavbar>
+      <div class="flex h-full">
+        <UDashboardPanel :width="400">
+          <UDashboardPanelContent>
+            <StudentsStudentProfileSection
+              :student_id="'5ce0b7bd-3312-5b3e-ab6b-ffcf05b50752'"
+            />
+          </UDashboardPanelContent>
+        </UDashboardPanel>
+        <UDashboardPanel grow>
+          <div class="h-full">
+            <div class="absolute inset-0 overflow-y-auto">
+              <BillsBillingList :bill_id="id" />
+            </div>
+          </div>
+        </UDashboardPanel>
+      </div>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">

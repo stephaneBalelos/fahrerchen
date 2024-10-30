@@ -1,27 +1,39 @@
 <template>
-  <UDashboardToolbar>
-    <USelectMenu
-      v-model="selectedCourse"
-      :options="courses"
-      option-attribute="name"
-      placeholder="Course"
-    />
-  </UDashboardToolbar>
-  <UDashboardPanelContent class="p-0">
-    <UTable :columns="columns" :rows="bills ?? []" :loading="status === 'pending'" >
-      <template #course_subscriptions.course_id-data="{ row }">
-        {{ courses.find((course) => course.id === row.course_subscriptions.course_id)?.name }}
-      </template>
-      <template #status-data="{ row }">
-        <UBadge :color="row.status === 'paid' ? 'green' : 'red'">
-          {{ row.status }}
-        </UBadge>
-      </template>
-      <template #action-data="{ row }">
-        <ULink :to="`/my/bills/${row.id}`">View</ULink>
-      </template>
-    </UTable>
-  </UDashboardPanelContent>
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardToolbar>
+        <USelectMenu
+          v-model="selectedCourse"
+          :options="courses"
+          option-attribute="name"
+          placeholder="Course"
+        />
+      </UDashboardToolbar>
+      <UDashboardPanelContent class="p-0">
+        <UTable
+          :columns="columns"
+          :rows="bills ?? []"
+          :loading="status === 'pending'"
+        >
+          <template #course_subscriptions.course_id-data="{ row }">
+            {{
+              courses.find(
+                (course) => course.id === row.course_subscriptions.course_id
+              )?.name
+            }}
+          </template>
+          <template #status-data="{ row }">
+            <UBadge :color="row.status === 'paid' ? 'green' : 'red'">
+              {{ row.status }}
+            </UBadge>
+          </template>
+          <template #action-data="{ row }">
+            <ULink :to="`/my/bills/${row.id}`">View</ULink>
+          </template>
+        </UTable>
+      </UDashboardPanelContent>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
@@ -60,7 +72,7 @@ const columns = [
   },
   {
     key: "action",
-  }
+  },
 ];
 
 const {
@@ -94,7 +106,7 @@ const {
         return {
           ...bill,
           status: bill.paid_at ? "paid" : "unpaid",
-        }
+        };
       });
     },
   }

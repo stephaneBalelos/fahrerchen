@@ -1,82 +1,62 @@
 <template>
-    <UDashboardLayout>
-      <UDashboardPanel
-        :width="250"
-        :resizable="{ min: 200, max: 300 }"
-        collapsible
-      >
-        <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
-          <template #left>
-            <ClientOnly>
-              <TeamsDropdown />
-            </ClientOnly>
-          </template>
-        </UDashboardNavbar>
+  <UDashboardLayout>
+    <UDashboardPanel
+      :width="250"
+      :resizable="{ min: 200, max: 300 }"
+      collapsible
+    >
+      <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
+        <template #left>
+          <ClientOnly>
+            <TeamsDropdown />
+          </ClientOnly>
+        </template>
+      </UDashboardNavbar>
 
-        <UDashboardSidebar>
-          <template #header>
-            <UDashboardSearchButton />
-          </template>
+      <UDashboardSidebar>
+        <template #header>
+          <UDashboardSearchButton />
+        </template>
 
-          <UDashboardSidebarLinks :links="links" />
+        <UDashboardSidebarLinks :links="links" />
 
-          <UDivider />
+        <UDivider />
 
-          <!-- <UDashboardSidebarLinks
+        <!-- <UDashboardSidebarLinks
             :links="[{ label: 'Colors', draggable: false, children: colors }]"
             @update:links="(links) => (defaultColors = links)"
           /> -->
 
-          <div class="flex-1" />
+        <div class="flex-1" />
 
-          <UDivider class="sticky bottom-0" />
+        <UDivider class="sticky bottom-0" />
 
-          <template #footer>
-            <UDashboardSidebarLinks :links="footerLinks" />
-          </template>
-        </UDashboardSidebar>
-      </UDashboardPanel>
-      <UDashboardPage>
-        <UDashboardPanel grow>
-          <UDashboardNavbar title="Home">
-            <template #right>
-              <UTooltip text="Notifications" :shortcuts="['N']">
-                <UButton color="gray" variant="ghost" square>
-                  <UChip color="red" inset>
-                    <UIcon name="i-heroicons-bell" class="w-5 h-5" />
-                  </UChip>
-                </UButton>
-              </UTooltip>
-              <UserDropdown></UserDropdown>
-            </template>
-          </UDashboardNavbar>
-
-          <ClientOnly>
-            <slot :orgid="selected_organization_id"></slot>
-          </ClientOnly>
-        </UDashboardPanel>
-
-      </UDashboardPage>
-    </UDashboardLayout>
+        <template #footer>
+          <UDashboardSidebarLinks :links="footerLinks" />
+        </template>
+      </UDashboardSidebar>
+    </UDashboardPanel>
+    <ClientOnly>
+      <slot :orgid="selected_organization_id"></slot>
+    </ClientOnly>
+  </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
-import TeamsDropdown from '~/components/sidebar/TeamsDropdown.vue';
-import UserDropdown from '~/components/navigation/UserMenu.vue';
-import { useUserOrganizations } from '~/composables/useUserOrganizations';
-
+import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
+import UserDropdown from "~/components/navigation/UserMenu.vue";
+import { useUserOrganizations } from "~/composables/useUserOrganizations";
 
 const route = useRoute();
 const appConfig = useAppConfig();
 const { isHelpSlideoverOpen } = useDashboard();
 const runtimeConfig = useRuntimeConfig();
 
-
 const user = useSupabaseUser();
 const supabase = useSupabaseClient();
 const toast = useToast();
 
-const { selected_organization_id } = useUserOrganizations()
+const { selected_organization_id } = useUserOrganizations();
 
 const links = [
   {
@@ -137,7 +117,7 @@ const links = [
       {
         label: "Payments",
         to: "/my/settings/payments",
-      }
+      },
     ],
     tooltip: {
       text: "Settings",

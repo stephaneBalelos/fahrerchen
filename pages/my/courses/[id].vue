@@ -1,9 +1,12 @@
 <template>
-  <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
-    <UHorizontalNavigation :links="links" />
-  </UDashboardToolbar>
-
-  <NuxtPage :orgid="selected_organization_id" :courseid="courseid" />
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
+        <UHorizontalNavigation :links="links" />
+      </UDashboardToolbar>
+      <NuxtPage :orgid="selected_organization_id" :courseid="courseid" />
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
