@@ -5,12 +5,12 @@ import { z } from 'zod';
 
 
 const supabase = useSupabaseClient<Database>();
-const { org } = useGlobalOrgState()
+const { selected_organization_id } = useUserOrganizations()
 
 const fileRef = ref<HTMLInputElement>()
 const toast = useToast()
 
-const lessonTypes: readonly string[] = ["EXAM", "OTHER", "PRACTICE", "THEORY"]
+const lessonTypes: string[] = ["EXAM", "OTHER", "PRACTICE", "THEORY"]
 
 const schema = z.object({
     type: z.enum(["DEFAULT", ...lessonTypes]),

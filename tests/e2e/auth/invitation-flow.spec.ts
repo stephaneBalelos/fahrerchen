@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { setupE2eTest, testConstants } from '../utils';
 import { login } from './utils';
 
-test.describe("Invite Team Member in Organisation", () => {
+test.describe("Invite Team Member in organization", () => {
 
     test.beforeAll(setupE2eTest);
     test.beforeEach(async ({page}) => {
@@ -16,7 +16,7 @@ test.describe("Invite Team Member in Organisation", () => {
         
     })
 
-    test('Authenticated User should have a default Organisation on the home page', async ({page, context}) => {
+    test('Authenticated User should have a default organization on the home page', async ({page, context}) => {
         expect(page).toHaveURL('http://localhost:3000')
         const orgCards = page.locator('.org-card')
         await expect(orgCards).toHaveCount(2)
@@ -30,7 +30,7 @@ test.describe("Invite Team Member in Organisation", () => {
         await expect(orgName).toHaveText('My Org')
     })
 
-    test('Authenticated User should be able to invite a team member to the organisation', async ({page, context}) => {
+    test('Authenticated User should be able to invite a team member to the organization', async ({page, context}) => {
         expect(page).toHaveURL('http://localhost:3000')
         page.locator('.org-card').first().click()
         await page.waitForURL('http://localhost:3000/my/')

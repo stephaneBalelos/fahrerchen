@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AppOrganisation, Database } from "~/types/app.types";
+import type { AppOrganization, Database } from "~/types/app.types";
 
 const actions = [
   {
@@ -14,7 +14,7 @@ const actions = [
 
 const client = useSupabaseClient<Database>();
 const props = useAttrs() as { orgid: string };
-const orgState = useGlobalOrgState();
+const orgState = useUserOrganizations();
 const { userInfos } = useUserInfos();
 
 const {
@@ -28,22 +28,21 @@ const {
       return [];
     }
     const { data, error } = await client
-      .from("organisation_members")
-      .select("user_id, organisations(*)")
+      .from("organization_members")
+      .select("user_id, organizations(*)")
       .eq("user_id", userInfos.value.id);
 
     if (error) {
       throw error;
     }
-    console.log(data);
     return data;
   },
   {
-    watch: [orgState.org, userInfos],
+    watch: [orgState.selected_organization_id, userInfos],
     immediate: true,
     transform: (data) => {
       const orgs = data
-        .map((d) => d.organisations)
+        .map((d) => d.organizations)
         .filter((org) => org !== null);
       return orgs.map((d, index) => {
         return {
@@ -54,7 +53,7 @@ const {
           },
           icon: "i-heroicons-globe-europe-africa",
           click: () => {
-            orgState.org.value = d.id;
+            orgState.selected_organization_id.value = d.id;
           },
         };
       });
@@ -64,12 +63,13 @@ const {
 
 const team = computed(() => {
   if (!teams.value) return null;
-  return teams.value.find((t) => t.id === orgState.org.value);
+  return teams.value.find((t) => t.id === orgState.selected_organization_id.value);
 });
 </script>
 
 <template>
   <UDropdown
+    id="teams-dropdown"
     v-if="teams"
     v-slot="{ open }"
     mode="hover"

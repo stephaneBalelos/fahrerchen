@@ -206,107 +206,6 @@
         }
       ]
     },
-    "broadcasts": {
-      "id": "realtime.broadcasts",
-      "schemaName": "realtime",
-      "tableName": "broadcasts",
-      "fields": [
-        {
-          "id": "realtime.broadcasts.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": {
-            "identifier": "\"realtime\".\"broadcasts_id_seq\"",
-            "increment": 1,
-            "start": 1
-          },
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.broadcasts.channel_id",
-          "name": "channel_id",
-          "columnName": "channel_id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.broadcasts.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.broadcasts.updated_at",
-          "name": "updated_at",
-          "columnName": "updated_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "channels",
-          "type": "channels",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "broadcastsTochannels",
-          "relationFromFields": [
-            "channel_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "broadcasts_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "broadcasts_channel_id_index",
-          "fields": [
-            "channel_id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
     "buckets": {
       "id": "storage.buckets",
       "schemaName": "storage",
@@ -512,267 +411,6 @@
         }
       ]
     },
-    "channels": {
-      "id": "realtime.channels",
-      "schemaName": "realtime",
-      "tableName": "channels",
-      "fields": [
-        {
-          "id": "realtime.channels.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": {
-            "identifier": "\"realtime\".\"channels_id_seq\"",
-            "increment": 1,
-            "start": 1
-          },
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.channels.name",
-          "name": "name",
-          "columnName": "name",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": 255
-        },
-        {
-          "id": "realtime.channels.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.channels.updated_at",
-          "name": "updated_at",
-          "columnName": "updated_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "broadcasts",
-          "type": "broadcasts",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "broadcastsTochannels",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "presences",
-          "type": "presences",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "presencesTochannels",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "channels_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "channels_name_index",
-          "fields": [
-            "name"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "course_activite_schedule": {
-      "id": "public.course_activite_schedule",
-      "schemaName": "public",
-      "tableName": "course_activite_schedule",
-      "fields": [
-        {
-          "id": "public.course_activite_schedule.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.activity_id",
-          "name": "activity_id",
-          "columnName": "activity_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.day_of_week",
-          "name": "day_of_week",
-          "columnName": "day_of_week",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.start_at",
-          "name": "start_at",
-          "columnName": "start_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.end_at",
-          "name": "end_at",
-          "columnName": "end_at",
-          "type": "timestamptz",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.repeat",
-          "name": "repeat",
-          "columnName": "repeat",
-          "type": "bool",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_activite_schedule.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
-          "type": "uuid",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "course_activities",
-          "type": "course_activities",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activite_scheduleTocourse_activities",
-          "relationFromFields": [
-            "activity_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "organisations",
-          "type": "organisations",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "course_activite_scheduleToorganisations",
-          "relationFromFields": [
-            "organisation_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "course_activite_schedule_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
     "course_activities": {
       "id": "public.course_activities",
       "schemaName": "public",
@@ -835,10 +473,10 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activities.date",
-          "name": "date",
-          "columnName": "date",
-          "type": "date",
+          "id": "public.course_activities.activity_type",
+          "name": "activity_type",
+          "columnName": "activity_type",
+          "type": "int4",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
@@ -849,37 +487,37 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activities.assigned_to",
-          "name": "assigned_to",
-          "columnName": "assigned_to",
-          "type": "uuid",
-          "isRequired": false,
+          "id": "public.course_activities.required",
+          "name": "required",
+          "columnName": "required",
+          "type": "int4",
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
         {
-          "id": "public.course_activities.requirement_id",
-          "name": "requirement_id",
-          "columnName": "requirement_id",
-          "type": "uuid",
-          "isRequired": false,
+          "id": "public.course_activities.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "numeric",
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
           "sequence": false,
-          "hasDefaultValue": false,
+          "hasDefaultValue": true,
           "isId": false,
           "maxLength": null
         },
         {
-          "id": "public.course_activities.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.course_activities.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -891,13 +529,13 @@
           "maxLength": null
         },
         {
-          "name": "course_requirements",
-          "type": "course_requirements",
-          "isRequired": false,
+          "name": "course_activity_types",
+          "type": "course_activity_types",
+          "isRequired": true,
           "kind": "object",
-          "relationName": "course_activitiesTocourse_requirements",
+          "relationName": "course_activitiesTocourse_activity_types",
           "relationFromFields": [
-            "requirement_id"
+            "activity_type"
           ],
           "relationToFields": [
             "id"
@@ -927,50 +565,18 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_activitiesToorganisations",
+          "relationName": "course_activitiesToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
           ],
           "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "public_users",
-          "type": "public_users",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activitiesTopublic_users",
-          "relationFromFields": [
-            "assigned_to"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "course_activite_schedule",
-          "type": "course_activite_schedule",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activite_scheduleTocourse_activities",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
           "isId": false,
           "isGenerated": false,
           "sequence": false,
@@ -982,6 +588,34 @@
           "isRequired": false,
           "kind": "object",
           "relationName": "course_activity_attendancesTocourse_activities",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_schedulesTocourse_activities",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bill_items",
+          "type": "course_subscription_bill_items",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_activities",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -1021,9 +655,9 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activity_attendances.activity_id",
-          "name": "activity_id",
-          "columnName": "activity_id",
+          "id": "public.course_activity_attendances.course_activity_id",
+          "name": "course_activity_id",
+          "columnName": "course_activity_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1035,11 +669,25 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activity_attendances.student_id",
-          "name": "student_id",
-          "columnName": "student_id",
+          "id": "public.course_activity_attendances.supervisor_id",
+          "name": "supervisor_id",
+          "columnName": "supervisor_id",
           "type": "uuid",
-          "isRequired": true,
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.activity_schedule_id",
+          "name": "activity_schedule_id",
+          "columnName": "activity_schedule_id",
+          "type": "uuid",
+          "isRequired": false,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -1077,9 +725,23 @@
           "maxLength": null
         },
         {
-          "id": "public.course_activity_attendances.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.course_activity_attendances.status",
+          "name": "status",
+          "columnName": "status",
+          "type": "attendance_status",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_attendances.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1097,7 +759,25 @@
           "kind": "object",
           "relationName": "course_activity_attendancesTocourse_activities",
           "relationFromFields": [
-            "activity_id"
+            "course_activity_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesTocourse_activity_schedules",
+          "relationFromFields": [
+            "activity_schedule_id"
           ],
           "relationToFields": [
             "id"
@@ -1127,13 +807,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
-          "isRequired": true,
+          "name": "organization_members",
+          "type": "organization_members",
+          "isRequired": false,
           "kind": "object",
-          "relationName": "course_activity_attendancesToorganisations",
+          "relationName": "course_activity_attendancesToorganization_members",
           "relationFromFields": [
-            "organisation_id"
+            "supervisor_id"
           ],
           "relationToFields": [
             "id"
@@ -1145,13 +825,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "students",
-          "type": "students",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_activity_attendancesTostudents",
+          "relationName": "course_activity_attendancesToorganizations",
           "relationFromFields": [
-            "student_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -1161,9 +841,31 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bill_items",
+          "type": "course_subscription_bill_items",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_activity_attendances",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
         }
       ],
       "uniqueConstraints": [
+        {
+          "name": "course_activity_attendances_course_subscription_id_activity_key",
+          "fields": [
+            "activity_schedule_id",
+            "course_subscription_id"
+          ],
+          "nullNotDistinct": false
+        },
         {
           "name": "course_activity_attendances_pkey",
           "fields": [
@@ -1173,13 +875,13 @@
         }
       ]
     },
-    "course_requirements": {
-      "id": "public.course_requirements",
+    "course_activity_schedules": {
+      "id": "public.course_activity_schedules",
       "schemaName": "public",
-      "tableName": "course_requirements",
+      "tableName": "course_activity_schedules",
       "fields": [
         {
-          "id": "public.course_requirements.id",
+          "id": "public.course_activity_schedules.id",
           "name": "id",
           "columnName": "id",
           "type": "uuid",
@@ -1193,7 +895,7 @@
           "maxLength": null
         },
         {
-          "id": "public.course_requirements.course_id",
+          "id": "public.course_activity_schedules.course_id",
           "name": "course_id",
           "columnName": "course_id",
           "type": "uuid",
@@ -1207,79 +909,9 @@
           "maxLength": null
         },
         {
-          "id": "public.course_requirements.requirements_type",
-          "name": "requirements_type",
-          "columnName": "requirements_type",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.name",
-          "name": "name",
-          "columnName": "name",
-          "type": "text",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.description",
-          "name": "description",
-          "columnName": "description",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.required",
-          "name": "required",
-          "columnName": "required",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.price",
-          "name": "price",
-          "columnName": "price",
-          "type": "int4",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": true,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "public.course_requirements.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.course_activity_schedules.activity_id",
+          "name": "activity_id",
+          "columnName": "activity_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1291,13 +923,83 @@
           "maxLength": null
         },
         {
-          "name": "course_requirements_types",
-          "type": "course_requirements_types",
+          "id": "public.course_activity_schedules.assigned_to",
+          "name": "assigned_to",
+          "columnName": "assigned_to",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.status",
+          "name": "status",
+          "columnName": "status",
+          "type": "schedule_status",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.start_at",
+          "name": "start_at",
+          "columnName": "start_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_activity_schedules.end_at",
+          "name": "end_at",
+          "columnName": "end_at",
+          "type": "timestamptz",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_requirementsTocourse_requirements_types",
+          "relationName": "course_activity_schedulesTocourse_activities",
           "relationFromFields": [
-            "requirements_type"
+            "activity_id"
           ],
           "relationToFields": [
             "id"
@@ -1313,7 +1015,7 @@
           "type": "courses",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_requirementsTocourses",
+          "relationName": "course_activity_schedulesTocourses",
           "relationFromFields": [
             "course_id"
           ],
@@ -1327,13 +1029,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
-          "isRequired": true,
+          "name": "organization_members",
+          "type": "organization_members",
+          "isRequired": false,
           "kind": "object",
-          "relationName": "course_requirementsToorganisations",
+          "relationName": "course_activity_schedulesToorganization_members",
           "relationFromFields": [
-            "organisation_id"
+            "assigned_to"
           ],
           "relationToFields": [
             "id"
@@ -1345,11 +1047,29 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activities",
-          "type": "course_activities",
+          "name": "organizations",
+          "type": "organizations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganizations",
+          "relationFromFields": [
+            "organization_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activitiesTocourse_requirements",
+          "relationName": "course_activity_attendancesTocourse_activity_schedules",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -1361,15 +1081,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "course_requirements_course_id_requirements_type_key",
-          "fields": [
-            "course_id",
-            "requirements_type"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "course_requirements_pkey",
+          "name": "course_activity_schedules_pkey",
           "fields": [
             "id"
           ],
@@ -1377,13 +1089,13 @@
         }
       ]
     },
-    "course_requirements_types": {
-      "id": "public.course_requirements_types",
+    "course_activity_types": {
+      "id": "public.course_activity_types",
       "schemaName": "public",
-      "tableName": "course_requirements_types",
+      "tableName": "course_activity_types",
       "fields": [
         {
-          "id": "public.course_requirements_types.id",
+          "id": "public.course_activity_types.id",
           "name": "id",
           "columnName": "id",
           "type": "int8",
@@ -1392,7 +1104,7 @@
           "isList": false,
           "isGenerated": false,
           "sequence": {
-            "identifier": "\"public\".\"course_requirements_types_id_seq\"",
+            "identifier": "\"public\".\"course_activity_types_id_seq\"",
             "increment": 1,
             "start": 1
           },
@@ -1401,10 +1113,10 @@
           "maxLength": null
         },
         {
-          "id": "public.course_requirements_types.type",
+          "id": "public.course_activity_types.type",
           "name": "type",
           "columnName": "type",
-          "type": "requirements_types",
+          "type": "activity_types",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
@@ -1415,7 +1127,194 @@
           "maxLength": null
         },
         {
-          "id": "public.course_requirements_types.name",
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activitiesTocourse_activity_types",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_activity_types_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "course_activity_types_type_key",
+          "fields": [
+            "type"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_documents": {
+      "id": "public.course_documents",
+      "schemaName": "public",
+      "tableName": "course_documents",
+      "fields": [
+        {
+          "id": "public.course_documents.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_documents.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_documents.name",
+          "name": "name",
+          "columnName": "name",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_documents.description",
+          "name": "description",
+          "columnName": "description",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_documents.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_documentsTocourses",
+          "relationFromFields": [
+            "course_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organizations",
+          "type": "organizations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_documentsToorganizations",
+          "relationFromFields": [
+            "organization_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_documents_pkey",
+          "fields": [
+            "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_required_documents": {
+      "id": "public.course_required_documents",
+      "schemaName": "public",
+      "tableName": "course_required_documents",
+      "fields": [
+        {
+          "id": "public.course_required_documents.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_required_documents.course_id",
+          "name": "course_id",
+          "columnName": "course_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_required_documents.name",
           "name": "name",
           "columnName": "name",
           "type": "text",
@@ -1429,7 +1328,21 @@
           "maxLength": null
         },
         {
-          "id": "public.course_requirements_types.description",
+          "id": "public.course_required_documents.name_slug",
+          "name": "name_slug",
+          "columnName": "name_slug",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": true,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_required_documents.description",
           "name": "description",
           "columnName": "description",
           "type": "text",
@@ -1443,14 +1356,50 @@
           "maxLength": null
         },
         {
-          "name": "course_requirements",
-          "type": "course_requirements",
-          "isRequired": false,
+          "id": "public.course_required_documents.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "courses",
+          "type": "courses",
+          "isRequired": true,
           "kind": "object",
-          "relationName": "course_requirementsTocourse_requirements_types",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
+          "relationName": "course_required_documentsTocourses",
+          "relationFromFields": [
+            "course_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organizations",
+          "type": "organizations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_required_documentsToorganizations",
+          "relationFromFields": [
+            "organization_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
           "isId": false,
           "isGenerated": false,
           "sequence": false,
@@ -1459,16 +1408,209 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "course_requirements_types_pkey",
+          "name": "course_required_documents_pkey",
           "fields": [
             "id"
           ],
           "nullNotDistinct": false
+        }
+      ]
+    },
+    "course_subscription_bill_items": {
+      "id": "public.course_subscription_bill_items",
+      "schemaName": "public",
+      "tableName": "course_subscription_bill_items",
+      "fields": [
+        {
+          "id": "public.course_subscription_bill_items.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
         },
         {
-          "name": "course_requirements_types_type_key",
+          "id": "public.course_subscription_bill_items.bill_id",
+          "name": "bill_id",
+          "columnName": "bill_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.course_activity_attendance_id",
+          "name": "course_activity_attendance_id",
+          "columnName": "course_activity_attendance_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.course_activity_id",
+          "name": "course_activity_id",
+          "columnName": "course_activity_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.description",
+          "name": "description",
+          "columnName": "description",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.price",
+          "name": "price",
+          "columnName": "price",
+          "type": "numeric",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.canceled_at",
+          "name": "canceled_at",
+          "columnName": "canceled_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bill_items.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "course_activities",
+          "type": "course_activities",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_activities",
+          "relationFromFields": [
+            "course_activity_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_activity_attendances",
+          "relationFromFields": [
+            "course_activity_attendance_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bills",
+          "type": "course_subscription_bills",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_subscription_bills",
+          "relationFromFields": [
+            "bill_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "organizations",
+          "type": "organizations",
+          "isRequired": true,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsToorganizations",
+          "relationFromFields": [
+            "organization_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "course_subscription_bill_items_pkey",
           "fields": [
-            "type"
+            "id"
           ],
           "nullNotDistinct": false
         }
@@ -1508,10 +1650,24 @@
           "maxLength": null
         },
         {
-          "id": "public.course_subscription_bills.amount",
-          "name": "amount",
-          "columnName": "amount",
-          "type": "int4",
+          "id": "public.course_subscription_bills.total",
+          "name": "total",
+          "columnName": "total",
+          "type": "numeric",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.course_subscription_bills.created_at",
+          "name": "created_at",
+          "columnName": "created_at",
+          "type": "timestamptz",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
@@ -1536,9 +1692,9 @@
           "maxLength": null
         },
         {
-          "id": "public.course_subscription_bills.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.course_subscription_bills.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1568,13 +1724,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_subscription_billsToorganisations",
+          "relationName": "course_subscription_billsToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -1584,16 +1740,23 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bill_items",
+          "type": "course_subscription_bill_items",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsTocourse_subscription_bills",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
         }
       ],
       "uniqueConstraints": [
-        {
-          "name": "course_subscription_bills_course_subscription_id_key",
-          "fields": [
-            "course_subscription_id"
-          ],
-          "nullNotDistinct": false
-        },
         {
           "name": "course_subscription_bills_pkey",
           "fields": [
@@ -1679,9 +1842,9 @@
           "maxLength": null
         },
         {
-          "id": "public.course_subscriptions.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.course_subscriptions.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1696,7 +1859,7 @@
           "id": "public.course_subscriptions.costs",
           "name": "costs",
           "columnName": "costs",
-          "type": "int4",
+          "type": "numeric",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
@@ -1725,13 +1888,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "course_subscriptionsToorganisations",
+          "relationName": "course_subscriptionsToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -1849,7 +2012,7 @@
           "name": "description",
           "columnName": "description",
           "type": "text",
-          "isRequired": true,
+          "isRequired": false,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -1966,9 +2129,9 @@
           "maxLength": null
         },
         {
-          "id": "public.courses.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.courses.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -1998,13 +2161,13 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "coursesToorganisations",
+          "relationName": "coursesToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -2030,11 +2193,39 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_requirements",
-          "type": "course_requirements",
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_requirementsTocourses",
+          "relationName": "course_activity_schedulesTocourses",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_documents",
+          "type": "course_documents",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_documentsTocourses",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_required_documents",
+          "type": "course_required_documents",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_required_documentsTocourses",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -2060,9 +2251,9 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "courses_organisation_id_type_key",
+          "name": "courses_organization_id_type_key",
           "fields": [
-            "organisation_id",
+            "organization_id",
             "type"
           ],
           "nullNotDistinct": false
@@ -2071,6 +2262,125 @@
           "name": "courses_pkey",
           "fields": [
             "id"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "extensions": {
+      "id": "_realtime.extensions",
+      "schemaName": "_realtime",
+      "tableName": "extensions",
+      "fields": [
+        {
+          "id": "_realtime.extensions.id",
+          "name": "id",
+          "columnName": "id",
+          "type": "uuid",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.extensions.type",
+          "name": "type",
+          "columnName": "type",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.extensions.settings",
+          "name": "settings",
+          "columnName": "settings",
+          "type": "jsonb",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.extensions.tenant_external_id",
+          "name": "tenant_external_id",
+          "columnName": "tenant_external_id",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.extensions.inserted_at",
+          "name": "inserted_at",
+          "columnName": "inserted_at",
+          "type": "timestamp",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.extensions.updated_at",
+          "name": "updated_at",
+          "columnName": "updated_at",
+          "type": "timestamp",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "tenants",
+          "type": "tenants",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "extensionsTotenants",
+          "relationFromFields": [
+            "tenant_external_id"
+          ],
+          "relationToFields": [
+            "external_id"
+          ],
+          "isList": false,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "extensions_tenant_external_id_type_index",
+          "fields": [
+            "tenant_external_id",
+            "type"
           ],
           "nullNotDistinct": false
         }
@@ -2992,45 +3302,49 @@
         }
       ]
     },
-    "log_events_07121355_b80b_42a1_94b2_804220ef1ed4": {
-      "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
-      "schemaName": "_analytics",
-      "tableName": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4",
+    "messages": {
+      "id": "realtime.messages",
+      "schemaName": "realtime",
+      "tableName": "messages",
       "fields": [
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.id",
+          "id": "realtime.messages.id",
           "name": "id",
           "columnName": "id",
-          "type": "varchar",
+          "type": "int8",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": {
+            "identifier": "\"realtime\".\"messages_id_seq\"",
+            "increment": 1,
+            "start": 1
+          },
+          "hasDefaultValue": true,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "realtime.messages.topic",
+          "name": "topic",
+          "columnName": "topic",
+          "type": "text",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
           "isId": false,
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
+          "id": "realtime.messages.extension",
+          "name": "extension",
+          "columnName": "extension",
           "type": "text",
-          "isRequired": false,
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -3040,11 +3354,25 @@
           "maxLength": null
         },
         {
-          "id": "_analytics.log_events_07121355_b80b_42a1_94b2_804220ef1ed4.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
+          "id": "realtime.messages.inserted_at",
+          "name": "inserted_at",
+          "columnName": "inserted_at",
           "type": "timestamp",
-          "isRequired": false,
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "realtime.messages.updated_at",
+          "name": "updated_at",
+          "columnName": "updated_at",
+          "type": "timestamp",
+          "isRequired": true,
           "kind": "scalar",
           "isList": false,
           "isGenerated": false,
@@ -3056,583 +3384,7 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "log_events_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
-      "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
-      "schemaName": "_analytics",
-      "tableName": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6",
-      "fields": [
-        {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_60fa7018_b5c0_459f_bad3_34677810ee39": {
-      "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
-      "schemaName": "_analytics",
-      "tableName": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39",
-      "fields": [
-        {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_60fa7018_b5c0_459f_bad3_34677810ee39.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226": {
-      "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
-      "schemaName": "_analytics",
-      "tableName": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226",
-      "fields": [
-        {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_773c6a26_5997_4c20_97d7_ea82f34ff226.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
-      "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
-      "schemaName": "_analytics",
-      "tableName": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
-      "fields": [
-        {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
-      "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
-      "schemaName": "_analytics",
-      "tableName": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
-      "fields": [
-        {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
-      "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
-      "schemaName": "_analytics",
-      "tableName": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7",
-      "fields": [
-        {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_eb54f357_8fee_4313_8d76_6003927e3317": {
-      "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317",
-      "schemaName": "_analytics",
-      "tableName": "log_events_eb54f357_8fee_4313_8d76_6003927e3317",
-      "fields": [
-        {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_eb54f357_8fee_4313_8d76_6003927e3317.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
-      "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
-      "schemaName": "_analytics",
-      "tableName": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
-      "fields": [
-        {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "varchar",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": 255
-        },
-        {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.body",
-          "name": "body",
-          "columnName": "body",
-          "type": "jsonb",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.event_message",
-          "name": "event_message",
-          "columnName": "event_message",
-          "type": "text",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.timestamp",
-          "name": "timestamp",
-          "columnName": "timestamp",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "log_events_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
+          "name": "messages_pkey",
           "fields": [
             "id"
           ],
@@ -3828,6 +3580,20 @@
           "maxLength": null
         },
         {
+          "id": "auth.mfa_challenges.otp_code",
+          "name": "otp_code",
+          "columnName": "otp_code",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "mfa_factors",
           "type": "mfa_factors",
           "isRequired": true,
@@ -3974,6 +3740,34 @@
           "maxLength": null
         },
         {
+          "id": "auth.mfa_factors.phone",
+          "name": "phone",
+          "columnName": "phone",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "auth.mfa_factors.last_challenged_at",
+          "name": "last_challenged_at",
+          "columnName": "last_challenged_at",
+          "type": "timestamptz",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "auth_users",
           "type": "auth_users",
           "isRequired": true,
@@ -4008,6 +3802,20 @@
       ],
       "uniqueConstraints": [
         {
+          "name": "mfa_factors_last_challenged_at_key",
+          "fields": [
+            "last_challenged_at"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "mfa_factors_phone_key",
+          "fields": [
+            "phone"
+          ],
+          "nullNotDistinct": false
+        },
+        {
           "name": "mfa_factors_pkey",
           "fields": [
             "id"
@@ -4018,6 +3826,14 @@
           "name": "mfa_factors_user_friendly_name_unique",
           "fields": [
             "friendly_name",
+            "user_id"
+          ],
+          "nullNotDistinct": false
+        },
+        {
+          "name": "unique_verified_phone_factor",
+          "fields": [
+            "phone",
             "user_id"
           ],
           "nullNotDistinct": false
@@ -4307,6 +4123,20 @@
           "maxLength": null
         },
         {
+          "id": "storage.objects.user_metadata",
+          "name": "user_metadata",
+          "columnName": "user_metadata",
+          "type": "jsonb",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "buckets",
           "type": "buckets",
           "isRequired": false,
@@ -4483,13 +4313,13 @@
         }
       ]
     },
-    "organisation_members": {
-      "id": "public.organisation_members",
+    "organization_members": {
+      "id": "public.organization_members",
       "schemaName": "public",
-      "tableName": "organisation_members",
+      "tableName": "organization_members",
       "fields": [
         {
-          "id": "public.organisation_members.id",
+          "id": "public.organization_members.id",
           "name": "id",
           "columnName": "id",
           "type": "uuid",
@@ -4503,7 +4333,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisation_members.inserted_at",
+          "id": "public.organization_members.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamptz",
@@ -4517,9 +4347,9 @@
           "maxLength": null
         },
         {
-          "id": "public.organisation_members.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.organization_members.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -4531,7 +4361,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisation_members.user_id",
+          "id": "public.organization_members.user_id",
           "name": "user_id",
           "columnName": "user_id",
           "type": "uuid",
@@ -4545,7 +4375,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisation_members.role",
+          "id": "public.organization_members.role",
           "name": "role",
           "columnName": "role",
           "type": "app_role",
@@ -4559,13 +4389,13 @@
           "maxLength": null
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "organisation_membersToorganisations",
+          "relationName": "organization_membersToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -4581,7 +4411,7 @@
           "type": "public_users",
           "isRequired": true,
           "kind": "object",
-          "relationName": "organisation_membersTopublic_users",
+          "relationName": "organization_membersTopublic_users",
           "relationFromFields": [
             "user_id"
           ],
@@ -4593,19 +4423,47 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_attendances",
+          "type": "course_activity_attendances",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_attendancesToorganization_members",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_activity_schedulesToorganization_members",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
         }
       ],
       "uniqueConstraints": [
         {
-          "name": "organisation_members_organisation_id_user_id_key",
+          "name": "organization_members_organization_id_user_id_key",
           "fields": [
-            "organisation_id",
+            "organization_id",
             "user_id"
           ],
           "nullNotDistinct": false
         },
         {
-          "name": "organisation_members_pkey",
+          "name": "organization_members_pkey",
           "fields": [
             "id"
           ],
@@ -4613,13 +4471,13 @@
         }
       ]
     },
-    "organisations": {
-      "id": "public.organisations",
+    "organizations": {
+      "id": "public.organizations",
       "schemaName": "public",
-      "tableName": "organisations",
+      "tableName": "organizations",
       "fields": [
         {
-          "id": "public.organisations.id",
+          "id": "public.organizations.id",
           "name": "id",
           "columnName": "id",
           "type": "uuid",
@@ -4633,7 +4491,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisations.inserted_at",
+          "id": "public.organizations.inserted_at",
           "name": "inserted_at",
           "columnName": "inserted_at",
           "type": "timestamptz",
@@ -4647,7 +4505,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisations.name",
+          "id": "public.organizations.name",
           "name": "name",
           "columnName": "name",
           "type": "text",
@@ -4661,7 +4519,7 @@
           "maxLength": null
         },
         {
-          "id": "public.organisations.owner_id",
+          "id": "public.organizations.owner_id",
           "name": "owner_id",
           "columnName": "owner_id",
           "type": "uuid",
@@ -4675,11 +4533,25 @@
           "maxLength": null
         },
         {
+          "id": "public.organizations.stripe_account_id",
+          "name": "stripe_account_id",
+          "columnName": "stripe_account_id",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "name": "public_users",
           "type": "public_users",
           "isRequired": true,
           "kind": "object",
-          "relationName": "organisationsTopublic_users",
+          "relationName": "organizationsTopublic_users",
           "relationFromFields": [
             "owner_id"
           ],
@@ -4693,25 +4565,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activite_schedule",
-          "type": "course_activite_schedule",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "course_activite_scheduleToorganisations",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
           "name": "course_activities",
           "type": "course_activities",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activitiesToorganisations",
+          "relationName": "course_activitiesToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4725,7 +4583,7 @@
           "type": "course_activity_attendances",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activity_attendancesToorganisations",
+          "relationName": "course_activity_attendancesToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4735,11 +4593,53 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_requirements",
-          "type": "course_requirements",
+          "name": "course_activity_schedules",
+          "type": "course_activity_schedules",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_requirementsToorganisations",
+          "relationName": "course_activity_schedulesToorganizations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_documents",
+          "type": "course_documents",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_documentsToorganizations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_required_documents",
+          "type": "course_required_documents",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_required_documentsToorganizations",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
+          "isId": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false
+        },
+        {
+          "name": "course_subscription_bill_items",
+          "type": "course_subscription_bill_items",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "course_subscription_bill_itemsToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4753,7 +4653,7 @@
           "type": "course_subscription_bills",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_subscription_billsToorganisations",
+          "relationName": "course_subscription_billsToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4767,7 +4667,7 @@
           "type": "course_subscriptions",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_subscriptionsToorganisations",
+          "relationName": "course_subscriptionsToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4781,7 +4681,7 @@
           "type": "courses",
           "isRequired": false,
           "kind": "object",
-          "relationName": "coursesToorganisations",
+          "relationName": "coursesToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4791,11 +4691,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisation_members",
-          "type": "organisation_members",
+          "name": "organization_members",
+          "type": "organization_members",
           "isRequired": false,
           "kind": "object",
-          "relationName": "organisation_membersToorganisations",
+          "relationName": "organization_membersToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4809,7 +4709,7 @@
           "type": "students",
           "isRequired": false,
           "kind": "object",
-          "relationName": "studentsToorganisations",
+          "relationName": "studentsToorganizations",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -4821,110 +4721,9 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "organisations_pkey",
+          "name": "organizations_pkey",
           "fields": [
             "id"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "presences": {
-      "id": "realtime.presences",
-      "schemaName": "realtime",
-      "tableName": "presences",
-      "fields": [
-        {
-          "id": "realtime.presences.id",
-          "name": "id",
-          "columnName": "id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": {
-            "identifier": "\"realtime\".\"presences_id_seq\"",
-            "increment": 1,
-            "start": 1
-          },
-          "hasDefaultValue": true,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.presences.channel_id",
-          "name": "channel_id",
-          "columnName": "channel_id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.presences.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "id": "realtime.presences.updated_at",
-          "name": "updated_at",
-          "columnName": "updated_at",
-          "type": "timestamp",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        },
-        {
-          "name": "channels",
-          "type": "channels",
-          "isRequired": true,
-          "kind": "object",
-          "relationName": "presencesTochannels",
-          "relationFromFields": [
-            "channel_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
-          "isList": false,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "presences_pkey",
-          "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "presences_channel_id_index",
-          "fields": [
-            "channel_id"
           ],
           "nullNotDistinct": false
         }
@@ -5285,6 +5084,20 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "storage.s3_multipart_uploads.user_metadata",
+          "name": "user_metadata",
+          "columnName": "user_metadata",
+          "type": "jsonb",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
           "isId": false,
           "maxLength": null
         },
@@ -5854,6 +5667,42 @@
         }
       ]
     },
+    "_realtime_schema_migrations": {
+      "id": "_realtime.schema_migrations",
+      "schemaName": "_realtime",
+      "tableName": "schema_migrations",
+      "fields": [
+        {
+          "id": "_realtime.schema_migrations.version",
+          "name": "version",
+          "columnName": "version",
+          "type": "int8",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.schema_migrations.inserted_at",
+          "name": "inserted_at",
+          "columnName": "inserted_at",
+          "type": "timestamp",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        }
+      ],
+      "uniqueConstraints": []
+    },
     "auth_schema_migrations": {
       "id": "auth.schema_migrations",
       "schemaName": "auth",
@@ -5971,402 +5820,6 @@
       "uniqueConstraints": [
         {
           "name": "schema_migrations_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4": {
-      "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_07121355_b80b_42a1_94b2_804220ef1ed4_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6": {
-      "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_45cefe7a_fe6f_49be_93d4_3607db7236f6_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39": {
-      "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_60fa7018_b5c0_459f_bad3_34677810ee39_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226": {
-      "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_773c6a26_5997_4c20_97d7_ea82f34ff226_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee": {
-      "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_7f55ed0f_f79e_4b4d_b1e6_c2049476f9ee_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f": {
-      "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_b847d9ad_3b87_4649_b0bf_508dbca53f0f_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7": {
-      "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_c54bbd66_7b1a_4917_8f64_d7de382100a7_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317": {
-      "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_eb54f357_8fee_4313_8d76_6003927e3317_pkey",
-          "fields": [
-            "version"
-          ],
-          "nullNotDistinct": false
-        }
-      ]
-    },
-    "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854": {
-      "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
-      "schemaName": "_analytics",
-      "tableName": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854",
-      "fields": [
-        {
-          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.version",
-          "name": "version",
-          "columnName": "version",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "_analytics.schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854.inserted_at",
-          "name": "inserted_at",
-          "columnName": "inserted_at",
-          "type": "timestamp",
-          "isRequired": false,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false,
-          "isId": false,
-          "maxLength": null
-        }
-      ],
-      "uniqueConstraints": [
-        {
-          "name": "schema_migrations_ec7576a6_0a25_4aa7_bd43_7b2d9a32d854_pkey",
           "fields": [
             "version"
           ],
@@ -6515,6 +5968,50 @@
           "name": "secrets_name_idx",
           "fields": [
             "name"
+          ],
+          "nullNotDistinct": false
+        }
+      ]
+    },
+    "seed_files": {
+      "id": "supabase_migrations.seed_files",
+      "schemaName": "supabase_migrations",
+      "tableName": "seed_files",
+      "fields": [
+        {
+          "id": "supabase_migrations.seed_files.path",
+          "name": "path",
+          "columnName": "path",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "supabase_migrations.seed_files.hash",
+          "name": "hash",
+          "columnName": "hash",
+          "type": "text",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        }
+      ],
+      "uniqueConstraints": [
+        {
+          "name": "seed_files_pkey",
+          "fields": [
+            "path"
           ],
           "nullNotDistinct": false
         }
@@ -7030,9 +6527,23 @@
           "maxLength": null
         },
         {
-          "id": "public.students.organisation_id",
-          "name": "organisation_id",
-          "columnName": "organisation_id",
+          "id": "public.students.user_id",
+          "name": "user_id",
+          "columnName": "user_id",
+          "type": "uuid",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "public.students.organization_id",
+          "name": "organization_id",
+          "columnName": "organization_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -7044,13 +6555,13 @@
           "maxLength": null
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": true,
           "kind": "object",
-          "relationName": "studentsToorganisations",
+          "relationName": "studentsToorganizations",
           "relationFromFields": [
-            "organisation_id"
+            "organization_id"
           ],
           "relationToFields": [
             "id"
@@ -7062,14 +6573,18 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activity_attendances",
-          "type": "course_activity_attendances",
+          "name": "public_users",
+          "type": "public_users",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activity_attendancesTostudents",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
+          "relationName": "studentsTopublic_users",
+          "relationFromFields": [
+            "user_id"
+          ],
+          "relationToFields": [
+            "id"
+          ],
+          "isList": false,
           "isId": false,
           "isGenerated": false,
           "sequence": false,
@@ -7227,33 +6742,15 @@
         }
       ]
     },
-    "user_roles": {
-      "id": "public.user_roles",
-      "schemaName": "public",
-      "tableName": "user_roles",
+    "tenants": {
+      "id": "_realtime.tenants",
+      "schemaName": "_realtime",
+      "tableName": "tenants",
       "fields": [
         {
-          "id": "public.user_roles.id",
+          "id": "_realtime.tenants.id",
           "name": "id",
           "columnName": "id",
-          "type": "int8",
-          "isRequired": true,
-          "kind": "scalar",
-          "isList": false,
-          "isGenerated": false,
-          "sequence": {
-            "identifier": "\"public\".\"user_roles_id_seq\"",
-            "increment": 1,
-            "start": 1
-          },
-          "hasDefaultValue": false,
-          "isId": true,
-          "maxLength": null
-        },
-        {
-          "id": "public.user_roles.user_id",
-          "name": "user_id",
-          "columnName": "user_id",
           "type": "uuid",
           "isRequired": true,
           "kind": "scalar",
@@ -7261,14 +6758,70 @@
           "isGenerated": false,
           "sequence": false,
           "hasDefaultValue": false,
+          "isId": true,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.name",
+          "name": "name",
+          "columnName": "name",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
           "isId": false,
           "maxLength": null
         },
         {
-          "id": "public.user_roles.role",
-          "name": "role",
-          "columnName": "role",
-          "type": "app_role",
+          "id": "_realtime.tenants.external_id",
+          "name": "external_id",
+          "columnName": "external_id",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.jwt_secret",
+          "name": "jwt_secret",
+          "columnName": "jwt_secret",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.max_concurrent_users",
+          "name": "max_concurrent_users",
+          "columnName": "max_concurrent_users",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.inserted_at",
+          "name": "inserted_at",
+          "columnName": "inserted_at",
+          "type": "timestamp",
           "isRequired": true,
           "kind": "scalar",
           "isList": false,
@@ -7279,18 +6832,140 @@
           "maxLength": null
         },
         {
-          "name": "public_users",
-          "type": "public_users",
+          "id": "_realtime.tenants.updated_at",
+          "name": "updated_at",
+          "columnName": "updated_at",
+          "type": "timestamp",
           "isRequired": true,
-          "kind": "object",
-          "relationName": "user_rolesTopublic_users",
-          "relationFromFields": [
-            "user_id"
-          ],
-          "relationToFields": [
-            "id"
-          ],
+          "kind": "scalar",
           "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.max_events_per_second",
+          "name": "max_events_per_second",
+          "columnName": "max_events_per_second",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.postgres_cdc_default",
+          "name": "postgres_cdc_default",
+          "columnName": "postgres_cdc_default",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.max_bytes_per_second",
+          "name": "max_bytes_per_second",
+          "columnName": "max_bytes_per_second",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.max_channels_per_client",
+          "name": "max_channels_per_client",
+          "columnName": "max_channels_per_client",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.max_joins_per_second",
+          "name": "max_joins_per_second",
+          "columnName": "max_joins_per_second",
+          "type": "int4",
+          "isRequired": true,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.suspend",
+          "name": "suspend",
+          "columnName": "suspend",
+          "type": "bool",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.jwt_jwks",
+          "name": "jwt_jwks",
+          "columnName": "jwt_jwks",
+          "type": "jsonb",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "id": "_realtime.tenants.notify_private_alpha",
+          "name": "notify_private_alpha",
+          "columnName": "notify_private_alpha",
+          "type": "bool",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": false,
+          "sequence": false,
+          "hasDefaultValue": true,
+          "isId": false,
+          "maxLength": null
+        },
+        {
+          "name": "extensions",
+          "type": "extensions",
+          "isRequired": false,
+          "kind": "object",
+          "relationName": "extensionsTotenants",
+          "relationFromFields": [],
+          "relationToFields": [],
+          "isList": true,
           "isId": false,
           "isGenerated": false,
           "sequence": false,
@@ -7299,17 +6974,9 @@
       ],
       "uniqueConstraints": [
         {
-          "name": "user_roles_pkey",
+          "name": "tenants_external_id_index",
           "fields": [
-            "id"
-          ],
-          "nullNotDistinct": false
-        },
-        {
-          "name": "user_roles_user_id_role_key",
-          "fields": [
-            "role",
-            "user_id"
+            "external_id"
           ],
           "nullNotDistinct": false
         }
@@ -8002,6 +7669,20 @@
           "maxLength": null
         },
         {
+          "id": "public.users.fullname",
+          "name": "fullname",
+          "columnName": "fullname",
+          "type": "text",
+          "isRequired": false,
+          "kind": "scalar",
+          "isList": false,
+          "isGenerated": true,
+          "sequence": false,
+          "hasDefaultValue": false,
+          "isId": false,
+          "maxLength": null
+        },
+        {
           "id": "public.users.status",
           "name": "status",
           "columnName": "status",
@@ -8034,11 +7715,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "course_activities",
-          "type": "course_activities",
+          "name": "organization_members",
+          "type": "organization_members",
           "isRequired": false,
           "kind": "object",
-          "relationName": "course_activitiesTopublic_users",
+          "relationName": "organization_membersTopublic_users",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -8048,11 +7729,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisation_members",
-          "type": "organisation_members",
+          "name": "organizations",
+          "type": "organizations",
           "isRequired": false,
           "kind": "object",
-          "relationName": "organisation_membersTopublic_users",
+          "relationName": "organizationsTopublic_users",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -8062,25 +7743,11 @@
           "hasDefaultValue": false
         },
         {
-          "name": "organisations",
-          "type": "organisations",
+          "name": "students",
+          "type": "students",
           "isRequired": false,
           "kind": "object",
-          "relationName": "organisationsTopublic_users",
-          "relationFromFields": [],
-          "relationToFields": [],
-          "isList": true,
-          "isId": false,
-          "isGenerated": false,
-          "sequence": false,
-          "hasDefaultValue": false
-        },
-        {
-          "name": "user_roles",
-          "type": "user_roles",
-          "isRequired": false,
-          "kind": "object",
-          "relationName": "user_rolesTopublic_users",
+          "relationName": "studentsTopublic_users",
           "relationFromFields": [],
           "relationToFields": [],
           "isList": true,
@@ -8148,6 +7815,9 @@
     "factor_type": {
       "schemaName": "auth",
       "values": [
+        {
+          "name": "phone"
+        },
         {
           "name": "totp"
         },
@@ -8248,6 +7918,23 @@
         }
       ]
     },
+    "activity_types": {
+      "schemaName": "public",
+      "values": [
+        {
+          "name": "EXAM"
+        },
+        {
+          "name": "OTHER"
+        },
+        {
+          "name": "PRACTICE"
+        },
+        {
+          "name": "THEORY"
+        }
+      ]
+    },
     "app_permission": {
       "schemaName": "public",
       "values": [
@@ -8276,16 +7963,16 @@
           "name": "course_activity_attendances.update"
         },
         {
-          "name": "course_requirements.create"
+          "name": "course_activity_schedules.create"
         },
         {
-          "name": "course_requirements.delete"
+          "name": "course_activity_schedules.delete"
         },
         {
-          "name": "course_requirements.read"
+          "name": "course_activity_schedules.read"
         },
         {
-          "name": "course_requirements.update"
+          "name": "course_activity_schedules.update"
         },
         {
           "name": "course_subscription_bills.create"
@@ -8324,22 +8011,22 @@
           "name": "courses.update"
         },
         {
-          "name": "organisation_members.delete"
+          "name": "organization_members.delete"
         },
         {
-          "name": "organisation_members.read"
+          "name": "organization_members.read"
         },
         {
-          "name": "organisation_members.update"
+          "name": "organization_members.update"
         },
         {
-          "name": "organisations.delete"
+          "name": "organizations.delete"
         },
         {
-          "name": "organisations.read"
+          "name": "organizations.read"
         },
         {
-          "name": "organisations.update"
+          "name": "organizations.update"
         },
         {
           "name": "students.create"
@@ -8378,6 +8065,20 @@
         },
         {
           "name": "teacher"
+        }
+      ]
+    },
+    "attendance_status": {
+      "schemaName": "public",
+      "values": [
+        {
+          "name": "ATTENDED"
+        },
+        {
+          "name": "CANCELED"
+        },
+        {
+          "name": "REGISTERED"
         }
       ]
     },
@@ -8434,20 +8135,37 @@
         }
       ]
     },
-    "requirements_types": {
+    "schedule_status": {
       "schemaName": "public",
       "values": [
         {
-          "name": "EXAM"
+          "name": "CANCELED"
         },
         {
-          "name": "OTHER"
+          "name": "COMPLETED"
         },
         {
-          "name": "PRACTICE"
+          "name": "PLANNED"
+        }
+      ]
+    },
+    "schedule_type": {
+      "schemaName": "public",
+      "values": [
+        {
+          "name": "DAILY"
         },
         {
-          "name": "THEORY"
+          "name": "MONTHLY"
+        },
+        {
+          "name": "ONCE"
+        },
+        {
+          "name": "WEEKLY"
+        },
+        {
+          "name": "YEARLY"
         }
       ]
     },

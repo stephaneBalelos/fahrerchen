@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const { t } = useI18n({
+  useScope: 'local'
+})
 const user = useSupabaseUser()
 const supabase = useSupabaseClient()
 const toast = useToast()
@@ -9,22 +12,22 @@ const getDropdownItems = (u: typeof user.value) => {
             slot: 'account',
             disabled: true
         }], [{
-            label: 'Profile',
+            label: t('profile'),
             icon: 'i-heroicons-cog-8-tooth',
             click: () => {
                 navigateTo("/account")
             }
         }], [{
-            label: 'Documentation',
+            label: t('documentation'),
             icon: 'i-heroicons-book-open'
         }, {
-            label: 'Changelog',
+            label: t('changelog'),
             icon: 'i-heroicons-megaphone'
         }, {
-            label: 'Status',
+            label: t('status'),
             icon: 'i-heroicons-signal'
         }], [{
-            label: 'Sign out',
+            label: t('sign_out'),
             icon: 'i-heroicons-arrow-left-on-rectangle',
             class: 'logout-button',
             click: () => signOut()
@@ -54,7 +57,7 @@ const signOut = async () => {
         <template #account="{ item }">
             <div class="text-left">
                 <p>
-                    Signed in as
+                    {{ t('logged_in_as') }}
                 </p>
                 <p class="truncate font-medium text-gray-900 dark:text-white">
                     {{ item.label }}
@@ -70,3 +73,25 @@ const signOut = async () => {
     </UDropdown>
 </template>
 
+
+
+<i18n lang="json">
+    {
+      "en": {
+        "logged_in_as": "Logged in as",
+        "profile": "My Profile",
+        "documentation": "Documentation",
+        "changelog": "Changelog",
+        "status": "Status",
+        "sign_out": "Sign out"
+      },
+      "de": {
+        "logged_in_as": "Angemeldet als",
+        "profile": "Mein Profil",
+        "documentation": "Dokumentation",
+        "changelog": "Änderungsprotokoll",
+        "status": "Status",
+        "sign_out": "Abmelden"
+      }
+    }
+  </i18n>

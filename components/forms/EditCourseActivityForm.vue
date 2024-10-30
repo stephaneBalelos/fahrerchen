@@ -8,11 +8,11 @@
       :onSubmit="saveCourseActivity"
     >
       <UDashboardSection
-        title="Course Activity"
+        :title="t('form_section_title')"
         :description="
           props.course_activity_id
-            ? 'Edit the course activity'
-            : 'Add a new course activity'
+            ? t('form_section_desc')
+            : t('form_section_desc_new')
         "
       >
         <UFormGroup
@@ -25,69 +25,6 @@
           :ui="{ container: '' }"
         >
           <UInput v-model="state.name" autocomplete="on" size="md" />
-        </UFormGroup>
-
-        <UFormGroup
-          name="date"
-          label="Date"
-          description="When"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UPopover :popper="{ placement: 'bottom-start' }">
-            <UButton
-              block
-              color="white"
-              trailing-icon="i-heroicons-chevron-down-20-solid"
-              :label="format(state.date, 'd MMM, yyy')"
-            />
-
-            <template #panel="{ close }">
-              <DatePicker v-model="state.date" is-required @close="close" />
-            </template>
-          </UPopover>
-        </UFormGroup>
-
-        <UFormGroup
-          name="assigned_to"
-          :label="`Assigned To`"
-          description="Who is assigned to this activity."
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <UserSelect v-model="state.assigned_to" />
-        </UFormGroup>
-
-        <UFormGroup
-          name="requirement_id"
-          :label="`Course Requirement`"
-          description="Welche Anforderung wird durch diese Aktivität erfüllt."
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <USelectMenu
-            v-model="state.requirement_id"
-            :options="course_requirements ?? []"
-            value-attribute="id"
-          >
-            <template #label>
-              <div v-if="state.requirement_id && course_requirements">
-                <span class="truncate">{{
-                  course_requirements.find((r) => r.id === state.requirement_id)
-                    ?.name
-                }}</span>
-              </div>
-              <div v-else>
-                <span class="truncate">Select a requirement</span>
-              </div>
-            </template>
-            <template #option="{ option }">
-              <span class="truncate">{{ option.name }}</span>
-            </template>
-          </USelectMenu>
         </UFormGroup>
 
         <UFormGroup
@@ -104,7 +41,38 @@
             size="md"
           />
         </UFormGroup>
-        <!-- <UFormGroup
+
+        <UFormGroup
+          name="requirement_id"
+          :label="`Course Requirement`"
+          description="Welche Anforderung wird durch diese Aktivität erfüllt."
+          required
+          class="grid grid-cols-1 gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+          <USelectMenu
+            v-model="state.activity_type"
+            :options="activity_types"
+            value-attribute="id"
+          >
+            <template #label>
+              <div v-if="state.activity_type && activity_types">
+                <span class="truncate">{{
+                  activity_types.find((r) => r.id === state.activity_type)
+                    ?.type
+                }}</span>
+              </div>
+              <div v-else>
+                <span class="truncate">{{ t('select_activity_type') }}</span>
+              </div>
+            </template>
+            <template #option="{ option }">
+              <span class="truncate">{{ option.type }}</span>
+            </template>
+          </USelectMenu>
+        </UFormGroup>
+
+        <UFormGroup
           name="price"
           label="Price"
           description="Will appear on receipts, invoices, and other communication."
@@ -113,7 +81,8 @@
           :ui="{ container: '' }"
         >
           <UInput v-model="state.price" autocomplete="on" size="md" />
-        </UFormGroup> -->
+        </UFormGroup>
+
       </UDashboardSection>
     </UForm>
 
@@ -136,17 +105,15 @@ import type { Form, FormSubmitEvent } from "#ui/types";
 import { format } from "date-fns";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 import UserSelect from "./Inputs/UserSelect.vue";
+import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
 
 type CourseActivityEdit = Omit<
   AppCourseActivity,
-  "id" | "date" | "course_id" | "organisation_id"
-> & {
-  date: Date;
-};
+  "id" | "course_id" | "organization_id"
+>;
 type Props = {
   courseid: string;
   orgid: string;
-  date: Date;
   course_activity_id?: string;
 };
 
@@ -154,6 +121,10 @@ type Emits = {
   (event: "activity-saved", payload?: AppCourseActivity): void;
   (event: "activity-deleted", payload?: AppCourseActivity): void;
 };
+
+const { t } = useI18n({
+  useScope: 'local'
+})
 
 const slideover = useSlideover();
 
@@ -163,33 +134,19 @@ const props = defineProps<Props>();
 
 const form = ref<Form<CourseActivityEdit> | null>(null);
 
-const date = ref(new Date());
-
 const client = useSupabaseClient<Database>();
 
 const $emit = defineEmits<Emits>();
 
-const { data: course_requirements, error } = await useAsyncData(
-  `course_requirements_${props.courseid}`,
-  async () => {
-    const { data, error } = await client
-      .from("course_requirements")
-      .select("*")
-      .eq("course_id", props.courseid);
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    return data;
-  }
-);
+const activity_types = await useCourseActivityTypes()
+
 
 const state = reactive<CourseActivityEdit>({
   name: "",
   description: "",
-  assigned_to: null,
-  date: props.date,
-  requirement_id: null,
+  activity_type: 0,
+  required: 0,
+  price: 0,
 });
 
 onMounted(async () => {
@@ -213,9 +170,8 @@ onMounted(async () => {
       } else {
         state.name = data.name;
         state.description = data.description;
-        state.assigned_to = data.assigned_to;
-        state.date = new Date(data.date);
-        state.requirement_id = data.requirement_id;
+        state.price = data.price;
+        state.activity_type = data.activity_type
       }
     } catch (error) {
       console.log(error);
@@ -239,8 +195,8 @@ const validate = (state: CourseActivityEdit) => {
     errors.push({ path: "name", message: "Please enter a name" });
   if (!state.description)
     errors.push({ path: "description", message: "Please enter a description" });
-  if (!state.date)
-    errors.push({ path: "date", message: "Please enter a date" });
+  if (!state.price)
+    errors.push({ path: "price", message: "Please enter a price" });
   return errors;
 };
 
@@ -257,7 +213,7 @@ async function updateCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .update({...params, date: params.date.toISOString()})
+      .update({...params})
       .eq("id", props.course_activity_id)
     if (error) { 
       console.error(error)
@@ -282,7 +238,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .insert({...params, date: params.date.toDateString(), course_id: props.courseid, organisation_id: props.orgid})
+      .insert({...params, course_id: props.courseid, organization_id: props.orgid})
       .select("*").single()
     if (error) { 
       console.error(error)
@@ -334,3 +290,22 @@ const deleteCourseActivity = async (id: string) => {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+  {
+    "de": {
+      "form_section_title": "Kurs Aktivität",
+      "form_section_desc": "Änderungen vornehmen",
+      "form_section_desc_new": "Kurs Aktivität erstellen",
+      "form_group_name_label": "Activity Name",
+      "select_activity_type": "Äktivitättyp auswählen"
+    },
+    "en": {
+      "form_section_title": "Kurs Aktivität",
+      "form_section_desc": "Änderungen vornehmen",
+      "form_section_desc_new": "Kurs Aktivität erstellen",
+      "form_group_name_label": "Activity Name",
+      "select_activity_type": "Äktivitättyp auswählen"
+    }
+  }
+</i18n>

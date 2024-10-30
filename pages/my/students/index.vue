@@ -28,7 +28,7 @@
           label="New user"
           trailing-icon="i-heroicons-plus"
           color="gray"
-          @click="open = true"
+          @click="() => openStudentForm()"
         />
       </template>
     </UDashboardToolbar>
@@ -70,7 +70,7 @@
       v-model:sort="sort"
       :rows="students ?? []"
       :columns="columns"
-      :loading="pending"
+      :loading="status === 'pending'"
       sort-mode="manual"
       class="w-full"
       :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
@@ -101,58 +101,37 @@
         />
       </template>
       <template #actions-data="{ row }">
-        <UButton :to="`/my/students/${row.id}`" color="primary" variant="soft" icon="i-heroicons-eye"></UButton>
+        <UButton
+          :to="`/my/students/${row.id}`"
+          color="primary"
+          variant="soft"
+          icon="i-heroicons-eye"
+        ></UButton>
+        <UButton
+          color="primary"
+          variant="soft"
+          icon="i-heroicons-pencil"
+          @click="(e) => openStudentForm(row.id)"
+        ></UButton>
       </template>
     </UTable>
   </UDashboardPanel>
-
-  <UDashboardSlideover v-model="open" title="Create News Student">
-    <CreateUserForm @submitted="onUserCreated" />
-    <template #footer>
-      <UButton @click="open = false">Cancel</UButton>
-    </template>
-  </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import type { AppUser, Database } from "~/types/app.types";
+import type { AppStudent, AppUser, Database } from "~/types/app.types";
 import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
+import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 
 definePageMeta({
   layout: "orgs",
 });
 
-const open = ref(false);
 const client = useSupabaseClient<Database>();
-
-const {
-  data: students,
-  pending,
-  error,
-  refresh,
-} = await useAsyncData("students", async () => {
-  const { data } = await client
-    .from("students")
-    .select("*")
-    .eq("organisation_id", org.value);
-
-  return data;
-}, {
-  watch: [org],
-  transform: (data) => {
-    return data ? data.map((item: any) => {
-      return {
-        ...item,
-        name: `${item.firstname} ${item.lastname}`, 
-      };
-    }) : [];
-  },
-});
-
+const slideover = useSlideover();
 const selected = ref<AppUser[]>([]);
-
 const columns = [
   {
     key: "avatar",
@@ -179,9 +158,35 @@ const q = ref("");
 const selectedColumns = ref(columns);
 const sort = ref({ column: "id", direction: "asc" as const });
 
-const onUserCreated = async (d: any) => {
-  refresh();
-};
+const {
+  data: students,
+  status,
+  error,
+  refresh,
+} = await useAsyncData(
+  "students",
+  async () => {
+    const { data } = await client
+      .from("students")
+      .select("*")
+      .eq("organization_id", selected_organization_id.value);
+
+    return data;
+  },
+  {
+    watch: [selected_organization_id],
+    transform: (data) => {
+      return data
+        ? data.map((item: any) => {
+            return {
+              ...item,
+              name: `${item.firstname} ${item.lastname}`,
+            };
+          })
+        : [];
+    },
+  }
+);
 
 function onSelect(row: AppUser) {
   const index = selected.value.findIndex((item) => item.id === row.id);
@@ -191,6 +196,21 @@ function onSelect(row: AppUser) {
     selected.value.splice(index, 1);
   }
 }
+
+const openStudentForm = (id?: string) => {
+  slideover.open(EditStudentForm, {
+    organization_id: selected_organization_id.value,
+    student_id: id,
+    "onStudent-created": (student: AppStudent) => {
+      console.log("student created", student);
+      refresh();
+    },
+    "onStudent-updated": (student: AppStudent) => {
+      console.log("student updated", student);
+      refresh();
+    },
+  })
+};
 </script>
 
 <style scoped>

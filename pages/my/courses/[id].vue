@@ -1,9 +1,12 @@
 <template>
-  <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
-    <UHorizontalNavigation :links="links" />
-  </UDashboardToolbar>
-
-  <NuxtPage :orgid="org" :courseid="courseid" />
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
+        <UHorizontalNavigation :links="links" />
+      </UDashboardToolbar>
+      <NuxtPage :orgid="selected_organization_id" :courseid="courseid" />
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
@@ -12,7 +15,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const { org } = useGlobalOrgState();
+const { selected_organization_id } = useUserOrganizations();
 const courseid = route.params.id as string;
 
 const links = [

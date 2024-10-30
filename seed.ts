@@ -28,26 +28,26 @@ const main = async () => {
       created_at: auth_user.created_at,
   }}))
 
-  // Seed the corresponding organisations (2 organisations are normally already created by pg triggers when a new user is created, but we dont have that here so we need to create them manually)
-  await seed.organisations((x) => x(2, (ctx) => {
+  // Seed the corresponding organizations (2 organizations are normally already created by pg triggers when a new user is created, but we dont have that here so we need to create them manually)
+  await seed.organizations((x) => x(2, (ctx) => {
     const auth_user = seed.$store.auth_users[ctx.index];
     return {
-      name: "Organisation " + ctx.index,
+      name: "organization " + ctx.index,
       owner_id: auth_user.id,
       created_at: new Date(),
     }
   }))
 
-  // Seed the organisation_members table with the auth_users we created
+  // Seed the organization_members table with the auth_users we created
   const managers = testConstants.usersEmails.filter((email) => email.includes('manager'))
   for (let i = 0; i < managers.length; i++) {
     const auth_user = seed.$store.auth_users.find((user) => user.email === managers[i]);
     if (auth_user) {
-      await seed.organisation_members((x) => x(1, (ctx) => {
+      await seed.organization_members((x) => x(1, (ctx) => {
         {
           return {
             user_id: auth_user.id,
-            organisation_id: seed.$store.organisations[0].id,
+            organization_id: seed.$store.organizations[0].id,
             role: 'manager',
             created_at: new Date(),
           }
@@ -55,18 +55,32 @@ const main = async () => {
       }))
     }
   }
-  // seed 2 students in the first created organisation
+  // seed 2 students in the first created organization
   await seed.students((x) => x(2, (ctx) => {
-    const org = seed.$store.organisations[0];
+    const org = seed.$store.organizations[0];
     return {
       firstname: copycat.firstName(ctx.index),
       lastname: copycat.lastName(ctx.index),
       email: copycat.email(ctx.index),
       birth_date: copycat.dateString(ctx.index, {minYear: 1990, maxYear: 2005}),
-      organisation_id: org.id,
+      organization_id: org.id,
       created_at: new Date(),
     }
   }))
+
+  // seed 2 courses in all organizations
+  const orgs = seed.$store.organizations;
+  for (let i = 0; i < orgs.length; i++) {
+    await seed.courses((x) => x(2, (ctx) => {
+      return {
+        name: "Course " + ctx.index,
+        description: copycat.sentence(ctx.index),
+        organization_id: orgs[i].id,
+        created_at: new Date(),
+        type: copycat.int(i + ctx.index, {min: 1, max: 9,}),
+      }
+    }))
+    }
 
   // Type completion not working? You might want to reload your TypeScript Server to pick up the changes
   process.exit();
