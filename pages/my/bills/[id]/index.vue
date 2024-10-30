@@ -15,10 +15,8 @@
       </UDashboardNavbar>
       <div class="flex h-full" v-if="bill.data && bill.subscription">
         <UDashboardPanel :width="400">
-          <UDashboardPanelContent v-if="bill.subscription">
-            <StudentsStudentProfileSection
-              :student_id="bill.subscription.student_id"
-            />
+          <UDashboardPanelContent v-if="bill.subscription && bill.subscription.student && bill.subscription.course">
+            <BillInformations :bill="bill.data" :student="bill.subscription.student" :course="bill.subscription.course" :subscription="bill.subscription"></BillInformations>
           </UDashboardPanelContent>
         </UDashboardPanel>
         <UDashboardPanel grow>
@@ -30,6 +28,10 @@
                 class="px-4 mt-6"
                 :ui="{ wrapper: 'divide-none'}"
               >
+              <template #links>
+                <UButton color="primary" variant="soft">Mark Bill as Ready to Pay</UButton>
+                <UButton color="red" variant="soft">Cancel Bill</UButton>
+              </template>
                 <template #description>
                   <div>
                     <p>Streetname 109</p>
@@ -56,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import BillInformations from "~/components/bills/BillInformations.vue";
 import type { Database, AppCourseSubscription } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 

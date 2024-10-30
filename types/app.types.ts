@@ -16,6 +16,8 @@ export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_typ
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
 export type AppCourseActivityAttendance = DatabaseGenerated['public']['Tables']['course_activity_attendances']['Row']
 
+export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
+
 
 
 export type StripeConnectPostBody = {
