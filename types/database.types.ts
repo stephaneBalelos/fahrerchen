@@ -321,6 +321,7 @@ export type Database = {
           bill_id: string
           canceled_at: string | null
           course_activity_attendance_id: string | null
+          course_activity_id: string | null
           description: string
           id: string
           organization_id: string
@@ -330,6 +331,7 @@ export type Database = {
           bill_id: string
           canceled_at?: string | null
           course_activity_attendance_id?: string | null
+          course_activity_id?: string | null
           description: string
           id?: string
           organization_id: string
@@ -339,6 +341,7 @@ export type Database = {
           bill_id?: string
           canceled_at?: string | null
           course_activity_attendance_id?: string | null
+          course_activity_id?: string | null
           description?: string
           id?: string
           organization_id?: string
@@ -357,6 +360,13 @@ export type Database = {
             columns: ["bill_id"]
             isOneToOne: false
             referencedRelation: "course_subscription_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_activity_id_fkey"
+            columns: ["course_activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
             referencedColumns: ["id"]
           },
           {
@@ -685,7 +695,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      course_subscription_bill_items_view: {
+        Row: {
+          activity_description: string | null
+          activity_name: string | null
+          bill_id: string | null
+          items:
+            | Database["public"]["Tables"]["course_subscription_bill_items"]["Row"][]
+            | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       authorize: {

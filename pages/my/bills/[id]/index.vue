@@ -1,11 +1,9 @@
 <template>
   <UDashboardPage>
-    <UDashboardPanel grow>
+    <UDashboardPanel grow v-if="bill">
       <UDashboardNavbar>
-        <template #left> 
-          <p class="font-semibold">
-            Bill #{{ bill?.id }}
-          </p>
+        <template #left>
+          <p class="font-semibold">Bill #{{ bill.data.id }}</p>
         </template>
 
         <template #right>
@@ -15,19 +13,41 @@
           </UButton>
         </template>
       </UDashboardNavbar>
-      <div class="flex h-full">
+      <div class="flex h-full" v-if="bill.data && bill.subscription">
         <UDashboardPanel :width="400">
-          <UDashboardPanelContent>
+          <UDashboardPanelContent v-if="bill.subscription">
             <StudentsStudentProfileSection
-              :student_id="'5ce0b7bd-3312-5b3e-ab6b-ffcf05b50752'"
+              :student_id="bill.subscription.student_id"
             />
           </UDashboardPanelContent>
         </UDashboardPanel>
         <UDashboardPanel grow>
           <div class="h-full">
             <div class="absolute inset-0 overflow-y-auto">
-              <BillsBillingList :bill_id="id" />
+              <UDashboardSection
+                :title="`${bill.subscription.student?.firstname} ${bill.subscription.student?.lastname}`"
+                icon="i-heroicons-user"
+                class="px-4 mt-6"
+                :ui="{ wrapper: 'divide-none'}"
+              >
+                <template #description>
+                  <div>
+                    <p>Streetname 109</p>
+                    <p>23456 Zipcode</p>
+                    <p>Wilhelmshaven Germany</p>
+                  </div>
+                </template>
+                <BillsBillingList :bill_id="id" />
+              </UDashboardSection>
             </div>
+            <UDashboardToolbar class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-8 pt-4">
+              <template #right>
+                <div class="flex flex-col flex-1 items-end">
+                <span class="text-sm text-gray-500">Total</span>
+                <span class="text-xl font-bold">{{ formatCurrency(bill.data.total) }}</span>
+              </div>
+              </template>
+            </UDashboardToolbar>
           </div>
         </UDashboardPanel>
       </div>
@@ -37,6 +57,7 @@
 
 <script setup lang="ts">
 import type { Database, AppCourseSubscription } from "~/types/app.types";
+import { formatCurrency } from "~/utils/formatters";
 
 definePageMeta({
   layout: "orgs",
@@ -44,7 +65,6 @@ definePageMeta({
 
 const { id } = useRoute().params;
 const client = useSupabaseClient<Database>();
-const subscription = ref<AppCourseSubscription | null>(null);
 const toast = useToast();
 
 const {
@@ -63,7 +83,12 @@ const {
     throw error;
   }
 
-  return data;
+  const subscription = await useCourseSubscription(data.course_subscription_id);
+
+  return {
+    data,
+    subscription,
+  };
 });
 
 async function markAsPaid() {

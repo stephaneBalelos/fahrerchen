@@ -247,6 +247,7 @@ create table public.course_subscription_bill_items (
   id            uuid default uuid_generate_v4() primary key,
   bill_id      uuid references public.course_subscription_bills on delete cascade not null,
   course_activity_attendance_id    uuid references public.course_activity_attendances on delete set null,
+  course_activity_id    uuid references public.course_activities on delete set null,
   description   text not null,
   price       numeric default 0 not null check (price >= 0),
   canceled_at   timestamp with time zone default null,
@@ -254,6 +255,22 @@ create table public.course_subscription_bill_items (
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
+
+
+-- Bill Items View grouped by course_activity_id
+create or replace view public.course_subscription_bill_items_view as
+select
+  course_activity.name as activity_name,
+  course_activity.description as activity_description,
+  bill_id,
+  array_agg(bill_items) as items,
+  sum(bill_items.price) as total
+from public.course_subscription_bill_items as bill_items
+left join public.course_activities as course_activity on bill_items.course_activity_id = course_activity.id
+group by course_activity_id, activity_name, activity_description, bill_id;
+
+
+
 
 
 
@@ -342,7 +359,6 @@ create or replace function public.handle_new_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
 declare bill_id uuid;
-declare course_activity_id uuid;
 declare activity_price numeric;
 declare activity_name text;
 begin
@@ -360,12 +376,11 @@ begin
   end if;
 
   -- lookup the activity name & price
-  select activity_id into course_activity_id from public.course_activity_schedules where id = new.activity_schedule_id;
-  select name, price into activity_name, activity_price from public.course_activities where id = course_activity_id;
+  select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
 
   -- insert the bill item
-  insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, description, price, organization_id)
-  values (bill_id, new.id, activity_name, activity_price, org_id);
+  insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
+  values (bill_id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
 
   return new;
 end;
