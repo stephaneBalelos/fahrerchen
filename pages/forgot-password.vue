@@ -49,7 +49,7 @@ const onSubmit = async (data: any) => {
     const { data: res, error } = await supabase.auth.resetPasswordForEmail(
       data.email,
       {
-        redirectTo: "http://localhost:3000/account/password-reset",
+        redirectTo: `${window.location.origin}/account/password-reset`,
       }
     );
 
