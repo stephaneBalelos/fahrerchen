@@ -98,3 +98,4 @@ sw.*
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+mail-preview.html
