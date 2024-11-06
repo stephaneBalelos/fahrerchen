@@ -124,9 +124,6 @@ Deno.serve(async (req) => {
                 "name": "No Reply",
                 "email": "no-reply@stephanedondyas.cloud"
             },
-            "headers": {
-                "X-Sib-Sandbox": "drop"
-            },
             "to": [
                 {
                     "email": user.email,
