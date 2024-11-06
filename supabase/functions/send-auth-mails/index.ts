@@ -22,7 +22,6 @@ Deno.serve(async (req) => {
     const headers = Object.fromEntries(req.headers)
     const secret = hookSecret.split('whsec_')[1]
     const wh = new Webhook(secret)
-    console.log(payload)
     try {
         const {
             user,
@@ -113,8 +112,6 @@ Deno.serve(async (req) => {
         } else {
             throw new Error('Unknown email action type')
         }
-
-        // console.log(html)
 
 
         // Send the email
