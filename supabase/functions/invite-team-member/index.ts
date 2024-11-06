@@ -12,7 +12,15 @@ Deno.serve(async (req: Request) => {
   }
 
   const authHeader = req.headers.get('Authorization')
+  if (!authHeader) {
+    return new Response('Unauthorized', {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 401,
+    })
+  }
+  console.log(authHeader)
   const token = authHeader.replace('Bearer ', '')
+
 
   console.log(Deno.env.get('SUPABASE_URL'))
 
@@ -34,7 +42,6 @@ Deno.serve(async (req: Request) => {
         orgid
       }
     })
-    console.log('start')
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
