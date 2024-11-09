@@ -1,5 +1,5 @@
 <template>
-  <UDashboardSlideover :title="`${props.course_id ? state.name : 'New Course'}`" ref="slideover" prevent-close id="create-course-slideover">
+  <UDashboardSlideover :title="`${props.course_id ? state.name : 'New Course'}`" prevent-close id="create-course-slideover">
     <UForm
     ref="form"
       :state="state"

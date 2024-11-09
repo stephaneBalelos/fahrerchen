@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { type Database } from "~/types/database.types";
-import CreateCourseForm from "~/components/forms/EditCourseForm.vue";
-import type { AppCourse } from "~/types/app.types";
 import EditCourseForm from "~/components/forms/EditCourseForm.vue";
 
 definePageMeta({
@@ -10,7 +8,6 @@ definePageMeta({
 
 const supabase = useSupabaseClient<Database>();
 const orgState = useUserOrganizations();
-const open = ref(false);
 const toast = useToast();
 const slideover = useSlideover();
 
@@ -33,14 +30,17 @@ onMounted(async () => {
   await refresh();
 });
 
-const onCourseCreated = async (d: AppCourse) => {
-    slideover.close();
-  navigateTo(`/my/courses/${d.id}/settings`);
-};
-
 const openCreateCourseForm = () => {
   slideover.open(EditCourseForm, {
-    "onCourse-created": onCourseCreated,
+    "onCourse-created": () => {
+      refresh();
+      slideover.close();
+      toast.add({
+        title: "Course created",
+        description: "Course has been created successfully",
+        color: "green",
+      });
+    },
   });
 };
 </script>
