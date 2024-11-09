@@ -16,21 +16,11 @@
           <UBadge color="white" variant="solid">Aktiv</UBadge> <br />
         </template>
       </UPageHeader>
-
-      <!-- <div class="grid lg:grid-cols-1 lg:items-start gap-8 mt-8" v-if="student?.id">
-        <FileListCard
-          bucketId="student_documents"
-          :path="student?.id"
-          title="Dokumente"
-          description="Alle Dokumente die der Schüler hochgeladen hat.">
-        </FileListCard>
-      </div> -->
     </UDashboardPanelContent>
   </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
-import FileListCard from "~/components/files/FileListCard.vue";
 import type { AppStudent, Database } from "~/types/app.types";
 
 definePageMeta({

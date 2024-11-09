@@ -16,7 +16,7 @@
           },
         ]"
       >
-        <NuxtLink
+        <div
           v-if="
             course_activity.course_activity_schedules &&
             course_activity.course_activity_schedules.length > 0
@@ -38,7 +38,7 @@
             </div>
           </div>
           <p class="text-gray-900 dark:text-white font-medium text-lg"></p>
-        </NuxtLink>
+        </div>
         <div v-else>
           <UAlert
             :title="`No schedules for ${course_activity.name}`"
