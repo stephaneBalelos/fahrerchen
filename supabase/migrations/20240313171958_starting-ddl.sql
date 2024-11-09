@@ -151,6 +151,8 @@ create table public.course_documents (
   course_id    uuid references public.courses on delete cascade not null,
   name          text,
   description   text,
+  path         text not null,
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_documents is 'COURSE DOCUMENTS MADE AVAILABLE FOR STUDENTS.';
@@ -268,9 +270,6 @@ select
 from public.course_subscription_bill_items as bill_items
 left join public.course_activities as course_activity on bill_items.course_activity_id = course_activity.id
 group by course_activity_id, activity_name, activity_description, bill_id;
-
-
-
 
 
 

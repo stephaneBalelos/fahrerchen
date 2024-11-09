@@ -18,6 +18,8 @@ export type AppCourseActivityAttendance = DatabaseGenerated['public']['Tables'][
 
 export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
 
+export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
+
 
 
 export type StripeConnectPostBody = {

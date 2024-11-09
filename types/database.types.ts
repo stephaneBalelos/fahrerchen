@@ -238,24 +238,30 @@ export type Database = {
       course_documents: {
         Row: {
           course_id: string
+          created_at: string
           description: string | null
           id: string
           name: string | null
           organization_id: string
+          path: string
         }
         Insert: {
           course_id: string
+          created_at?: string
           description?: string | null
           id?: string
           name?: string | null
           organization_id: string
+          path: string
         }
         Update: {
           course_id?: string
+          created_at?: string
           description?: string | null
           id?: string
           name?: string | null
           organization_id?: string
+          path?: string
         }
         Relationships: [
           {

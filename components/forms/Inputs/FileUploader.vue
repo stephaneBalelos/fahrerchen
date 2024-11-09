@@ -27,8 +27,6 @@ type Props = {
   mode?: "single" | "multiple";
 };
 
-const { selected_organization_id } = useUserOrganizations();
-
 const props = defineProps<Props>();
 const $emits = defineEmits(["uploaded"]);
 const runtimeConfig = useRuntimeConfig();
@@ -38,12 +36,8 @@ const fileRef = ref<HTMLInputElement>();
 const uploadState = ref<"idle" | "uploading" | "completed" | "failed">("idle");
 const uploadProgress = ref(0);
 const uppy = ref<Uppy>();
-const uploadId = computed(() => {
-  return props.bucketId + "/" + props.path;
-});
 
 function onFileChange(files: FileList) {
-
   if (files.length === 0) {
     return;
   }
@@ -85,7 +79,7 @@ onMounted(async () => {
   });
 
   uppy.value.on("file-added", (file) => {
-    const filename = org.value + "/" + props.path + "/" + file.name;
+    const filename = props.path + "/" + file.name;
     file.name = filename;
     const supabaseMetadata = {
       bucketName: props.bucketId,
@@ -115,6 +109,11 @@ onMounted(async () => {
     } else {
       $emits("uploaded");
       uploadState.value = "completed";
+      if(fileRef.value) {
+        console.log(fileRef.value.value)
+        fileRef.value.value = "";
+      }
+      uppy.value?.clearUploadedFiles();
     }
   });
   uppy.value.on("error", (error) => {

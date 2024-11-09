@@ -1,6 +1,9 @@
 <template>
   <UDashboardPanelContent>
     <div class="grid lg:grid-cols-2 gap-4">
+
+      <FormsCourseDocumentsForm :orgid="props.orgid" :courseid="props.courseid" />
+
       <UDashboardCard
         v-for="course_activity in course_activities"
         :title="course_activity.name"
