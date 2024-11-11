@@ -426,6 +426,51 @@ export type Database = {
           },
         ]
       }
+      course_subscription_documents: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          name: string
+          organization_id: string
+          path: string
+          subscription_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          name: string
+          organization_id: string
+          path: string
+          subscription_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          path?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscription_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_documents_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_subscriptions: {
         Row: {
           archived_at: string | null
@@ -674,6 +719,7 @@ export type Database = {
       }
       users: {
         Row: {
+          avatar_path: string | null
           email: string
           firstname: string | null
           fullname: string | null
@@ -682,6 +728,7 @@ export type Database = {
           status: Database["public"]["Enums"]["user_status"] | null
         }
         Insert: {
+          avatar_path?: string | null
           email: string
           firstname?: string | null
           fullname?: string | null
@@ -690,6 +737,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["user_status"] | null
         }
         Update: {
+          avatar_path?: string | null
           email?: string
           firstname?: string | null
           fullname?: string | null

@@ -81,6 +81,7 @@ create table public.users (
   firstname    text,
   lastname    text,
   fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
+  avatar_path    text,
   status      user_status default 'OFFLINE'::public.user_status
 );
 comment on table public.users is 'Profile data for each user.';
@@ -184,6 +185,21 @@ create table public.course_subscriptions (
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 
 alter table public.course_subscriptions enable row level security;
+
+-- COURSE SUBSCRIPTION DOCUMENTS
+create table public.course_subscription_documents (
+  id            uuid default uuid_generate_v4() primary key,
+  subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  name          text not null,
+  description   text not null,
+  path         text not null,
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_subscription_documents is 'COURSE SUBSCRIPTION DOCUMENTS.';
+
+alter table public.course_subscription_documents enable row level security;
+
 
 -- COURSE ACTIVITIES
 create table public.course_activities (
@@ -544,20 +560,24 @@ create policy "Owner & Manager can delete course_required_documents" on public.c
 insert into public.role_permissions (role, permission) values ('owner', 'courses.delete');
 
 create policy "Everyone can see course_subscriptions" on public.course_subscriptions for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
+create policy "Everyone can see course_subscription_documents" on public.course_subscription_documents for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('student', 'course_subscriptions.read');
 
 create policy "Owner, Manager can insert course_subscriptions" on public.course_subscriptions for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
+create policy "Owner, Manager can insert course_subscription_documents" on public.course_subscription_documents for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.create');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.create');
 
 create policy "Owner & Manager can update course_subscriptions" on public.course_subscriptions for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
+create policy "Owner & Manager can update course_subscription_documents" on public.course_subscription_documents for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.update');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.update');
 
 create policy "Owner & Manager can delete course_subscriptions" on public.course_subscriptions for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id));
+create policy "Owner & Manager can delete course_subscription_documents" on public.course_subscription_documents for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
 
