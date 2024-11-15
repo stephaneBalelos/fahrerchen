@@ -58,7 +58,28 @@ const toast = useToast();
 
 const { selected_organization_id } = useUserOrganizations();
 
-const links = [
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { data:org_courses, error, status } = await useAsyncData(
+  `org_courses_${selected_organization_id.value}`,
+  async () => {
+    const { data, error } = await supabase
+      .from("courses")
+      .select("id, name")
+      .eq("organization_id", selected_organization_id.value);
+
+    if (error) {
+      throw error;
+    }
+    return data;
+  }, {
+    watch: [selected_organization_id],
+  }
+);
+
+const links = computed(() => [
   {
     id: "dashboard",
     label: "Dashboard [NOT IMPLEMENTED]",
@@ -88,6 +109,10 @@ const links = [
       text: "Courses",
       shortcuts: ["G", "C"],
     },
+    children: org_courses.value ? org_courses.value.map((course) => ({
+      label: course.name,
+      to: `/my/courses/${course.id}`,
+    })): [],
   },
   {
     id: "bills",
@@ -124,7 +149,7 @@ const links = [
       shortcuts: ["G", "S"],
     },
   },
-];
+]);
 
 const footerLinks = [
   {
@@ -137,35 +162,6 @@ const footerLinks = [
   },
 ];
 
-const groups = [
-  {
-    key: "links",
-    label: "Go to",
-    commands: links.map((link) => ({
-      ...link,
-      shortcuts: link.tooltip?.shortcuts,
-    })),
-  },
-  {
-    key: "code",
-    label: "Code",
-    commands: [
-      {
-        id: "source",
-        label: "View page source",
-        icon: "i-simple-icons-github",
-        click: () => {
-          window.open(
-            `https://github.com/nuxt-ui-pro/dashboard/blob/main/pages${
-              route.path === "/" ? "/index" : route.path
-            }.vue`,
-            "_blank"
-          );
-        },
-      },
-    ],
-  },
-];
 
 const defaultColors = ref(
   ["green", "teal", "cyan", "sky", "blue", "indigo", "violet"].map((color) => ({
