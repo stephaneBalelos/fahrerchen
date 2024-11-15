@@ -30,6 +30,8 @@
           color="gray"
           @click="() => openStudentForm()"
         />
+        <UButton color="gray" variant="solid" size="2xs" to="/my/students/requests">Voranmeldungen</UButton>
+
       </template>
     </UDashboardToolbar>
 
