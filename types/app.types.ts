@@ -21,6 +21,9 @@ export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['c
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
 
 
+export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
+
 
 export type StripeConnectPostBody = {
   org_id: string

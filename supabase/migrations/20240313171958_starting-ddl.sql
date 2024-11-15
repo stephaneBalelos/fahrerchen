@@ -13,6 +13,10 @@ create type public.app_permission as enum (
   'students.create',
   'students.update',
   'students.delete',
+  'students_registration_requests.read',
+  'students_registration_requests.create',
+  'students_registration_requests.update',
+  'students_registration_requests.delete',
   'courses.read',
   'courses.create',
   'courses.update',
@@ -95,13 +99,18 @@ create table public.organizations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   name          text not null,
+  allow_self_registration  boolean default true not null,
+  preferred_language    text default 'de' not null,
+  address_street  text,
+  address_zip    text,
+  address_city  text,
+  address_country text,
   owner_id      uuid references public.users not null,
   stripe_account_id  text
 );
 comment on table public.organizations is 'organization data.';
 
 alter table public.organizations enable row level security;
-
 
 -- ORGANIZATION MEMBERS
 create table public.organization_members (
@@ -116,6 +125,7 @@ comment on table public.organization_members is 'Members of each organization, u
 
 alter table public.organization_members enable row level security;
 
+
 -- STUDENTS
 create table public.students (
   id          uuid default uuid_generate_v4() primary key,
@@ -123,6 +133,13 @@ create table public.students (
   firstname    text not null,
   lastname    text not null,
   birth_date   date not null,
+  phone_number  text,
+  address_street  text,
+  address_zip    text,
+  address_city  text,
+  address_country text,
+  has_a_license  boolean default false not null,
+  self_registered  boolean default false not null, -- if the user registered themselves via onboarding
   user_id      uuid references public.users,
   organization_id    uuid references public.organizations on delete cascade not null
 );
@@ -139,12 +156,36 @@ create table public.courses (
   description       text not null,
   type         integer references public.course_types not null,
   organization_id    uuid references public.organizations on delete cascade not null,
+  is_active     boolean default true not null,
   unique (organization_id, type)
 );
 comment on table public.courses is 'COURSES AVAILABLE.';
 
 alter table public.courses enable row level security;
 
+
+-- STUDENTS REGISTRATION REQUESTS
+create table public.students_registration_requests (
+  id            uuid default uuid_generate_v4() primary key,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  email         text not null,
+  firstname      text not null,
+  lastname      text not null,
+  birth_date     date not null,
+  phone_number    text not null,
+  address_street    text not null,
+  address_zip      text not null,
+  address_city    text not null,
+  address_country   text not null,
+  has_a_license    boolean default false not null,
+  requested_course_id uuid references public.courses on delete set null,
+  status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (email, organization_id)
+);
+comment on table public.students_registration_requests is 'STUDENTS REGISTRATION REQUESTS.';
+
+alter table public.students_registration_requests enable row level security;
 
 -- COURSE DOCUMENTS
 create table public.course_documents (
@@ -288,6 +329,39 @@ left join public.course_activities as course_activity on bill_items.course_activ
 group by course_activity_id, activity_name, activity_description, bill_id;
 
 
+-- Organisation Public View - Joining with courses as array
+create or replace view public.organizations_view as
+select
+  organizations.id,
+  organizations.name,
+  organizations.address_street,
+  organizations.address_zip,
+  organizations.address_city,
+  organizations.address_country,
+  organizations.owner_id,
+  organizations.allow_self_registration,
+  organizations.preferred_language,
+  users.email as owner_email,
+  users.firstname as owner_firstname,
+  users.lastname as owner_lastname,
+  courses as organization_courses
+from public.organizations
+left join (
+  select
+    courses.organization_id,
+    jsonb_agg(jsonb_build_object(
+      'id', courses.id,
+      'name', courses.name,
+      'description', courses.description,
+      'type', courses.type,
+      'is_active', courses.is_active
+    )) as courses
+  from public.courses
+  group by courses.organization_id
+) as courses on organizations.id = courses.organization_id
+left join public.users on organizations.owner_id = users.id;
+
+
 
 -- TRIGGERS
 create function public.handle_new_user() 
@@ -367,6 +441,35 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_created
   after insert on public.courses
   for each row execute procedure public.handle_new_course();
+
+
+-- handle Registration Request confirmation
+create or replace function public.handle_registration_request_confirmation()
+returns trigger as $$
+declare org_id uuid;
+begin
+  org_id := new.organization_id;
+
+  -- prevent updating the status to PENDING
+  if new.status = 0 then
+    raise exception 'Status cannot be set to PENDING';
+  end if;
+
+  -- if the status is ACCEPTED, insert the student
+  if new.status = 1 then
+    insert into public.students (email, firstname, lastname, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license, organization_id)
+    values (new.email, new.firstname, new.lastname, new.birth_date, new.phone_number, new.address_street, new.address_zip, new.address_city, new.address_country, new.has_a_license, org_id);
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a registration request is updated
+create trigger on_registration_request_updated
+  after update of status on public.students_registration_requests
+  for each row execute procedure public.handle_registration_request_confirmation();
+
+
 
 
 -- handle new activity attendance
@@ -464,6 +567,9 @@ create trigger on_course_activity_attendance_status_updated
 
 
 
+
+
+
 -- Helpers Functions
 create or replace function public.authorize(
   requested_permission app_permission,
@@ -531,6 +637,21 @@ create policy "Owner & Manager can delete students" on public.students for delet
 insert into public.role_permissions (role, permission) values ('owner', 'students.delete');
 insert into public.role_permissions (role, permission) values ('manager', 'students.delete');
 
+
+create policy "Everyone authenticated staff user can see students_registration_requests" on public.students_registration_requests for select to authenticated using (public.authorize('students_registration_requests.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.read');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'students_registration_requests.read');
+
+create policy "Insert students_registration_requests" on public.students_registration_requests for insert to authenticated, anon with check (true);
+
+create policy "Owner & Manager can update students_registration_requests" on public.students_registration_requests for update to authenticated using (public.authorize('students_registration_requests.update', organization_id)) with check (public.authorize('students_registration_requests.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.update');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.update');
+
+create policy "Owner & Manager can delete students_registration_requests" on public.students_registration_requests for delete to authenticated using (public.authorize('students_registration_requests.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.delete');
 
 
 
