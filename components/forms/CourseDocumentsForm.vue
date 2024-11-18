@@ -17,7 +17,7 @@
       :key="index"
       class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
     >
-      <UAvatar :alt="'AM'" size="md" />
+      <UAvatar :icon="doc.extension_icon" size="md" />
       <div class="text-sm flex-1">
         <div>
           <p class="text-gray-900 dark:text-white font-medium">
@@ -93,6 +93,17 @@ const {
     throw error;
   }
   return data;
+}, {
+  transform: (data) => {
+    return data.map((doc: AppCourseDocument) => {
+      const extension = doc.path.split(".").pop();
+      return {
+        ...doc,
+        extension_icon: extension == 'pdf' ? 'i-heroicons-document-text' : extension == 'mp4' ? 'i-heroicons-video-camera' : 'i-heroicons-photo',
+        created_at: formatDate(doc.created_at),
+      };
+    });
+  },
 });
 
 
