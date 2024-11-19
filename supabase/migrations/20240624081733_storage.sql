@@ -123,42 +123,42 @@ when (old.bucket_id = 'course_documents')
 execute procedure public.handle_course_documents();
 
 
--- Create Or Delete entry in public.course_required_documents when a new document is uploaded or deleted
-create or replace function public.handle_course_required_documents()
+-- Create Or Delete entry in public.course_subscription_documents when a new document is uploaded or deleted
+create or replace function public.handle_course_subscription_documents()
 returns trigger as $$
 begin
   if (TG_OP = 'DELETE') then
-    delete from public.course_required_documents where path = array_to_string(old.path_tokens, '/');
+    delete from public.course_subscription_documents where path = array_to_string(old.path_tokens, '/');
     return old;
   end if;
   
   if (TG_OP = 'INSERT') then
-    insert into public.course_required_documents (course_subscription_id, organization_id, name, description, path)
+    insert into public.course_subscription_documents (course_subscription_id, organization_id, name, description, path)
     values (((storage.foldername(new.name))[2])::uuid, ((storage.foldername(new.name))[1])::uuid, null, null, array_to_string(new.path_tokens, '/'));
     return new;
   end if;
   
   if (TG_OP = 'UPDATE') then
-    update public.course_required_documents set path = array_to_string(new.path_tokens, '/') where path = array_to_string(old.path_tokens, '/');
+    update public.course_subscription_documents set path = array_to_string(new.path_tokens, '/') where path = array_to_string(old.path_tokens, '/');
     return new;
   end if;
 end;
 $$ language plpgsql security definer;
 
-create trigger "handle_course_required_documents_create" after insert on storage.objects
+create trigger "handle_course_subscription_documents_create" after insert on storage.objects
 for each row
-when (new.bucket_id = 'course_required_documents')
-execute procedure public.handle_course_required_documents();
+when (new.bucket_id = 'course_subscription_documents')
+execute procedure public.handle_course_subscription_documents();
 
-create trigger "handle_course_required_documents_update" after update on storage.objects
+create trigger "handle_course_subscription_documents_update" after update on storage.objects
 for each row
-when (new.bucket_id = 'course_required_documents')
-execute procedure public.handle_course_required_documents();
+when (new.bucket_id = 'course_subscription_documents')
+execute procedure public.handle_course_subscription_documents();
 
-create trigger "handle_course_required_documents_delete" after delete on storage.objects
+create trigger "handle_course_subscription_documents_delete" after delete on storage.objects
 for each row
-when (old.bucket_id = 'course_required_documents')
-execute procedure public.handle_course_required_documents();
+when (old.bucket_id = 'course_subscription_documents')
+execute procedure public.handle_course_subscription_documents();
 
 
 

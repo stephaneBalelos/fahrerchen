@@ -483,6 +483,7 @@ export type Database = {
           name: string
           organization_id: string
           path: string
+          required_document_id: string | null
           subscription_id: string
         }
         Insert: {
@@ -492,6 +493,7 @@ export type Database = {
           name: string
           organization_id: string
           path: string
+          required_document_id?: string | null
           subscription_id: string
         }
         Update: {
@@ -501,6 +503,7 @@ export type Database = {
           name?: string
           organization_id?: string
           path?: string
+          required_document_id?: string | null
           subscription_id?: string
         }
         Relationships: [
@@ -516,6 +519,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_documents_required_document_id_fkey"
+            columns: ["required_document_id"]
+            isOneToOne: false
+            referencedRelation: "course_required_documents"
             referencedColumns: ["id"]
           },
           {

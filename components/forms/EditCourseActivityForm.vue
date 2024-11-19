@@ -1,5 +1,5 @@
 <template>
-  <UDashboardSlideover :title="state.name" ref="slideover">
+  <UDashboardSlideover :title="state.name">
     <UForm
       ref="form"
       :state="state"
@@ -17,9 +17,9 @@
       >
         <UFormGroup
           name="name"
-          label="Activity Name"
-          placeholder="Theorie Unterricht"
-          description="Name of the activity. Will appear on receipts, invoices, and other communication."
+          :label="t('form.name')"
+          :placeholder="t('form.name_placeholder')"
+          :description="t('form.name_description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -29,8 +29,9 @@
 
         <UFormGroup
           name="description"
-          label="Course Description"
-          description="Describe your course in detail."
+          :label="t('form.description')"
+          :placeholder="t('form.description_placeholder')"
+          :description="t('form.description_description')"
           class="grid gap-2"
           :ui="{ container: '' }"
         >
@@ -44,8 +45,8 @@
 
         <UFormGroup
           name="requirement_id"
-          :label="`Course Requirement`"
-          description="Welche Anforderung wird durch diese Aktivität erfüllt."
+          :label="t('form.activity_type')"
+          :description="t('form.activity_type_description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -63,7 +64,7 @@
                 }}</span>
               </div>
               <div v-else>
-                <span class="truncate">{{ t('select_activity_type') }}</span>
+                <span class="truncate">{{ t('form.activity_type_placeholder') }}</span>
               </div>
             </template>
             <template #option="{ option }">
@@ -74,13 +75,24 @@
 
         <UFormGroup
           name="price"
-          label="Price"
-          description="Will appear on receipts, invoices, and other communication."
+          :label="t('form.price')"
+          :description="t('form.price_description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
         >
-          <UInput v-model="state.price" autocomplete="on" size="md" />
+          <UInput v-model="state.price" type="number" autocomplete="off" size="md" />
+        </UFormGroup>
+
+        <UFormGroup
+          name="required"
+          :label="t('form.required_amount')"
+          :description="t('form.required_amount_description')"
+          required
+          class="grid grid-cols-1 gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+          <UInput v-model="state.required" type="number" autocomplete="off" size="md" />
         </UFormGroup>
 
       </UDashboardSection>
@@ -172,6 +184,7 @@ onMounted(async () => {
         state.description = data.description;
         state.price = data.price;
         state.activity_type = data.activity_type
+        state.required = data.required
       }
     } catch (error) {
       console.log(error);
@@ -185,7 +198,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  console.log("unmounted");
   slideover.reset();
 });
 
@@ -201,6 +213,7 @@ const validate = (state: CourseActivityEdit) => {
 };
 
 async function saveCourseActivity(event: FormSubmitEvent<CourseActivityEdit>) {
+  console.log(state)
   if (props.course_activity_id) {
     await updateCourseActivity(state);
   } else {
@@ -220,11 +233,6 @@ async function updateCourseActivity(params: CourseActivityEdit) {
       throw error
     }
     $emit("activity-saved");
-    toast.add({
-      title: "Activity saved",
-      description: "The activity has been saved successfully.",
-      color: "green",
-    });
   } catch (error) {
     console.log(error);
     toast.add({
@@ -246,11 +254,6 @@ async function createCourseActivity(params: CourseActivityEdit) {
     }
     console.log(data);
     $emit("activity-saved");
-    toast.add({
-      title: "Activity saved",
-      description: "The activity has been saved successfully.",
-      color: "green",
-    });
   } catch (error) {
     console.log(error);
     toast.add({
@@ -273,11 +276,6 @@ const deleteCourseActivity = async (id: string) => {
     }
 
     $emit("activity-deleted");
-    toast.add({
-      title: "Activity deleted",
-      description: "The activity has been deleted successfully.",
-      color: "green",
-    });
   } catch (error) {
     console.log(error);
     toast.add({
@@ -295,17 +293,47 @@ const deleteCourseActivity = async (id: string) => {
   {
     "de": {
       "form_section_title": "Kurs Aktivität",
-      "form_section_desc": "Änderungen vornehmen",
+      "form_section_desc": "Änderungen wirken sich auf alle teilnehmenden Schüler aus. Offene Rechnungen und Quittungen werden aktualisiert.",
       "form_section_desc_new": "Kurs Aktivität erstellen",
       "form_group_name_label": "Activity Name",
-      "select_activity_type": "Äktivitättyp auswählen"
+      "form": {
+        "name": "Aktivität Name",
+        "name_placeholder": "z.B. Theorie Unterricht",
+        "name_description": "Name der Aktivität. Wird auf Quittungen, Rechnungen und anderen Kommunikationen angezeigt.",
+        "description": "Beschreibung",
+        "description_placeholder": "Beschreiben Sie Ihren Kurs im Detail. Wie viele Stunden, was wird unterrichtet, etc.",
+        "description_description": "Beschreiben Sie Ihren Kurs im Detail. Wird auf Quittungen, Rechnungen und anderen Kommunikationen angezeigt.",
+        "activity_type": "Aktivitättyp",
+        "activity_type_placeholder": "Äktivitättyp auswählen",
+        "activity_type_description": "Wählen Sie den Aktivitättyp zwischen Theorie, Praxis, Prüfung, etc.",
+        "price": "Preis",
+        "price_description": "Wird auf Quittungen, Rechnungen und anderen Kommunikationen angezeigt. Geben Sie den Preis in Euro an. 0 für kostenlose Aktivitäten.",
+        "is_activity_required": "Ist diese Aktivität erforderlich, um den Kurs abzuschließen?",
+        "required_amount": "Anzahl der erforderlichen Teilnahmen",
+        "required_amount_description": "Geben Sie die Anzahl der erforderlichen Teilnahmen an, um die Aktivität abzuschließen."
+      }
     },
     "en": {
-      "form_section_title": "Kurs Aktivität",
-      "form_section_desc": "Änderungen vornehmen",
-      "form_section_desc_new": "Kurs Aktivität erstellen",
+      "form_section_title": "Course Activity",
+      "form_section_desc": "Make changes that will affect all participating students. Open invoices and receipts will be updated.",
+      "form_section_desc_new": "Create Course Activity",
       "form_group_name_label": "Activity Name",
-      "select_activity_type": "Äktivitättyp auswählen"
+      "form": {
+        "name": "Activity Name",
+        "name_placeholder": "e.g. Theory Class",
+        "name_description": "Name of the activity. Will be displayed on receipts, invoices, and other communications.",
+        "description": "Description",
+        "description_placeholder": "Describe your course in detail. How many hours, what is taught, etc.",
+        "description_description": "Describe your course in detail. Will be displayed on receipts, invoices, and other communications.",
+        "activity_type": "Activity Type",
+        "activity_type_placeholder": "Select Activity Type",
+        "activity_type_description": "Select the activity type between Theory, Practical, Exam, etc.",
+        "price": "Price",
+        "price_description": "Will be displayed on receipts, invoices, and other communications. Specify the price in Euro. 0 for free activities.",
+        "is_activity_required": "Is this activity required to complete the course?",
+        "required_amount": "Number of required attendances",
+        "required_amount_description": "Specify the number of required attendances to complete the activity."
+      }
     }
   }
 </i18n>

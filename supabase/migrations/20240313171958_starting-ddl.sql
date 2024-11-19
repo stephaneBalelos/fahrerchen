@@ -231,6 +231,7 @@ alter table public.course_subscriptions enable row level security;
 create table public.course_subscription_documents (
   id            uuid default uuid_generate_v4() primary key,
   subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  required_document_id  uuid references public.course_required_documents on delete set null,
   name          text not null,
   description   text not null,
   path         text not null,

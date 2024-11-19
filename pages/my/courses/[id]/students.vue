@@ -160,7 +160,7 @@ const {
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .select("*, students(*)")
+      .select("*, student:students(*)")
       .eq("organization_id", selected_organization_id.value)
       .eq("course_id", courseid);
     if (error) {
@@ -177,8 +177,8 @@ const {
         return {
           ...sub,
           status: sub.archived_at ? "archived" : "subscribed",
-          email: sub.students?.email,
-          fullname: `${sub.students?.firstname} ${sub.students?.lastname}`,
+          email: sub.student?.email,
+          fullname: `${sub.student?.firstname} ${sub.student?.lastname}`,
         };
       });
     },
@@ -187,7 +187,7 @@ const {
 
 const subscriptions = computed(() => {
   if (!course_subscriptions.value) return [];
-  return course_subscriptions.value.filter((sub) => sub.students !== null);
+  return course_subscriptions.value.filter((sub) => sub.student !== null);
 });
 
 // const defaultLocations = users.value.reduce((acc, user) => {
@@ -219,13 +219,16 @@ defineShortcuts({
   },
 });
 
-const items = (row: AppCourseSubscription) => [
+const items = (row: AppCourseSubscription & {student: AppStudent}) => [
   [
     {
       label: "Course Profile",
       icon: "i-heroicons-pencil-square-20-solid",
       click: () => {
-        slideover.open(StudentCourseProfile);
+        slideover.open(StudentCourseProfile, {
+          subscription_id: row.id,
+          student: row.student,
+        });
       },
     },
     {
