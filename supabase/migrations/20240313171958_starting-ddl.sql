@@ -211,7 +211,6 @@ create table public.course_required_documents (
 comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
 alter table public.course_required_documents enable row level security;
 
-
 -- COURSES SUBSCRIPTIONS
 create table public.course_subscriptions (
   id            uuid default uuid_generate_v4() primary key,
@@ -232,8 +231,6 @@ create table public.course_subscription_documents (
   id            uuid default uuid_generate_v4() primary key,
   subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   required_document_id  uuid references public.course_required_documents on delete set null,
-  name          text not null,
-  description   text not null,
   path         text not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null

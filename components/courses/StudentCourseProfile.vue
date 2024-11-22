@@ -9,28 +9,57 @@
       <template #icon="">
         <UAvatar alt="m d" size="lg" />
       </template>
-
     </UDashboardSection>
 
-    <UDashboardCard v-if="data"
+    <UDashboardCard
+      class="mb-4"
+      v-if="data"
       :title="t('course_activity_attendances')"
       :description="t('course_activity_attendances_description')"
     >
-      <div v-for="activity in data.course?.course_activities" :key="activity.id" class="flex flex-col mb-4">
+      <div
+        v-for="activity in data.course?.course_activities"
+        :key="activity.id"
+        class="flex flex-col mb-4"
+      >
         <p class="font-bold">{{ activity.name }}</p>
-        <UProgress v-if="activity.required > 0" :value="activity.attendances[0].count" :max="activity.required" color="primary" indicator>
+        <UProgress
+          v-if="activity.required > 0"
+          :value="activity.attendances[0].count"
+          :max="activity.required"
+          color="primary"
+          indicator
+        >
           <template #indicator>
-            <span :color="color">{{ activity.attendances[0].count }} / {{ activity.required }}</span>
+            <span :color="`primary`">
+              {{ activity.attendances[0].count }} /
+              {{ activity.required }}
+            </span>
           </template>
         </UProgress>
         <div v-else>{{ activity.attendances[0].count }}</div>
       </div>
+    </UDashboardCard>
+
+    <UDashboardCard
+      class="mb-4"
+      v-if="data && data.course?.course_required_documents"
+      :title="t('course_required_documents')"
+      :description="t('course_required_documents_description')"
+    >
+      <template #links>
+        0 / {{ data.course.course_required_documents.length }}
+      </template>
+
+      <CourseRequiredDocumentItem v-for="(doc, index) in data.course.course_required_documents" :key="doc.id"
+        :doc="doc" :bucket-id="'course_subscription_documents'" :path="`${doc.organization_id}/${data.id}/${doc.id}`" />
     </UDashboardCard>
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
 import type { Database, AppStudent } from "~/types/app.types";
+import CourseRequiredDocumentItem from "../files/CourseDocuments/CourseRequiredDocumentItem.vue";
 
 type Props = {
   subscription_id: string;
@@ -43,10 +72,7 @@ const { t } = useI18n({
 
 const props = defineProps<Props>();
 
-// const { subscription, student, course } = useAttrs() as Props;
 const supabase = useSupabaseClient<Database>();
-
-const course_progression = ref(35);
 
 const { data, error, status } = useAsyncData(
   `course_progression_${props.subscription_id}`,
@@ -54,7 +80,7 @@ const { data, error, status } = useAsyncData(
     const { data, error } = await supabase
       .from("course_subscriptions")
       .select(
-        "*, course:courses(id, course_activities(*, attendances:course_activity_attendances(count)))"
+        "*, course:courses(id, course_required_documents(*), course_activities(*, attendances:course_activity_attendances(count)))"
       )
       .eq("id", props.subscription_id)
 
@@ -67,19 +93,6 @@ const { data, error, status } = useAsyncData(
     return data;
   }
 );
-
-const color = computed(() => {
-  switch (true) {
-    case course_progression.value < 10:
-      return "blue";
-    case course_progression.value < 20:
-      return "amber";
-    case course_progression.value < 30:
-      return "orange";
-    default:
-      return "green";
-  }
-});
 </script>
 
 <style scoped></style>
@@ -89,12 +102,16 @@ const color = computed(() => {
   "de": {
     "course_profile": "Kursprofil",
     "course_activity_attendances": "Kursaktivitätsbesuche",
-    "course_activity_attendances_description": "Anzahl der Besuche der Kursaktivitäten"
+    "course_activity_attendances_description": "Anzahl der Besuche der Kursaktivitäten",
+    "course_required_documents": "Erforderliche Dokumente",
+    "course_required_documents_description": "Erforderliche Dokumente für den Kurs"
   },
   "en": {
     "course_profile": "Course Profile",
     "course_activity_attendances": "Course Activity Attendances",
-    "course_activity_attendances_description": "Number of visits to course activities"
+    "course_activity_attendances_description": "Number of visits to course activities",
+    "course_required_documents": "Required Documents",
+    "course_required_documents_description": "Required documents for the course"
   }
 }
 </i18n>

@@ -37,11 +37,11 @@ create policy "Owner & Manager can insert courses" on storage.objects for insert
 create policy "Owner & Manager can update courses" on storage.objects for update to authenticated using (public.authorize('courses.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('courses.update', ((storage.foldername(name))[1])::uuid));
 create policy "Owner & Manager can delete courses" on storage.objects for delete to authenticated using (public.authorize('courses.delete', ((storage.foldername(name))[1])::uuid));
 
--- Course Required Documents
+-- Course Subscription Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('course_required_documents', 'course_required_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024); -- 5MB
+  ('course_subscription_documents', 'course_subscription_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024); -- 5MB
 create policy "Everyone can see course required Documents" on storage.objects for select to authenticated using (public.authorize('course_subscriptions.read', (((storage.foldername(name))[1])::uuid)::uuid));
 create policy "Owner & Manager can insert course required Documents" on storage.objects for insert to authenticated with check (public.authorize('course_subscriptions.create', ((storage.foldername(name))[1])::uuid));
 create policy "Owner & Manager can update course required Documents" on storage.objects for update to authenticated using (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('course_subscriptions.update', ((storage.foldername(name))[1])::uuid));
@@ -133,8 +133,8 @@ begin
   end if;
   
   if (TG_OP = 'INSERT') then
-    insert into public.course_subscription_documents (course_subscription_id, organization_id, name, description, path)
-    values (((storage.foldername(new.name))[2])::uuid, ((storage.foldername(new.name))[1])::uuid, null, null, array_to_string(new.path_tokens, '/'));
+    insert into public.course_subscription_documents (subscription_id, required_document_id, organization_id, path)
+    values (((storage.foldername(new.name))[2])::uuid, ((storage.foldername(new.name))[3])::uuid, ((storage.foldername(new.name))[1])::uuid, array_to_string(new.path_tokens, '/'));
     return new;
   end if;
   

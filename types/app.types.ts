@@ -19,6 +19,7 @@ export type AppCourseActivityAttendance = DatabaseGenerated['public']['Tables'][
 export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
 
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
+export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
 
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
