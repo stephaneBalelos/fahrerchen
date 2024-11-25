@@ -3,12 +3,12 @@
     class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
     @click="openPreview(submitted_doc)"
   >
-    <UAvatar
-      :icon="
-        submitted_doc
-          ? submitted_doc.extension_icon
-          : 'i-heroicons-exclamation-triangle'
-      "
+    <UAvatar v-if="submitted_doc"
+      :icon="submitted_doc.extension_icon"
+      size="md"
+    />
+    <UAvatar v-else
+      icon="i-heroicons-exclamation-triangle"
       size="md"
     />
     <div class="flex justify-between text-sm flex-1">
@@ -95,9 +95,11 @@ const {
   },
   {
     transform: (data) => {
+      const icon = getDocumentIconFromExtension(data[0].path);
+      console.log(icon);
       return {
         ...data[0],
-        extension_icon: getDocumentIconFromExtension(data[0].path),
+        extension_icon: icon,
       };
     },
   }
@@ -108,6 +110,10 @@ const openPreview = (doc: typeof submitted_doc.value) => {
   modal.open(DocumentPreview, {
     bucketId: props.bucketId,
     path: doc.path,
+    onClose: () => {
+      refresh();
+      modal.close();
+    },
   })
 };
 
