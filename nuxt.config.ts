@@ -39,7 +39,6 @@ export default defineNuxtConfig({
   // },
   modules: [
     '@nuxtjs/supabase',
-    '@vue-email/nuxt',
     '@nuxt/ui',
     '@nuxtjs/i18n',
     '@nuxt/test-utils/module',
