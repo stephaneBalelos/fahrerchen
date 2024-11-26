@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import * as pjson from './package.json'
 
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: process.env.NODE_ENV === 'development'},
@@ -18,7 +19,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'vercel-edge',
+    preset: 'vercel-edge'
   },
 
   runtimeConfig: {
@@ -43,6 +44,10 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@nuxt/test-utils/module',
   ],
+
+  ui: {
+    global: true
+  },
 
   extends: ['@nuxt/ui-pro'],
 
