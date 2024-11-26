@@ -1,9 +1,9 @@
 import React from 'npm:react@18.3.1'
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import SignupMail from './_templates/SignupMail.tsx'
-import PasswordResetMail from './_templates/PasswordResetMail.tsx'
-import InvitationMail from './_templates/InvitationMail.tsx'
+import SignupMail from '../_shared/_templates/SignupMail.tsx'
+import PasswordResetMail from '../_shared/_templates/PasswordResetMail.tsx'
+import InvitationMail from '../_shared/_templates/InvitationMail.tsx'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 

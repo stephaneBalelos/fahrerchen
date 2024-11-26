@@ -73,7 +73,7 @@ export const SignupMail = ({
             <Preview>{translations.preview_text}</Preview>
             <Tailwind config={tailwindConfig}>
                 <Head />
-                <Body className="bg-gray my-auto mx-auto font-sans px-2">
+                <Body className="bg-gray my-auto font-sans px-2">
                     <Container className="mx-auto flex justify-center items-center px-4 sm:px-6 lg:px-8 max-w-5xl">
                         <Section className="mt-[32px]">
                             <Img
