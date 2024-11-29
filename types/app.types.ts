@@ -2,6 +2,7 @@ import type { MergeDeep } from "type-fest";
 import type { Database as DatabaseGenerated } from "./database.types";
 
 export type UserRole = DatabaseGenerated['public']['Enums']['app_role']
+export type RolePermission = DatabaseGenerated['public']['Enums']['app_permission']
 export type AppUser = DatabaseGenerated['public']['Tables']['users']['Row']
 export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Row'] & { role: UserRole }
 export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
