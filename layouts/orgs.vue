@@ -18,7 +18,7 @@
           <UDashboardSearchButton />
         </template>
 
-        <UDashboardSidebarLinks :links="links" />
+        <!-- <UDashboardSidebarLinks :links="links" /> -->
 
         <UDivider />
 
@@ -32,7 +32,7 @@
         <UDivider class="sticky bottom-0" />
 
         <template #footer>
-          <UDashboardSidebarLinks :links="footerLinks" />
+          <!-- <UDashboardSidebarLinks :links="footerLinks" /> -->
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
@@ -44,18 +44,9 @@
 
 <script setup lang="ts">
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
-import { useUserOrganizations } from "~/composables/useUserOrganizations";
 
 const runtimeConfig = useRuntimeConfig();
-const supabase = useSupabaseClient();
-const userPermissionStore = useUserPermissionsStore();
-const userOrganizationsStore = useUserOrganizationsStore();
 
-await useAsyncData('permissions', async () => {
-  if (!userOrganizationsStore.selectedOrganization) return false;
-  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.role);
-  return true;
-});
 
 const { t } = useI18n({
   useScope: "local",

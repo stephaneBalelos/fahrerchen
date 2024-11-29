@@ -21,11 +21,9 @@ export const useUserPermissionsStore = defineStore('permissions', () => {
             permissions.value = []
         }
         permissions.value = data.map((row) => row.permission)
-        console.log('Permissions loaded', permissions.value)
     }
 
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
-        console.log('Selected organization changed')
         if (userOrganizationsStore.selectedOrganization) {
             await loadPermissions(userOrganizationsStore.selectedOrganization.role)
         }

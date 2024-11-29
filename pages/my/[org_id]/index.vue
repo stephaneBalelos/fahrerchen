@@ -1,13 +1,13 @@
 <template>
     <div>
-        Home page
 
-        <NuxtLink to="/my">My page</NuxtLink>
     </div>
 </template>
 
 <script setup lang="ts">
-
+    definePageMeta({
+        layout: 'orgs',
+    })
 </script>
 
 <style scoped>
