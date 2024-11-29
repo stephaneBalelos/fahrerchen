@@ -37,55 +37,29 @@
       </UDashboardSidebar>
     </UDashboardPanel>
     <ClientOnly>
-      <slot :orgid="selected_organization_id"></slot>
+      <slot></slot>
     </ClientOnly>
   </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
-import UserDropdown from "~/components/navigation/UserMenu.vue";
 import { useUserOrganizations } from "~/composables/useUserOrganizations";
 
-const route = useRoute();
-const appConfig = useAppConfig();
-const { isHelpSlideoverOpen } = useDashboard();
 const runtimeConfig = useRuntimeConfig();
-
-const user = useSupabaseUser();
 const supabase = useSupabaseClient();
-const toast = useToast();
+const userPermissionStore = useUserPermissionsStore();
+const userOrganizationsStore = useUserOrganizationsStore();
 
-const { selected_organization_id } = useUserOrganizations();
+await useAsyncData('permissions', async () => {
+  if (!userOrganizationsStore.selectedOrganization) return false;
+  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.role);
+  return true;
+});
 
 const { t } = useI18n({
   useScope: "local",
 });
-
-const {
-  data: org_courses,
-  error,
-  status,
-} = await useAsyncData(
-  `org_courses_${selected_organization_id.value}`,
-  async () => {
-    if (!selected_organization_id.value) {
-      return;
-    }
-    const { data, error } = await supabase
-      .from("courses")
-      .select("id, name")
-      .eq("organization_id", selected_organization_id.value);
-
-    if (error) {
-      throw error;
-    }
-    return data;
-  },
-  {
-    watch: [selected_organization_id],
-  }
-);
 
 const links = computed(() => [
   {
@@ -117,12 +91,6 @@ const links = computed(() => [
       text: "Courses",
       shortcuts: ["G", "C"],
     },
-    children: org_courses.value
-      ? org_courses.value.map((course) => ({
-          label: course.name,
-          to: `/my/courses/${course.id}`,
-        }))
-      : [],
   },
   {
     id: "bills",

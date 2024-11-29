@@ -13,10 +13,6 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-function selectOrg(org: AppOrganizationMember) {
-  organizationsStore.selectedOrganization = org;
-}
-
 function openCreateOrgModal() {
   modal.open(CreateOrganizationForm, {
     onClose: () => {

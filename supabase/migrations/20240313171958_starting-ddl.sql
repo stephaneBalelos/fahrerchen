@@ -564,8 +564,7 @@ create trigger on_course_activity_attendance_status_updated
   for each row execute procedure public.handle_attendance_status_change();
 
 
-
-
+-- prevent update of the 
 
 
 -- Helpers Functions
@@ -595,22 +594,53 @@ begin
 end;
 $$ language plpgsql security definer set search_path = '';
 
+-- prevent update of the primrary key & strioe_account_id of an organization
+create or replace function public.prevent_organization_update()
+returns trigger as $$
+begin
+  if old.id <> new.id then
+    raise exception 'Cannot update the primary key of an organization';
+  end if;
+
+  if old.stripe_account_id <> new.stripe_account_id then
+    raise exception 'Cannot update stripe_account_id of an organization';
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a organization is updated
+create trigger on_organization_update
+  before update on public.organizations
+  for each row execute procedure public.prevent_organization_update();
+
+
 
 -- Policies
+
+-- Role Permissions Policies
+create policy "Everyone can see role_permissions" on public.role_permissions for select to authenticated using (true);
+
+-- Users Policies
 create policy "Everyone can see users" on public.users for select to authenticated using (true);
 create policy "User can see update their own data" on public.users for update to authenticated using (auth.uid() = id);
 
-create policy "Everyone member can see organizations" on public.organizations for select to authenticated using (public.authorize('organizations.read', id));
+
+-- Organizations Policies
+create policy "Everyone member can see organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('student', 'organizations.read');
 
-create policy "Owner can see update organizations" on public.organizations for update to authenticated using ((auth.uid() = owner_id) or (public.authorize('organizations.update', id)));
+create policy "Owner & Manager can update organizations" on public.organizations for update to authenticated using ((auth.uid() = owner_id) or (public.authorize('organizations.update', id)));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations.update');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations.update');
 
-create policy "Create organization only if owner is the same as the user" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
+create policy "Create organization only if owner is the same as the user who make the request" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
 
+
+-- Organization Members Policies
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organization_members.read');
@@ -620,7 +650,11 @@ insert into public.role_permissions (role, permission) values ('student', 'organ
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
 
-create policy "Everyone except students can see students" on public.students for select to authenticated using (public.authorize('students.read', organization_id));
+
+
+-- Students Policies
+create policy "Student can see their own data" on public.students for select to authenticated using (auth.uid() = user_id);
+create policy "Everyone except students can see other students" on public.students for select to authenticated using (public.authorize('students.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.read');
 insert into public.role_permissions (role, permission) values ('manager', 'students.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'students.read');
@@ -638,6 +672,7 @@ insert into public.role_permissions (role, permission) values ('owner', 'student
 insert into public.role_permissions (role, permission) values ('manager', 'students.delete');
 
 
+-- Students Registration Requests Policies
 create policy "Everyone authenticated staff user can see students_registration_requests" on public.students_registration_requests for select to authenticated using (public.authorize('students_registration_requests.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.read');
 insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.read');
@@ -654,7 +689,7 @@ insert into public.role_permissions (role, permission) values ('owner', 'student
 insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.delete');
 
 
-
+-- Courses Policies
 create policy "Everyone can see courses" on public.courses for select to authenticated using (public.authorize('courses.read', organization_id));
 create policy "Everyone can see courses_documents" on public.course_documents for select to authenticated using (public.authorize('courses.read', organization_id));
 create policy "Everyone can see course_required_documents" on public.course_required_documents for select to authenticated using (public.authorize('courses.read', organization_id));
@@ -680,6 +715,8 @@ create policy "Owner & Manager can delete courses_documents" on public.course_do
 create policy "Owner & Manager can delete course_required_documents" on public.course_required_documents for delete to authenticated using (public.authorize('courses.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'courses.delete');
 
+
+-- Course Subscriptions Policies
 create policy "Everyone can see course_subscriptions" on public.course_subscriptions for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
 create policy "Everyone can see course_subscription_documents" on public.course_subscription_documents for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.read');
@@ -702,6 +739,7 @@ create policy "Owner & Manager can delete course_subscription_documents" on publ
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
 
+-- Course Activities Policies
 create policy "Everyone can see course_activities" on public.course_activities for select to authenticated using (public.authorize('course_activities.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activities.read');
@@ -719,6 +757,7 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 create policy "Owner can delete course_activities" on public.course_activities for delete to authenticated using (public.authorize('course_activities.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.delete');
 
+-- Course Activity Schedules Policies
 create policy "Everyone can see course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.read');
@@ -741,6 +780,7 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.delete');
 
 
+-- Course Activity Attendances Policies
 create policy "Everyone can see course_activity_attendances" on public.course_activity_attendances for select to authenticated using (public.authorize('course_activity_attendances.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.read');
@@ -759,6 +799,7 @@ create policy "Owner can delete course_activity_attendances" on public.course_ac
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.delete');
 
 
+-- Course Subscription Bills Policies
 create policy "Everyone can see course_subscription_bills" on public.course_subscription_bills for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 create policy "Everyone can see course_subscription_bill_items" on public.course_subscription_bill_items for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.read');
@@ -779,7 +820,6 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 create policy "Owner can delete course_subscription_bills" on public.course_subscription_bills for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
 create policy "Owner can delete course_subscription_bill_items" on public.course_subscription_bill_items for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.delete');
-
 
 
 create policy "Everyone can see course_types" on public.course_types for select to authenticated using (true);
