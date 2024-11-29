@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import type { AppOrganization, AppOrganizationMember } from '~/types/app.types';
-import { type Database } from '~/types/app.types';
+import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
+import type { AppOrganization, AppOrganizationMember } from "~/types/app.types";
+import { type Database } from "~/types/app.types";
 
+const client = useSupabaseClient<Database>();
+const organizationsStore = useUserOrganizationsStore();
 
-const client = useSupabaseClient<Database>()
-const organizationsStore = useUserOrganizationsStore()
-const newOrgName = ref('')
+const { t } = useI18n({
+  useScope: "local",
+});
 
+const newOrgName = ref("");
 
 // const createOrganization = async () => {
 //   if(user.value === null) {
@@ -23,41 +27,43 @@ const newOrgName = ref('')
 // }
 
 function selectOrg(org: AppOrganizationMember) {
-  organizationsStore.selectedOrganization = org
+  organizationsStore.selectedOrganization = org;
 }
 
 function openCreateOrgModal() {
-  console.log('openCreateOrgModal')
+  console.log("openCreateOrgModal");
 }
 </script>
 
 <template>
   <UContainer class="w-full">
     <UPageHeader
-      headline="Organizations"
-      title="My Organizations"
-      description="All your organizations in one place."
+      :headline="t('organizations')"
+      :title="t('my_organizations')"
+      :description="t('description')"
       :links="[
-        { label: 'Create new organization', click: () => openCreateOrgModal },
+        { label: t('create_new_organization'), click: () => openCreateOrgModal },
       ]"
     />
-    <UPageCard
-      class="mb-4"
-      v-for="org in organizationsStore.organisations"
-      :key="org.id"
-      :title="org.id"
-      :description="new Date(org.inserted_at).toLocaleDateString('de')"
-      icon="i-simple-icons-tailwindcss"
-      @click="selectOrg(org)"
-      :ui="{ wrapper: 'relative group org-card' }"
+    <OrganizationCard
+      v-for="org in organizationsStore.organizations"
+      :org_id="org.organization_id"
     />
 
     <UPageCard
-      v-if="organizationsStore.organisations.length == 0"
-      :title="'No organizations found'"
-      :description="'You have not created any organizations yet.'"
+      v-if="
+        organizationsStore.organizations.length == 0 &&
+        !organizationsStore.isLoading
+      "
+      :title="t('no_organizations_found')"
+      :description="t('you_have_not_created_any_organizations_yet')"
       icon="i-simple-icons-tailwindcss"
     />
+
+    <div v-if="organizationsStore.isLoading" class="space-y-2">
+      <USkeleton class="h-24 w-full" />
+      <USkeleton class="h-24 w-full" />
+    </div>
 
     <!-- <UModal v-model="isOpen" >
       <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
@@ -82,3 +88,24 @@ function openCreateOrgModal() {
     </UModal> -->
   </UContainer>
 </template>
+
+<i18n lang="json">
+{
+  "de": {
+    "organizations": "Fahrschulen",
+    "my_organizations": "Meine Fahrschulen",
+    "description": "Alle deine Fahrschulen an einem Ort.",
+    "no_organizations_found": "Keine Fahrshulen gefunden",
+    "you_have_not_created_any_organizations_yet": "Du hast noch keine Fahrschulen erstellt.",
+    "create_new_organization": "Neue Fahrschule erstellen"
+  },
+  "en": {
+    "organizations": "Organizations",
+    "my_organizations": "My Organizations",
+    "description": "All your organizations in one place.",
+    "no_organizations_found": "No organizations found",
+    "you_have_not_created_any_organizations_yet": "You have not created any organizations yet.",
+    "create_new_organization": "Create new organization"
+  }
+}
+</i18n>

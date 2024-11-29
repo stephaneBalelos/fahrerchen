@@ -4,8 +4,9 @@ import { useUserStore } from "./user"
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
-    const organisations = ref<AppOrganizationMember[]>([])
+    const organizations = ref<AppOrganizationMember[]>([])
     const selectedOrganization = ref<AppOrganizationMember | null>(null)
+    const isLoading = ref(true)
 
     async function createOrganization(organization: AppOrganization) {
         if (!userStore.user) {
@@ -30,16 +31,18 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         if (!userStore.user) {
             return
         }
+        isLoading.value = true
         const { data, error } = await supabase.from('organization_members').select('*').eq('user_id', userStore.user.id)
         if (error) {
             console.error(error)
             return
         }
-        organisations.value = data
+        organizations.value = data
+        isLoading.value = false
     }
 
-    function selectOrganization(organization: AppOrganizationMember) {
-        selectedOrganization.value = organization
+    function selectOrganization(org_id: string) {
+        selectedOrganization.value = organizations.value.find(org => org.organization_id === org_id) ?? null
     }
 
     function clearSelectedOrganization() {
@@ -48,18 +51,13 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
 
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
-            organisations.value = []
+            organizations.value = []
             return
         }
-        const { data, error } = await supabase.from('organization_members').select('*').eq('user_id', userStore.user.id)
-        if (error) {
-            console.error(error)
-            return
-        }
-        organisations.value = data
+        await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organisations, selectedOrganization }
+    return { organizations, selectedOrganization, isLoading, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
 
     
 })
