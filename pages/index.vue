@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CreateOrganizationForm from "~/components/forms/CreateOrganizationForm.vue";
 import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
 import type { AppOrganization, AppOrganizationMember } from "~/types/app.types";
 import { type Database } from "~/types/app.types";
@@ -6,32 +7,25 @@ import { type Database } from "~/types/app.types";
 const client = useSupabaseClient<Database>();
 const organizationsStore = useUserOrganizationsStore();
 
+const modal = useModal();
+
 const { t } = useI18n({
   useScope: "local",
 });
-
-const newOrgName = ref("");
-
-// const createOrganization = async () => {
-//   if(user.value === null) {
-//     return
-//   }
-//   if(newOrgName.value === '') {
-//     return
-//   }
-//   const { data, error } = await client.from('organizations').insert({ name: newOrgName.value, owner_id: user.value.id})
-//   if (error) {
-//     throw error
-//   }
-//   isOpen.value = false
-// }
 
 function selectOrg(org: AppOrganizationMember) {
   organizationsStore.selectedOrganization = org;
 }
 
 function openCreateOrgModal() {
-  console.log("openCreateOrgModal");
+  modal.open(CreateOrganizationForm, {
+    onClose: () => {
+      modal.close();
+    },
+    onCreated: () => {
+      organizationsStore.loadOrganizationsMemberships();
+    },
+  })
 }
 </script>
 
@@ -42,7 +36,7 @@ function openCreateOrgModal() {
       :title="t('my_organizations')"
       :description="t('description')"
       :links="[
-        { label: t('create_new_organization'), click: () => openCreateOrgModal },
+        { label: t('create_new_organization'), click: () => openCreateOrgModal() },
       ]"
     />
     <OrganizationCard
@@ -65,27 +59,6 @@ function openCreateOrgModal() {
       <USkeleton class="h-24 w-full" />
     </div>
 
-    <!-- <UModal v-model="isOpen" >
-      <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
-              Your new organization
-            </h3>
-            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isOpen = false" />
-          </div>
-        </template>
-
-        <UInput v-model="newOrgName" label="Name" placeholder="Enter the name of your organization" />
-
-        <template #footer>
-          <div class="flex justify-end space-x-2">
-            <UButton color="gray" variant="ghost" @click="isOpen = false">Cancel</UButton>
-            <UButton @click="createOrganization">Create</UButton>
-          </div>
-        </template>
-      </UCard>
-    </UModal> -->
   </UContainer>
 </template>
 

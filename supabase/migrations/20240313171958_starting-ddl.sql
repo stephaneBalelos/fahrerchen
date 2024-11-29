@@ -609,6 +609,8 @@ insert into public.role_permissions (role, permission) values ('student', 'organ
 create policy "Owner can see update organizations" on public.organizations for update to authenticated using ((auth.uid() = owner_id) or (public.authorize('organizations.update', id)));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations.update');
 
+create policy "Create organization only if owner is the same as the user" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
+
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organization_members.read');

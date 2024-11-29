@@ -1,5 +1,13 @@
 {
     "welcome": "Welcome",
     "lang_en": "English",
-    "lang_de": "German"
+    "lang_de": "German",
+    "form_errors": {
+        "required": "Please enter {field}",
+        "min": "{field} must be at least {min} characters",
+        "max": "{field} must be at most {max} characters",
+        "email": "Please enter a valid email address",
+        "password": "The password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character",
+        "password_confirmation": "The passwords do not match"
+    }
 }
