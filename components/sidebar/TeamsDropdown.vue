@@ -1,50 +1,39 @@
 <script setup lang="ts">
 import type { AppOrganization, Database } from "~/types/app.types";
 
-const actions = [
-  {
-    label: "Create team",
-    icon: "i-heroicons-plus-circle",
-  },
-  {
-    label: "Manage teams",
-    icon: "i-heroicons-cog-8-tooth",
-  },
-];
-
 const client = useSupabaseClient<Database>();
-const props = useAttrs() as { orgid: string };
-const orgState = useUserOrganizations();
-const { userInfos } = useUserInfos();
+const user = useSupabaseUser();
+const userOrganizationsStore = useUserOrganizationsStore();
+const userPermissionStore = useUserPermissionsStore();
 
 const {
-  data: teams,
+  data: organizations,
   error,
-  pending,
+  status,
 } = await useAsyncData(
-  "",
+  "user_organizations_select",
   async () => {
-    if (!userInfos.value) {
-      return [];
-    }
     const { data, error } = await client
-      .from("organization_members")
-      .select("user_id, organizations(*)")
-      .eq("user_id", userInfos.value.id);
+      .from("organizations")
+      .select("id, name")
+      .in(
+        "id",
+        userOrganizationsStore.organizations.map((o) => o.organization_id)
+      );
 
     if (error) {
       throw error;
     }
+    if (!data) {
+      throw new Error("No Organizations found");
+    }
     return data;
   },
   {
-    watch: [orgState.selected_organization_id, userInfos],
+    watch: [userOrganizationsStore.organizations],
     immediate: true,
     transform: (data) => {
-      const orgs = data
-        .map((d) => d.organizations)
-        .filter((org) => org !== null);
-      return orgs.map((d, index) => {
+      return data.map((d, index) => {
         return {
           id: d.id,
           label: d.name,
@@ -53,7 +42,7 @@ const {
           },
           icon: "i-heroicons-globe-europe-africa",
           click: () => {
-            orgState.selected_organization_id.value = d.id;
+            userOrganizationsStore.selectOrganization(d.id);
           },
         };
       });
@@ -61,34 +50,66 @@ const {
   }
 );
 
-const team = computed(() => {
-  if (!teams.value) return null;
-  return teams.value.find((t) => t.id === orgState.selected_organization_id.value);
+const actions = computed(() => {
+  const items = [];
+
+  const selectedOrganization = userOrganizationsStore.selectedOrganization;
+
+  if (
+    userPermissionStore.hasPermission("organizations.update") &&
+    selectedOrganization
+  ) {
+    items.push({
+      label: "Settings",
+      icon: "i-heroicons-cog-8-tooth",
+      click: () => {
+        navigateTo(`/my/${selectedOrganization.organization_id}/settings`);
+      },
+    });
+  }
+
+  items.push({
+    label: "Zurück zu den Teams",
+    click: () => {
+      navigateTo("/my");
+    },
+  });
+  return items;
+});
+
+const selectedOrganization = computed(() => {
+  return organizations.value?.find(
+    (o) => o.id === userOrganizationsStore.selectedOrganization?.organization_id
+  );
 });
 </script>
 
 <template>
   <UDropdown
     id="teams-dropdown"
-    v-if="teams"
+    v-if="organizations"
     v-slot="{ open }"
     mode="hover"
-    :items="[teams, actions]"
+    :items="[organizations, actions]"
     class="w-full"
     :ui="{ width: 'w-full' }"
     :popper="{ strategy: 'absolute' }"
   >
     <UButton
-      v-if="team"
+      v-if="userOrganizationsStore.selectedOrganization"
       color="gray"
       variant="ghost"
       :class="[open && 'bg-gray-50 dark:bg-gray-800']"
       class="w-full"
     >
-      <UAvatar :src="team.avatar.src ?? false" :icon="team.icon" size="2xs" />
+      <UAvatar
+        :src="false"
+        :icon="'i-heroicons-globe-europe-africa'"
+        size="2xs"
+      />
 
       <span class="truncate text-gray-900 dark:text-white font-semibold">{{
-        team?.label
+        selectedOrganization?.label
       }}</span>
     </UButton>
   </UDropdown>
