@@ -62,9 +62,16 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { data:org_courses, error, status } = await useAsyncData(
+const {
+  data: org_courses,
+  error,
+  status,
+} = await useAsyncData(
   `org_courses_${selected_organization_id.value}`,
   async () => {
+    if (!selected_organization_id.value) {
+      return;
+    }
     const { data, error } = await supabase
       .from("courses")
       .select("id, name")
@@ -74,7 +81,8 @@ const { data:org_courses, error, status } = await useAsyncData(
       throw error;
     }
     return data;
-  }, {
+  },
+  {
     watch: [selected_organization_id],
   }
 );
@@ -109,10 +117,12 @@ const links = computed(() => [
       text: "Courses",
       shortcuts: ["G", "C"],
     },
-    children: org_courses.value ? org_courses.value.map((course) => ({
-      label: course.name,
-      to: `/my/courses/${course.id}`,
-    })): [],
+    children: org_courses.value
+      ? org_courses.value.map((course) => ({
+          label: course.name,
+          to: `/my/courses/${course.id}`,
+        }))
+      : [],
   },
   {
     id: "bills",
@@ -161,7 +171,6 @@ const footerLinks = [
     label: "v" + runtimeConfig.public.app_version,
   },
 ];
-
 
 const defaultColors = ref(
   ["green", "teal", "cyan", "sky", "blue", "indigo", "violet"].map((color) => ({

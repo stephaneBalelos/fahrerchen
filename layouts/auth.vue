@@ -10,9 +10,13 @@
 <script setup lang="ts">
 import LocaleSwitcher from '~/components/settings/LocaleSwitcher.vue';
 
-    const supabase = useSupabaseClient()
-    const user = useSupabaseUser()
-    const config = useRuntimeConfig()
+const user = useSupabaseUser();
+const router = useRouter();
+
+if (user.value) {
+    // Redirect to dashboard if user is logged in
+    router.push('/')
+}
 </script>
 
 <style scoped>

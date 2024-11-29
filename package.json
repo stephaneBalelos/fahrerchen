@@ -21,6 +21,7 @@
     "@nuxt/ui": "^2.19.2",
     "@nuxtjs/i18n": "^9.0.0",
     "@nuxtjs/supabase": "1.2.2",
+    "@pinia/nuxt": "^0.8.0",
     "@playwright/test": "^1.48.2",
     "@snaplet/copycat": "^5.1.0",
     "@snaplet/seed": "^0.97.20",

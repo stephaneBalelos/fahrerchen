@@ -43,6 +43,7 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxtjs/i18n',
     '@nuxt/test-utils/module',
+    '@pinia/nuxt'
   ],
 
   ui: {
