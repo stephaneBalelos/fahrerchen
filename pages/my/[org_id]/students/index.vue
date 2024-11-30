@@ -30,7 +30,7 @@
           color="gray"
           @click="() => openStudentForm()"
         />
-        <UButton color="gray" variant="solid" size="2xs" to="/my/students/requests">Voranmeldungen</UButton>
+        <UButton color="gray" variant="solid" size="2xs" :to="userOrganizationsStore.relativePath('/students/requests')">Voranmeldungen</UButton>
 
       </template>
     </UDashboardToolbar>
@@ -104,7 +104,7 @@
       </template>
       <template #actions-data="{ row }">
         <UButton
-          :to="`/my/students/${row.id}`"
+          :to="userOrganizationsStore.relativePath(`/students/${row.id}`)"
           color="primary"
           variant="soft"
           icon="i-heroicons-eye"
@@ -125,14 +125,13 @@ import type { AppStudent, AppUser, Database } from "~/types/app.types";
 import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 
-const { selected_organization_id } = useUserOrganizations();
-
 definePageMeta({
   layout: "orgs",
 });
 
 const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
+const userOrganizationsStore = useUserOrganizationsStore();
 const selected = ref<AppUser[]>([]);
 const columns = [
   {
@@ -168,15 +167,17 @@ const {
 } = await useAsyncData(
   "students",
   async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return null;
+    }
     const { data } = await client
       .from("students")
       .select("*")
-      .eq("organization_id", selected_organization_id.value);
+      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
 
     return data;
   },
   {
-    watch: [selected_organization_id],
     transform: (data) => {
       return data
         ? data.map((item: any) => {
@@ -200,8 +201,11 @@ function onSelect(row: AppUser) {
 }
 
 const openStudentForm = (id?: string) => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return;
+  }
   slideover.open(EditStudentForm, {
-    organization_id: selected_organization_id.value,
+    organization_id: userOrganizationsStore.selectedOrganization.organization_id,
     student_id: id,
     "onStudent-created": (student: AppStudent) => {
       console.log("student created", student);

@@ -96,16 +96,17 @@ import type {
   Database,
 } from "~/types/app.types";
 
-const { selected_organization_id } = useUserOrganizations();
 const route = useRoute();
 const slideover = useSlideover();
+const { courseid } = useAttrs() as Props;
+const userOrganizationsStore = useUserOrganizationsStore();
+const supabase = useSupabaseClient<Database>();
+
 
 type Props = {
-  orgid: string;
   courseid: string;
 };
 
-const { courseid, orgid } = useAttrs() as Props;
 
 const defaultColumns = [
   {
@@ -128,8 +129,6 @@ const defaultColumns = [
     label: "Actions",
   },
 ];
-
-const supabase = useSupabaseClient<Database>();
 
 const q = ref("");
 const selected = ref<AppStudent[]>([]);
@@ -156,12 +155,15 @@ const {
   status,
   refresh,
 } = await useAsyncData(
-  `subscriptions_${selected_organization_id.value}`,
+  `subscriptions_${courseid}`,
   async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return null;
+    }
     const { data, error } = await supabase
       .from("course_subscriptions")
       .select("*, student:students(*)")
-      .eq("organization_id", selected_organization_id.value)
+      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id)
       .eq("course_id", courseid);
     if (error) {
       console.log(error);
@@ -173,7 +175,7 @@ const {
     watch: [query],
     immediate: true,
     transform: (data) => {
-      return data.map((sub) => {
+      return data?.map((sub) => {
         return {
           ...sub,
           status: sub.archived_at ? "archived" : "subscribed",
@@ -252,9 +254,12 @@ const items = (row: AppCourseSubscription & {student: AppStudent}) => [
 ];
 
 function openAddStudentForm() {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return;
+  }
   slideover.open(AddStudentsForm, {
-    courseid,
-    orgid,
+    courseid: courseid,
+    orgid: userOrganizationsStore.selectedOrganization.organization_id,
     "onStudent-added": () => {
       refresh();
     },

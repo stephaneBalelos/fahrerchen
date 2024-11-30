@@ -89,7 +89,7 @@ import type { AppCourse } from "~/types/app.types";
 
 type EditCourseFormProps = Omit<
   AppCourse,
-  "id" | "inserted_at" | "organization_id"
+  "id" | "inserted_at" | "organization_id" | "is_active"
 >;
 
 type Props = {
@@ -98,7 +98,7 @@ type Props = {
 
 const props = defineProps<Props>();
 const supabase = useSupabaseClient<Database>();
-const { selected_organization_id } = useUserOrganizations();
+const userOrganizationsStore = useUserOrganizationsStore();
 const slideover = useSlideover();
 const form = ref<HTMLFormElement | null>(null);
 
@@ -168,20 +168,36 @@ const validate = (state: EditCourseFormProps): FormError[] => {
 };
 
 async function onSubmit(event: FormSubmitEvent<any>) {
+  if (!userOrganizationsStore.selectedOrganization) {
+    toast.add({
+      title: "Error",
+      description: "No organization data found",
+      color: "red",
+    });
+    return;
+  }
   if (props.course_id) {
-    updateCourse(props.course_id, event.data);
+    updateCourse(props.course_id, event.data, userOrganizationsStore.selectedOrganization.organization_id);
   } else {
-    createCourse(event.data);
+    createCourse(event.data, userOrganizationsStore.selectedOrganization.organization_id);
   }
 }
 
-const createCourse = async (d: EditCourseFormProps) => {
+const createCourse = async (d: EditCourseFormProps, org_id: string) => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    toast.add({
+      title: "Error",
+      description: "No organization data found",
+      color: "red",
+    });
+    return;
+  }
   try {
     const { data, error } = await supabase
       .from("courses")
       .insert({
         ...d,
-        organization_id: selected_organization_id.value,
+        organization_id: org_id,
       })
       .select("*");
     if (error) {
@@ -209,13 +225,13 @@ const createCourse = async (d: EditCourseFormProps) => {
     });
   }
 };
-const updateCourse = async (course_id: string, d: EditCourseFormProps) => {
+const updateCourse = async (course_id: string, d: EditCourseFormProps, org_id:string) => {
   try {
     const { data, error } = await supabase
       .from("courses")
       .update({
         ...d,
-        organization_id: selected_organization_id.value,
+        organization_id: org_id,
       })
       .eq("id", course_id)
       .select("*");

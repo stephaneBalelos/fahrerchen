@@ -94,8 +94,7 @@ const { t } = useI18n({
 });
 
 const toast = useToast();
-
-const { selected_organization_id } = useUserOrganizations();
+const userOrganizationsStore = useUserOrganizationsStore();
 const client = useSupabaseClient<Database>();
 const {
   data: requests,
@@ -103,12 +102,15 @@ const {
   error,
   refresh,
 } = await useAsyncData(
-  `students_registrations_${selected_organization_id.value}`,
+  `students_registrations_${userOrganizationsStore.selectedOrganization?.organization_id}`,
   async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return [];
+    }
     const { data, error } = await client
       .from("students_registration_requests")
       .select("*")
-      .eq("organization_id", selected_organization_id.value)
+      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id)
       .eq("status", 0)
       .order("inserted_at", { ascending: false });
 
@@ -122,7 +124,6 @@ const {
     return data;
   },
   {
-    watch: [selected_organization_id],
     transform: (data) => {
       return data.map((request) => {
         const row = {

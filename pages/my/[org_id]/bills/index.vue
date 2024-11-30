@@ -43,11 +43,14 @@ definePageMeta({
   layout: "orgs",
 });
 
-const { selected_organization_id } = useUserOrganizations();
 const client = useSupabaseClient<Database>();
+const userOrganizationsStore = useUserOrganizationsStore();
+if (!userOrganizationsStore.selectedOrganization) {
+  throw new Error("Organization not found");
+}
 
 const selectedCourse = ref<AppCourse>();
-const courses = await useCourses();
+const courses = await useCourses(userOrganizationsStore.selectedOrganization.organization_id);
 
 const columns = [
   {
@@ -81,12 +84,15 @@ const {
   status,
   refresh,
 } = useAsyncData(
-  `${selected_organization_id}_subscriptions_bills`,
+  `${userOrganizationsStore.selectedOrganization.organization_id}_subscriptions_bills`,
   async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return null;
+    }
     let req = client
       .from("course_subscription_bills")
       .select("*, course_subscriptions(*, students(*))")
-      .eq("organization_id", selected_organization_id.value);
+      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
     // if (selectedCourse.value) {
     //   req = req.eq("course_id", selectedCourse.value);
     // }
@@ -102,7 +108,7 @@ const {
   {
     watch: [selectedCourse],
     transform: (data) => {
-      return data.map((bill) => {
+      return data?.map((bill) => {
         return {
           ...bill,
           status: bill.paid_at ? "paid" : "unpaid",

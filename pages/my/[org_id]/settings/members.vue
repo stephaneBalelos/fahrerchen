@@ -4,10 +4,13 @@ import type { AppUserWithRole } from '~/types/app.types';
 import { type Database } from '~/types/database.types';
 
 const client = useSupabaseClient<Database>()
-const { selected_organization_id } = useUserOrganizations()
+const userOrganizationsStore = useUserOrganizationsStore()
 
 const { data, error, refresh } = await useAsyncData('members', async () => {
-  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', selected_organization_id.value)
+  if (!userOrganizationsStore.selectedOrganization) {
+    return null
+  }
+  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
   if (error) {
     throw error
   }
@@ -76,7 +79,7 @@ async function onClose() {
       :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
     >
       <!-- ~/components/settings/MembersForm.vue -->
-      <AddMemberForm :orgid="selected_organization_id" @close="onClose" />
+      <AddMemberForm v-if="userOrganizationsStore.selectedOrganization?.organization_id" :orgid="userOrganizationsStore.selectedOrganization.organization_id" @close="onClose" />
     </UDashboardModal>
   </div>
 </template>
