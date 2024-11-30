@@ -18,7 +18,7 @@
           <UDashboardSearchButton />
         </template>
 
-        <!-- <UDashboardSidebarLinks :links="links" /> -->
+       <SidebarLinks />
 
         <UDivider />
 
@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 
 const runtimeConfig = useRuntimeConfig();
@@ -52,73 +53,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const links = computed(() => [
-  {
-    id: "dashboard",
-    label: "Dashboard [NOT IMPLEMENTED]",
-    icon: "i-heroicons-chart-pie",
-    to: "/my",
-    tooltip: {
-      text: "Dashboard",
-      shortcuts: ["G", "D"],
-    },
-  },
-  {
-    id: "students",
-    label: "Students",
-    icon: "i-heroicons-user-group",
-    to: "/my/students",
-    tooltip: {
-      text: "Students",
-      shortcuts: ["G", "U"],
-    },
-  },
-  {
-    id: "courses",
-    label: "Courses",
-    icon: "i-heroicons-book-open",
-    to: "/my/courses",
-    tooltip: {
-      text: "Courses",
-      shortcuts: ["G", "C"],
-    },
-  },
-  {
-    id: "bills",
-    label: "Bills",
-    icon: "i-heroicons-credit-card",
-    to: "/my/bills",
-    tooltip: {
-      text: "Bills",
-      shortcuts: ["G", "B"],
-    },
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    to: "/my/settings",
-    icon: "i-heroicons-cog-8-tooth",
-    children: [
-      {
-        label: "General [NOT IMPLEMENTED]",
-        to: "/my/settings",
-        exact: true,
-      },
-      {
-        label: "Members",
-        to: "/my/settings/members",
-      },
-      {
-        label: "Payments",
-        to: "/my/settings/payments",
-      },
-    ],
-    tooltip: {
-      text: "Settings",
-      shortcuts: ["G", "S"],
-    },
-  },
-]);
+
 
 const footerLinks = [
   {
