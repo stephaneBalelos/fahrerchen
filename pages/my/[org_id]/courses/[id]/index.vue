@@ -1,8 +1,11 @@
 <template>
   <UDashboardPanelContent>
     <div class="grid lg:grid-cols-2 gap-4">
-
-      <FormsCourseDocumentsForm :orgid="props.orgid" :courseid="props.courseid" />
+      <FormsCourseDocumentsForm
+        v-if="userOrganizationsStore.selectedOrganization"
+        :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+        :courseid="props.courseid"
+      />
 
       <UDashboardCard
         v-for="course_activity in course_activities"
@@ -30,10 +33,10 @@
           <div class="text-sm flex-1">
             <div>
               <p class="text-gray-900 dark:text-white font-medium">
-                {{ s.assigned_to ? s.assigned_to : 'No assigned' }}
+                {{ s.assigned_to ? s.assigned_to : "No assigned" }}
               </p>
               <p class="text-gray-500 dark:text-gray-400">
-                {{ format(new Date(s.start_at), 'PPPP') }}
+                {{ format(new Date(s.start_at), "PPPP") }}
               </p>
             </div>
           </div>
@@ -54,11 +57,13 @@
 import { format } from "date-fns";
 import AddStudentsAttendanceForm from "~/components/forms/AddStudentsAttendanceForm.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
-import type { AppCourseActivity, AppCourseActivitySchedule } from "~/types/app.types";
+import type {
+  AppCourseActivity,
+  AppCourseActivitySchedule,
+} from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
 type Props = {
-  orgid: string;
   courseid: string;
 };
 definePageMeta({
@@ -67,34 +72,45 @@ definePageMeta({
 
 const props = useAttrs() as Props;
 const client = useSupabaseClient<Database>();
+const userOrganizationsStore = useUserOrganizationsStore();
 const { locale } = useI18n();
 const toast = useToast();
 
 const slideover = useSlideover();
 
-const { data: course_activities, error, refresh } = useAsyncData(
-  "course_activity_schedules",
-  async () => {
-    const { data, error } = await client
-      .from("course_activities")
-      .select("id, name, description, course_activity_schedules(*)")
-      .eq("course_id", props.courseid)
-      .order('start_at', { ascending: false, referencedTable: 'course_activity_schedules' })
-      .limit(5, {referencedTable: 'course_activity_schedules'});
-    if (error) {
-      throw error;
-    }
-    return data;
+const {
+  data: course_activities,
+  error,
+  refresh,
+} = useAsyncData("course_activity_schedules", async () => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return null;
   }
-);
+  const { data, error } = await client
+    .from("course_activities")
+    .select("id, name, description, course_activity_schedules(*)")
+    .eq("course_id", props.courseid).eq("organization_id", userOrganizationsStore.selectedOrganization?.organization_id)
+    .order("start_at", {
+      ascending: false,
+      referencedTable: "course_activity_schedules",
+    })
+    .limit(5, { referencedTable: "course_activity_schedules" });
+  if (error) {
+    throw error;
+  }
+  return data;
+});
 
 function openAddCourseScheduleForm(
   course_activity_id: string,
   activity_schedule_id?: string,
   date?: Date
 ) {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return;
+  }
   slideover.open(EditCourseActivitySchedule, {
-    orgid: props.orgid,
+    orgid: userOrganizationsStore.selectedOrganization.organization_id,
     courseid: props.courseid,
     activityid: course_activity_id,
     activity_schedule_id: activity_schedule_id,
@@ -107,7 +123,9 @@ function openAddCourseScheduleForm(
   });
 }
 
-function openAddStudentsAttendanceForm(course_activity_schedule: AppCourseActivitySchedule) {
+function openAddStudentsAttendanceForm(
+  course_activity_schedule: AppCourseActivitySchedule
+) {
   slideover.open(AddStudentsAttendanceForm, {
     courseid: props.courseid,
     courseActivitySchedule: course_activity_schedule,

@@ -7,23 +7,29 @@ definePageMeta({
 });
 
 const supabase = useSupabaseClient<Database>();
-const orgState = useUserOrganizations();
 const toast = useToast();
 const slideover = useSlideover();
+const userOrganizationsStore = useUserOrganizationsStore();
 
 const { data, error, status, refresh } = await useAsyncData(
   "courses",
   async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return;
+    }
     const { data, error } = await supabase
       .from("courses")
       .select("*")
-      .eq("organization_id", orgState.selected_organization_id.value);
+      .eq(
+        "organization_id",
+        userOrganizationsStore.selectedOrganization.organization_id
+      );
     if (error) {
       throw error;
     }
     return data;
   },
-  { watch: [orgState.selected_organization_id], immediate: true }
+  { immediate: true }
 );
 
 onMounted(async () => {
@@ -73,7 +79,7 @@ const openCreateCourseForm = () => {
             label: 'Details',
             color: 'gray',
             trailingIcon: 'i-heroicons-arrow-right-20-solid',
-            to: '/my/courses/' + d.id,
+            to: userOrganizationsStore.relativePath(`/courses/${d.id}`),
           },
         ]"
       />

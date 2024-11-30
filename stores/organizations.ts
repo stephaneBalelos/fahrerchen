@@ -41,6 +41,10 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         isLoading.value = false
     }
 
+    function relativePath(path: string) {
+        return `/my/${selectedOrganization.value?.organization_id}${path}`
+    }
+
     async function selectOrganization(org_id: string) {
         await loadOrganizationsMemberships()
         selectedOrganization.value = organizations.value.find(org => org.organization_id === org_id) ?? null
@@ -62,7 +66,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganization, isLoading, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
+    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
 
     
 })

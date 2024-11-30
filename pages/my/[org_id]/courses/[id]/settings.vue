@@ -1,13 +1,14 @@
 <template>
   <UDashboardPanelContent
     class="p-0 pb-24 divide-y divide-gray-200 dark:divide-gray-800"
+    v-if="userOrganizationsStore.selectedOrganization"
   >
 
-  <EditCourseSection :orgid="props.orgid" :courseid="props.courseid" />
+  <EditCourseSection :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
 
-  <CourseActivitiesList :orgid="props.orgid" :courseid="props.courseid" />
+  <CourseActivitiesList :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
 
-  <CourseRequirementsList :orgid="props.orgid" :courseid="props.courseid" />
+  <CourseRequirementsList :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
 
   </UDashboardPanelContent>
 </template>
@@ -18,11 +19,12 @@ import CourseRequirementsList from "~/components/courses/settings/CourseRequired
 import EditCourseSection from "~/components/courses/settings/EditCourseSection.vue";
 
 type Props = {
-  orgid: string;
   courseid: string;
 };
 
 const props = useAttrs() as Props;
+const userOrganizationsStore = useUserOrganizationsStore();
+
 </script>
 
 <style scoped></style>
