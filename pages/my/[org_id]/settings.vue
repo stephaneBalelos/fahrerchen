@@ -12,18 +12,18 @@ const links = [
     {
       label: "General",
       icon: "i-heroicons-user-circle",
-      to: "/my/settings",
+      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings`,
       exact: true,
     },
     {
       label: "Members",
       icon: "i-heroicons-user-group",
-      to: "/my/settings/members",
+      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
     },
     {
       label: "Payments",
       icon: "i-heroicons-bell",
-      to: "/my/settings/payments",
+      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
     },
   ],
   [
@@ -36,7 +36,7 @@ const links = [
     {
       label: "Subscription",
       icon: "i-heroicons-credit-card",
-      to: "/my/settings/subscription",
+      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/subscription`,
     },
   ],
 ];

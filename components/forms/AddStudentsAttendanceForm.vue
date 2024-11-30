@@ -81,6 +81,11 @@ const q = ref("");
 const toast = useToast();
 
 const selected = ref<AppCourseSubscription[]>([]);
+const userOrganizationsStore = useUserOrganizationsStore();
+
+if (!userOrganizationsStore.selectedOrganization) {
+  throw new Error("Organization not found");
+}
 
 const columns = [
   {
@@ -89,8 +94,8 @@ const columns = [
   },
 ];
 
-const course = await useCourses(props.courseid);
-const courseActivity = await useCourseActivities(props.courseid, props.courseActivitySchedule.activity_id);
+const course = await useCourses(userOrganizationsStore.selectedOrganization.organization_id, props.courseid);
+const courseActivity = await useCourseActivities(userOrganizationsStore.selectedOrganization.organization_id, props.courseid, props.courseActivitySchedule.activity_id);
 
 
 const {

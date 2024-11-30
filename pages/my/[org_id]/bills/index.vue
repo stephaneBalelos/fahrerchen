@@ -28,7 +28,7 @@
             </UBadge>
           </template>
           <template #action-data="{ row }">
-            <ULink :to="`/my/bills/${row.id}`">View</ULink>
+            <ULink :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)">View</ULink>
           </template>
         </UTable>
       </UDashboardPanelContent>
