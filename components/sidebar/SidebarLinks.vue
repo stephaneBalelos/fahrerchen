@@ -53,7 +53,7 @@ const links = computed(() => {
     id: "bills",
     label: "Bills",
     icon: "i-heroicons-credit-card",
-    to: "/my/bills",
+    to: `/my/${selectedOrganization.organization_id}/bills`,
     tooltip: {
       text: "Bills",
       shortcuts: ["G", "B"],
