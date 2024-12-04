@@ -11,6 +11,10 @@ create type public.app_permission as enum (
   'organization_members.read',
   'organization_members.update',
   'organization_members.delete',
+  'organization_invitations.read',
+  'organization_invitations.create',
+  'organization_invitations.update',
+  'organization_invitations.delete',
   'students.read',
   'students.create',
   'students.update',
@@ -113,6 +117,21 @@ create table public.organizations (
 comment on table public.organizations is 'organization data.';
 
 alter table public.organizations enable row level security;
+
+-- ORGANIZATIONS INVITATIONS
+create table public.organizations_invitations (
+  id            uuid default uuid_generate_v4() primary key,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  email         text not null,
+  role         app_role not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
+  unique (email, organization_id) 
+);
+comment on table public.organizations_invitations is 'Invitations to join an organization.';
+
+alter table public.organizations_invitations enable row level security;
+
 
 -- ORGANIZATION MEMBERS
 create table public.organization_members (
@@ -372,22 +391,6 @@ begin
   insert into public.users (id, email)
   values (new.id, new.email);
 
-  org_id := new.raw_user_meta_data ->> 'orgid';
-  role_name := (new.raw_user_meta_data ->> 'role')::public.app_role;
-
-  if new.raw_user_meta_data ->> 'orgid' is null then
-    org_id := extensions.uuid_generate_v4();
-    insert into public.organizations (id, name, owner_id)
-    values (org_id, 'My Org', new.id);
-    return new;
-  end if;
-
-  -- if role is provided, insert into organization_members
-  if role_name is not null then
-    insert into public.organization_members (organization_id, user_id, role)
-    values (org_id, new.id, role_name);
-  end if;
-
   return new;
 end;
 $$ language plpgsql security definer set search_path = auth, public;
@@ -469,6 +472,54 @@ create trigger on_registration_request_updated
   after update of status on public.students_registration_requests
   for each row execute procedure public.handle_registration_request_confirmation();
 
+
+-- Handle New Invitations
+create or replace function public.handle_new_invitation()
+returns trigger as $$
+declare
+  payload jsonb;
+  invited_user_id uuid;
+begin
+
+  -- check if user already exists
+  select id into invited_user_id from public.users where email = new.email;
+
+  -- if user exist, check if the user is already a member of the organization
+  if invited_user_id is not null then
+    if exists (select 1 from public.organization_members where user_id = invited_user_id and organization_id = new.organization_id) then
+      raise exception 'User is already a member of the organization';
+    end if;
+
+    -- insert the user as a member of the organization
+    insert into public.organization_members (organization_id, user_id, role)
+    values (new.organization_id, invited_user_id, new.role);
+  end if;
+
+
+  -- generate payload
+  payload := jsonb_build_object(
+    'type', 'organizations_invitations.create',
+    'data', jsonb_build_object(
+      'id', new.id,
+      'email', new.email,
+      'organization_id', new.organization_id,
+      'role', new.role,
+      'inserted_at', new.inserted_at
+      'invited_user_id', invited_user_id
+    )
+  );
+
+  -- send the payload to the webhook
+  perform public.send_transactional_email(message_id := new.id, payload := payload);
+
+  return NEW;
+
+end;
+$$ language plpgsql security invoker set search_path = public, extensions, net;
+create or replace trigger new_invitation_webhook
+after insert on public.organizations_invitations
+for each row
+execute function public.handle_new_invitation();
 
 
 
@@ -566,7 +617,7 @@ create trigger on_course_activity_attendance_status_updated
   for each row execute procedure public.handle_attendance_status_change();
 
 
--- prevent update of the 
+
 
 
 -- Helpers Functions
@@ -652,6 +703,24 @@ insert into public.role_permissions (role, permission) values ('student', 'organ
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
 
+
+-- Organizations Invitations Policies
+create policy "User can see their own organization_invitations" on public.organizations_invitations for select to authenticated using (auth.email() = email);
+create policy "Owner & Manager see organization_invitations" on public.organizations_invitations for select to authenticated using (public.authorize('organization_invitations.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.read');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.read');
+
+create policy "Owner & Manager can insert organization_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.create');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.create');
+
+create policy "Owner & Manager can update organization_invitations" on public.organizations_invitations for update to authenticated using (public.authorize('organization_invitations.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.update');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.update');
+
+create policy "Owner & Manager can delete organization_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.delete');
 
 
 -- Students Policies

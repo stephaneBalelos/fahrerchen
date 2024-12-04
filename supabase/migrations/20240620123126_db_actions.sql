@@ -15,34 +15,6 @@ $$ language plpgsql security invoker set search_path = public;
 
 -- Webhooks
 
--- Handle New Invitations
-create or replace function public.handle_new_invitation()
-returns trigger as $$
-declare
-  payload jsonb;
-begin
-  -- generate payload
-  payload := jsonb_build_object(
-    'type', 'new_invitation',
-    'data', jsonb_build_object(
-      'id', new.id,
-      'email', new.email,
-      'organization_id', new.organization_id
-    )
-  );
-
-  -- send the payload to the webhook
-  perform public.send_transactional_email(message_id := new.id, payload := payload);
-
-  return NEW;
-
-end;
-$$ language plpgsql security definer set search_path = public, extensions, net;
-create or replace trigger new_invitation_webhook
-after insert on public.organizations_invitations
-for each row
-execute function public.handle_new_invitation();
-
 -- send transactional email
 create or replace function public.send_transactional_email(
   message_id uuid,
