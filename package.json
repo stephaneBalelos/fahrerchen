@@ -10,7 +10,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "playwright test",
-    "db_gen_types": "supabase gen types typescript --local > ./types/database.types.ts",
+    "db_gen_types": "supabase gen types typescript --local > ./types/database.types.ts && cp ./types/database.types.ts ./supabase/functions/_shared/types/database.types.ts",
     "db_seed_sync": "pnpx @snaplet/seed sync",
     "db_seed_generate": "pnpx @snaplet/seed generate",
     "db_gen_seed": "pnpx tsx seed.ts > supabase/seed.sql"

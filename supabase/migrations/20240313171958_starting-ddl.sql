@@ -6,9 +6,11 @@ create type public.app_permission as enum (
   'users.update',
   'users.delete',
   'organizations.read',
+  'organizations.create',
   'organizations.update',
   'organizations.delete',
   'organization_members.read',
+  'organization_members.create',
   'organization_members.update',
   'organization_members.delete',
   'organization_invitations.read',
@@ -700,8 +702,15 @@ insert into public.role_permissions (role, permission) values ('manager', 'organ
 insert into public.role_permissions (role, permission) values ('teacher', 'organization_members.read');
 insert into public.role_permissions (role, permission) values ('student', 'organization_members.read');
 
+create policy "Owner & Manager can insert organization_members" on public.organization_members for insert to authenticated with check (public.authorize('organization_members.create', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_members.create');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_members.create');
+
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
+
+create policy "Owner can delete organization_members" on public.organization_members for delete to authenticated using ((public.authorize('organization_members.delete', organization_id)) or (auth.uid() = user_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_members.delete');
 
 
 -- Organizations Invitations Policies

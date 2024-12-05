@@ -23,14 +23,12 @@ Deno.serve(async (req) => {
     const secret = hookSecret.split('whsec_')[1]
     const wh = new Webhook(secret)
     try {
-        const {
-            user,
-            email_data: { token, token_hash, redirect_to, email_action_type },
-        } = wh.verify(payload, headers) as {
+        const verifiedPayload = wh.verify(payload, headers) as {
             user: {
                 email: string
                 user_metadata: {
-                    orgid: string
+                    organization_id: string
+                    role: string
                 }
             }
             email_data: {
@@ -43,6 +41,13 @@ Deno.serve(async (req) => {
                 token_hash_new: string
             }
         }
+
+        console.log(verifiedPayload)
+
+        const {
+            user,
+            email_data: { token, token_hash, redirect_to, email_action_type },
+        } = verifiedPayload
 
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -71,11 +76,10 @@ Deno.serve(async (req) => {
                 })
             )
         } else if (email_action_type === 'invite') {
-            const { data, error } = await supabaseClient.from('organizations').select('name').eq('id', user.user_metadata.orgid).single()
+            const { data, error } = await supabaseClient.from('organizations').select('*').eq('id', user.user_metadata.organization_id).single()
             if (error) {
                 throw new Error('Organization not found')
             }
-            console.log(data)
             if (!data) {
                 throw new Error('Organization not found')
             }
@@ -91,7 +95,6 @@ Deno.serve(async (req) => {
                     token_hash,
                 })
             )
-            console.log(html)
 
         } else if (email_action_type === 'signup') {
             html = await renderAsync(
@@ -143,8 +146,6 @@ Deno.serve(async (req) => {
         })
 
         const json = await res.json()
-
-        console.log(json)
 
     } catch (error) {
         console.log(error)
