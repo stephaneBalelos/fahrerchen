@@ -7,7 +7,7 @@
       :description="organization.inserted_at"
       :icon="organizationsStore.selectedOrganization?.organization_id == organization?.id ? 'i-simple-icons-tailwindcss' : ''"
       :ui="{ wrapper: 'relative group org-card' }"
-    @click="organizationsStore.selectOrganization(organization.id)"
+    @click="navigateTo(`/my/${organization.id}`)"
     />
 </template>
 

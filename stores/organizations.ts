@@ -48,10 +48,6 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     async function selectOrganization(org_id: string) {
         await loadOrganizationsMemberships()
         selectedOrganization.value = organizations.value.find(org => org.organization_id === org_id) ?? null
-
-        if (selectedOrganization.value) {
-            navigateTo(`/my/${org_id}`)
-        }
     }
 
     function clearSelectedOrganization() {

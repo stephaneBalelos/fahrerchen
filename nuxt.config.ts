@@ -34,10 +34,13 @@ export default defineNuxtConfig({
     }
   },
 
-  // routeRules: {
-  //   // prerender index route by default
-  //   '/': { prerender: true },
-  // },
+  routeRules: {
+    // prerender index route by default
+    '/': { prerender: true },
+    // /my routes are not ssr
+    '/my/**': { ssr: false },
+
+  },
   modules: [
     '@nuxtjs/supabase',
     '@nuxt/ui',
