@@ -165,6 +165,7 @@ create table public.students (
   self_registered  boolean default false not null, -- if the user registered themselves via onboarding
   user_id      uuid references public.users,
   organization_id    uuid references public.organizations on delete cascade not null
+  unique (user_id, organization_id)
 );
 comment on table public.students is 'Profile data for each student.';
 
