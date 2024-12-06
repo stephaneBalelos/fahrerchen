@@ -18,30 +18,24 @@ const accessToken = hashParams.get("access_token");
 const refreshToken = hashParams.get("refresh_token");
 
 watch(user, () => {
+  console.log("redirecting to ", redirectPath);
   if (user.value) {
     navigateTo(redirectPath || "/my");
   } else {
     console.log("no user");
   }
-});
+}, { immediate: true });
 
 // if access token is present, set it in the client
 if (accessToken && refreshToken) {
-  try {
-    const { data, error } = await client.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
-    if (error) {
-      console.error(error);
-      navigateTo("/login");
-    }
-  } catch (e) {
-    console.error(e);
-  }
-} else {
-  console.log("no access token");
-  navigateTo("/login");
+  client.auth.setSession({
+    access_token: accessToken,
+    refresh_token: refreshToken,
+  }).then(() => {
+    console.log("session set");
+  }).catch((error) => {
+    console.error("error setting session", error);
+  });
 }
 </script>
 <template>

@@ -4,9 +4,10 @@
 
 <script setup lang="ts">
 import organizations from '~/middleware/organizations';
+import studentProfile from '~/middleware/student-profile';
 definePageMeta({
     layout: 'orgs',
-    middleware: [organizations],
+    middleware: [organizations, studentProfile],
 })
 
 const userOrganizationsStore = useUserOrganizationsStore();

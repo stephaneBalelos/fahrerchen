@@ -2,7 +2,6 @@
 import type { FormError, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
-import { useUserInfos } from "~/composables/useUserInfos";
 import type { AppUser } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
@@ -12,7 +11,7 @@ definePageMeta({
 
 const fileRef = ref<HTMLInputElement>();
 const isDeleteAccountModalOpen = ref(false);
-const {userInfos} = useUserInfos();
+const userStore = useUserStore();
 const client = useSupabaseClient<Database>();
 
 const schema = z.object({
@@ -28,9 +27,9 @@ const state = reactive<Schema>({
 });
 
 const stop = watchEffect((onCleanup) => {
-  if (userInfos.value) {
-    state.firstname = userInfos.value.firstname ? userInfos.value.firstname : "";
-    state.lastname = userInfos.value.lastname ?   userInfos.value.lastname : "";
+  if (userStore.user) {
+    state.firstname = userStore.user.firstname ? userStore.user.firstname : "";
+    state.lastname = userStore.user.lastname ?   userStore.user.lastname : "";
   }
 });
 
@@ -38,7 +37,7 @@ const stop = watchEffect((onCleanup) => {
 const toast = useToast();
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  if (userInfos.value) {
+  if (userStore.user) {
     try {
       const update = await client
         .from("users")
@@ -46,8 +45,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           firstname: event.data.firstname,
           lastname: event.data.lastname,
         })
-        .eq("id", userInfos.value.id);
-      console.log(update);
+        .eq("id", userStore.user.id);
       if (update.error) {
         toast.add({
           title: "Error trying to update the profile",
@@ -87,7 +85,7 @@ onUnmounted(() => {
 
         <UDivider class="mb-4" />
 
-        <UForm :state="state" :schema="schema" @submit="onSubmit" v-if="userInfos">
+        <UForm :state="state" :schema="schema" @submit="onSubmit" v-if="userStore.user">
           <UDashboardSection
             title="Profile"
             description="This information will be displayed publicly so be careful what you share."
@@ -108,7 +106,7 @@ onUnmounted(() => {
             >
               <FileUploader
                 :bucket-id="'users_avatars'"
-                :path="userInfos.id"
+                :path="userStore.user.id"
               ></FileUploader>
             </UFormGroup>
 

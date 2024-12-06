@@ -74,7 +74,7 @@ const validate = (state: any) => {
 
 onMounted(() => {
   if (user.value) {
-    navigateTo("/")
+    navigateTo("/my")
   }
 })
 

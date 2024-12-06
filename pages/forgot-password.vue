@@ -46,10 +46,13 @@ const validate = (state: any) => {
 
 const onSubmit = async (data: any) => {
   try {
+    const cookieName = useRuntimeConfig().public.supabase.cookieName;
+    const redirectCookie = useCookie(`${cookieName}-redirect-path`)
+    redirectCookie.value = "/account/password-reset";
     const { data: res, error } = await supabase.auth.resetPasswordForEmail(
       data.email,
       {
-        redirectTo: `${window.location.origin}/account/password-reset`,
+        redirectTo: `${window.location.origin}/confirm`,
       }
     );
 
