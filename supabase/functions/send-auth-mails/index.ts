@@ -42,8 +42,6 @@ Deno.serve(async (req) => {
             }
         }
 
-        console.log(verifiedPayload)
-
         const {
             user,
             email_data: { token, token_hash, redirect_to, email_action_type },
@@ -145,7 +143,7 @@ Deno.serve(async (req) => {
             body: JSON.stringify(data)
         })
 
-        const json = await res.json()
+        // const json = await res.json()
 
     } catch (error) {
         console.log(error)
