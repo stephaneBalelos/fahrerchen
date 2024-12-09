@@ -164,7 +164,7 @@ create table public.students (
   has_a_license  boolean default false not null,
   self_registered  boolean default false not null, -- if the user registered themselves via onboarding
   user_id      uuid references public.users,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
   unique (user_id, organization_id)
 );
 comment on table public.students is 'Profile data for each student.';
@@ -739,6 +739,9 @@ create policy "Everyone except students can see other students" on public.studen
 insert into public.role_permissions (role, permission) values ('owner', 'students.read');
 insert into public.role_permissions (role, permission) values ('manager', 'students.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'students.read');
+
+create policy "Student can insert their own data" on public.students for insert to authenticated with check (auth.uid() = user_id);
+create policy "Student can update their own data" on public.students for update to authenticated using (auth.uid() = user_id);
 
 create policy "Owner & Manager can insert students" on public.students for insert to authenticated with check (public.authorize('students.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.create');
