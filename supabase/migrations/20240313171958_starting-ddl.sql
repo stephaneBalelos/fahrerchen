@@ -384,6 +384,31 @@ left join (
 left join public.users on organizations.owner_id = users.id;
 
 
+-- Organization's Schedules View joining with activities, group by course_id
+create or replace view public.course_activity_schedules_view as
+select 
+  course_activity_schedules.id,
+  course_activity_schedules.course_id,
+  course_activity_schedules.activity_id,
+  course_activity_schedules.assigned_to,
+  course_activity_schedules.status,
+  course_activity_schedules.start_at,
+  course_activity_schedules.end_at,
+  course_activity_schedules.organization_id,
+  course_activities.name as activity_name,
+  course_activities.description as activity_description,
+  course_activities.activity_type,
+  courses.name as course_name,
+  courses.description as course_description,
+  users.email as assigned_to_email,
+  users.firstname as assigned_to_firstname,
+  users.lastname as assigned_to_lastname
+from public.course_activity_schedules
+inner join public.course_activities on course_activity_schedules.activity_id = course_activities.id
+inner join public.courses on course_activity_schedules.course_id = courses.id
+left join public.users on course_activity_schedules.assigned_to = users.id;
+
+
 
 -- TRIGGERS
 create function public.handle_new_user() 

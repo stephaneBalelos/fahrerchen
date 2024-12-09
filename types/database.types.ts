@@ -136,6 +136,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
+            columns: ["activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
             columns: ["course_activity_id"]
             isOneToOne: false
@@ -997,6 +1004,70 @@ export type Database = {
       }
     }
     Views: {
+      course_activity_schedules_view: {
+        Row: {
+          activity_description: string | null
+          activity_id: string | null
+          activity_name: string | null
+          activity_type: number | null
+          assigned_to: string | null
+          assigned_to_email: string | null
+          assigned_to_firstname: string | null
+          assigned_to_lastname: string | null
+          course_description: string | null
+          course_id: string | null
+          course_name: string | null
+          end_at: string | null
+          id: string | null
+          organization_id: string | null
+          start_at: string | null
+          status: Database["public"]["Enums"]["schedule_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activities_activity_type_fkey"
+            columns: ["activity_type"]
+            isOneToOne: false
+            referencedRelation: "course_activity_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_subscription_bill_items_view: {
         Row: {
           activity_description: string | null
@@ -1092,11 +1163,17 @@ export type Database = {
         | "users.update"
         | "users.delete"
         | "organizations.read"
+        | "organizations.create"
         | "organizations.update"
         | "organizations.delete"
         | "organization_members.read"
+        | "organization_members.create"
         | "organization_members.update"
         | "organization_members.delete"
+        | "organization_invitations.read"
+        | "organization_invitations.create"
+        | "organization_invitations.update"
+        | "organization_invitations.delete"
         | "students.read"
         | "students.create"
         | "students.update"
