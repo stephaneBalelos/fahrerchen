@@ -136,7 +136,6 @@ async function addStudents() {
         const attendance: Omit<AppCourseActivityAttendance, "id" | "status" | "attended_at"> = {
         course_subscription_id: subscriptions.id,
         course_activity_id: courseActivity.id,
-        supervisor_id: props.courseActivitySchedule.assigned_to,
         organization_id: courseActivity.organization_id,
         activity_schedule_id: props.courseActivitySchedule.id,
       };
