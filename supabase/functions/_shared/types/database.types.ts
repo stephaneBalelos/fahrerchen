@@ -174,7 +174,7 @@ export type Database = {
             foreignKeyName: "course_activity_attendances_supervisor_id_fkey"
             columns: ["supervisor_id"]
             isOneToOne: false
-            referencedRelation: "organization_members"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -222,7 +222,7 @@ export type Database = {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: "organization_members"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -1042,7 +1042,7 @@ export type Database = {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
-            referencedRelation: "organization_members"
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {

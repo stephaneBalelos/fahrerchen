@@ -11,7 +11,7 @@
 
   <template #label>
     <div v-if="selected">
-        <UAvatar :alt="'dsa dsd'" size="xs" />
+        <UAvatar v-if="selected.fullname" :alt="selected.fullname" size="xs" />
         <span class="truncate ms-3">{{ selected.name }}</span>
     </div>
     <div v-else>
@@ -39,25 +39,12 @@ const client = useSupabaseClient<Database>();
 const model = defineModel<string>({ default: null });
 const selected = ref<Omit<AppUser & {name: string}, "status"> | null>(null);
 
-watch(model, (value) => {
-  if (!value) {
-    return;
-  }
-  if (!users.value) {
-    return;
-  }
-  const user = users.value.find((user) => user.id === value);
-  if (user) {
-    selected.value = user;
-  }
-});
-
 const {
   data: users,
   error,
   refresh,
 } = useAsyncData(`users_${props.orgid}`, async () => {
-  const { data, error } = await client.from("users").select("id, firstname, lastname, email").limit(10);
+  const { data, error } = await client.from("users").select('*').limit(10);
   if (error) {
     console.error(error);
     throw error;
@@ -79,6 +66,20 @@ const {
       });
     }
 });
+
+
+watch(model, (value) => {
+  if (!value) {
+    return;
+  }
+  if (!users.value) {
+    return;
+  }
+  const user = users.value.find((user) => user.id === value);
+  if (user) {
+    selected.value = user;
+  }
+}, { immediate: true });
 </script>
 
 <style scoped></style>

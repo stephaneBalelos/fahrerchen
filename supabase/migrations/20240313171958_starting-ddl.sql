@@ -284,7 +284,7 @@ create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
   course_id    uuid references public.courses on delete cascade not null,
   activity_id    uuid references public.course_activities on delete cascade not null,
-  assigned_to   uuid references public.organization_members on delete set null,
+  assigned_to   uuid references public.users on delete set null,
   organization_id    uuid references public.organizations on delete cascade not null,
   status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
   start_at     timestamp with time zone not null,
@@ -298,7 +298,7 @@ alter table public.course_activity_schedules enable row level security;
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity_id   uuid references public.course_activities on delete cascade not null,
-  supervisor_id    uuid references public.organization_members on delete set null,
+  supervisor_id    uuid references public.users on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   attended_at   timestamp with time zone default null,

@@ -23,6 +23,17 @@ const links = computed(() => {
       shortcuts: ["G", "D"],
     },
   });
+
+  items.push({
+    id: "schedules",
+    label: "Schedules",
+    icon: "i-heroicons-calendar",
+    to: `/my/${selectedOrganization.organization_id}/schedules`,
+    tooltip: {
+      text: "Schedules",
+      shortcuts: ["G", "S"],
+    },
+  });
   
 
   items.push({

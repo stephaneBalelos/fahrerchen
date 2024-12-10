@@ -61,14 +61,14 @@
           <USelectMenu
             v-model="state.assigned_to"
             :options="organization_members"
-            value-attribute="id"
+            value-attribute="user_id"
             option-attribute="email"
           >
             <template #label>
               <div v-if="state.assigned_to && organization_members.length > 0">
                 <span class="truncate">{{
                   organization_members.find(
-                    (m) => m.id === state.assigned_to
+                    (m) => m.user_id === state.assigned_to
                   )?.user?.fullname
                 }}</span>
               </div>
