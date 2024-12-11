@@ -13,7 +13,7 @@
     >
       <div>
         <UCard
-          :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
+          :ui="{ header: { padding: 'p-4' }, body: { padding: '' } }"
           class="min-w-0"
         >
           <template #header>
@@ -28,7 +28,6 @@
           <div
             v-for="subscription in filteredStudents"
             :key="subscription.id"
-            class="p-4"
           >
             <FormsInputsStudentAttendanceCheckbox
               v-if="subscription.student"
@@ -38,7 +37,7 @@
               :schedule_id="props.courseActivitySchedule.id"
               :onChange="() => $emit('updated')"
             >
-              <div class="flex items-center gap-3">
+              <div class="flex gap-3 items-center">
                 <UAvatar
                   :alt="`${subscription.student?.firstname} ${subscription.student?.lastname}`"
                   size="xs"
