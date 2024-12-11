@@ -298,7 +298,6 @@ alter table public.course_activity_schedules enable row level security;
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity_id   uuid references public.course_activities on delete cascade not null,
-  supervisor_id    uuid references public.users on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   attended_at   timestamp with time zone default null,
@@ -382,6 +381,24 @@ left join (
   group by courses.organization_id
 ) as courses on organizations.id = courses.organization_id
 left join public.users on organizations.owner_id = users.id;
+
+-- Organization's Courses Subscriptions View joining with students
+create or replace view public.course_subscriptions_view as
+select
+  course_subscriptions.id,
+  course_subscriptions.course_id,
+  course_subscriptions.student_id,
+  course_subscriptions.archived_at,
+  course_subscriptions.costs,
+  course_subscriptions.organization_id,
+  courses.name as course_name,
+  courses.description as course_description,
+  students.email as student_email,
+  students.firstname as student_firstname,
+  students.lastname as student_lastname
+from public.course_subscriptions
+inner join public.courses on course_subscriptions.course_id = courses.id
+inner join public.students on course_subscriptions.student_id = students.id;
 
 
 -- Organization's Schedules View joining with activities, group by course_id
