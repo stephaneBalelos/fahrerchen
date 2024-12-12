@@ -179,12 +179,13 @@ create table public.courses (
   name          text not null,
   description       text not null,
   type         integer references public.course_types not null,
-  organization_id    uuid references public.organizations on delete cascade not null,
   is_active     boolean default true not null,
+  create_bill_on_subscription  boolean default true not null,
+  allow_self_registration  boolean default true not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
   unique (organization_id, type)
 );
 comment on table public.courses is 'COURSES AVAILABLE.';
-
 alter table public.courses enable row level security;
 
 
@@ -316,6 +317,7 @@ create table public.course_subscription_bills (
   total        numeric default 0 not null check (total >= 0),
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
+  ready_to_pay  boolean default false not null, -- if the bill is ready to be paid, the bill is should be locked
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
@@ -330,11 +332,29 @@ create table public.course_subscription_bill_items (
   course_activity_id    uuid references public.course_activities on delete set null,
   description   text not null,
   price       numeric default 0 not null check (price >= 0),
-  canceled_at   timestamp with time zone default null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_activity_attendance_id)
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
+
+-- Bill History Action type
+create type public.bill_history_action_type as enum ('ITEM_ADDED', 'ITEM_REMOVED', 'ITEM_UPDATED', 'BILL_READY_TO_PAY', 'BILL_PAID');
+
+-- COURSE SUBSCRIPTION BILL HISTORY
+create table public.course_subscription_bill_history (
+  id            uuid default uuid_generate_v4() primary key,
+  bill_id      uuid references public.course_subscription_bills on delete cascade not null,
+  actor_id      uuid references public.users on delete set null,
+  activity      public.bill_history_action_type not null,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION BILL HISTORY.';
+alter table public.course_subscription_bill_history enable row level security;
+
+
 
 
 -- Bill Items View grouped by course_activity_id
@@ -469,6 +489,7 @@ declare org_id uuid;
 begin
   org_id := new.organization_id;
 
+  -- insert the default activities
   insert into public.course_activities (course_id, name, description, activity_type, required, price, organization_id)
   values (new.id, 'Theorieunterricht', 'Theorieunterricht', 1, 12, 45, org_id),
          (new.id, 'Übungstunde', 'Praxisunterricht', 2, 15, 64, org_id),
@@ -566,35 +587,103 @@ after insert on public.organizations_invitations
 for each row
 execute function public.handle_new_invitation();
 
+-- handle new course subscription
+create or replace function public.handle_new_course_subscription()
+returns trigger as $$
+declare org_id uuid;
+declare is_course_active boolean;
+declare create_bill boolean;
+declare bill_id uuid;
+declare activity public.course_activities;
+begin
+  org_id := new.organization_id;
+  select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
+
+  -- if the course is not active, raise an exception
+  if not is_course_active then
+    raise exception 'Course is not active';
+  end if;
+
+  -- if the bill should be created, create a new bill and insert default items based on the course activities and required count
+  if create_bill then
+    insert into public.course_subscription_bills (course_subscription_id, organization_id)
+    values (new.id, org_id) returning id into bill_id;
+
+    -- loop over the course activities and insert the required number of items
+    for activity in (select * from public.course_activities where course_id = new.course_id) loop
+      if activity.required > 0 then
+        for i in 1..activity.required loop
+          insert into public.course_subscription_bill_items (bill_id, course_activity_id, description, price, organization_id)
+          values (bill_id, activity.id, activity.name, activity.price, org_id);
+        end loop;
+      end if;
+    end loop;
+
+    -- set bill as ready to pay
+    update public.course_subscription_bills set ready_to_pay = true where id = bill_id;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course subscription is created
+create trigger on_course_subscription_created
+  after insert on public.course_subscriptions
+  for each row execute procedure public.handle_new_course_subscription();
 
 
 -- handle new activity attendance
 create or replace function public.handle_new_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
-declare bill_id uuid;
+declare bill public.course_subscription_bills;
 declare activity_price numeric;
 declare activity_name text;
+declare bill_item public.course_subscription_bill_items;
 begin
   org_id := new.organization_id;
 
   -- lookup if a bill already exists for the course subscription and has not been paid
-  select id into bill_id from public.course_subscription_bills
-  where course_subscription_id = new.course_subscription_id and paid_at is null;
+  select * into bill from public.course_subscription_bills
+  where course_subscription_id = new.course_subscription_id and paid_at is null limit 1;
 
   -- if no bill exists, create a new one
-  if bill_id is null then
+  if bill is null then
     insert into public.course_subscription_bills (course_subscription_id, organization_id)
     values (new.course_subscription_id, org_id)
-    returning id into bill_id;
+    returning id into bill.id;
+
+    -- insert bill the bill item for this activity
+    select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
+
+    -- insert the bill item
+    insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
+    values (bill.id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+
+  else
+    -- if the bill exists, check if a bill item already exists but without attendance
+    select * into bill_item from public.course_subscription_bill_items
+    where bill_id = bill.id and course_activity_attendance_id is null and course_activity_id = new.course_activity_id limit 1;
+
+    -- if the bill item exists, update the bill item with the attendance id
+    if bill_item is null then
+      -- if the bill item does not exist, insert a new one
+      select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
+
+      -- insert the bill item
+      insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
+      values (bill.id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+    else
+      -- if the bill item exists, update the bill item with the attendance id
+      update public.course_subscription_bill_items set course_activity_attendance_id = new.id
+      where id = bill_item.id;
+    end if;
+
   end if;
-
-  -- lookup the activity name & price
-  select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
-
-  -- insert the bill item
-  insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
-  values (bill_id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+  
+  -- update the bill total
+  update public.course_subscription_bills set total = (select sum(price) from public.course_subscription_bill_items where bill_id = bill.id)
+  where id = bill.id;
 
   return new;
 end;
@@ -603,6 +692,44 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_activity_attendance_created
   after insert on public.course_activity_attendances
   for each row execute procedure public.handle_new_activity_attendance();
+
+-- handle removed activity attendance
+create or replace function public.handle_removed_activity_attendance()
+returns trigger as $$
+declare org_id uuid;
+declare bill_item_id uuid;
+declare subscription_bill_id uuid;
+begin
+  org_id := old.organization_id;
+
+  -- lookup for the linked bill item
+  select id, bill_id into bill_item_id, subscription_bill_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+
+  -- if no bill item exists, do nothing
+  if bill_item_id is null then
+    return old;
+  end if;
+
+  -- check if the bill has been paid
+  if exists (select 1 from public.course_subscription_bills where id = subscription_bill_id and (paid_at is not null or ready_to_pay = true)) then
+    -- bill exists and has been paid or is ready to pay, do nothing
+    return old;
+  else
+    -- bill exists but has not been paid, remove the bill item
+    delete from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+
+    -- update the bill total
+    update public.course_subscription_bills set total = (select sum(price) from public.course_subscription_bill_items where bill_id = subscription_bill_id)
+    where id = subscription_bill_id;
+  end if;
+
+  return old;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course activity attendance is deleted
+create trigger on_course_activity_attendance_deleted
+  before delete on public.course_activity_attendances
+  for each row execute procedure public.handle_removed_activity_attendance();
 
 
 -- handle new Bill Item
@@ -627,42 +754,33 @@ create trigger on_course_subscription_bill_item_created
   after insert on public.course_subscription_bill_items
   for each row execute procedure public.handle_new_bill_item();
 
-
--- hnadle attendance status change
-create or replace function public.handle_attendance_status_change()
+-- handle removed Bill Item
+create or replace function public.handle_removed_bill_item()
 returns trigger as $$
 declare org_id uuid;
-declare bill_paid boolean;
+declare bill_total numeric;
 begin
-  org_id := new.organization_id;
+  org_id := old.organization_id;
 
-  -- prevent resetting the status to REGISTERED
-  if new.status = 'REGISTERED' then
-    raise exception 'Status cannot be reset to REGISTERED';
+  -- lookup for the linked bill
+  select sum(price) into bill_total from public.course_subscription_bill_items where bill_id = old.bill_id;
+
+  -- if no bill item exists, do nothing
+  if bill_total is null then
+    return old;
   end if;
 
-  -- if the status is ATTENDED, update the bill item to be paid
-  if new.status = 'ATTENDED' then
-    update public.course_subscription_bill_items set canceled_at = null
-    where id = new.id;
-  end if;
+  -- if the bill item exists, remove it
+  update public.course_subscription_bills set total = bill_total
+  where id = old.bill_id;
 
-  -- if the status is CANCELED, update the bill item to be canceled
-  if new.status = 'CANCELED' then
-    update public.course_subscription_bill_items set canceled_at = timezone('utc'::text, now())
-    where id = new.id;
-  end if;
-
-  return new;
+  return old;
 end;
 $$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course activity attendance's status is updated
-create trigger on_course_activity_attendance_status_updated
-  after update of status on public.course_activity_attendances
-  for each row execute procedure public.handle_attendance_status_change();
-
-
-
+-- trigger the function every time a course subscription bill item is deleted
+create trigger on_course_subscription_bill_item_deleted
+  after delete on public.course_subscription_bill_items
+  for each row execute procedure public.handle_removed_bill_item();
 
 
 -- Helpers Functions

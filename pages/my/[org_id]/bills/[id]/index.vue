@@ -7,7 +7,7 @@
         </template>
 
         <template #right>
-          <UButton color="gray" variant="solid" size="xs" @click="markAsPaid">
+          <UButton v-if="!bill.data.paid_at"color="gray" variant="solid" size="xs" @click="markAsPaid">
             <i class="i-heroicons-check"></i>
             <span>Mark as paid</span>
           </UButton>
@@ -29,8 +29,8 @@
                 :ui="{ wrapper: 'divide-none'}"
               >
               <template #links>
-                <UButton color="primary" variant="soft">Mark Bill as Ready to Pay</UButton>
-                <UButton color="red" variant="soft">Cancel Bill</UButton>
+                <UButton v-if="!bill.data.ready_to_pay" color="primary" variant="soft" @click="markAsReadyToPay">Mark Bill as Ready to Pay</UButton>
+                <UButton v-if="!bill.data.paid_at" color="red" variant="soft">Cancel Bill</UButton>
               </template>
                 <template #description>
                   <div>
@@ -74,6 +74,7 @@ const {
   data: bill,
   error,
   status,
+  refresh,
 } = useAsyncData(`bills_${id}`, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
@@ -93,6 +94,33 @@ const {
     subscription,
   };
 });
+
+async function markAsReadyToPay() {
+  try {
+    const { data, error } = await client
+      .from("course_subscription_bills")
+      .update({ ready_to_pay: true })
+      .eq("id", id as string);
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    toast.add({
+      title: "Bill marked as ready to pay",
+      description: "The bill has been marked as ready to pay",
+      color: "green",
+    });
+    refresh();
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "An error occurred while marking the bill as ready to pay",
+      color: "red",
+    });
+  }
+}
 
 async function markAsPaid() {
   try {

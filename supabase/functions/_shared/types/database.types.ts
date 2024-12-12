@@ -361,34 +361,90 @@ export type Database = {
           },
         ]
       }
+      course_subscription_bill_history: {
+        Row: {
+          activity: Database["public"]["Enums"]["bill_history_action_type"]
+          actor_id: string | null
+          bill_id: string
+          id: string
+          inserted_at: string
+          organization_id: string
+        }
+        Insert: {
+          activity: Database["public"]["Enums"]["bill_history_action_type"]
+          actor_id?: string | null
+          bill_id: string
+          id?: string
+          inserted_at?: string
+          organization_id: string
+        }
+        Update: {
+          activity?: Database["public"]["Enums"]["bill_history_action_type"]
+          actor_id?: string | null
+          bill_id?: string
+          id?: string
+          inserted_at?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscription_bill_history_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_history_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_history_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_subscription_bill_items: {
         Row: {
           bill_id: string
-          canceled_at: string | null
           course_activity_attendance_id: string | null
           course_activity_id: string | null
           description: string
           id: string
+          inserted_at: string
           organization_id: string
           price: number
         }
         Insert: {
           bill_id: string
-          canceled_at?: string | null
           course_activity_attendance_id?: string | null
           course_activity_id?: string | null
           description: string
           id?: string
+          inserted_at?: string
           organization_id: string
           price?: number
         }
         Update: {
           bill_id?: string
-          canceled_at?: string | null
           course_activity_attendance_id?: string | null
           course_activity_id?: string | null
           description?: string
           id?: string
+          inserted_at?: string
           organization_id?: string
           price?: number
         }
@@ -396,7 +452,7 @@ export type Database = {
           {
             foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
             columns: ["course_activity_attendance_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "course_activity_attendances"
             referencedColumns: ["id"]
           },
@@ -437,6 +493,7 @@ export type Database = {
           id: string
           organization_id: string
           paid_at: string | null
+          ready_to_pay: boolean
           total: number
         }
         Insert: {
@@ -445,6 +502,7 @@ export type Database = {
           id?: string
           organization_id: string
           paid_at?: string | null
+          ready_to_pay?: boolean
           total?: number
         }
         Update: {
@@ -453,6 +511,7 @@ export type Database = {
           id?: string
           organization_id?: string
           paid_at?: string | null
+          ready_to_pay?: boolean
           total?: number
         }
         Relationships: [
@@ -628,6 +687,8 @@ export type Database = {
       }
       courses: {
         Row: {
+          allow_self_registration: boolean
+          create_bill_on_subscription: boolean
           description: string
           id: string
           inserted_at: string
@@ -637,6 +698,8 @@ export type Database = {
           type: number
         }
         Insert: {
+          allow_self_registration?: boolean
+          create_bill_on_subscription?: boolean
           description: string
           id?: string
           inserted_at?: string
@@ -646,6 +709,8 @@ export type Database = {
           type: number
         }
         Update: {
+          allow_self_registration?: boolean
+          create_bill_on_subscription?: boolean
           description?: string
           id?: string
           inserted_at?: string
@@ -1264,6 +1329,12 @@ export type Database = {
         | "course_subscription_bills.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
       attendance_status: "REGISTERED" | "ATTENDED" | "CANCELED"
+      bill_history_action_type:
+        | "ITEM_ADDED"
+        | "ITEM_REMOVED"
+        | "ITEM_UPDATED"
+        | "BILL_READY_TO_PAY"
+        | "BILL_PAID"
       course_type:
         | "AM"
         | "A1"
