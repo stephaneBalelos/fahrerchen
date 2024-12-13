@@ -97,7 +97,6 @@ const {
     //   req = req.eq("course_id", selectedCourse.value);
     // }
     const { data, error } = await req;
-    console.log(data);
     if (error) {
       console.error(error);
       throw error;
