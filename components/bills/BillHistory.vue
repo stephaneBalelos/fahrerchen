@@ -51,10 +51,6 @@ const {
     throw error;
   }
 
-  console.log(props.bill_id)
-
-  console.log(data);
-
   return data;
 }, {
     transform: (data) => {
