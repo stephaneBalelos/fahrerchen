@@ -368,6 +368,8 @@ export type Database = {
           bill_id: string
           id: string
           inserted_at: string
+          item_description: string
+          item_price: number
           organization_id: string
         }
         Insert: {
@@ -376,6 +378,8 @@ export type Database = {
           bill_id: string
           id?: string
           inserted_at?: string
+          item_description: string
+          item_price: number
           organization_id: string
         }
         Update: {
@@ -384,6 +388,8 @@ export type Database = {
           bill_id?: string
           id?: string
           inserted_at?: string
+          item_description?: string
+          item_price?: number
           organization_id?: string
         }
         Relationships: [

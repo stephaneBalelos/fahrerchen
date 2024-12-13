@@ -348,13 +348,13 @@ create table public.course_subscription_bill_history (
   bill_id      uuid references public.course_subscription_bills on delete cascade not null,
   actor_id      uuid references public.users on delete set null,
   activity      public.bill_history_action_type not null,
+  item_description  text not null,
+  item_price    numeric not null check (item_price >= 0),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION BILL HISTORY.';
 alter table public.course_subscription_bill_history enable row level security;
-
-
 
 
 -- Bill Items View grouped by course_activity_id
@@ -687,7 +687,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course activity attendance is created
 create trigger on_course_activity_attendance_created
   after insert on public.course_activity_attendances
@@ -732,6 +732,43 @@ create trigger on_course_activity_attendance_deleted
   for each row execute procedure public.handle_removed_activity_attendance();
 
 
+-- handle updated bill ready to pay
+create or replace function public.handle_updated_bill()
+returns trigger as $$
+begin
+  --prevent set ready_to_pay to false if the bill has been paid
+  if old.ready_to_pay = true and new.ready_to_pay = false and new.paid_at is not null then
+    raise exception 'Cannot set ready_to_pay to false if the bill has been paid';
+  end if;
+
+  -- prevent set paid_at to null if the bill is ready to pay
+  if old.paid_at is not null and new.paid_at is null and new.ready_to_pay = true then
+    raise exception 'Cannot set paid_at to null if the bill is ready to pay';
+  end if;
+
+
+  if new.ready_to_pay and old.ready_to_pay = false then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.id, auth.uid(), 'BILL_READY_TO_PAY', '', 0, new.organization_id);
+  end if;
+
+  if new.paid_at is not null then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.id, auth.uid(), 'BILL_PAID', '', 0, new.organization_id);
+  end if;
+
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course subscription bill is updated
+create trigger on_course_subscription_bill_updated
+  after update on public.course_subscription_bills
+  for each row execute procedure public.handle_updated_bill();
+
+
 -- handle new Bill Item
 create or replace function public.handle_new_bill_item()
 returns trigger as $$
@@ -745,6 +782,10 @@ begin
   -- Aggragate the total of the bill
   update public.course_subscription_bills set total = bill_total
   where id = new.bill_id;
+
+  -- insert the bill history
+  insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+  values (new.bill_id, auth.uid(), 'ITEM_ADDED', new.description, new.price, org_id);
 
   return new;
 end;
@@ -774,6 +815,10 @@ begin
   update public.course_subscription_bills set total = bill_total
   where id = old.bill_id;
 
+  -- insert the bill history
+  insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+  values (old.bill_id, auth.uid(), 'ITEM_REMOVED', old.description, old.price, org_id);
+
   return old;
 end;
 $$ language plpgsql security definer set search_path = public;
@@ -781,6 +826,31 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_subscription_bill_item_deleted
   after delete on public.course_subscription_bill_items
   for each row execute procedure public.handle_removed_bill_item();
+
+-- handle updated Bill Item
+create or replace function public.handle_updated_bill_item()
+returns trigger as $$
+begin
+
+  if old.description <> new.description then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
+  end if;
+
+  if old.price <> new.price then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course subscription bill item is updated
+create trigger on_course_subscription_bill_item_updated
+  after update on public.course_subscription_bill_items
+  for each row execute procedure public.handle_updated_bill_item();
 
 
 -- Helpers Functions
@@ -1046,6 +1116,7 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 -- Course Subscription Bills Policies
 create policy "Everyone can see course_subscription_bills" on public.course_subscription_bills for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 create policy "Everyone can see course_subscription_bill_items" on public.course_subscription_bill_items for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
+create policy "Everyone can see course_subscription_bill_history" on public.course_subscription_bill_history for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscription_bills.read');
