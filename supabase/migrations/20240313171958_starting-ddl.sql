@@ -555,37 +555,15 @@ begin
     if exists (select 1 from public.organization_members where user_id = invited_user_id and organization_id = new.organization_id) then
       raise exception 'User is already a member of the organization';
     end if;
-
-    -- insert the user as a member of the organization
-    insert into public.organization_members (organization_id, user_id, role)
-    values (new.organization_id, invited_user_id, new.role);
   end if;
 
-
-  -- generate payload
-  payload := jsonb_build_object(
-    'type', 'organizations_invitations.create',
-    'data', jsonb_build_object(
-      'id', new.id,
-      'email', new.email,
-      'organization_id', new.organization_id,
-      'role', new.role,
-      'inserted_at', new.inserted_at
-      'invited_user_id', invited_user_id
-    )
-  );
-
-  -- send the payload to the webhook
-  perform public.send_transactional_email(message_id := new.id, payload := payload);
-
-  return NEW;
+  return new;
 
 end;
-$$ language plpgsql security invoker set search_path = public, extensions, net;
+$$ language plpgsql security invoker set search_path = public;
 create or replace trigger new_invitation_webhook
-after insert on public.organizations_invitations
-for each row
-execute function public.handle_new_invitation();
+  after insert on public.organizations_invitations
+  for each row execute function public.handle_new_invitation();
 
 -- handle new course subscription
 create or replace function public.handle_new_course_subscription()
@@ -933,10 +911,6 @@ insert into public.role_permissions (role, permission) values ('manager', 'organ
 insert into public.role_permissions (role, permission) values ('teacher', 'organization_members.read');
 insert into public.role_permissions (role, permission) values ('student', 'organization_members.read');
 
-create policy "Owner & Manager can insert organization_members" on public.organization_members for insert to authenticated with check (public.authorize('organization_members.create', organization_id));
-insert into public.role_permissions (role, permission) values ('owner', 'organization_members.create');
-insert into public.role_permissions (role, permission) values ('manager', 'organization_members.create');
-
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
 
@@ -953,10 +927,6 @@ insert into public.role_permissions (role, permission) values ('manager', 'organ
 create policy "Owner & Manager can insert organization_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.create');
 insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.create');
-
-create policy "Owner & Manager can update organization_invitations" on public.organizations_invitations for update to authenticated using (public.authorize('organization_invitations.update', organization_id));
-insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.update');
-insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.update');
 
 create policy "Owner & Manager can delete organization_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.delete');
