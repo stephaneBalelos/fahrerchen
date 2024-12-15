@@ -1,7 +1,6 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database } from "../_shared/types/database.types.ts"
-import { decodeBase64 } from "jsr:@std/encoding/base64";
-
+import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
 
 export async function hasUserOrganisationMembership(supabase: SupabaseClient<Database>, user_id: string, orgid: string): Promise<Database['public']['Tables']['organization_members']['Row'] | null> {
     const { data, error } = await supabase.from('organization_members').select('*').eq('organization_id', orgid).eq('user_id', user_id).single()
@@ -41,4 +40,28 @@ export const verifyHmacSignature = async (data: string, signature: string): Prom
 
     const expectedSignature = await getHmacSignature(data)
     return expectedSignature === signature
+}
+
+export const sendEmail = async (to: string, subject: string, text: string): Promise<void> => {
+    const body = new FormData()
+    body.append('from', Deno.env.get('MAILER_FROM_EMAIL') ?? '')
+    body.append('to', to)
+    body.append('subject', subject)
+    body.append('html', text)
+
+    const domain = Deno.env.get('MAILER_DOMAIN')
+    const apiKey = Deno.env.get('MAILER_API_KEY')
+
+
+    const res = await fetch(`https://api.eu.mailgun.net/v3/${domain}/messages`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Basic ${encodeBase64(`api:${apiKey}`)}`
+        },
+        body
+    })
+
+    const data = await res.text()
+    console.log(data)
+
 }

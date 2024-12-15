@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database } from "../_shared/types/database.types.ts"
 import { corsHeaders } from "../_shared/cors.ts";
-import { getHmacSignature, hasUserOrganisationMembership } from "../_shared/utils.ts";
+import { getHmacSignature, hasUserOrganisationMembership, sendEmail } from "../_shared/utils.ts";
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -80,6 +80,11 @@ Deno.serve(async (req) => {
 
   // generate url
   const url = `${Deno.env.get('BASE_URL')}/external/invitations?invitation_id=${invite.id}&signature=${invitationSignature}`
+
+  // send email
+  const emailText = `You have been invited to join the organization. Click <a href="${url}">here</a> to accept the invitation`
+
+  await sendEmail(invite.email, 'Invitation to join the organization', emailText)
   
 
   return new Response(
