@@ -18,6 +18,14 @@ export async function getUserByEmail(supabase: SupabaseClient<Database>, email: 
     return data
 }
 
+export async function getOrganization(supabase: SupabaseClient<Database>, orgid: string): Promise<Database['public']['Tables']['organizations']['Row'] | null> {
+    const { data, error } = await supabase.from('organizations').select('*').eq('id', orgid).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
 export const getHmacSignature = async (data: string): Promise<string> => {
     const { createHmac } = await import('node:crypto');
     const secret = Deno.env.get("MAIL_WEBHOOK_SECRET_KEY")
@@ -64,4 +72,18 @@ export const sendEmail = async (to: string, subject: string, text: string): Prom
     const data = await res.text()
     console.log(data)
 
+}
+
+export const translator = (translationsEn: Record<string, string>, translationsDe: Record<string, string>, lang: string= 'de') => (key: string, ...args: string[]): string => {
+    const translations = lang.includes('de') ? translationsDe : translationsEn
+    let translation = translations[key] || key
+    if (args.length > 0) {
+        console.log('t', translation)
+        for (let i = 0; i < args.length; i++) {
+            console.log(`{${i}}`, args[i])
+            translation = translation.replace(`{${i}}`, args[i] )
+        }
+    }
+
+    return translation
 }

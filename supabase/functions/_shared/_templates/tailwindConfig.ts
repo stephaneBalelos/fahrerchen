@@ -3,7 +3,7 @@ export default {
         extend: {
             colors: {
                 primary: "#4ade80",
-                gray: "#e5e7eb"
+                gray: "#1c1917"
             },
         },
         fontSize: {

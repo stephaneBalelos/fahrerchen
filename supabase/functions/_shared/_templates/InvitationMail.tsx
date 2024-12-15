@@ -8,130 +8,140 @@ import {
     Preview,
     Text,
     Section,
+    Row,
+    Column,
     Img,
     Tailwind,
     Button,
 } from 'npm:@react-email/components'
 import * as React from 'npm:react@18.3.1'
 import tailwindConfig from './tailwindConfig.ts'
+import { translator } from '../utils.ts';
 
 interface InviteMailProps {
-    username: string
-    org_name: string
+    user_email: string
+    organization_name: string
     lang: string
-    supabase_url: string
-    email_action_type: string
-    redirect_to: string
-    token_hash: string
-    baseUrl: string
+    url_base: string
+    role: string
+    call_to_action_url: string
 }
 
 /** Translations of the text for English */
 const translationsEn = {
-    preview_text: "You have been invited to Fahrerchen",
-    h1: (username: string, org_name: string) => `Hi ${username}! Join ${org_name} on Fahrerchen`,
-    invitation_msg: (username: string, org_name: string) => `Hi ${username}, you have been invited to join ${org_name} on Fahrerchen.`,
-    click_here: (org_name: string) => `Click here to join ${org_name}`,
-    if_you_did_not_request: 'When you did not expect this email, there is no reason to worry, you can safely ignore it.',
-    blog: 'Our blog',
+    preview_text: `You've been invited to {0} on Fahrerchen`,
+    h1: `Hello, welcome to {0} on Fahrerchen`,
+    invitation_msg_staff: `Hello {0}, you've been invited to join {1} on Fahrerchen.`,
+    invitation_msg_student: `Hello {0}, it's time to get your driver's license. {1} has invited you to sign up on Fahrerchen.`,
+    click_here: `Get started with {0}`,
+    if_you_did_not_request: 'If you did not expect this email, there is no need to worry, you can safely ignore it.',
+    blog: 'Our Blog',
     policies: 'Policies',
-    help_center: 'Help center',
+    help_center: 'Help Center',
     community: 'Community',
 }
 
 /** Translations of the text for German */
 const translationsDe = {
-    preview_text: "Sie wurden zu Fahrerchen eingeladen",
-    h1: (username: string, org_name: string) => `Hallo ${username}! Treten Sie ${org_name} bei Fahrerchen bei`,
-    invitation_msg: (username: string, org_name: string) => `Hallo ${username}, Sie wurden eingeladen, ${org_name} auf Fahrerchen beizutreten.`,
-    click_here: (org_name: string) => `Klicken Sie hier, um ${org_name} beizutreten`,
-    if_you_did_not_request: 'Wenn Sie diese E-Mail nicht erwartet haben, gibt es keinen Grund zur Sorge, Sie können sie sicher ignorieren.',
+    preview_text: `Du wurdest zu {0} auf Fahrerchen eingeladen`,
+    h1: `Hallo, willkommen zu {0} auf Fahrerchen`,
+    invitation_msg_staff: `Hallo {0}, du wurdest eingeladen, {1} auf Fahrerchen beizutreten.`,
+    invitation_msg_student: `Hallo {0}, es ist Zeit, deinen Führerschein zu machen. {1} hat dich eingeladen, dich auf Fahrerchen anzumelden.`,
+    click_here: `Los geht's mit {0}`,
+    if_you_did_not_request: 'Wenn du diese E-Mail nicht erwartet hast, gibt es keinen Grund zur Sorge, du kannst sie sicher ignorieren.',
     blog: 'Unser Blog',
     policies: 'Richtlinien',
     help_center: 'Hilfe-Center',
     community: 'Community',
 }
 
-export const SignupMail = ({
-    username,
-    org_name,
+export const InvitationEmail = ({
+    user_email,
+    organization_name,
     lang,
-    supabase_url,
-    email_action_type,
-    redirect_to,
-    token_hash,
-    baseUrl = "https://fahrerchen.stephanedondyas.dev"
+    url_base,
+    role,
+    call_to_action_url
+
 }: InviteMailProps) => {
-    const translations = lang.includes('de') ? translationsDe : translationsEn
+    const t = translator(translationsEn, translationsDe, lang)
 
     return (
         <Html>
-            <Preview>{translations.preview_text}</Preview>
+            <Preview>{t('preview_text', organization_name)}</Preview>
             <Tailwind config={tailwindConfig}>
                 <Head />
-                <Body className="bg-gray my-auto mx-auto font-sans px-2">
+                <Body className="bg-gray text-white my-auto mx-auto font-sans px-2">
                     <Container className="mx-auto flex justify-center items-center px-4 sm:px-6 lg:px-8 max-w-5xl">
                         <Section className="mt-[32px]">
                             <Img
-                                src={`${baseUrl}/android-chrome-512x512.png`}
+                                src={`${url_base}/android-chrome-512x512.png`}
                                 width="40"
                                 height="37"
                                 alt="Fahrerchen"
                                 className="my-0 mx-auto"
                             />
                         </Section>
-                        <Heading className="text-black text-[24px] font-normal text-center p-0 my-[30px] mx-0">
-                            {translations.h1(username, org_name)}
+                        <Heading className="text-white text-[24px] font-normal text-center p-0 my-[30px] mx-0">
+                            {t('h1', organization_name)}
                         </Heading>
                         <Section className="text-center mt-[32px] mb-[32px]">
-                            <Text>{translations.invitation_msg(username, org_name)}</Text>
+                            <Text>{t(`invitation_msg_${role === 'student' ? 'student' : 'staff'}`, user_email, organization_name)}</Text>
                         </Section>
                         <Section className="text-center mt-[32px] mb-[32px]">
                             <Button
-                                className="bg-primary rounded text-white text-[12px] font-semibold no-underline text-center px-5 py-3"
-                                href={`${supabase_url}?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}`}
+                                className="bg-primary rounded text-gray text-[12px] font-semibold no-underline text-center px-5 py-3"
+                                href={call_to_action_url}
                             >
-                                {translations.click_here(org_name)}
+                                {t('click_here', organization_name)}
                             </Button>
                         </Section>
-                        <Section>
-                            <Link
-                                className="text-primary font-medium"
-                                href="https://fahrerchen.stephanedondyas.dev/blog"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {translations.blog}
-                            </Link>
-                            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                            <Link
-                                className="text-primary font-medium"
-                                href="https://fahrerchen.stephanedondyas.dev/legal"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {translations.policies}
-                            </Link>
-                            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                            <Link
-                                className="text-primary font-medium"
-                                href="https://fahrerchen.stephanedondyas.dev/help"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                {translations.help_center}
-                            </Link>
-                            &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-                            <Link
-                                className="text-primary font-medium"
-                                href="https://fahrerchen.stephanedondyas.dev/community"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                data-auth="NotApplicable"
-                                data-linkindex="6"
-                            >
-                                {translations.community}
-                            </Link>
+                        <Section >
+                            <Row>
+                                <Column>
+                                    <Link
+                                        className="text-primary font-medium"
+                                        href="https://fahrerchen.stephanedondyas.dev/blog"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {t('blog')}
+                                    </Link>
+                                </Column>
+
+                                <Column>
+                                    <Link
+                                        className="text-primary font-medium"
+                                        href="https://fahrerchen.stephanedondyas.dev/legal"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {t('policies')}
+                                    </Link>
+                                </Column>
+
+                                <Column>
+                                    <Link
+                                        className="text-primary font-medium"
+                                        href="https://fahrerchen.stephanedondyas.dev/help"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {t('help_center')}
+                                    </Link>
+                                </Column>
+
+                                <Column>
+                                    <Link
+                                        className="text-primary font-medium"
+                                        href="https://fahrerchen.stephanedondyas.dev/community"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {t('community')}
+                                    </Link>
+                                </Column>
+                            </Row>
                         </Section>
                     </Container>
                 </Body>
@@ -139,13 +149,5 @@ export const SignupMail = ({
         </Html>
     )
 }
-SignupMail.PreviewProps = {
-    username: 'dshukertjr',
-    org_name: 'Fahrerchen',
-    supabase_url: 'https://123.supabase.co',
-    email_action_type: 'confirm',
-    redirect_to: 'https://fahrerchen.stephanedondyas.dev',
-    token_hash: '123456',
-} as InviteMailProps
 
-export default SignupMail
+export default InvitationEmail
