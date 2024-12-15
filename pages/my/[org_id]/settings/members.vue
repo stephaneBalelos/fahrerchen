@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AddMemberForm from '~/components/forms/AddMemberForm.vue';
+import InvitationList from '~/components/settings/InvitationList.vue';
 import type { AppUserWithRole } from '~/types/app.types';
 import { type Database } from '~/types/database.types';
 
@@ -54,22 +55,24 @@ async function onClose() {
         />
       </template>
 
-      <UCard
-        :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
-        class="min-w-0"
-      >
-        <template #header>
-          <UInput
-            v-model="q"
-            icon="i-heroicons-magnifying-glass"
-            placeholder="Search members"
-            autofocus
-          />
-        </template>
-
-        <!-- ~/components/settings/MembersList.vue -->
-        <SettingsMembersList :members="filteredMembers" />
-      </UCard>
+      <div class="flex flex-col gap-4">
+        <UCard
+          :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
+          class="min-w-0"
+        >
+          <template #header>
+            <UInput
+              v-model="q"
+              icon="i-heroicons-magnifying-glass"
+              placeholder="Search members"
+              autofocus
+            />
+          </template>
+          <!-- ~/components/settings/MembersList.vue -->
+          <SettingsMembersList :members="filteredMembers" />
+        </UCard>
+        <InvitationList v-if="userOrganizationsStore.selectedOrganization" :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
+      </div>
     </UDashboardSection>
 
     <UDashboardModal

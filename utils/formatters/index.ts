@@ -1,7 +1,10 @@
 import { isToday, isYesterday, isTomorrow } from "date-fns";
 
 export const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString()
+    const { t, locale } = useI18n({
+        useScope: 'global',
+    })
+    return new Date(date).toLocaleDateString(locale.value)
 };
 
 export const formatDateTime = (date: string) => {
