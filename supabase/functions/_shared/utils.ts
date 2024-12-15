@@ -78,9 +78,7 @@ export const translator = (translationsEn: Record<string, string>, translationsD
     const translations = lang.includes('de') ? translationsDe : translationsEn
     let translation = translations[key] || key
     if (args.length > 0) {
-        console.log('t', translation)
         for (let i = 0; i < args.length; i++) {
-            console.log(`{${i}}`, args[i])
             translation = translation.replace(`{${i}}`, args[i] )
         }
     }
