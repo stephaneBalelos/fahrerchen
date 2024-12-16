@@ -48,9 +48,7 @@ const links = [
       <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
         <UHorizontalNavigation :links="links" />
       </UDashboardToolbar>
-      <UDashboardPanelContent>
-        <NuxtPage />
-      </UDashboardPanelContent>
+      <NuxtPage />
     </UDashboardPanel>
   </UDashboardPage>
 </template>

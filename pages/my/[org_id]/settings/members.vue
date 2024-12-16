@@ -39,50 +39,50 @@ async function onClose() {
 </script>
 
 <template>
-  <div>
-    <UDashboardSection
-      title="Manage access"
-      description="Invite new members by email address."
-      orientation="horizontal"
-      :ui="{ container: 'lg:sticky top-2' }"
-    >
-      <template #links>
-        <UButton
-          id="invite-people"
-          label="Invite people"
-          color="black"
-          @click="isInviteModalOpen = true"
-        />
-      </template>
-
-      <div class="flex flex-col gap-4">
-        <UCard
-          :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
-          class="min-w-0"
-        >
-          <template #header>
-            <UInput
-              v-model="q"
-              icon="i-heroicons-magnifying-glass"
-              placeholder="Search members"
-              autofocus
-            />
-          </template>
-          <!-- ~/components/settings/MembersList.vue -->
-          <SettingsMembersList :members="filteredMembers" />
-        </UCard>
-        <InvitationList v-if="userOrganizationsStore.selectedOrganization" :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
-      </div>
-    </UDashboardSection>
-
-    <UDashboardModal
-      v-model="isInviteModalOpen"
-      title="Invite people"
-      description="Invite new members by email address"
-      :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
-    >
-      <!-- ~/components/settings/MembersForm.vue -->
-      <AddMemberForm v-if="userOrganizationsStore.selectedOrganization?.organization_id" :orgid="userOrganizationsStore.selectedOrganization.organization_id" @close="onClose" />
-    </UDashboardModal>
-  </div>
+  <UDashboardPanelContent>
+    <div>
+      <UDashboardSection
+        title="Manage access"
+        description="Invite new members by email address."
+        orientation="horizontal"
+        :ui="{ container: 'lg:sticky top-2' }"
+      >
+        <template #links>
+          <UButton
+            id="invite-people"
+            label="Invite people"
+            color="black"
+            @click="isInviteModalOpen = true"
+          />
+        </template>
+        <div class="flex flex-col gap-4">
+          <UCard
+            :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
+            class="min-w-0"
+          >
+            <template #header>
+              <UInput
+                v-model="q"
+                icon="i-heroicons-magnifying-glass"
+                placeholder="Search members"
+                autofocus
+              />
+            </template>
+            <!-- ~/components/settings/MembersList.vue -->
+            <SettingsMembersList :members="filteredMembers" />
+          </UCard>
+          <InvitationList v-if="userOrganizationsStore.selectedOrganization" :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
+        </div>
+      </UDashboardSection>
+      <UDashboardModal
+        v-model="isInviteModalOpen"
+        title="Invite people"
+        description="Invite new members by email address"
+        :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
+      >
+        <!-- ~/components/settings/MembersForm.vue -->
+        <AddMemberForm v-if="userOrganizationsStore.selectedOrganization?.organization_id" :orgid="userOrganizationsStore.selectedOrganization.organization_id" @close="onClose" />
+      </UDashboardModal>
+    </div>
+  </UDashboardPanelContent>
 </template>
