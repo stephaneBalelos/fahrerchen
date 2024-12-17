@@ -23,7 +23,7 @@
               t("card_payment.description")
             }}</span>
           </div>
-          <UToggle />
+          <UToggle v-model="form.credit_card.enabled" @change="onChange"/>
         </div>
         <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
           <div class="mr-2">
@@ -37,7 +37,7 @@
               t("paypal.description")
             }}</span>
           </div>
-          <UToggle />
+          <UToggle v-model="form.paypal.enabled"  @change="onChange"/>
         </div>
         <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
           <div class="mr-2">
@@ -51,7 +51,7 @@
               t("klarna.description")
             }}</span>
           </div>
-          <UToggle />
+          <UToggle v-model="form.klarna.enabled" @change="onChange"/>
         </div>
       </UCard>
     </div>
@@ -59,9 +59,65 @@
 </template>
 
 <script setup lang="ts">
+import type Stripe from 'stripe';
+import type { AppStripeAccountPaymentMethodSettings, Database } from '~/types/app.types';
+
 const { t } = useI18n({
   useScope: "local",
 });
+
+
+const stripeStore = useStripeStore();
+const userOrganizationStore = useUserOrganizationsStore();
+const client = useSupabaseClient<Database>();
+
+const { data, error, status, refresh } = await useAsyncData(``, async () => {
+  if(!userOrganizationStore.selectedOrganization) {
+    return null;
+  }
+  const { data, error } = await client.from("organizations_stripe_accounts").select("payment_methods").eq("id", userOrganizationStore.selectedOrganization.organization_id).single()
+  if (error) {
+    console.error(error);
+    
+  }
+  return data?.payment_methods as unknown as AppStripeAccountPaymentMethodSettings;
+})
+
+const form = reactive<AppStripeAccountPaymentMethodSettings>({
+  credit_card: {
+    payment_method_id: 'card',
+    enabled: data.value?.credit_card.enabled ?? false,
+  },
+  paypal: {
+    payment_method_id: 'paypal',
+    enabled: data.value?.paypal.enabled ?? false,
+  },
+  klarna: {
+    payment_method_id: 'klarna',
+    enabled: data.value?.klarna.enabled ?? false,
+  },
+});
+
+const onChange = async ($event: any) => {
+  if(!userOrganizationStore.selectedOrganization) {
+    return;
+  }
+  try {
+    const { data, error } = await client.from("organizations_stripe_accounts").update({
+      payment_methods: form
+    }).eq("id", userOrganizationStore.selectedOrganization.organization_id)
+    if (error) {
+      throw error;
+    }
+
+  } catch (error) {
+    console.error(error);
+  } finally {
+     refresh()
+  }
+}
+
+
 </script>
 
 <style scoped></style>

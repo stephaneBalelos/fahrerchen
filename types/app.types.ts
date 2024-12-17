@@ -1,5 +1,6 @@
 import type { MergeDeep } from "type-fest";
 import type { Database as DatabaseGenerated } from "./database.types";
+import type Stripe from "stripe";
 
 export type UserRole = DatabaseGenerated['public']['Enums']['app_role']
 export type RolePermission = DatabaseGenerated['public']['Enums']['app_permission']
@@ -24,6 +25,26 @@ export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['c
 
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
+export type AppStripeAccountPaymentMethodSettings = {
+  credit_card: {
+    payment_method_id: Stripe.PaymentMethod.Type
+    enabled: boolean
+  },
+  paypal: {
+    payment_method_id: Stripe.PaymentMethod.Type
+    enabled: boolean
+  },
+  klarna: {
+    payment_method_id: Stripe.PaymentMethod.Type
+    enabled: boolean
+  }
+}
+
+export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
+
+
+
 
 
 

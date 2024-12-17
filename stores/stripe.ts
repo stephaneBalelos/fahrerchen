@@ -1,5 +1,5 @@
 import Stripe from "stripe"
-import type { AppOrganizationMember, Database } from "~/types/app.types"
+import { type AppOrganizationsStripeAccount, type Database } from "~/types/app.types"
 
 export const useStripeStore = defineStore('stripe', () => {
     const client = useSupabaseClient<Database>()
@@ -7,6 +7,7 @@ export const useStripeStore = defineStore('stripe', () => {
     const userPermissionsStore = useUserPermissionsStore()
     const userOrganizationsStore = useUserOrganizationsStore()
     const stripeAccount = ref<Stripe.Response<Stripe.Account> | null>(null)
+    const stripeAppSettings = ref<AppOrganizationsStripeAccount | null>(null)
 
     async function fetchStripeAccount() {
         try {
@@ -20,6 +21,7 @@ export const useStripeStore = defineStore('stripe', () => {
                 stripeAccount.value = null;
                 await nextTick();
                 stripeAccount.value = account;
+                await getStripeAppSettings();
             }
         } catch (error) {
             console.log(error);
@@ -38,6 +40,26 @@ export const useStripeStore = defineStore('stripe', () => {
         }
     }
 
+    async function getStripeAppSettings() {
+        if (!userOrganizationsStore.selectedOrganization) {
+            throw new Error('No organization selected');
+        }
+        try {
+            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", userOrganizationsStore.selectedOrganization.organization_id).single();
+            if (error) {
+                throw error;
+            }
+            if (data) {
+                stripeAppSettings.value = data;
+            } else {
+                stripeAppSettings.value = null;
+            }
+        } catch (error) {
+            console.log(error);
+            stripeAppSettings.value = null;
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         if (userOrganizationsStore.selectedOrganization) {
             await fetchStripeAccount();
@@ -45,6 +67,6 @@ export const useStripeStore = defineStore('stripe', () => {
     }, { immediate: true })
 
     return {
-        stripeAccount, getStripeSessionSecret, fetchStripeAccount
+        stripeAccount, stripeAppSettings, getStripeSessionSecret, fetchStripeAccount, getStripeAppSettings
     }
 })
