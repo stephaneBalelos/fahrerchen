@@ -18,6 +18,7 @@ const links = computed(() => {
     label: "Dashboard [NOT IMPLEMENTED]",
     icon: "i-heroicons-chart-pie",
     to: `/my/${selectedOrganization.organization_id}`,
+    exact: true,
     tooltip: {
       text: "Dashboard",
       shortcuts: ["G", "D"],
@@ -29,6 +30,7 @@ const links = computed(() => {
     label: "Schedules",
     icon: "i-heroicons-calendar",
     to: `/my/${selectedOrganization.organization_id}/schedules`,
+    exact: true,
     tooltip: {
       text: "Schedules",
       shortcuts: ["G", "S"],
@@ -41,6 +43,7 @@ const links = computed(() => {
     label: "Courses",
     icon: "i-heroicons-book-open",
     to: `/my/${selectedOrganization.organization_id}/courses`,
+    exact: true,
     tooltip: {
       text: "Courses",
       shortcuts: ["G", "C"],
@@ -53,6 +56,7 @@ const links = computed(() => {
       label: "Students",
       icon: "i-heroicons-users",
       to: `/my/${selectedOrganization.organization_id}/students`,
+      exact: true,
       tooltip: {
         text: "Students",
         shortcuts: ["G", "U"],
@@ -64,7 +68,8 @@ const links = computed(() => {
     id: "bills",
     label: "Bills",
     icon: "i-heroicons-credit-card",
-    to: `/my/${selectedOrganization.organization_id}/bills`,
+    to: `/my/${selectedOrganization.organization_id}/bills/`,
+    exact: true,
     tooltip: {
       text: "Bills",
       shortcuts: ["G", "B"],
@@ -77,6 +82,7 @@ const links = computed(() => {
       label: "Settings",
       icon: "i-heroicons-cog-8-tooth",
       to: `/my/${selectedOrganization.organization_id}/settings`,
+      exact: true,
       children: [
         {
           label: "General [NOT IMPLEMENTED]",
