@@ -71,8 +71,6 @@ const {
     .neq("role", "student")
     .order("inserted_at", { ascending: false });
 
-    console.log(data);
-
   if (error) {
     console.error(error);
     throw error;
