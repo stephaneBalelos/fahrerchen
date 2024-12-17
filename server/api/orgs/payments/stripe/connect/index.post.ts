@@ -43,6 +43,8 @@ export default defineEventHandler(async (event) => {
                 email: user.email,
             });
     
+            console.log(account)
+
             if (!account) {
                 throw createError({
                     status: 500,
