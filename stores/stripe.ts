@@ -17,8 +17,9 @@ export const useStripeStore = defineStore('stripe', () => {
                 `/api/orgs/payments/stripe/accounts/${userOrganizationsStore.selectedOrganization.organization_id}`
             );
             if (account) {
+                stripeAccount.value = null;
+                await nextTick();
                 stripeAccount.value = account;
-                console.log(account);
             }
         } catch (error) {
             console.log(error);

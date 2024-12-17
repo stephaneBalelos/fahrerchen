@@ -807,7 +807,6 @@ export type Database = {
           name: string
           owner_id: string
           preferred_language: string
-          stripe_account_id: string | null
         }
         Insert: {
           address_city?: string | null
@@ -820,7 +819,6 @@ export type Database = {
           name: string
           owner_id: string
           preferred_language?: string
-          stripe_account_id?: string | null
         }
         Update: {
           address_city?: string | null
@@ -833,7 +831,6 @@ export type Database = {
           name?: string
           owner_id?: string
           preferred_language?: string
-          stripe_account_id?: string | null
         }
         Relationships: [
           {
@@ -882,6 +879,39 @@ export type Database = {
             foreignKeyName: "organizations_invitations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations_stripe_accounts: {
+        Row: {
+          id: string
+          payment_methods: Json | null
+          stripe_account_id: string
+        }
+        Insert: {
+          id: string
+          payment_methods?: Json | null
+          stripe_account_id: string
+        }
+        Update: {
+          id?: string
+          payment_methods?: Json | null
+          stripe_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizations_stripe_accounts_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizations_stripe_accounts_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
             referencedRelation: "organizations_view"
             referencedColumns: ["id"]
           },
@@ -1293,6 +1323,9 @@ export type Database = {
         | "organizations.create"
         | "organizations.update"
         | "organizations.delete"
+        | "organizations_stripe_accounts.read"
+        | "organizations_stripe_accounts.create"
+        | "organizations_stripe_accounts.update"
         | "organization_members.read"
         | "organization_members.create"
         | "organization_members.update"

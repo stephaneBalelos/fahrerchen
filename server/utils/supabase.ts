@@ -11,3 +11,13 @@ export const getOrganisationById = async (event: H3Event, id: string): Promise<A
     }
     return data
 }
+
+export const getOrganizationStripeAccount = async (event: H3Event, orgid: string) => {
+    const client = await serverSupabaseClient<Database>(event)
+    const { data, error } = await client.from("organizations_stripe_accounts").select().eq('id', orgid).single()
+    if (error) {
+        console.error(error)
+        return null
+    }
+    return data
+}

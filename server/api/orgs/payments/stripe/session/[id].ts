@@ -1,4 +1,5 @@
 import { User } from "@supabase/supabase-js"
+import { getOrganizationStripeAccount } from "~/server/utils/supabase"
 
 export default defineEventHandler(async (event) => {
 
@@ -40,18 +41,23 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // check if the organization has a stripe account
-    if (!organization.stripe_account_id) {
+    const stripeAccount = await getOrganizationStripeAccount(event, orgid)
+
+    if (!stripeAccount) {
         console.log('Organization does not have a stripe account')
-        return null
+        throw createError({
+            status: 404,
+            message: 'Organization does not have a stripe account'
+        })
     }
+
 
     const config = useRuntimeConfig()
     const stripe = await stripeClient(config.stripe_sk)
 
     try {
         const accountSession = await stripe.accountSessions.create({
-            account: organization.stripe_account_id,
+            account: stripeAccount.stripe_account_id,
             components: {
                 account_onboarding: {
                     enabled: true,

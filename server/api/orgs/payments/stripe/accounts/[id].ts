@@ -1,4 +1,4 @@
-import { getOrganisationById } from '~/server/utils/supabase'
+import { getOrganisationById, getOrganizationStripeAccount } from '~/server/utils/supabase'
 import type { Database } from '~/types/app.types'
 
 
@@ -26,12 +26,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    if (!organization.stripe_account_id) {
+    const stripeAccount = await getOrganizationStripeAccount(event, orgid)
+
+    if (!stripeAccount) {
         return null
     }
 
     try {
-        const account = await stripe.accounts.retrieve(organization.stripe_account_id);
+        const account = await stripe.accounts.retrieve(stripeAccount.stripe_account_id);
         return account
         
     } catch (error) {

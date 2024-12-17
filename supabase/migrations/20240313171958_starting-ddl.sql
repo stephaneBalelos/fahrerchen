@@ -9,6 +9,9 @@ create type public.app_permission as enum (
   'organizations.create',
   'organizations.update',
   'organizations.delete',
+  'organizations_stripe_accounts.read',
+  'organizations_stripe_accounts.create',
+  'organizations_stripe_accounts.update',
   'organization_members.read',
   'organization_members.create',
   'organization_members.update',
@@ -113,12 +116,21 @@ create table public.organizations (
   address_zip    text,
   address_city  text,
   address_country text,
-  owner_id      uuid references public.users not null,
-  stripe_account_id  text
+  owner_id      uuid references public.users not null
 );
 comment on table public.organizations is 'organization data.';
 
 alter table public.organizations enable row level security;
+
+-- ORGANIZATIONS STRIPE ACCOUNTS
+create table public.organizations_stripe_accounts (
+  id            uuid references public.organizations on delete restrict not null primary key,
+  stripe_account_id  text not null,
+  payment_methods    jsonb
+);
+comment on table public.organizations_stripe_accounts is 'Stripe account data for each organization.';
+alter table public.organizations_stripe_accounts enable row level security;
+
 
 -- ORGANIZATIONS INVITATIONS
 create table public.organizations_invitations (
@@ -512,6 +524,29 @@ create trigger on_course_created
   for each row execute procedure public.handle_new_course();
 
 
+-- handle Stripe Account update
+create or replace function public.handle_stripe_account_update()
+returns trigger as $$
+begin
+  -- prevent updating the stripe account id
+  if old.stripe_account_id <> new.stripe_account_id then
+    raise exception 'Cannot update the stripe account id';
+  end if;
+
+  -- prevent updating the id
+  if old.id <> new.id then
+    raise exception 'Cannot update the id';
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a stripe account is updated
+create trigger on_stripe_account_updated
+  before update on public.organizations_stripe_accounts
+  for each row execute procedure public.handle_stripe_account_update();
+
+
 -- handle Registration Request confirmation
 create or replace function public.handle_registration_request_confirmation()
 returns trigger as $$
@@ -841,6 +876,12 @@ declare
   bind_permissions int;
   user_role public.app_role;
 begin
+
+  --check if the user is the main owner
+  if exists (select 1 from public.organizations where id = org_id and owner_id = auth.uid()) then
+    return true;
+  end if;
+
   -- Fetch user role once and store it to reduce number of calls
   select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
 
@@ -866,10 +907,6 @@ begin
     raise exception 'Cannot update the primary key of an organization';
   end if;
 
-  if old.stripe_account_id <> new.stripe_account_id then
-    raise exception 'Cannot update stripe_account_id of an organization';
-  end if;
-
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
@@ -877,7 +914,6 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_organization_update
   before update on public.organizations
   for each row execute procedure public.prevent_organization_update();
-
 
 
 -- Policies
@@ -902,6 +938,17 @@ insert into public.role_permissions (role, permission) values ('owner', 'organiz
 insert into public.role_permissions (role, permission) values ('manager', 'organizations.update');
 
 create policy "Create organization only if owner is the same as the user who make the request" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
+
+-- Organizations Stripe Accounts Policies
+create policy "Owner & Manager can see organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
+insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.read');
+
+create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.authorize('organizations_stripe_accounts.create', id));
+
+create policy "Owner & Manager can update organizations_stripe_accounts" on public.organizations_stripe_accounts for update to authenticated using (public.authorize('organizations_stripe_accounts.update', id));
+insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.update');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.update');
 
 
 -- Organization Members Policies

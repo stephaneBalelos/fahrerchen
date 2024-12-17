@@ -1,5 +1,5 @@
 <template>
-  <div ref="stripeOnboardingElement" :id="`stripe-onboarding-element-${props.component}`"></div>
+  <div ref="stripeElement" :id="`stripe-element-${props.component}`"></div>
 </template>
 
 <script setup lang="ts">
@@ -18,7 +18,7 @@ const { locale } = useI18n();
 const stripeStore = useStripeStore();
 const config = useRuntimeConfig();
 
-const stripeOnboardingElement = ref<HTMLElement | null>(null);
+const stripeElement = ref<HTMLElement | null>(null);
 
 const primaryColor = useCssVar("--color-primary-400");
 const backgroundColor = useCssVar("--ui-background");
@@ -42,9 +42,9 @@ const stripeConnectInstance = loadConnectAndInitialize({
 });
 
 onMounted(() => {
-  if (stripeOnboardingElement.value) {
+  if (stripeElement.value) {
     const el = stripeConnectInstance.create(props.component);
-    stripeOnboardingElement.value.appendChild(el);
+    stripeElement.value.appendChild(el);
   }
 });
 
