@@ -56,6 +56,24 @@ export default defineEventHandler(async (event) => {
                 account_onboarding: {
                     enabled: true,
                 },
+                notification_banner: {
+                    enabled: true,
+                },
+                payments: {
+                    enabled: true,
+                },
+                payouts: {
+                    enabled: true,
+                    features: {
+                        instant_payouts: true,
+                        standard_payouts: true,
+                        edit_payout_schedule: true,
+                    },
+                },
+                account_management: {
+                    enabled: true
+                },
+                documents: { enabled: true },
             },
         });
         return accountSession
@@ -65,6 +83,6 @@ export default defineEventHandler(async (event) => {
             status: 500,
             message: "An error occurred when calling the Stripe API to create the account session",
         });
-    }   
+    }
 
 })

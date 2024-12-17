@@ -2,7 +2,7 @@
   <UDashboardPanel grow :ui="{
     wrapper: 'flex-row',
   }">
-    <div v-if="stripeStore.stripeAccount" class="w-52 p-4 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 lg:w-[--width] flex-shrink-0">
+    <div v-if="stripeStore.stripeAccount" class="w-60 flex flex-col items-between justify-between p-4 border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 flex-shrink-0">
       <UNavigationTree :links="links" />
     </div>
 
@@ -27,6 +27,9 @@
     </UAlert>
     <div class="grow relative" v-else>
       <div class="absolute inset-0 overflow-y-auto p-4">
+        <div class="pb-4">
+          <StripeEmbeddedComponent :component="'notification-banner'" />
+        </div>
         <NuxtPage />
       </div>
     </div>
@@ -36,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import StripeEmbeddedComponent from "~/components/settings/stripe/StripeEmbeddedComponent.vue";
 import type { Database, StripeConnectPostBody } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
