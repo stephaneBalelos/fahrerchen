@@ -1,5 +1,34 @@
 <template>
-  <div>Invitations</div>
+  <UDashboardPanel grow>
+    <div class="h-full grid place-items-center">
+      <UContainer>
+        <ULandingCTA
+          v-if="!hasError"
+          :title="t('loading_title')"
+          :description="t('loading_description')"
+          card
+        >
+          <UProgress animation="elastic" size="xs" :indicator="false" />
+        </ULandingCTA>
+        <UAlert
+          v-if="hasError"
+          class="w-96"
+          :title="t('loading_error_title')"
+          :description="t('loading_error_description')"
+          color="red"
+          variant="soft"
+          :actions="[
+            {
+              variant: 'solid',
+              color: 'gray',
+              label: t('back_to_home'),
+              click: () => navigateTo('/'),
+            },
+          ]"
+        />
+      </UContainer>
+    </div>
+  </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
@@ -20,6 +49,12 @@ definePageMeta({
 
     return true;
   },
+});
+
+const hasError = ref(false);
+
+const { t } = useI18n({
+  useScope: "local",
 });
 
 const route = useRoute();
@@ -55,10 +90,7 @@ onMounted(async () => {
       }
     );
 
-    console.log(data);
-
     if (error) {
-      console.log(error);
       throw error;
     }
 
@@ -70,13 +102,32 @@ onMounted(async () => {
       });
       navigateTo(`/my/${data.orgid}`);
     } else {
-        navigateTo("/my");
+      navigateTo("/my");
     }
   } catch (error) {
     console.error(error);
-
+    hasError.value = true;
   }
 });
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "loading_title": "Ein Moment bitte",
+    "loading_description": "Wir prüfen die Einladung...",
+    "loading_error_title": "Mist, da ist etwas schief gelaufen",
+    "loading_error_description": "Dieser Link schein nicht mehr gültig zu sein",
+    "back_to_home": "Zurück zur Startseite"
+  },
+  "en": {
+    "loading_title": "One moment please",
+    "loading_description": "Checking the invitation...",
+    "loading_error_title": "Oops, something went wrong",
+    "loading_error_description": "This link seems to be invalid",
+    "back_to_home": "Back to the homepage"
+  }
+}
+</i18n>
