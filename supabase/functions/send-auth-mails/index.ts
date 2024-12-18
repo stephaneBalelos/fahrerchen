@@ -5,6 +5,7 @@ import SignupMail from '../_shared/_templates/SignupMail.tsx'
 import PasswordResetMail from '../_shared/_templates/PasswordResetMail.tsx'
 import InvitationMail from '../_shared/_templates/InvitationMail.tsx'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/utils.ts';
 
 
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string
@@ -117,33 +118,9 @@ Deno.serve(async (req) => {
 
         // Send the email
 
-        const data = {
-            "sender": {
-                "name": "No Reply",
-                "email": "no-reply@stephanedondyas.cloud"
-            },
-            "to": [
-                {
-                    "email": user.email,
-                    "name": "User"
-                }
-            ],
-            "htmlContent": html,
-            "textContent": "Please enable HTML to view this email",
-            "subject": "Welcome to Fahrerchen",
-        }
+        // TODO: Get email subect from the template
 
-        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "api-key": Deno.env.get("BREVO_API_KEY") as string,
-                "accept": "application/json",
-            },
-            body: JSON.stringify(data)
-        })
-
-        // const json = await res.json()
+        await sendEmail(user.email, "Welcome to Fahrerchen", html)
 
     } catch (error) {
         console.log(error)
