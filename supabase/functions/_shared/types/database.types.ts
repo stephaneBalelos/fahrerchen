@@ -500,6 +500,7 @@ export type Database = {
           organization_id: string
           paid_at: string | null
           ready_to_pay: boolean
+          stripe_payment_intent_id: string | null
           total: number
         }
         Insert: {
@@ -509,6 +510,7 @@ export type Database = {
           organization_id: string
           paid_at?: string | null
           ready_to_pay?: boolean
+          stripe_payment_intent_id?: string | null
           total?: number
         }
         Update: {
@@ -518,6 +520,7 @@ export type Database = {
           organization_id?: string
           paid_at?: string | null
           ready_to_pay?: boolean
+          stripe_payment_intent_id?: string | null
           total?: number
         }
         Relationships: [

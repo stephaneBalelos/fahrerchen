@@ -330,6 +330,7 @@ create table public.course_subscription_bills (
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
   ready_to_pay  boolean default false not null, -- if the bill is ready to be paid, the bill is should be locked
+  stripe_payment_intent_id  text, -- Stripe Payment Intent ID
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
@@ -764,6 +765,11 @@ begin
     -- insert the bill history
     insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
     values (new.id, auth.uid(), 'BILL_READY_TO_PAY', '', 0, new.organization_id);
+  end if;
+
+  -- prevent removing the stripe_payment_intent_id when bill is paid
+  if old.stripe_payment_intent_id is not null and new.stripe_payment_intent_id is null and new.paid_at is not null then
+    raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
   end if;
 
   if new.paid_at is not null then
