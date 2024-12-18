@@ -49,4 +49,4 @@ begin
   return true;
 
 end;
-$$ language plpgsql security definer set search_path = public, extensions, net;
+$$ language plpgsql security invoker set search_path = public, extensions, net;
