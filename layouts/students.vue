@@ -40,16 +40,19 @@ const links = computed(() => {
       label: t("overview"),
       icon: "i-heroicons-home",
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}`,
+      exact: true,
     },
     {
       label: t("courses"),
       icon: "i-heroicons-graduation-cap",
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/courses`,
+      exact: true,
     },
     {
       label: t("bills"),
       icon: "i-heroicons-cash",
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/bills`,
+      exact: true,
     },
   ];
 
