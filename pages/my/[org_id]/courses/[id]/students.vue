@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import CourseSubscriptionBill from "~/components/courses/CourseSubscriptionBill.vue";
-import StudentCourseProfile from "~/components/courses/StudentCourseProfile.vue";
+import StudentCourseProfileSlideover from "~/components/courses/StudentCourseProfileSlideover.vue";
 import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
 import type {
   AppCourseSubscription,
@@ -227,7 +227,7 @@ const items = (row: AppCourseSubscription & {student: AppStudent}) => [
       label: "Course Profile",
       icon: "i-heroicons-pencil-square-20-solid",
       click: () => {
-        slideover.open(StudentCourseProfile, {
+        slideover.open(StudentCourseProfileSlideover, {
           subscription_id: row.id,
           student: row.student,
         });
