@@ -10,6 +10,13 @@ export const useUserPermissionsStore = defineStore('permissions', () => {
         return permissions.value.includes(permission)
     }
 
+    function isStaffMember() {
+        if (!userOrganizationsStore.selectedOrganization) {
+            return false
+        }
+        return userOrganizationsStore.selectedOrganization.role !== 'student'
+    }
+
     async function loadPermissions(role: UserRole) {
         const { data, error } = await supabase.from('role_permissions').select('*').eq('role', role)
         if (error) {
@@ -30,6 +37,6 @@ export const useUserPermissionsStore = defineStore('permissions', () => {
     }, { immediate: true })
 
 
-    return { permissions, hasPermission, loadPermissions }
+    return { permissions, isStaffMember, hasPermission, loadPermissions }
 
 })

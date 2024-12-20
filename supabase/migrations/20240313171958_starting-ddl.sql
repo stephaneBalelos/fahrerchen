@@ -370,6 +370,24 @@ comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION
 alter table public.course_subscription_bill_history enable row level security;
 
 
+-- VIEWS
+
+-- Organization Members View
+create or replace view public.organization_members_view as
+select
+  organization_members.id,
+  organization_members.inserted_at,
+  organization_members.organization_id,
+  organization_members.user_id,
+  organization_members.role,
+  users.email as user_email,
+  users.firstname as user_firstname,
+  users.lastname as user_lastname
+from public.organization_members
+inner join public.organizations on organization_members.organization_id = organizations.id
+inner join public.users on organization_members.user_id = users.id;
+
+
 -- Bill Items View grouped by course_activity_id
 create or replace view public.course_subscription_bill_items_view as
 select
@@ -873,6 +891,8 @@ create trigger on_course_subscription_bill_item_updated
 
 
 -- Helpers Functions
+
+-- Authorize function
 create or replace function public.authorize(
   requested_permission app_permission,
   org_id uuid
@@ -881,10 +901,13 @@ returns boolean as $$
 declare
   bind_permissions int;
   user_role public.app_role;
+  owner uuid;
 begin
 
+  select owner_id into owner from public.organizations where id = org_id;
+
   --check if the user is the main owner
-  if exists (select 1 from public.organizations where id = org_id and owner_id = auth.uid()) then
+  if owner = auth.uid() then
     return true;
   end if;
 
@@ -903,23 +926,39 @@ begin
 
   return bind_permissions > 0;
 end;
-$$ language plpgsql security definer set search_path = '';
+$$ language plpgsql security definer set search_path = public;
 
--- prevent update of the primrary key & strioe_account_id of an organization
-create or replace function public.prevent_organization_update()
-returns trigger as $$
+
+create or replace function is_main_owner(
+  org_id uuid
+)
+returns boolean as $$
+declare
+  owner uuid;
 begin
-  if old.id <> new.id then
-    raise exception 'Cannot update the primary key of an organization';
-  end if;
+  select owner_id into owner from public.organizations where id = org_id;
 
-  return new;
+  return owner = auth.uid();
 end;
 $$ language plpgsql security definer set search_path = public;
--- trigger the function every time a organization is updated
-create trigger on_organization_update
-  before update on public.organizations
-  for each row execute procedure public.prevent_organization_update();
+
+-- 2 users are in the same organization
+create or replace function public.are_users_in_same_organization(
+  user_id_1 uuid,
+  user_id_2 uuid
+)
+returns boolean as $$
+declare
+  org_id_1 uuid;
+  org_id_2 uuid;
+begin
+
+
+  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
+  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
+end;
+$$ language plpgsql security definer set search_path = public;
+
 
 
 -- Policies
@@ -928,7 +967,8 @@ create trigger on_organization_update
 create policy "Everyone can see role_permissions" on public.role_permissions for select to authenticated using (true);
 
 -- Users Policies
-create policy "Everyone can see users" on public.users for select to authenticated using (true);
+create policy "Users can see their own data" on public.users for select to authenticated using (auth.uid() = id);
+create policy "Users can see other users in the same organization" on public.users for select to authenticated using (public.are_users_in_same_organization(auth.uid(), id));
 create policy "User can see update their own data" on public.users for update to authenticated using (auth.uid() = id);
 
 
@@ -950,7 +990,7 @@ create policy "Owner & Manager can see organizations_stripe_accounts" on public.
 insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.read');
 
-create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.authorize('organizations_stripe_accounts.create', id));
+create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.is_main_owner(id));
 
 create policy "Owner & Manager can update organizations_stripe_accounts" on public.organizations_stripe_accounts for update to authenticated using (public.authorize('organizations_stripe_accounts.update', id));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.update');

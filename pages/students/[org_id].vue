@@ -4,15 +4,15 @@
 
 <script setup lang="ts">
 import organizations from '~/middleware/organizations';
-import staffMember from '~/middleware/staff-member';
 import studentProfile from '~/middleware/student-profile';
 definePageMeta({
-    layout: 'orgs',
-    middleware: [organizations, staffMember],
+    layout: 'students',
+    middleware: [organizations, studentProfile],
 })
 
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
+const studentStore = useStudentStore();
 const route = useRoute();
 
 await useAsyncData('userOrganizations', async () => {

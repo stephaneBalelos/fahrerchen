@@ -61,6 +61,21 @@ export type CourseActivityScheduleView = Database["public"]["Views"]["course_act
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
     Views: {
+      course_subscriptions_view: {
+        Row: {
+          id: string,
+          course_id: string,
+          student_id: string,
+          archived_at: Date | null,
+          costs: string,
+          organization_id: string,
+          course_name: string,
+          course_description: string,
+          student_email: string,
+          student_firstname: string,
+          student_lastname: string
+        }
+      },
       course_activity_schedules_view: {
         Row: {
           id: string

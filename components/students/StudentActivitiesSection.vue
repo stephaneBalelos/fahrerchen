@@ -2,10 +2,26 @@
   <UDashboardSection
     title="Student Activities"
     description="All activities of the student"
-    orientation="vertical"
+    orientation="horizontal"
     class="px-4 mt-6"
   >
-  
+  <template #links>
+
+  </template>
+    <div v-if="status === 'pending'">Loading...</div>
+    <div v-else-if="status === 'error'">Error: {{ error }}</div>
+    <div v-else-if="status === 'success' && activities">
+      <div v-if="activities.length === 0">No activities found</div>
+      <div v-else>
+        <div v-for="activity in activities" :key="activity.id">
+          <div>{{ activity.id }}</div>
+          <div>{{ activity.course_subscription_id }}</div>
+          <div>{{ activity.course_activity_id }}</div>
+          <div>{{ activity.status }}</div>
+          <div>{{ activity.activity_schedule_id}}</div>
+        </div>
+      </div>
+    </div>
   </UDashboardSection>
 </template>
 
@@ -13,22 +29,25 @@
 import type { Database } from '~/types/app.types';
 
 const props = defineProps<{
-  student_id: string;
+  subscription_id: string;
 }>();
 
 const client = useSupabaseClient<Database>();
+const slideover = useSlideover();
+const userOrganizationsStore = useUserOrganizationsStore();
 
-const { data: student, error, status } = useAsyncData(`student_${props.student_id}_activities`, async () => {
+
+const { data: activities, error, status } = useAsyncData(`student_${props.subscription_id}_activities`, async () => {
   const { data, error } = await client
     .from('course_activity_attendances')
     .select('*')
-    .eq('id', props.student_id)
-    .single();
+    .eq('course_subscription_id', props.subscription_id)
   if (error) {
     throw error;
   }
   return data;
 });
+
 
 </script>
 
