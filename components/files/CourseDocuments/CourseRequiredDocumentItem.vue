@@ -82,7 +82,6 @@ const {
 } = useAsyncData(
   `course_required_documents/${props.doc.id}`,
   async () => {
-    console.log(props.doc.id);
     const { data, error } = await client
       .from("course_subscription_documents")
       .select("*")
@@ -90,7 +89,6 @@ const {
     if (error) {
       throw error;
     }
-    console.log(data);
     return data;
   },
   {

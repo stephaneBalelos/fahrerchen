@@ -1,60 +1,58 @@
 <template>
-  <UDashboardSlideover :title="t('course_profile')">
-    <UDashboardSection
-      v-if="data"
-      icon="i-heroicons-user"
-      :title="props.student.firstname + ' ' + props.student.lastname"
-      :description="props.student.email"
-    >
-      <template #icon="">
-        <UAvatar alt="m d" size="lg" />
-      </template>
-    </UDashboardSection>
-
-    <UDashboardCard
-      class="mb-4"
-      v-if="data"
-      :title="t('course_activity_attendances')"
-      :description="t('course_activity_attendances_description')"
-    >
-      <div
-        v-for="activity in data.course?.course_activities"
-        :key="activity.id"
-        class="flex flex-col mb-4"
+  <UDashboardSection
+    v-if="data"
+    :title="props.title"
+    :description="props.description"
+  >
+    <div>
+      <UDashboardCard
+        class="mb-4"
+        v-if="data"
+        :title="t('course_activity_attendances')"
+        :description="t('course_activity_attendances_description')"
       >
-        <p class="font-bold">{{ activity.name }}</p>
-        <UProgress
-          v-if="activity.required > 0"
-          :value="activity.attendances[0].count"
-          :max="activity.required"
-          color="primary"
-          indicator
+        <div
+          v-for="activity in data.course?.course_activities"
+          :key="activity.id"
+          class="flex flex-col mb-4"
         >
-          <template #indicator>
-            <span :color="`primary`">
-              {{ activity.attendances[0].count }} /
-              {{ activity.required }}
-            </span>
-          </template>
-        </UProgress>
-        <div v-else>{{ activity.attendances[0].count }}</div>
-      </div>
-    </UDashboardCard>
-
-    <UDashboardCard
-      class="mb-4"
-      v-if="data && data.course?.course_required_documents"
-      :title="t('course_required_documents')"
-      :description="t('course_required_documents_description')"
-    >
-      <template #links>
-        0 / {{ data.course.course_required_documents.length }}
-      </template>
-
-      <CourseRequiredDocumentItem v-for="(doc, index) in data.course.course_required_documents" :key="doc.id"
-        :doc="doc" :bucket-id="'course_subscription_documents'" :path="`${doc.organization_id}/${data.id}/${doc.id}`" />
-    </UDashboardCard>
-  </UDashboardSlideover>
+          <p class="font-bold">{{ activity.name }}</p>
+          <UProgress
+            v-if="activity.required > 0"
+            :value="activity.attendances[0].count"
+            :max="activity.required"
+            color="primary"
+            indicator
+          >
+            <template #indicator>
+              <span :color="`primary`">
+                {{ activity.attendances[0].count }} /
+                {{ activity.required }}
+              </span>
+            </template>
+          </UProgress>
+          <div v-else>{{ activity.attendances[0].count }}</div>
+        </div>
+      </UDashboardCard>
+      <UDashboardCard
+        class="mb-4"
+        v-if="data && data.course?.course_required_documents"
+        :title="t('course_required_documents')"
+        :description="t('course_required_documents_description')"
+      >
+        <template #links>
+          0 / {{ data.course.course_required_documents.length }}
+        </template>
+        <CourseRequiredDocumentItem
+          v-for="(doc, index) in data.course.course_required_documents"
+          :key="doc.id"
+          :doc="doc"
+          :bucket-id="'course_subscription_documents'"
+          :path="`${doc.organization_id}/${data.id}/${doc.id}`"
+        />
+      </UDashboardCard>
+    </div>
+  </UDashboardSection>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +60,8 @@ import type { Database, AppStudent } from "~/types/app.types";
 import CourseRequiredDocumentItem from "../files/CourseDocuments/CourseRequiredDocumentItem.vue";
 
 type Props = {
+  title: string;
+  description: string;
   subscription_id: string;
   student: AppStudent;
 };
@@ -89,7 +89,6 @@ const { data, error, status } = useAsyncData(
     if (error) {
       throw error;
     }
-    console.log(data);
     return data;
   }
 );
