@@ -66,8 +66,6 @@ export default defineEventHandler(async (event) => {
             stripeAccount: orgStripeAccount.stripe_account_id
         });
 
-        console.log('Payment intent:', intent.client_secret);
-
         return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id};
     } else {
         // create a new payment intent
@@ -76,7 +74,6 @@ export default defineEventHandler(async (event) => {
         if (orgsPaymentMethods) {
             Object.values(orgsPaymentMethods).filter(pm => pm.enabled).forEach(pm => enabledPaymentMethods.push(pm.payment_method_id))
         }
-        console.log('Enabled payment methods:', enabledPaymentMethods)
 
         const intent = await stripe.paymentIntents.create({
             amount: bill.total * 100,

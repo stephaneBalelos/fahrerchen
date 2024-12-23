@@ -67,7 +67,7 @@ type Props = {
 
 const props = defineProps<Props>();
 const $emit = defineEmits(["close"]);
-
+const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
 });
@@ -145,6 +145,11 @@ async function handleSubmit(event: Event) {
 
   if (error) {
     console.error(error);
+    toast.add({
+      title: "Error",
+      description:t(`stripe_errors.${error.code}`) || t(`stripe_errors.payment_intent_unknown_error`),
+      color: "red"
+    });
   }
 
   loading.value = false;
@@ -157,11 +162,28 @@ async function handleSubmit(event: Event) {
 {
   "de": {
     "checkout": "Kasse",
-    "close": "Schließen"
+    "close": "Schließen",
+    "pay_now": "Jetzt bezahlen",
+    "stripe_errors": {
+      "payment_intent_authentication_failure": "Die Zahlung konnte nicht authentifiziert werden. Bitte versuche es erneut.",
+      "payment_intent_payment_failure": "Die Zahlung konnte nicht durchgeführt werden. Bitte versuche es erneut.",
+      "payment_intent_payment_canceled": "Die Zahlung wurde abgebrochen.",
+      "payment_intent_unknown_error": "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.",
+      "card_declined": "Die Karte wurde abgelehnt. Bitte versuche es mit einer anderen Karte."
+
+    }
   },
   "en": {
     "checkout": "Checkout",
-    "close": "Close"
+    "close": "Close",
+    "pay_now": "Pay now",
+    "stripe_errors": {
+      "payment_intent_authentication_failure": "Payment could not be authenticated. Please try again.",
+      "payment_intent_payment_failure": "Payment could not be completed. Please try again.",
+      "payment_intent_payment_canceled": "Payment was canceled.",
+      "payment_intent_unknown_error": "An unknown error occurred. Please try again.",
+      "card_declined": "Card was declined. Please try again with another card."
+    }
   }
 }
 </i18n>

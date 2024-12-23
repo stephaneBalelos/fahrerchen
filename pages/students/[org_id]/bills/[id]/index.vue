@@ -16,8 +16,8 @@
             <div class="flex justify-end py-4">
                 <span class="text-lg font-bold" v-if="bill?.total">{{ formatCurrency(bill.total) }}</span>
             </div>
-            <div class="py-4">
-                <UButton v-if="bill?.ready_to_pay && !bill.paid_at" block color="primary" :label="`${t('pay_now')}`" @click="openCheckoutModal" />
+            <div v-if="stripeStore.stripeAppSettings" class="py-4">
+                <UButton v-if="bill?.ready_to_pay && !bill.paid_at" color="primary" :label="`${t('pay_now')}`" @click="openCheckoutModal" />
             </div>
         </div>
         </UDashboardSection>
@@ -33,6 +33,7 @@ import { formatDateTime, formatCurrency } from '~/utils/formatters';
 const route = useRoute();
 const bill_id = route.params.id as string
 const modal = useModal();
+const stripeStore = useStripeStore();
 
 
 const client = useSupabaseClient<Database>();

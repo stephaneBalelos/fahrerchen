@@ -3,9 +3,9 @@ import type Stripe from "stripe"
 import { Database } from "../_shared/types/database.types.ts";
 
 Deno.serve(async (req) => {
-  console .log("Request received")
+  console.log("Request received")
   const body = await req.json() as Stripe.Event
-  
+
   const eventType = body.type
 
   console.log("Event Type: ", eventType)
@@ -39,7 +39,6 @@ Deno.serve(async (req) => {
   }
 
   if (eventType === "payment_intent.succeeded") {
-    console.log("Payment Intent Succeeded")
 
     const paymentIntent = body.data.object as Stripe.PaymentIntent
     const metadata = paymentIntent.metadata
@@ -48,6 +47,12 @@ Deno.serve(async (req) => {
 
     // Get Bill ID form metadata
     const billId = metadata.bill_id
+
+    // Get Organization ID form metadata
+    const organizationId = metadata.organization_id
+
+    // Get User ID form metadata
+    const userId = metadata.user_id
 
     const supabaseAdmin = createClient<Database>(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -62,7 +67,16 @@ Deno.serve(async (req) => {
 
     // update the bill with the payment intent id
     const { error } = await supabaseAdmin.from("course_subscription_bills").update({ paid_at: new Date().toISOString() }).eq('id', billId).single()
+    const { error: errorInsert } = await supabaseAdmin.from("course_subscription_bill_history").insert({
+      bill_id: billId,
+      activity: 'BILL_PAID',
+      actor_id: userId,
+      item_price: 0, 
+      item_description: '',
+      organization_id: organizationId
+    })
     console.log("Error: ", error)
+    console.log("Error Insert: ", errorInsert)
   }
 
 
