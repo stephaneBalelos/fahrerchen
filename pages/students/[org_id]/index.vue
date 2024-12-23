@@ -16,7 +16,6 @@
 </template>
 
 <script setup lang="ts">
-import { sub } from 'date-fns';
 import StudentCourseProfile from '~/components/courses/StudentCourseProfile.vue';
 
 const studentStore = useStudentStore();

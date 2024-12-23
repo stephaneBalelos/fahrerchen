@@ -87,8 +87,6 @@ onMounted(async () => {
 
     const stripeAccount = await stripeStore.loadStripeAccount(org_id);
 
-    console.log(stripeAccount);
-
     if (!stripeAccount) {
       throw createError({
         statusCode: 404,
