@@ -1,6 +1,7 @@
 import { resolve } from "path";
 import * as pjson from './package.json'
 
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: process.env.NODE_ENV === 'development'},
@@ -18,7 +19,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'vercel-edge',
+    preset: 'vercel-edge'
   },
 
   runtimeConfig: {
@@ -30,29 +31,41 @@ export default defineNuxtConfig({
     public: {
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
       app_version: pjson.version,
+      stripe_pk: process.env.STRIPE_PK,
     }
   },
 
-  // routeRules: {
-  //   // prerender index route by default
-  //   '/': { prerender: true },
-  // },
+  routeRules: {
+    // prerender index route by default
+    '/': { prerender: true },
+    // /my routes are not ssr
+    '/my/**': { ssr: false },
+
+  },
   modules: [
     '@nuxtjs/supabase',
-    '@vue-email/nuxt',
     '@nuxt/ui',
     '@nuxtjs/i18n',
     '@nuxt/test-utils/module',
+    '@pinia/nuxt'
   ],
+
+  ui: {
+    global: true
+  },
 
   extends: ['@nuxt/ui-pro'],
 
   supabase: {
     redirect: true,
+    cookieOptions: {
+      secure: process.env.NODE_ENV === 'production'
+    },
     redirectOptions: {
       login: '/login',
-      callback: '/callback',
-      exclude: ['/forgot-password', '/account/password-reset', '/confirm', '/login', '/external/*']
+      callback: '/confirm',
+      exclude: ['/', '/forgot-password', '/confirm', '/login', '/signup', '/external/*'],
+      cookieRedirect: true
     }
   },
 

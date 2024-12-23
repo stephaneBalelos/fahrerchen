@@ -1,0 +1,189 @@
+<template>
+  <UModal fullscreen>
+    <UCard
+      :ui="{
+        base: 'h-full flex flex-col',
+        rounded: '',
+        divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+        body: {
+          base: 'grow',
+        },
+      }"
+    >
+      <template #header>
+        <div class="flex items-center justify-between">
+          <h3
+            class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+          >
+            {{ t("checkout") }}
+          </h3>
+        </div>
+      </template>
+
+      <div class="absulute inset-0 overflow-y-auto">
+        <div class="grid grid-cols-2 gap-4 p-4">
+          <div class="w-full">
+            <BillsBillingList :bill_id="props.bill_id" />
+          </div>
+          <div class="w-full">
+            <form @submit="handleSubmit">
+              <div ref="paymentElement">
+                <!-- A Stripe Element will be inserted here. -->
+              </div>
+              <div class="flex justify-end space-x-2">
+                <UButton
+                  :loading="loading"
+                  :disabled="loading"
+                  color="primary"
+                  type="submit"
+                  >{{ t("pay_now") }}</UButton
+                >
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <div class="flex justify-end space-x-2">
+          <UButton
+            :disabled="loading"
+            color="primary"
+            @click="$emit('close')"
+            >{{ t("close") }}</UButton
+          >
+        </div>
+      </template>
+    </UCard>
+  </UModal>
+</template>
+
+<script setup lang="ts">
+import { loadStripe, type Stripe, type StripeElements } from "@stripe/stripe-js";
+
+type Props = {
+  bill_id: string;
+};
+
+const props = defineProps<Props>();
+const $emit = defineEmits(["close"]);
+const toast = useToast();
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const loading = ref(false);
+
+const config = useRuntimeConfig();
+
+const paymentElement = ref<HTMLElement | null>(null);
+
+const stripe = ref<Stripe | null>(null);
+
+const elements = ref<StripeElements | null>(null);
+
+onMounted(async () => {
+  try {
+    const { stripeAccountId, clientSecret } = await fetchSecret();
+
+    if (!stripeAccountId || !clientSecret) {
+      throw new Error("Failed to fetch secret");
+    }
+
+    stripe.value = await loadStripe(config.public.stripe_pk, {
+      stripeAccount: stripeAccountId,
+    });
+
+    if (!stripe.value) {
+      throw new Error("Failed to load stripe");
+    }
+
+    elements.value = stripe.value.elements({
+      clientSecret: clientSecret,
+    });
+
+    const paymentEl = elements.value.create("payment", {
+      layout: "accordion",
+    });
+
+    console.log(paymentElement.value);
+
+    if (!paymentElement.value) {
+      throw new Error("Failed to load payment element");
+    }
+
+    paymentEl.mount(paymentElement.value);
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+async function fetchSecret() {
+  const res = await $fetch(
+    `/api/orgs/payments/stripe/checkout-session/${props.bill_id}`
+  );
+  if (!res.stripeAccountId || !res.clientSecret) {
+    throw new Error("Failed to fetch client secret");
+  }
+  return res;
+}
+
+async function handleSubmit(event: Event) {
+  event.preventDefault();
+  loading.value = true;
+
+  if (!stripe.value || !elements.value) {
+    return;
+  }
+
+  const { error } = await stripe.value.confirmPayment({
+    elements: elements.value,
+    confirmParams: {
+      return_url: window.location.href + '/payment-completed',
+    },
+  });
+
+  if (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description:t(`stripe_errors.${error.code}`) || t(`stripe_errors.payment_intent_unknown_error`),
+      color: "red"
+    });
+  }
+
+  loading.value = false;
+}
+</script>
+
+<style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "checkout": "Kasse",
+    "close": "Schließen",
+    "pay_now": "Jetzt bezahlen",
+    "stripe_errors": {
+      "payment_intent_authentication_failure": "Die Zahlung konnte nicht authentifiziert werden. Bitte versuche es erneut.",
+      "payment_intent_payment_failure": "Die Zahlung konnte nicht durchgeführt werden. Bitte versuche es erneut.",
+      "payment_intent_payment_canceled": "Die Zahlung wurde abgebrochen.",
+      "payment_intent_unknown_error": "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.",
+      "card_declined": "Die Karte wurde abgelehnt. Bitte versuche es mit einer anderen Karte."
+
+    }
+  },
+  "en": {
+    "checkout": "Checkout",
+    "close": "Close",
+    "pay_now": "Pay now",
+    "stripe_errors": {
+      "payment_intent_authentication_failure": "Payment could not be authenticated. Please try again.",
+      "payment_intent_payment_failure": "Payment could not be completed. Please try again.",
+      "payment_intent_payment_canceled": "Payment was canceled.",
+      "payment_intent_unknown_error": "An unknown error occurred. Please try again.",
+      "card_declined": "Card was declined. Please try again with another card."
+    }
+  }
+}
+</i18n>

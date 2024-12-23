@@ -39,7 +39,7 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   const orgId = props.orgid
   if (orgId) {
-    const {data, error} = await client.functions.invoke("invite-team-member", {
+    const {data, error} = await client.functions.invoke("invite-user", {
     method: 'POST',
     body: {
       email: event.data.email,
@@ -47,6 +47,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
       orgid: orgId,
     },
   });
+  console.log(data);
   if (error) {
     console.error(error);
     toasts.add({

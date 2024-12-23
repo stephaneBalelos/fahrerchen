@@ -21,7 +21,7 @@
     </div>
   </UDashboardSection>
   <UDivider label="History" />
-  <BillHistory></BillHistory>
+  <BillHistory :bill_id="bill.id" :bill_created_at="bill.created_at"></BillHistory>
 </template>
 
 <script setup lang="ts">

@@ -1,18 +1,33 @@
+create extension if not exists "pgcrypto";
+create extension if not exists "pg_net";
 -- Custom types
 create type public.app_permission as enum (
   'users.read',
   'users.update',
   'users.delete',
   'organizations.read',
+  'organizations.create',
   'organizations.update',
   'organizations.delete',
+  'organizations_stripe_accounts.read',
+  'organizations_stripe_accounts.create',
+  'organizations_stripe_accounts.update',
   'organization_members.read',
+  'organization_members.create',
   'organization_members.update',
   'organization_members.delete',
+  'organization_invitations.read',
+  'organization_invitations.create',
+  'organization_invitations.update',
+  'organization_invitations.delete',
   'students.read',
   'students.create',
   'students.update',
   'students.delete',
+  'students_registration_requests.read',
+  'students_registration_requests.create',
+  'students_registration_requests.update',
+  'students_registration_requests.delete',
   'courses.read',
   'courses.create',
   'courses.update',
@@ -81,6 +96,7 @@ create table public.users (
   firstname    text,
   lastname    text,
   fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
+  avatar_path    text,
   status      user_status default 'OFFLINE'::public.user_status
 );
 comment on table public.users is 'Profile data for each user.';
@@ -94,12 +110,41 @@ create table public.organizations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   name          text not null,
-  owner_id      uuid references public.users not null,
-  stripe_account_id  text
+  allow_self_registration  boolean default true not null,
+  preferred_language    text default 'de' not null,
+  address_street  text,
+  address_zip    text,
+  address_city  text,
+  address_country text,
+  owner_id      uuid references public.users not null
 );
 comment on table public.organizations is 'organization data.';
 
 alter table public.organizations enable row level security;
+
+-- ORGANIZATIONS STRIPE ACCOUNTS
+create table public.organizations_stripe_accounts (
+  id            uuid references public.organizations on delete restrict not null primary key,
+  stripe_account_id  text not null,
+  payment_methods    jsonb
+);
+comment on table public.organizations_stripe_accounts is 'Stripe account data for each organization.';
+alter table public.organizations_stripe_accounts enable row level security;
+
+
+-- ORGANIZATIONS INVITATIONS
+create table public.organizations_invitations (
+  id            uuid default uuid_generate_v4() primary key,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  email         text not null,
+  role         app_role not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
+  unique (email, organization_id) 
+);
+comment on table public.organizations_invitations is 'Invitations to join an organization.';
+
+alter table public.organizations_invitations enable row level security;
 
 
 -- ORGANIZATION MEMBERS
@@ -115,6 +160,7 @@ comment on table public.organization_members is 'Members of each organization, u
 
 alter table public.organization_members enable row level security;
 
+
 -- STUDENTS
 create table public.students (
   id          uuid default uuid_generate_v4() primary key,
@@ -122,8 +168,16 @@ create table public.students (
   firstname    text not null,
   lastname    text not null,
   birth_date   date not null,
+  phone_number  text,
+  address_street  text,
+  address_zip    text,
+  address_city  text,
+  address_country text,
+  has_a_license  boolean default false not null,
+  self_registered  boolean default false not null, -- if the user registered themselves via onboarding
   user_id      uuid references public.users,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (user_id, organization_id)
 );
 comment on table public.students is 'Profile data for each student.';
 
@@ -137,13 +191,38 @@ create table public.courses (
   name          text not null,
   description       text not null,
   type         integer references public.course_types not null,
+  is_active     boolean default true not null,
+  create_bill_on_subscription  boolean default true not null,
+  allow_self_registration  boolean default true not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (organization_id, type)
 );
 comment on table public.courses is 'COURSES AVAILABLE.';
-
 alter table public.courses enable row level security;
 
+
+-- STUDENTS REGISTRATION REQUESTS
+create table public.students_registration_requests (
+  id            uuid default uuid_generate_v4() primary key,
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  email         text not null,
+  firstname      text not null,
+  lastname      text not null,
+  birth_date     date not null,
+  phone_number    text not null,
+  address_street    text not null,
+  address_zip      text not null,
+  address_city    text not null,
+  address_country   text not null,
+  has_a_license    boolean default false not null,
+  requested_course_id uuid references public.courses on delete set null,
+  status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (email, organization_id)
+);
+comment on table public.students_registration_requests is 'STUDENTS REGISTRATION REQUESTS.';
+
+alter table public.students_registration_requests enable row level security;
 
 -- COURSE DOCUMENTS
 create table public.course_documents (
@@ -151,6 +230,8 @@ create table public.course_documents (
   course_id    uuid references public.courses on delete cascade not null,
   name          text,
   description   text,
+  path         text not null,
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_documents is 'COURSE DOCUMENTS MADE AVAILABLE FOR STUDENTS.';
@@ -167,7 +248,6 @@ create table public.course_required_documents (
 comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
 alter table public.course_required_documents enable row level security;
 
-
 -- COURSES SUBSCRIPTIONS
 create table public.course_subscriptions (
   id            uuid default uuid_generate_v4() primary key,
@@ -182,6 +262,20 @@ create table public.course_subscriptions (
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 
 alter table public.course_subscriptions enable row level security;
+
+-- COURSE SUBSCRIPTION DOCUMENTS
+create table public.course_subscription_documents (
+  id            uuid default uuid_generate_v4() primary key,
+  subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  required_document_id  uuid references public.course_required_documents on delete set null,
+  path         text not null,
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_subscription_documents is 'COURSE SUBSCRIPTION DOCUMENTS.';
+
+alter table public.course_subscription_documents enable row level security;
+
 
 -- COURSE ACTIVITIES
 create table public.course_activities (
@@ -203,7 +297,7 @@ create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
   course_id    uuid references public.courses on delete cascade not null,
   activity_id    uuid references public.course_activities on delete cascade not null,
-  assigned_to   uuid references public.organization_members on delete set null,
+  assigned_to   uuid references public.users on delete set null,
   organization_id    uuid references public.organizations on delete cascade not null,
   status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
   start_at     timestamp with time zone not null,
@@ -217,7 +311,6 @@ alter table public.course_activity_schedules enable row level security;
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity_id   uuid references public.course_activities on delete cascade not null,
-  supervisor_id    uuid references public.organization_members on delete set null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   attended_at   timestamp with time zone default null,
@@ -236,6 +329,8 @@ create table public.course_subscription_bills (
   total        numeric default 0 not null check (total >= 0),
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
+  ready_to_pay  boolean default false not null, -- if the bill is ready to be paid, the bill is should be locked
+  stripe_payment_intent_id  text, -- Stripe Payment Intent ID
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
@@ -250,11 +345,47 @@ create table public.course_subscription_bill_items (
   course_activity_id    uuid references public.course_activities on delete set null,
   description   text not null,
   price       numeric default 0 not null check (price >= 0),
-  canceled_at   timestamp with time zone default null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_activity_attendance_id)
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
+
+-- Bill History Action type
+create type public.bill_history_action_type as enum ('ITEM_ADDED', 'ITEM_REMOVED', 'ITEM_UPDATED', 'BILL_READY_TO_PAY', 'BILL_PAID');
+
+-- COURSE SUBSCRIPTION BILL HISTORY
+create table public.course_subscription_bill_history (
+  id            uuid default uuid_generate_v4() primary key,
+  bill_id      uuid references public.course_subscription_bills on delete cascade not null,
+  actor_id      uuid references public.users on delete set null,
+  activity      public.bill_history_action_type not null,
+  item_description  text not null,
+  item_price    numeric not null check (item_price >= 0),
+  inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION BILL HISTORY.';
+alter table public.course_subscription_bill_history enable row level security;
+
+
+-- VIEWS
+
+-- Organization Members View
+create or replace view public.organization_members_view as
+select
+  organization_members.id,
+  organization_members.inserted_at,
+  organization_members.organization_id,
+  organization_members.user_id,
+  organization_members.role,
+  users.email as user_email,
+  users.firstname as user_firstname,
+  users.lastname as user_lastname
+from public.organization_members
+inner join public.organizations on organization_members.organization_id = organizations.id
+inner join public.users on organization_members.user_id = users.id;
 
 
 -- Bill Items View grouped by course_activity_id
@@ -270,7 +401,80 @@ left join public.course_activities as course_activity on bill_items.course_activ
 group by course_activity_id, activity_name, activity_description, bill_id;
 
 
+-- Organisation Public View - Joining with courses as array
+create or replace view public.organizations_view as
+select
+  organizations.id,
+  organizations.name,
+  organizations.address_street,
+  organizations.address_zip,
+  organizations.address_city,
+  organizations.address_country,
+  organizations.owner_id,
+  organizations.allow_self_registration,
+  organizations.preferred_language,
+  users.email as owner_email,
+  users.firstname as owner_firstname,
+  users.lastname as owner_lastname,
+  courses as organization_courses
+from public.organizations
+left join (
+  select
+    courses.organization_id,
+    jsonb_agg(jsonb_build_object(
+      'id', courses.id,
+      'name', courses.name,
+      'description', courses.description,
+      'type', courses.type,
+      'is_active', courses.is_active
+    )) as courses
+  from public.courses
+  group by courses.organization_id
+) as courses on organizations.id = courses.organization_id
+left join public.users on organizations.owner_id = users.id;
 
+-- Organization's Courses Subscriptions View joining with students
+create or replace view public.course_subscriptions_view as
+select
+  course_subscriptions.id,
+  course_subscriptions.course_id,
+  course_subscriptions.student_id,
+  course_subscriptions.archived_at,
+  course_subscriptions.costs,
+  course_subscriptions.organization_id,
+  courses.name as course_name,
+  courses.description as course_description,
+  students.email as student_email,
+  students.firstname as student_firstname,
+  students.lastname as student_lastname
+from public.course_subscriptions
+inner join public.courses on course_subscriptions.course_id = courses.id
+inner join public.students on course_subscriptions.student_id = students.id;
+
+
+-- Organization's Schedules View joining with activities, group by course_id
+create or replace view public.course_activity_schedules_view as
+select 
+  course_activity_schedules.id,
+  course_activity_schedules.course_id,
+  course_activity_schedules.activity_id,
+  course_activity_schedules.assigned_to,
+  course_activity_schedules.status,
+  course_activity_schedules.start_at,
+  course_activity_schedules.end_at,
+  course_activity_schedules.organization_id,
+  course_activities.name as activity_name,
+  course_activities.description as activity_description,
+  course_activities.activity_type,
+  courses.name as course_name,
+  courses.description as course_description,
+  users.email as assigned_to_email,
+  users.firstname as assigned_to_firstname,
+  users.lastname as assigned_to_lastname
+from public.course_activity_schedules
+inner join public.course_activities on course_activity_schedules.activity_id = course_activities.id
+inner join public.courses on course_activity_schedules.course_id = courses.id
+left join public.users on course_activity_schedules.assigned_to = users.id;
 
 
 
@@ -282,22 +486,6 @@ declare role_name public.app_role;
 begin
   insert into public.users (id, email)
   values (new.id, new.email);
-
-  org_id := new.raw_user_meta_data ->> 'orgid';
-  role_name := (new.raw_user_meta_data ->> 'role')::public.app_role;
-
-  if new.raw_user_meta_data ->> 'orgid' is null then
-    org_id := extensions.uuid_generate_v4();
-    insert into public.organizations (id, name, owner_id)
-    values (org_id, 'My Org', new.id);
-    return new;
-  end if;
-
-  -- if role is provided, insert into organization_members
-  if role_name is not null then
-    insert into public.organization_members (organization_id, user_id, role)
-    values (org_id, new.id, role_name);
-  end if;
 
   return new;
 end;
@@ -332,6 +520,7 @@ declare org_id uuid;
 begin
   org_id := new.organization_id;
 
+  -- insert the default activities
   insert into public.course_activities (course_id, name, description, activity_type, required, price, organization_id)
   values (new.id, 'Theorieunterricht', 'Theorieunterricht', 1, 12, 45, org_id),
          (new.id, 'Übungstunde', 'Praxisunterricht', 2, 15, 64, org_id),
@@ -354,41 +543,267 @@ create trigger on_course_created
   for each row execute procedure public.handle_new_course();
 
 
--- handle new activity attendance
-create or replace function public.handle_new_activity_attendance()
+-- handle Stripe Account update
+create or replace function public.handle_stripe_account_update()
 returns trigger as $$
-declare org_id uuid;
-declare bill_id uuid;
-declare activity_price numeric;
-declare activity_name text;
 begin
-  org_id := new.organization_id;
-
-  -- lookup if a bill already exists for the course subscription and has not been paid
-  select id into bill_id from public.course_subscription_bills
-  where course_subscription_id = new.course_subscription_id and paid_at is null;
-
-  -- if no bill exists, create a new one
-  if bill_id is null then
-    insert into public.course_subscription_bills (course_subscription_id, organization_id)
-    values (new.course_subscription_id, org_id)
-    returning id into bill_id;
+  -- prevent updating the stripe account id
+  if old.stripe_account_id <> new.stripe_account_id then
+    raise exception 'Cannot update the stripe account id';
   end if;
 
-  -- lookup the activity name & price
-  select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
-
-  -- insert the bill item
-  insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
-  values (bill_id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+  -- prevent updating the id
+  if old.id <> new.id then
+    raise exception 'Cannot update the id';
+  end if;
 
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a stripe account is updated
+create trigger on_stripe_account_updated
+  before update on public.organizations_stripe_accounts
+  for each row execute procedure public.handle_stripe_account_update();
+
+
+-- handle Registration Request confirmation
+create or replace function public.handle_registration_request_confirmation()
+returns trigger as $$
+declare org_id uuid;
+begin
+  org_id := new.organization_id;
+
+  -- prevent updating the status to PENDING
+  if new.status = 0 then
+    raise exception 'Status cannot be set to PENDING';
+  end if;
+
+  -- if the status is ACCEPTED, insert the student
+  if new.status = 1 then
+    insert into public.students (email, firstname, lastname, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license, organization_id)
+    values (new.email, new.firstname, new.lastname, new.birth_date, new.phone_number, new.address_street, new.address_zip, new.address_city, new.address_country, new.has_a_license, org_id);
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a registration request is updated
+create trigger on_registration_request_updated
+  after update of status on public.students_registration_requests
+  for each row execute procedure public.handle_registration_request_confirmation();
+
+
+-- Handle New Invitations
+create or replace function public.handle_new_invitation()
+returns trigger as $$
+declare
+  payload jsonb;
+  invited_user_id uuid;
+begin
+
+  -- check if user already exists
+  select id into invited_user_id from public.users where email = new.email;
+
+  -- if user exist, check if the user is already a member of the organization
+  if invited_user_id is not null then
+    if exists (select 1 from public.organization_members where user_id = invited_user_id and organization_id = new.organization_id) then
+      raise exception 'User is already a member of the organization';
+    end if;
+  end if;
+
+  return new;
+
+end;
+$$ language plpgsql security invoker set search_path = public;
+create or replace trigger new_invitation_webhook
+  after insert on public.organizations_invitations
+  for each row execute function public.handle_new_invitation();
+
+-- handle new course subscription
+create or replace function public.handle_new_course_subscription()
+returns trigger as $$
+declare org_id uuid;
+declare is_course_active boolean;
+declare create_bill boolean;
+declare bill_id uuid;
+declare activity public.course_activities;
+begin
+  org_id := new.organization_id;
+  select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
+
+  -- if the course is not active, raise an exception
+  if not is_course_active then
+    raise exception 'Course is not active';
+  end if;
+
+  -- if the bill should be created, create a new bill and insert default items based on the course activities and required count
+  if create_bill then
+    insert into public.course_subscription_bills (course_subscription_id, organization_id)
+    values (new.id, org_id) returning id into bill_id;
+
+    -- loop over the course activities and insert the required number of items
+    for activity in (select * from public.course_activities where course_id = new.course_id) loop
+      if activity.required > 0 then
+        for i in 1..activity.required loop
+          insert into public.course_subscription_bill_items (bill_id, course_activity_id, description, price, organization_id)
+          values (bill_id, activity.id, activity.name, activity.price, org_id);
+        end loop;
+      end if;
+    end loop;
+
+    -- set bill as ready to pay
+    update public.course_subscription_bills set ready_to_pay = true where id = bill_id;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course subscription is created
+create trigger on_course_subscription_created
+  after insert on public.course_subscriptions
+  for each row execute procedure public.handle_new_course_subscription();
+
+
+-- handle new activity attendance
+create or replace function public.handle_new_activity_attendance()
+returns trigger as $$
+declare org_id uuid;
+declare bill public.course_subscription_bills;
+declare activity_price numeric;
+declare activity_name text;
+declare bill_item public.course_subscription_bill_items;
+begin
+  org_id := new.organization_id;
+
+  -- lookup if a bill already exists for the course subscription and has not been paid
+  select * into bill from public.course_subscription_bills
+  where course_subscription_id = new.course_subscription_id and paid_at is null limit 1;
+
+  -- if no bill exists, create a new one
+  if bill is null then
+    insert into public.course_subscription_bills (course_subscription_id, organization_id)
+    values (new.course_subscription_id, org_id)
+    returning id into bill.id;
+
+    -- insert bill the bill item for this activity
+    select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
+
+    -- insert the bill item
+    insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
+    values (bill.id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+
+  else
+    -- if the bill exists, check if a bill item already exists but without attendance
+    select * into bill_item from public.course_subscription_bill_items
+    where bill_id = bill.id and course_activity_attendance_id is null and course_activity_id = new.course_activity_id limit 1;
+
+    -- if the bill item exists, update the bill item with the attendance id
+    if bill_item is null then
+      -- if the bill item does not exist, insert a new one
+      select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
+
+      -- insert the bill item
+      insert into public.course_subscription_bill_items (bill_id, course_activity_attendance_id, course_activity_id, description, price, organization_id)
+      values (bill.id, new.id, new.course_activity_id, activity_name, activity_price, org_id);
+    else
+      -- if the bill item exists, update the bill item with the attendance id
+      update public.course_subscription_bill_items set course_activity_attendance_id = new.id
+      where id = bill_item.id;
+    end if;
+
+  end if;
+  
+  -- update the bill total
+  update public.course_subscription_bills set total = (select sum(price) from public.course_subscription_bill_items where bill_id = bill.id)
+  where id = bill.id;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course activity attendance is created
 create trigger on_course_activity_attendance_created
   after insert on public.course_activity_attendances
   for each row execute procedure public.handle_new_activity_attendance();
+
+-- handle removed activity attendance
+create or replace function public.handle_removed_activity_attendance()
+returns trigger as $$
+declare org_id uuid;
+declare bill_item_id uuid;
+declare subscription_bill_id uuid;
+begin
+  org_id := old.organization_id;
+
+  -- lookup for the linked bill item
+  select id, bill_id into bill_item_id, subscription_bill_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+
+  -- if no bill item exists, do nothing
+  if bill_item_id is null then
+    return old;
+  end if;
+
+  -- check if the bill has been paid
+  if exists (select 1 from public.course_subscription_bills where id = subscription_bill_id and (paid_at is not null or ready_to_pay = true)) then
+    -- bill exists and has been paid or is ready to pay, do nothing
+    return old;
+  else
+    -- bill exists but has not been paid, remove the bill item
+    delete from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+
+    -- update the bill total
+    update public.course_subscription_bills set total = (select sum(price) from public.course_subscription_bill_items where bill_id = subscription_bill_id)
+    where id = subscription_bill_id;
+  end if;
+
+  return old;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course activity attendance is deleted
+create trigger on_course_activity_attendance_deleted
+  before delete on public.course_activity_attendances
+  for each row execute procedure public.handle_removed_activity_attendance();
+
+
+-- handle updated bill ready to pay
+create or replace function public.handle_updated_bill()
+returns trigger as $$
+begin
+  --prevent set ready_to_pay to false if the bill has been paid
+  if old.ready_to_pay = true and new.ready_to_pay = false and new.paid_at is not null then
+    raise exception 'Cannot set ready_to_pay to false if the bill has been paid';
+  end if;
+
+  -- prevent set paid_at to null if the bill is ready to pay
+  if old.paid_at is not null and new.paid_at is null and new.ready_to_pay = true then
+    raise exception 'Cannot set paid_at to null if the bill is ready to pay';
+  end if;
+
+
+  if new.ready_to_pay and old.ready_to_pay = false then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.id, auth.uid(), 'BILL_READY_TO_PAY', '', 0, new.organization_id);
+  end if;
+
+  -- prevent removing the stripe_payment_intent_id when bill is paid
+  if old.stripe_payment_intent_id is not null and new.stripe_payment_intent_id is null and new.paid_at is not null then
+    raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
+  end if;
+
+  if new.paid_at is not null then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.id, auth.uid(), 'BILL_PAID', '', 0, new.organization_id);
+  end if;
+
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course subscription bill is updated
+create trigger on_course_subscription_bill_updated
+  after update on public.course_subscription_bills
+  for each row execute procedure public.handle_updated_bill();
 
 
 -- handle new Bill Item
@@ -405,6 +820,10 @@ begin
   update public.course_subscription_bills set total = bill_total
   where id = new.bill_id;
 
+  -- insert the bill history
+  insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+  values (new.bill_id, auth.uid(), 'ITEM_ADDED', new.description, new.price, org_id);
+
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
@@ -413,43 +832,67 @@ create trigger on_course_subscription_bill_item_created
   after insert on public.course_subscription_bill_items
   for each row execute procedure public.handle_new_bill_item();
 
-
--- hnadle attendance status change
-create or replace function public.handle_attendance_status_change()
+-- handle removed Bill Item
+create or replace function public.handle_removed_bill_item()
 returns trigger as $$
 declare org_id uuid;
-declare bill_paid boolean;
+declare bill_total numeric;
 begin
-  org_id := new.organization_id;
+  org_id := old.organization_id;
 
-  -- prevent resetting the status to REGISTERED
-  if new.status = 'REGISTERED' then
-    raise exception 'Status cannot be reset to REGISTERED';
+  -- lookup for the linked bill
+  select sum(price) into bill_total from public.course_subscription_bill_items where bill_id = old.bill_id;
+
+  -- if no bill item exists, do nothing
+  if bill_total is null then
+    return old;
   end if;
 
-  -- if the status is ATTENDED, update the bill item to be paid
-  if new.status = 'ATTENDED' then
-    update public.course_subscription_bill_items set canceled_at = null
-    where id = new.id;
+  -- if the bill item exists, remove it
+  update public.course_subscription_bills set total = bill_total
+  where id = old.bill_id;
+
+  -- insert the bill history
+  insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+  values (old.bill_id, auth.uid(), 'ITEM_REMOVED', old.description, old.price, org_id);
+
+  return old;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- trigger the function every time a course subscription bill item is deleted
+create trigger on_course_subscription_bill_item_deleted
+  after delete on public.course_subscription_bill_items
+  for each row execute procedure public.handle_removed_bill_item();
+
+-- handle updated Bill Item
+create or replace function public.handle_updated_bill_item()
+returns trigger as $$
+begin
+
+  if old.description <> new.description then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
   end if;
 
-  -- if the status is CANCELED, update the bill item to be canceled
-  if new.status = 'CANCELED' then
-    update public.course_subscription_bill_items set canceled_at = timezone('utc'::text, now())
-    where id = new.id;
+  if old.price <> new.price then
+    -- insert the bill history
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
   end if;
 
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course activity attendance's status is updated
-create trigger on_course_activity_attendance_status_updated
-  after update of status on public.course_activity_attendances
-  for each row execute procedure public.handle_attendance_status_change();
-
+-- trigger the function every time a course subscription bill item is updated
+create trigger on_course_subscription_bill_item_updated
+  after update on public.course_subscription_bill_items
+  for each row execute procedure public.handle_updated_bill_item();
 
 
 -- Helpers Functions
+
+-- Authorize function
 create or replace function public.authorize(
   requested_permission app_permission,
   org_id uuid
@@ -458,7 +901,16 @@ returns boolean as $$
 declare
   bind_permissions int;
   user_role public.app_role;
+  owner uuid;
 begin
+
+  select owner_id into owner from public.organizations where id = org_id;
+
+  --check if the user is the main owner
+  if owner = auth.uid() then
+    return true;
+  end if;
+
   -- Fetch user role once and store it to reduce number of calls
   select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
 
@@ -474,22 +926,80 @@ begin
 
   return bind_permissions > 0;
 end;
-$$ language plpgsql security definer set search_path = '';
+$$ language plpgsql security definer set search_path = public;
+
+
+create or replace function is_main_owner(
+  org_id uuid
+)
+returns boolean as $$
+declare
+  owner uuid;
+begin
+  select owner_id into owner from public.organizations where id = org_id;
+
+  return owner = auth.uid();
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- 2 users are in the same organization
+create or replace function public.are_users_in_same_organization(
+  user_id_1 uuid,
+  user_id_2 uuid
+)
+returns boolean as $$
+declare
+  org_id_1 uuid;
+  org_id_2 uuid;
+begin
+
+
+  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
+  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
+end;
+$$ language plpgsql security definer set search_path = public;
+
 
 
 -- Policies
-create policy "Everyone can see users" on public.users for select to authenticated using (true);
+
+-- Role Permissions Policies
+create policy "Everyone can see role_permissions" on public.role_permissions for select to authenticated using (true);
+
+-- Users Policies
+create policy "Users can see their own data" on public.users for select to authenticated using (auth.uid() = id);
+create policy "Users can see other users in the same organization" on public.users for select to authenticated using (public.are_users_in_same_organization(auth.uid(), id));
 create policy "User can see update their own data" on public.users for update to authenticated using (auth.uid() = id);
 
-create policy "Everyone member can see organizations" on public.organizations for select to authenticated using (public.authorize('organizations.read', id));
+
+-- Organizations Policies
+create policy "Everyone member can see organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'organizations.read');
 insert into public.role_permissions (role, permission) values ('student', 'organizations.read');
 
-create policy "Owner can see update organizations" on public.organizations for update to authenticated using ((auth.uid() = owner_id) or (public.authorize('organizations.update', id)));
+create policy "Owner & Manager can update organizations" on public.organizations for update to authenticated using ((auth.uid() = owner_id) or (public.authorize('organizations.update', id)));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations.update');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations.update');
 
+create policy "Create organization only if owner is the same as the user who make the request" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
+
+-- Organizations Stripe Accounts Policies
+create policy "Everyone in Org can see organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
+insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('student', 'organizations_stripe_accounts.read');
+
+create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.is_main_owner(id));
+
+create policy "Owner & Manager can update organizations_stripe_accounts" on public.organizations_stripe_accounts for update to authenticated using (public.authorize('organizations_stripe_accounts.update', id));
+insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.update');
+insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.update');
+
+
+-- Organization Members Policies
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organization_members.read');
@@ -499,10 +1009,34 @@ insert into public.role_permissions (role, permission) values ('student', 'organ
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
 
-create policy "Everyone except students can see students" on public.students for select to authenticated using (public.authorize('students.read', organization_id));
+create policy "Owner can delete organization_members" on public.organization_members for delete to authenticated using ((public.authorize('organization_members.delete', organization_id)) or (auth.uid() = user_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_members.delete');
+
+
+-- Organizations Invitations Policies
+create policy "User can see their own organization_invitations" on public.organizations_invitations for select to authenticated using (auth.email() = email);
+create policy "Owner & Manager see organization_invitations" on public.organizations_invitations for select to authenticated using (public.authorize('organization_invitations.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.read');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.read');
+
+create policy "Owner & Manager can insert organization_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.create');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.create');
+
+create policy "Owner & Manager can delete organization_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'organization_invitations.delete');
+
+
+-- Students Policies
+create policy "Student can see their own data" on public.students for select to authenticated using (auth.uid() = user_id);
+create policy "Everyone except students can see other students" on public.students for select to authenticated using (public.authorize('students.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.read');
 insert into public.role_permissions (role, permission) values ('manager', 'students.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'students.read');
+
+create policy "Student can insert their own data" on public.students for insert to authenticated with check (auth.uid() = user_id);
+create policy "Student can update their own data" on public.students for update to authenticated using (auth.uid() = user_id);
 
 create policy "Owner & Manager can insert students" on public.students for insert to authenticated with check (public.authorize('students.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.create');
@@ -517,8 +1051,24 @@ insert into public.role_permissions (role, permission) values ('owner', 'student
 insert into public.role_permissions (role, permission) values ('manager', 'students.delete');
 
 
+-- Students Registration Requests Policies
+create policy "Everyone authenticated staff user can see students_registration_requests" on public.students_registration_requests for select to authenticated using (public.authorize('students_registration_requests.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.read');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'students_registration_requests.read');
+
+create policy "Insert students_registration_requests" on public.students_registration_requests for insert to authenticated, anon with check (true);
+
+create policy "Owner & Manager can update students_registration_requests" on public.students_registration_requests for update to authenticated using (public.authorize('students_registration_requests.update', organization_id)) with check (public.authorize('students_registration_requests.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.update');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.update');
+
+create policy "Owner & Manager can delete students_registration_requests" on public.students_registration_requests for delete to authenticated using (public.authorize('students_registration_requests.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'students_registration_requests.delete');
 
 
+-- Courses Policies
 create policy "Everyone can see courses" on public.courses for select to authenticated using (public.authorize('courses.read', organization_id));
 create policy "Everyone can see courses_documents" on public.course_documents for select to authenticated using (public.authorize('courses.read', organization_id));
 create policy "Everyone can see course_required_documents" on public.course_required_documents for select to authenticated using (public.authorize('courses.read', organization_id));
@@ -544,24 +1094,31 @@ create policy "Owner & Manager can delete courses_documents" on public.course_do
 create policy "Owner & Manager can delete course_required_documents" on public.course_required_documents for delete to authenticated using (public.authorize('courses.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'courses.delete');
 
+
+-- Course Subscriptions Policies
 create policy "Everyone can see course_subscriptions" on public.course_subscriptions for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
+create policy "Everyone can see course_subscription_documents" on public.course_subscription_documents for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscriptions.read');
 insert into public.role_permissions (role, permission) values ('student', 'course_subscriptions.read');
 
 create policy "Owner, Manager can insert course_subscriptions" on public.course_subscriptions for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
+create policy "Owner, Manager can insert course_subscription_documents" on public.course_subscription_documents for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.create');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.create');
 
 create policy "Owner & Manager can update course_subscriptions" on public.course_subscriptions for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
+create policy "Owner & Manager can update course_subscription_documents" on public.course_subscription_documents for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.update');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.update');
 
 create policy "Owner & Manager can delete course_subscriptions" on public.course_subscriptions for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id));
+create policy "Owner & Manager can delete course_subscription_documents" on public.course_subscription_documents for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
 
+-- Course Activities Policies
 create policy "Everyone can see course_activities" on public.course_activities for select to authenticated using (public.authorize('course_activities.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activities.read');
@@ -579,6 +1136,7 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 create policy "Owner can delete course_activities" on public.course_activities for delete to authenticated using (public.authorize('course_activities.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.delete');
 
+-- Course Activity Schedules Policies
 create policy "Everyone can see course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.read');
@@ -601,6 +1159,7 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.delete');
 
 
+-- Course Activity Attendances Policies
 create policy "Everyone can see course_activity_attendances" on public.course_activity_attendances for select to authenticated using (public.authorize('course_activity_attendances.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.read');
@@ -619,8 +1178,10 @@ create policy "Owner can delete course_activity_attendances" on public.course_ac
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.delete');
 
 
+-- Course Subscription Bills Policies
 create policy "Everyone can see course_subscription_bills" on public.course_subscription_bills for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 create policy "Everyone can see course_subscription_bill_items" on public.course_subscription_bill_items for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
+create policy "Everyone can see course_subscription_bill_history" on public.course_subscription_bill_history for select to authenticated using (public.authorize('course_subscription_bills.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscription_bills.read');
@@ -639,7 +1200,6 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 create policy "Owner can delete course_subscription_bills" on public.course_subscription_bills for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
 create policy "Owner can delete course_subscription_bill_items" on public.course_subscription_bill_items for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.delete');
-
 
 
 create policy "Everyone can see course_types" on public.course_types for select to authenticated using (true);

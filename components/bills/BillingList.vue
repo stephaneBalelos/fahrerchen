@@ -38,7 +38,7 @@
           <span class="font-semibold">Details</span>
           <ul>
             <li v-for="i in item.items" :key="i.id">
-              {{ i.description }} - {{ formatCurrency(i.price) }} [//Todo add Date]
+              {{ i.description }} - {{ formatCurrency(i.price) }} || attendance id: {{ i.course_activity_attendance_id }}
             </li>
           </ul>
         </div>
@@ -75,8 +75,6 @@ const {
       console.error(error);
       throw error;
     }
-
-    console.log(data);
 
     return data;
   },

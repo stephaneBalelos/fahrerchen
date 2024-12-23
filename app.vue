@@ -5,4 +5,5 @@
   </NuxtLayout>
   <UNotifications id="notifications-container" />
   <USlideovers />
+  <UModals />
 </template>

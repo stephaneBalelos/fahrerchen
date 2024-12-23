@@ -1,10 +1,11 @@
 import React from 'npm:react@18.3.1'
 import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
-import SignupMail from './_templates/SignupMail.tsx'
-import PasswordResetMail from './_templates/PasswordResetMail.tsx'
-import InvitationMail from './_templates/InvitationMail.tsx'
+import SignupMail from '../_shared/_templates/SignupMail.tsx'
+import PasswordResetMail from '../_shared/_templates/PasswordResetMail.tsx'
+import InvitationMail from '../_shared/_templates/InvitationMail.tsx'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail } from '../_shared/utils.ts';
 
 
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string
@@ -22,16 +23,13 @@ Deno.serve(async (req) => {
     const headers = Object.fromEntries(req.headers)
     const secret = hookSecret.split('whsec_')[1]
     const wh = new Webhook(secret)
-    console.log(payload)
     try {
-        const {
-            user,
-            email_data: { token, token_hash, redirect_to, email_action_type },
-        } = wh.verify(payload, headers) as {
+        const verifiedPayload = wh.verify(payload, headers) as {
             user: {
                 email: string
                 user_metadata: {
-                    orgid: string
+                    organization_id: string
+                    role: string
                 }
             }
             email_data: {
@@ -44,6 +42,11 @@ Deno.serve(async (req) => {
                 token_hash_new: string
             }
         }
+
+        const {
+            user,
+            email_data: { token, token_hash, redirect_to, email_action_type },
+        } = verifiedPayload
 
         const supabaseClient = createClient(
             Deno.env.get('SUPABASE_URL') ?? '',
@@ -72,11 +75,10 @@ Deno.serve(async (req) => {
                 })
             )
         } else if (email_action_type === 'invite') {
-            const { data, error } = await supabaseClient.from('organizations').select('name').eq('id', user.user_metadata.orgid).single()
+            const { data, error } = await supabaseClient.from('organizations').select('*').eq('id', user.user_metadata.organization_id).single()
             if (error) {
                 throw new Error('Organization not found')
             }
-            console.log(data)
             if (!data) {
                 throw new Error('Organization not found')
             }
@@ -92,7 +94,6 @@ Deno.serve(async (req) => {
                     token_hash,
                 })
             )
-            console.log(html)
 
         } else if (email_action_type === 'signup') {
             html = await renderAsync(
@@ -114,40 +115,12 @@ Deno.serve(async (req) => {
             throw new Error('Unknown email action type')
         }
 
-        // console.log(html)
-
 
         // Send the email
 
-        const data = {
-            "sender": {
-                "name": "No Reply",
-                "email": "no-reply@stephanedondyas.cloud"
-            },
-            "to": [
-                {
-                    "email": user.email,
-                    "name": "User"
-                }
-            ],
-            "htmlContent": html,
-            "textContent": "Please enable HTML to view this email",
-            "subject": "Welcome to Fahrerchen",
-        }
+        // TODO: Get email subect from the template
 
-        const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "api-key": Deno.env.get("BREVO_API_KEY") as string,
-                "accept": "application/json",
-            },
-            body: JSON.stringify(data)
-        })
-
-        const json = await res.json()
-
-        console.log(json)
+        await sendEmail(user.email, "Welcome to Fahrerchen", html)
 
     } catch (error) {
         console.log(error)

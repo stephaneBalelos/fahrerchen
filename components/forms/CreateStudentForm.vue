@@ -39,7 +39,7 @@ const emit = defineEmits<{
 }>();
 
 const client = useSupabaseClient<Database>();
-const { selected_organization_id } = useUserOrganizations();
+const userOrganizationsStore = useUserOrganizationsStore();
 const toast = useToast();
 
 const schema = z.object({
@@ -60,7 +60,7 @@ const state = reactive<CreateUserSchema>({
 
 async function onSubmit(event: FormSubmitEvent<CreateUserSchema>) {
 
-  if (!selected_organization_id.value) {
+  if (!userOrganizationsStore.selectedOrganization) {
     toast.add({
       title: "Error",
       description: "No organization data found",
@@ -77,7 +77,7 @@ async function onSubmit(event: FormSubmitEvent<CreateUserSchema>) {
     try {
       const { data: student, error } = await client.from("students").insert({
         ...data,
-        organization_id: selected_organization_id.value,
+        organization_id: userOrganizationsStore.selectedOrganization.organization_id,
       });
       console.log(student, error);
       if (error) {

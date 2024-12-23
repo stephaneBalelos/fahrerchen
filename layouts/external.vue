@@ -1,10 +1,7 @@
 <template>
   <UDashboardLayout>
     <UDashboardPage>
-      <UDashboardPanel grow>
-
-        <slot></slot>
-      </UDashboardPanel>
+      <slot></slot>
     </UDashboardPage>
   </UDashboardLayout>
 </template>

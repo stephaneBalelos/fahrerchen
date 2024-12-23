@@ -18,7 +18,7 @@
           <UDashboardSearchButton />
         </template>
 
-        <UDashboardSidebarLinks :links="links" />
+       <SidebarLinks />
 
         <UDivider />
 
@@ -32,99 +32,28 @@
         <UDivider class="sticky bottom-0" />
 
         <template #footer>
-          <UDashboardSidebarLinks :links="footerLinks" />
+          <!-- <UDashboardSidebarLinks :links="footerLinks" /> -->
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
     <ClientOnly>
-      <slot :orgid="selected_organization_id"></slot>
+      <slot></slot>
     </ClientOnly>
   </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
+import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
-import UserDropdown from "~/components/navigation/UserMenu.vue";
-import { useUserOrganizations } from "~/composables/useUserOrganizations";
 
-const route = useRoute();
-const appConfig = useAppConfig();
-const { isHelpSlideoverOpen } = useDashboard();
 const runtimeConfig = useRuntimeConfig();
 
-const user = useSupabaseUser();
-const supabase = useSupabaseClient();
-const toast = useToast();
 
-const { selected_organization_id } = useUserOrganizations();
+const { t } = useI18n({
+  useScope: "local",
+});
 
-const links = [
-  {
-    id: "dashboard",
-    label: "Dashboard [NOT IMPLEMENTED]",
-    icon: "i-heroicons-chart-pie",
-    to: "/my",
-    tooltip: {
-      text: "Dashboard",
-      shortcuts: ["G", "D"],
-    },
-  },
-  {
-    id: "students",
-    label: "Students",
-    icon: "i-heroicons-user-group",
-    to: "/my/students",
-    tooltip: {
-      text: "Students",
-      shortcuts: ["G", "U"],
-    },
-  },
-  {
-    id: "courses",
-    label: "Courses",
-    icon: "i-heroicons-book-open",
-    to: "/my/courses",
-    tooltip: {
-      text: "Courses",
-      shortcuts: ["G", "C"],
-    },
-  },
-  {
-    id: "bills",
-    label: "Bills",
-    icon: "i-heroicons-credit-card",
-    to: "/my/bills",
-    tooltip: {
-      text: "Bills",
-      shortcuts: ["G", "B"],
-    },
-  },
-  {
-    id: "settings",
-    label: "Settings",
-    to: "/my/settings",
-    icon: "i-heroicons-cog-8-tooth",
-    children: [
-      {
-        label: "General [NOT IMPLEMENTED]",
-        to: "/my/settings",
-        exact: true,
-      },
-      {
-        label: "Members",
-        to: "/my/settings/members",
-      },
-      {
-        label: "Payments",
-        to: "/my/settings/payments",
-      },
-    ],
-    tooltip: {
-      text: "Settings",
-      shortcuts: ["G", "S"],
-    },
-  },
-];
+
 
 const footerLinks = [
   {
@@ -134,36 +63,6 @@ const footerLinks = [
   },
   {
     label: "v" + runtimeConfig.public.app_version,
-  },
-];
-
-const groups = [
-  {
-    key: "links",
-    label: "Go to",
-    commands: links.map((link) => ({
-      ...link,
-      shortcuts: link.tooltip?.shortcuts,
-    })),
-  },
-  {
-    key: "code",
-    label: "Code",
-    commands: [
-      {
-        id: "source",
-        label: "View page source",
-        icon: "i-simple-icons-github",
-        click: () => {
-          window.open(
-            `https://github.com/nuxt-ui-pro/dashboard/blob/main/pages${
-              route.path === "/" ? "/index" : route.path
-            }.vue`,
-            "_blank"
-          );
-        },
-      },
-    ],
   },
 ];
 

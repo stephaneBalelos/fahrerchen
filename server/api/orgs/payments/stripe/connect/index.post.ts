@@ -1,6 +1,7 @@
 import { serverSupabaseClient, serverSupabaseSession } from '#supabase/server'
 import { User } from '@supabase/supabase-js'
 import { stripeClient } from '~/server/utils/stripe'
+import { getOrganizationStripeAccount } from '~/server/utils/supabase'
 import { AppUser, Database, StripeConnectPostBody } from '~/types/app.types'
 
 export default defineEventHandler(async (event) => {
@@ -21,28 +22,33 @@ export default defineEventHandler(async (event) => {
 
         const client = await serverSupabaseClient<Database>(event)
     
-        const { data:org, error } = await client.from('organizations').select('*').eq('id', body.org_id).single()
+        const org = await getOrganisationById(event, body.org_id)
 
-        if (error) {
+        if (!org) {
             throw createError({
                 status: 500,
                 message: 'Failed to fetch organization'
             })
         }
 
-        if (!org) {
+        // user is the main owner of the organization
+        if (user.id !== org.owner_id) {
             throw createError({
-                status: 404,
-                message: 'Organization not found'
+                status: 401,
+                message: 'Unauthorized'
             })
         }
 
-        if (!org?.stripe_account_id) {
+        const stripeAccount = await getOrganizationStripeAccount(event, body.org_id)
+
+        if (!stripeAccount) {
             const account = await stripe.accounts.create({
                 country: "DE",
                 email: user.email,
             });
     
+            console.log(account)
+
             if (!account) {
                 throw createError({
                     status: 500,
@@ -50,11 +56,12 @@ export default defineEventHandler(async (event) => {
                 })
             }
 
-            const res = await client.from('organizations').update({
+            const {error} = await client.from('organizations_stripe_accounts').insert({
+                id: body.org_id,
                 stripe_account_id: account.id
-            }).eq('id', body.org_id)
+            })
 
-            if (res.error) {
+            if (error) {
                 throw createError({
                     status: 500,
                     message: 'Failed to save Account'
@@ -62,7 +69,7 @@ export default defineEventHandler(async (event) => {
             }
             return {accountId: account.id}
         } else {
-            return {accountId: org.stripe_account_id}
+            return {accountId: stripeAccount.stripe_account_id}
         }
 
     } catch (error) {

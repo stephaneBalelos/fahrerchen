@@ -7,7 +7,11 @@ import type { DatePickerModel } from 'v-calendar/dist/types/src/use/datePicker.j
 const props = defineProps({
   modelValue: {
     type: [Date, Object] as PropType<DatePickerModel>,
-    default: null
+    default: null,
+  },
+  expanded: {
+    type: Boolean,
+    default: false,
   }
 })
 
@@ -31,7 +35,7 @@ const attrs = {
 </script>
 
 <template>
-  <VCalendarDatePicker v-if="date && (typeof date === 'object')" v-model="date" :columns="1" v-bind="{ ...attrs, ...$attrs }" />
+  <VCalendarDatePicker :expanded="props.expanded" v-if="date && (typeof date === 'object')" v-model="date" :columns="1" v-bind="{ ...attrs, ...$attrs }" />
 </template>
 
 <style>

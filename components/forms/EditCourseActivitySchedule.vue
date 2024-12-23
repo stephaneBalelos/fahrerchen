@@ -1,6 +1,6 @@
 <template>
   <UDashboardSlideover
-    :title="'New Activity Schedule'"
+    :title="props.activity_schedule_id ? 'Edit Activity Schedule' : 'New Activity Schedule'"
     ref="slideover"
     id="edit-activity-schedule"
   >
@@ -61,15 +61,15 @@
           <USelectMenu
             v-model="state.assigned_to"
             :options="organization_members"
-            value-attribute="member_id"
+            value-attribute="user_id"
             option-attribute="email"
           >
             <template #label>
               <div v-if="state.assigned_to && organization_members.length > 0">
                 <span class="truncate">{{
                   organization_members.find(
-                    (m) => m.member_id === state.assigned_to
-                  )?.email
+                    (m) => m.user_id === state.assigned_to
+                  )?.user?.fullname
                 }}</span>
               </div>
               <div v-else>
@@ -77,10 +77,10 @@
               </div>
             </template>
             <template #option="{ option }">
-              <span v-if="option.firstname && option.lastname" class="truncate"
-                >{{ option.firstname }} {{ option.lastname }}</span
+              <span v-if="option.user.firstname && option.user.lastname" class="truncate"
+                >{{ option.user.firstname }} {{ option.user.lastname }}</span
               >
-              <span v-else class="truncate">{{ option.email }}</span>
+              <span v-else class="truncate">{{ option.user.email }}</span>
             </template>
           </USelectMenu>
         </UFormGroup>
@@ -193,9 +193,8 @@ const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
-const course_activities = await useCourseActivities(props.courseid);
-const { organization_members } = useOrganizationMembers(props.orgid);
-
+const course_activities = await useCourseActivities(props.orgid, props.courseid);
+const organization_members = await useOrganizationMembers(props.orgid, true);
 const zDayOfWeek = z.number().int().min(1).max(7);
 
 const schema = z.object({
@@ -238,7 +237,6 @@ onMounted(async () => {
           color: "red",
         });
       } else {
-        console.log(data);
         state.start_at = new Date(data.start_at);
         state.end_at = new Date(data.end_at);
         state.assigned_to = data.assigned_to ?? undefined;
@@ -291,7 +289,6 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
         color: "red",
       });
     } else {
-      console.log(res);
       toast.add({
         title: "Success",
         description: "Course activity schedule created",
@@ -328,7 +325,6 @@ async function updateCourseActivitySchedule(
         color: "red",
       });
     } else {
-      console.log(res);
       toast.add({
         title: "Success",
         description: "Course activity schedule updated",
