@@ -21,3 +21,13 @@ export const getOrganizationStripeAccount = async (event: H3Event, orgid: string
     }
     return data
 }
+
+export const getBillById = async (event: H3Event, id: string) => {
+    const client = await serverSupabaseClient<Database>(event)
+    const { data, error } = await client.from('course_subscription_bills').select().eq('id', id).single()
+    if (error) {
+        console.error(error)
+        return null
+    }
+    return data
+}

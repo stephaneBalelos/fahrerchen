@@ -60,6 +60,28 @@ export const useStripeStore = defineStore('stripe', () => {
         }
     }
 
+    async function loadStripeAccount(orgid?: string) {
+        const org = orgid || userOrganizationsStore.selectedOrganization?.organization_id;
+        try {
+            if (!org) {
+                throw new Error('No organization selected');
+            }
+    
+            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", org).single();
+            if (error) {
+                throw error;
+            }
+            if (data) {
+                return data;
+            } else {
+                return null;
+            }
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         if (userOrganizationsStore.selectedOrganization) {
             await fetchStripeAccount();
@@ -67,6 +89,6 @@ export const useStripeStore = defineStore('stripe', () => {
     }, { immediate: true })
 
     return {
-        stripeAccount, stripeAppSettings, getStripeSessionSecret, fetchStripeAccount, getStripeAppSettings
+        stripeAccount, stripeAppSettings, getStripeSessionSecret, fetchStripeAccount, getStripeAppSettings, loadStripeAccount
     }
 })

@@ -986,9 +986,11 @@ insert into public.role_permissions (role, permission) values ('manager', 'organ
 create policy "Create organization only if owner is the same as the user who make the request" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
 
 -- Organizations Stripe Accounts Policies
-create policy "Owner & Manager can see organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
+create policy "Everyone in Org can see organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
 insert into public.role_permissions (role, permission) values ('owner', 'organizations_stripe_accounts.read');
 insert into public.role_permissions (role, permission) values ('manager', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'organizations_stripe_accounts.read');
+insert into public.role_permissions (role, permission) values ('student', 'organizations_stripe_accounts.read');
 
 create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.is_main_owner(id));
 

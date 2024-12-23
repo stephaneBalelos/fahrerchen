@@ -58,6 +58,9 @@ export default defineNuxtConfig({
 
   supabase: {
     redirect: true,
+    cookieOptions: {
+      secure: process.env.NODE_ENV === 'production'
+    },
     redirectOptions: {
       login: '/login',
       callback: '/confirm',
