@@ -2,7 +2,7 @@
   "private": true,
   "type": "module",
   "name": "fahrerchen",
-  "version": "0.0.2",
+  "version": "0.2.0",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
