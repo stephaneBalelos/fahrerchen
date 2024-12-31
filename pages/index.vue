@@ -1,12 +1,19 @@
 <template>
     <div>
-        Home page
-
-        <NuxtLink to="/my">My page</NuxtLink>
+        <NuxtLink to="/my">redirect..</NuxtLink>
     </div>
 </template>
 
 <script setup lang="ts">
+
+definePageMeta({
+    layout: 'auth',
+    middleware: [
+        function (to, from) {
+            return navigateTo("/my")
+        }
+    ]
+})
 
 </script>
 

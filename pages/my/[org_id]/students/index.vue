@@ -67,56 +67,56 @@
       </template>
     </UDashboardToolbar>
 
-    <UTable
-      v-model="selected"
-      v-model:sort="sort"
-      :rows="students ?? []"
-      :columns="columns"
-      :loading="status === 'pending'"
-      sort-mode="manual"
-      class="w-full"
-      :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-      @select="onSelect"
-    >
-      <template #name-data="{ row }">
-        <div class="flex items-center gap-3">
-          <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
-
-          <span class="text-gray-900 dark:text-white font-medium">{{
-            row.name
-          }}</span>
-        </div>
-      </template>
-
-      <template #status-data="{ row }">
-        <UBadge
-          :label="row.status ?? 'unknown'"
-          :color="
-            row.status === 'subscribed'
-              ? 'green'
-              : row.status === 'bounced'
-              ? 'orange'
-              : 'red'
-          "
-          variant="subtle"
-          class="capitalize"
-        />
-      </template>
-      <template #actions-data="{ row }">
-        <UButton
-          :to="userOrganizationsStore.relativePath(`/students/${row.id}`)"
-          color="primary"
-          variant="soft"
-          icon="i-heroicons-eye"
-        ></UButton>
-        <UButton
-          color="primary"
-          variant="soft"
-          icon="i-heroicons-pencil"
-          @click="(e) => openStudentForm(row.id)"
-        ></UButton>
-      </template>
-    </UTable>
+    <UDashboardPanelContent class="p-0">
+      <UTable
+        v-model="selected"
+        v-model:sort="sort"
+        :rows="students ?? []"
+        :columns="columns"
+        :loading="status === 'pending'"
+        sort-mode="manual"
+        class="w-full"
+        :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
+        @select="onSelect"
+      >
+        <template #name-data="{ row }">
+          <div class="flex items-center gap-3">
+            <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
+            <span class="text-gray-900 dark:text-white font-medium">{{
+              row.name
+            }}</span>
+          </div>
+        </template>
+        <template #status-data="{ row }">
+          <UBadge
+            :label="row.status ?? 'unknown'"
+            :color="
+              row.status === 'subscribed'
+                ? 'green'
+                : row.status === 'bounced'
+                ? 'orange'
+                : 'red'
+            "
+            variant="subtle"
+            class="capitalize"
+          />
+        </template>
+        <template #actions-data="{ row }">
+          <UButton
+            :to="userOrganizationsStore.relativePath(`/students/${row.id}`)"
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-eye"
+          ></UButton>
+          <UButton
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-pencil"
+            @click="(e) => openStudentForm(row.id)"
+          ></UButton>
+        </template>
+      </UTable>
+    </UDashboardPanelContent>
   </UDashboardPanel>
 </template>
 
