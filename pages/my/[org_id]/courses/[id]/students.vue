@@ -1,43 +1,43 @@
 <template>
-  <div>
-    <UDashboardToolbar>
-      <template #left>
-        <!-- <USelectMenu
-              v-model="selectedStatuses"
-              icon="i-heroicons-check-circle"
-              placeholder="Status"
-              multiple
-              :options="defaultStatuses"
-              :ui-menu="{ option: { base: 'capitalize' } }"
-            />
-            <USelectMenu
-              v-model="selectedLocations"
-              icon="i-heroicons-map-pin"
-              placeholder="Location"
-              :options="defaultLocations"
-              multiple
-            /> -->
-      </template>
+  <UDashboardToolbar>
+    <template #left>
+      <!-- <USelectMenu
+            v-model="selectedStatuses"
+            icon="i-heroicons-check-circle"
+            placeholder="Status"
+            multiple
+            :options="defaultStatuses"
+            :ui-menu="{ option: { base: 'capitalize' } }"
+          />
+          <USelectMenu
+            v-model="selectedLocations"
+            icon="i-heroicons-map-pin"
+            placeholder="Location"
+            :options="defaultLocations"
+            multiple
+          /> -->
+    </template>
 
-      <template #right>
-        <USelectMenu
-          v-model="selectedColumns"
-          icon="i-heroicons-adjustments-horizontal-solid"
-          :options="defaultColumns"
-          multiple
-          class="hidden lg:block"
-        >
-          <template #label> Display </template>
-        </USelectMenu>
-        <UButton
-          label="Add Student"
-          trailing-icon="i-heroicons-plus"
-          color="gray"
-          @click="openAddStudentForm"
-        />
-      </template>
-    </UDashboardToolbar>
+    <template #right>
+      <USelectMenu
+        v-model="selectedColumns"
+        icon="i-heroicons-adjustments-horizontal-solid"
+        :options="defaultColumns"
+        multiple
+        class="hidden lg:block"
+      >
+        <template #label> Display </template>
+      </USelectMenu>
+      <UButton
+        label="Add Student"
+        trailing-icon="i-heroicons-plus"
+        color="gray"
+        @click="openAddStudentForm"
+      />
+    </template>
+  </UDashboardToolbar>
 
+  <UDashboardPanelContent class="p-0">
     <UTable
       v-model="selected"
       v-model:sort="sort"
@@ -52,13 +52,11 @@
       <template #fullname-data="{ row }">
         <div class="flex items-center gap-3">
           <UAvatar :alt="row.fullname" size="xs" />
-
           <span class="text-gray-900 dark:text-white font-medium">{{
             row.fullname
           }}</span>
         </div>
       </template>
-
       <template #status-data="{ row }">
         <UBadge
           :label="row.status"
@@ -83,7 +81,7 @@
         </UDropdown>
       </template>
     </UTable>
-  </div>
+  </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
