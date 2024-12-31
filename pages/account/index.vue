@@ -14,6 +14,8 @@ const isDeleteAccountModalOpen = ref(false);
 const userStore = useUserStore();
 const client = useSupabaseClient<Database>();
 
+const query = useRoute().query
+
 const schema = z.object({
   firstname: z.string().min(2, "Must be at least 2 characters"),
   lastname: z.string().min(2, "Must be at least 2 characters"),
@@ -56,6 +58,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           title: "Profile updated",
           icon: "i-heroicons-check-circle",
         });
+
+        if (query.redirect) {
+          navigateTo(query.redirect as string);
+        }
       }
     } catch (err) {
       toast.add({ title: "Error trying to update the profile", color: "red" });
@@ -79,7 +85,7 @@ onUnmounted(() => {
         >
           <template #links>
             <!-- <UColorModeSelect color="gray" /> -->
-            dsds
+            TODO: Add color mode select
           </template>
         </UDashboardSection>
 

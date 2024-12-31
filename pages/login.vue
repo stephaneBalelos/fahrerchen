@@ -96,7 +96,7 @@ async function onSubmit(credentials: any) {
         return;
     }
 
-    navigateTo('/')   
+    navigateTo('/my')   
 }
 </script>
 

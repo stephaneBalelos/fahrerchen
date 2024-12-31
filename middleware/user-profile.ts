@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     if (data.firstname === null || data.lastname === null) {
-        return '/account?profile=complete'
+        return '/account?redirect=/my'
     }
 
     return
