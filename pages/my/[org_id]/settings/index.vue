@@ -3,9 +3,12 @@ import type { FormError, FormSubmitEvent } from "#ui/types";
 import { title } from "process";
 import * as z from "zod";
 import type { Database } from "~/types/app.types";
+import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 
 const fileRef = ref<HTMLInputElement>();
 const isDeleteAccountModalOpen = ref(false);
+
+const config = useRuntimeConfig().public
 
 const userOrganizationStore = useUserOrganizationsStore();
 const route = useRoute();
@@ -36,39 +39,111 @@ const {
   }
 
   return data;
+}, {
+  transform: (data) => {
+    const avatar_path = data.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}` : '';
+    console.log(avatar_path)
+    return {
+      ...data,
+      avatar_path,
+    };
+  },
 });
 
 const schema = z.object({
   name: z.string({
-    required_error: g('form_errors.required', {field: t('settings.name.label') })
+    required_error: g("form_errors.required", {
+      field: t("settings.name.label"),
+    }),
   }),
-  email: z.string({
-    required_error: g('form_errors.required', {field: t('settings.email.label') })
-  }).email(g("form_errors.email")),
-  phone_number: z.string()
-  .min(3, g('form_errors.min', {field: t('settings.phone_number.label'), min: 3}))
-  .max(20, g('form_errors.max', {field: t('settings.phone_number.label'), max: 20}))
-  .optional(),
+  email: z
+    .string({
+      required_error: g("form_errors.required", {
+        field: t("settings.email.label"),
+      }),
+    })
+    .email(g("form_errors.email")),
+  phone_number: z
+    .string()
+    .min(
+      3,
+      g("form_errors.min", { field: t("settings.phone_number.label"), min: 3 })
+    )
+    .max(
+      20,
+      g("form_errors.max", { field: t("settings.phone_number.label"), max: 20 })
+    )
+    .optional(),
   website: z.string().optional(),
-  description: z.string()
-  .max(255, g('form_errors.max', {field: t('settings.org_description.label'), max: 255}))
-  .optional(),
-  address_street: z.string()
-  .min(3, g('form_errors.min', {field: t('settings.address.street.label'), min: 3}))
-  .max(255, g('form_errors.max', {field: t('settings.address.street.label'), max: 255}))
-  .optional(),
-  address_city: z.string()
-  .min(3, g('form_errors.min', {field: t('settings.address.city.label'), min: 3}))
-  .max(255, g('form_errors.max', {field: t('settings.address.city.label'), max: 255}))
-  .optional(),
-  address_zip: z.string()
-  .min(3, g('form_errors.min', {field: t('settings.address.zip.label'), min: 3}))
-  .max(20, g('form_errors.max', {field: t('settings.address.zip.label'), max: 20}))
-  .optional(),
-  address_country: z.string()
-  .min(3, g('form_errors.min', {field: t('settings.address.country.label'), min: 3}))
-  .max(255, g('form_errors.max', {field: t('settings.address.country.label'), max: 255}))
-  .optional(),
+  description: z
+    .string()
+    .max(
+      255,
+      g("form_errors.max", {
+        field: t("settings.org_description.label"),
+        max: 255,
+      })
+    )
+    .optional(),
+  address_street: z
+    .string()
+    .min(
+      3,
+      g("form_errors.min", {
+        field: t("settings.address.street.label"),
+        min: 3,
+      })
+    )
+    .max(
+      255,
+      g("form_errors.max", {
+        field: t("settings.address.street.label"),
+        max: 255,
+      })
+    )
+    .optional(),
+  address_city: z
+    .string()
+    .min(
+      3,
+      g("form_errors.min", { field: t("settings.address.city.label"), min: 3 })
+    )
+    .max(
+      255,
+      g("form_errors.max", {
+        field: t("settings.address.city.label"),
+        max: 255,
+      })
+    )
+    .optional(),
+  address_zip: z
+    .string()
+    .min(
+      3,
+      g("form_errors.min", { field: t("settings.address.zip.label"), min: 3 })
+    )
+    .max(
+      20,
+      g("form_errors.max", { field: t("settings.address.zip.label"), max: 20 })
+    )
+    .optional(),
+  address_country: z
+    .string()
+    .min(
+      3,
+      g("form_errors.min", {
+        field: t("settings.address.country.label"),
+        min: 3,
+      })
+    )
+    .max(
+      255,
+      g("form_errors.max", {
+        field: t("settings.address.country.label"),
+        max: 255,
+      })
+    )
+    .optional(),
   allow_self_registration: z.boolean().optional(),
   preferred_language: z.string().optional(),
 });
@@ -127,7 +202,8 @@ async function onSubmit(event: FormSubmitEvent<any>) {
         address_zip: state.address_zip,
         address_country: state.address_country,
         avatar_path: state.avatar_path,
-      }).eq("id", org.value.id);
+      })
+      .eq("id", org.value.id);
 
     if (error) {
       throw error;
@@ -281,18 +357,10 @@ function onError(error: FormError) {
             }"
           >
             <UAvatar :src="state.avatar_path" :alt="state.name" size="lg" />
-            <UButton
-              :label="t('settings.avatar.upload')"
-              color="white"
-              size="md"
-              @click="onFileClick"
-            />
-            <input
-              ref="fileRef"
-              type="file"
-              class="hidden"
-              accept=".jpg, .jpeg, .png, .gif"
-              @change="onFileChange"
+            <FileUploader
+              v-if="org"
+              :bucket-id="'organizations_avatars'"
+              :path="org.id"
             />
           </UFormGroup>
           <UFormGroup
@@ -396,7 +464,7 @@ function onError(error: FormError) {
       },
       "avatar": {
         "label": "Profilbild",
-        "help": "Ein Bild, das Ihre Fahrschule repräsentiert.",
+        "help": "Der Logo Ihrer Fahrschule. Dieses Bild wird auf Rechnungen, Rechnungen und anderen Kommunikationsmitteln angezeigt.",
         "upload": "Bild hochladen"
       },
       "org_description": {
@@ -455,7 +523,7 @@ function onError(error: FormError) {
       },
       "avatar": {
         "label": "Profile picture",
-        "help": "An image that represents your school.",
+        "help": "The logo of your school. This image will appear on receipts, invoices, and other communication.",
         "upload": "Upload image"
       },
       "org_description": {

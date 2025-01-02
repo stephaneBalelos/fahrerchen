@@ -4,12 +4,11 @@
       color="white"
       variant="solid"
       size="md"
-      :block="true"
       icon="i-heroicons-arrow-up-tray"
       trailing
-      @click="fileRef?.click()"
       :loading="uploadState === 'uploading'"
       :disabled="uploadState === 'uploading'"
+      @click="fileRef?.click()"
       >{{ fileName ? fileName : t("choose_file") }}</UButton
     >
     <UProgress
@@ -30,7 +29,7 @@
       <span v-if="uploadErrorType">{{ t(`upload_failed_${uploadErrorType}`) }}</span>
     </template>
     </UAlert>
-    <input class="hidden" ref="fileRef" type="file" @change="onChange" />
+    <input ref="fileRef" class="hidden" type="file" @change="onChange" >
   </slot>
 </template>
 
@@ -61,7 +60,7 @@ const uploadErrorType = ref<"too_large" | "invalid_extension" | null>(null);
 const uploadProgress = ref(0);
 const upload = ref();
 
-function onChange($event: Event) {
+function onChange(_$event: Event) {
   if (fileRef.value && fileRef.value.files) {
     onFileChange(fileRef.value.files);
   }
