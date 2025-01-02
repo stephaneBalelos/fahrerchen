@@ -805,11 +805,16 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           allow_self_registration: boolean
+          avatar_path: string | null
+          description: string | null
+          email: string | null
           id: string
           inserted_at: string
           name: string
           owner_id: string
+          phone_number: string | null
           preferred_language: string
+          website: string | null
         }
         Insert: {
           address_city?: string | null
@@ -817,11 +822,16 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           allow_self_registration?: boolean
+          avatar_path?: string | null
+          description?: string | null
+          email?: string | null
           id?: string
           inserted_at?: string
           name: string
           owner_id: string
+          phone_number?: string | null
           preferred_language?: string
+          website?: string | null
         }
         Update: {
           address_city?: string | null
@@ -829,11 +839,16 @@ export type Database = {
           address_street?: string | null
           address_zip?: string | null
           allow_self_registration?: boolean
+          avatar_path?: string | null
+          description?: string | null
+          email?: string | null
           id?: string
           inserted_at?: string
           name?: string
           owner_id?: string
+          phone_number?: string | null
           preferred_language?: string
+          website?: string | null
         }
         Relationships: [
           {
@@ -1248,6 +1263,41 @@ export type Database = {
           },
         ]
       }
+      organization_members_view: {
+        Row: {
+          id: string | null
+          inserted_at: string | null
+          organization_id: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          user_email: string | null
+          user_firstname: string | null
+          user_id: string | null
+          user_lastname: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations_view: {
         Row: {
           address_city: string | null
@@ -1276,6 +1326,13 @@ export type Database = {
       }
     }
     Functions: {
+      are_users_in_same_organization: {
+        Args: {
+          user_id_1: string
+          user_id_2: string
+        }
+        Returns: boolean
+      }
       authorize: {
         Args: {
           requested_permission: Database["public"]["Enums"]["app_permission"]
@@ -1307,6 +1364,12 @@ export type Database = {
           self_registered: boolean
           user_id: string | null
         }
+      }
+      is_main_owner: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
       }
       send_transactional_email: {
         Args: {

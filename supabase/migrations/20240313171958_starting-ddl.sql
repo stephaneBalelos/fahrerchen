@@ -109,7 +109,13 @@ alter table public.users enable row level security;
 create table public.organizations (
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
+  -- handle        text not null unique check (handle ~ '^[a-z0-9_]+$'),
+  avatar_path    text,
   name          text not null,
+  description       text,
+  email         text,
+  phone_number    text,
+  website       text,
   allow_self_registration  boolean default true not null,
   preferred_language    text default 'de' not null,
   address_street  text,
