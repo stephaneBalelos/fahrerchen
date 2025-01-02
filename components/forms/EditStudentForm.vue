@@ -44,7 +44,6 @@
               <DatePicker
                 v-model="state.birth_date"
                 is-required
-                @close="close"
               />
             </template>
           </UPopover>

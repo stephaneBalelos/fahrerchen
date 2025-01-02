@@ -107,7 +107,6 @@
                 <DatePicker
                   v-model="state.start_at"
                   is-required
-                  @close="close"
                   @update:model-value="onUpdateStartDate"
                 />
               </template>
@@ -122,7 +121,7 @@
                 />
               </div>
               <template #panel="{ close }">
-                <DatePicker v-model="state.end_at" is-required @close="close" />
+                <DatePicker v-model="state.end_at" is-required />
               </template>
             </UPopover>
           </div>

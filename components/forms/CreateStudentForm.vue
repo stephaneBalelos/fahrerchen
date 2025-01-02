@@ -17,7 +17,7 @@
       />
 
       <template #panel="{ close }">
-        <DatePicker v-model="state.birth_date" is-required @close="close" />
+        <DatePicker v-model="state.birth_date" is-required />
       </template>
     </UPopover>
 
