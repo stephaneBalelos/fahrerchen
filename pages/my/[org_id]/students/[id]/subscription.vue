@@ -32,28 +32,31 @@
         />
       </UDashboardCard>
       <UDivider />
-        <UDashboardCard :title="t('archive_subscription_label')" :description="t('archive_subscription_description')">
-            <template #links>
-            <UButton
-                variant="ghost"
-                color="primary"
-                @click="_archiveSubscription"
-            >
-                {{ t("archive_subscription") }}
-            </UButton>
-            </template>
-        </UDashboardCard>
-        <UDashboardCard :title="t('delete_subscription_label')" :description="t('delete_subscription_description')">
-            <template #links>
-            <UButton
-                variant="ghost"
-                color="red"
-                @click="_deleteSubscription"
-            >
-                {{ t("delete_subscription") }}
-            </UButton>
-            </template>
-        </UDashboardCard>
+      <UDashboardCard
+        v-if="!data?.archived_at"
+        :title="t('archive_subscription_label')"
+        :description="t('archive_subscription_description')"
+      >
+        <template #links>
+          <UButton
+            variant="ghost"
+            color="primary"
+            @click="_archiveSubscription"
+          >
+            {{ t("archive_subscription") }}
+          </UButton>
+        </template>
+      </UDashboardCard>
+      <UDashboardCard
+        :title="t('delete_subscription_label')"
+        :description="t('delete_subscription_description')"
+      >
+        <template #links>
+          <UButton variant="ghost" color="red" @click="_deleteSubscription">
+            {{ t("delete_subscription") }}
+          </UButton>
+        </template>
+      </UDashboardCard>
     </div>
   </UDashboardSection>
 </template>
@@ -74,7 +77,9 @@ const props = useAttrs() as Props;
 
 const client = useSupabaseClient<Database>();
 
-const { data } = useAsyncData(
+const toast = useToast();
+
+const { data, refresh } = useAsyncData(
   `course_progression_${props.subscription_id}`,
   async () => {
     const { data, error } = await client
@@ -93,8 +98,34 @@ const { data } = useAsyncData(
   }
 );
 
-function _archiveSubscription() {
-  console.log("archive subscription");
+async function _archiveSubscription() {
+  try {
+    const { error } = await client
+      .from("course_subscriptions")
+      .update({
+        archived_at: new Date().toISOString(),
+      })
+      .eq("id", props.subscription_id);
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    toast.add({
+      title: t("subscription_archived"),
+      description: t("subscription_archived_description"),
+      color: "green",
+    });
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "An error occurred while archiving the subscription.",
+      color: "red",
+    });
+  } finally {
+    refresh();
+  }
 }
 
 function _deleteSubscription() {
@@ -117,7 +148,9 @@ function _deleteSubscription() {
     "archive_subscription": "Archivieren",
     "delete_subscription_label": "Subscription löschen",
     "delete_subscription_description": "Löschen dieses Student dauerhaft aus dem Kurs.",
-    "delete_subscription": "Aus dem Kurs austragen"
+    "delete_subscription": "Aus dem Kurs austragen",
+    "subscription_archived": "Subscription archiviert",
+    "subscription_archived_description": "Der Student wurde erfolgreich aus dem Kurs archiviert."
   },
   "en": {
     "course_subscription": "Course Subscription",
@@ -130,7 +163,9 @@ function _deleteSubscription() {
     "archive_subscription": "Archive Subscription",
     "delete_subscription_label": "Delete Subscription",
     "delete_subscription_description": "Unsubscribe this student from the course permanently.",
-    "delete_subscription": "Unsubscribe from course"
+    "delete_subscription": "Unsubscribe from course",
+    "subscription_archived": "Subscription archived",
+    "subscription_archived_description": "The student has been successfully archived from the course."
   }
 }
 </i18n>

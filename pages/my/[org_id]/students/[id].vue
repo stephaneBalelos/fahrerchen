@@ -13,7 +13,15 @@
           :option-attribute="'course_name'"
         >
           <template #label>
-            <div v-if="selectedSubscriptionId">
+            <div v-if="selectedSubscriptionId" class="flex gap-2 items-center">
+              <UBadge
+                v-if="
+                  subscriptions.find((sub) => sub.id === selectedSubscriptionId)
+                    ?.archived_at
+                "
+                size="sm"
+                >{{ t("archive") }}</UBadge
+              >
               <span>{{
                 subscriptions.find((sub) => sub.id === selectedSubscriptionId)
                   ?.course_name
@@ -100,6 +108,7 @@ const links = [
   "de": {
     "title": "Student",
     "active": "Aktiv",
+    "archive": "Archiv",
     "overview": "Überblick",
     "bills": "Rechnungen",
     "subscription": "Abonnement"
@@ -107,6 +116,7 @@ const links = [
   "en": {
     "title": "Student",
     "active": "Active",
+    "archive": "Archive",
     "overview": "Overview",
     "bills": "Bills",
     "subscription": "Subscription"
