@@ -2,11 +2,16 @@
   <UDashboardSection
     title="Student Activities"
     description="All activities of the student"
-    orientation="horizontal"
     class="px-4 mt-6"
   >
   <template #links>
-
+    <UButton
+      variant="ghost"
+      color="primary"
+      @click="openAddActivityAttendance"
+    >
+      Add Activity Attendance
+    </UButton>
   </template>
     <div v-if="status === 'pending'">Loading...</div>
     <div v-else-if="status === 'error'">Error: {{ error }}</div>
@@ -33,8 +38,6 @@ const props = defineProps<{
 }>();
 
 const client = useSupabaseClient<Database>();
-const slideover = useSlideover();
-const userOrganizationsStore = useUserOrganizationsStore();
 
 
 const { data: activities, error, status } = useAsyncData(`student_${props.subscription_id}_activities`, async () => {
@@ -47,6 +50,10 @@ const { data: activities, error, status } = useAsyncData(`student_${props.subscr
   }
   return data;
 });
+
+const openAddActivityAttendance = () => {
+  console.log('openAddActivityAttendance');
+};
 
 
 </script>
