@@ -1,7 +1,7 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
+      <UDashboardToolbar>
         <UHorizontalNavigation :links="links" />
       </UDashboardToolbar>
       <NuxtPage :courseid="courseid" />
@@ -10,6 +10,7 @@
 </template>
 
 <script setup lang="ts">
+
 definePageMeta({
   layout: "orgs",
 });

@@ -1,4 +1,5 @@
 <template>
+  <UDashboardPanelContent class="p-0">
   <UDashboardToolbar>
     <template #left>
       <!-- <USelectMenu
@@ -37,7 +38,6 @@
     </template>
   </UDashboardToolbar>
 
-  <UDashboardPanelContent class="p-0">
     <UTable
       v-model="selected"
       v-model:sort="sort"
@@ -94,7 +94,6 @@ import type {
   Database,
 } from "~/types/app.types";
 
-const route = useRoute();
 const slideover = useSlideover();
 const { courseid } = useAttrs() as Props;
 const userOrganizationsStore = useUserOrganizationsStore();
