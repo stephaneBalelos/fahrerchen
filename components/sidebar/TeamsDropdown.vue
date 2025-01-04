@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import type { AppOrganization, Database } from "~/types/app.types";
+import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
-const user = useSupabaseUser();
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
 
-const {
-  data: organizations,
-  error,
-  status,
-} = await useAsyncData(
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { data: organizations } = await useAsyncData(
   "user_organizations_select",
   async () => {
     const { data, error } = await client
@@ -33,7 +32,7 @@ const {
     watch: [userOrganizationsStore.organizations],
     immediate: true,
     transform: (data) => {
-      return data.map((d, index) => {
+      return data.map((d) => {
         return {
           id: d.id,
           label: d.name,
@@ -60,7 +59,7 @@ const actions = computed(() => {
     selectedOrganization
   ) {
     items.push({
-      label: "Settings",
+      label: t("settings"),
       icon: "i-heroicons-cog-8-tooth",
       click: () => {
         navigateTo(`/my/${selectedOrganization.organization_id}/settings`);
@@ -69,7 +68,7 @@ const actions = computed(() => {
   }
 
   items.push({
-    label: "Zurück zu den Teams",
+    label: t("back_to_home"),
     click: () => {
       navigateTo("/my");
     },
@@ -86,8 +85,8 @@ const selectedOrganization = computed(() => {
 
 <template>
   <UDropdown
-    id="teams-dropdown"
     v-if="organizations"
+    id="teams-dropdown"
     v-slot="{ open }"
     mode="hover"
     :items="[organizations, actions]"
@@ -114,3 +113,16 @@ const selectedOrganization = computed(() => {
     </UButton>
   </UDropdown>
 </template>
+
+<i18n lang="json">
+{
+  "de": {
+    "settings": "Einstellungen",
+    "back_to_home": "Zurück zur Startseite"
+  },
+  "en": {
+    "settings": "Settings",
+    "back_to_home": "Back to Home"
+  }
+}
+</i18n>
