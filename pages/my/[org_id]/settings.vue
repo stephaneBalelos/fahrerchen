@@ -7,37 +7,35 @@ definePageMeta({
 
 const userOrganizationsStore = useUserOrganizationsStore();
 
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const links = [
   [
     {
-      label: "General",
-      icon: "i-heroicons-user-circle",
+      label: t("settings"),
+      icon: "i-heroicons-cog",
       to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings`,
       exact: true,
     },
     {
-      label: "Members",
+      label: t("members"),
       icon: "i-heroicons-user-group",
       to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
     },
     {
-      label: "Payments",
-      icon: "i-heroicons-bell",
+      label: t("payments"),
+      icon: "i-heroicons-credit-card",
       to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
     },
   ],
   [
     {
-      label: "Documentation",
+      label: "Documentation [not implemented]",
       icon: "i-heroicons-book-open",
-      to: "https://ui.nuxt.com/pro",
       target: "_blank",
-    },
-    {
-      label: "Subscription",
-      icon: "i-heroicons-credit-card",
-      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/subscription`,
-    },
+    }
   ],
 ];
 </script>
@@ -52,3 +50,22 @@ const links = [
     </UDashboardPanel>
   </UDashboardPage>
 </template>
+
+<i18n lang="json">
+{
+  "en": {
+    "settings": "Settings",
+    "members": "Members",
+    "payments": "Payments",
+    "documentation": "Documentation",
+    "subscription": "Subscription"
+  },
+  "de": {
+    "settings": "Einstellungen",
+    "members": "Mitglieder",
+    "payments": "Zahlungen",
+    "documentation": "Dokumentation",
+    "subscription": "Abonnement"
+  }
+}
+</i18n>
