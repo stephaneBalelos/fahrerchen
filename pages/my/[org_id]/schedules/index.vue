@@ -8,7 +8,7 @@
             <FormsInputsDatepicker
               v-model="selectedDate"
               expanded
-            ></FormsInputsDatepicker>
+            />
           </UDashboardCard>
           <UDashboardCard>
             <UFormGroup :label="t('form.assigned_to.label')" :description="t('form.assigned_to.description')" name="assigned_to">
@@ -16,7 +16,7 @@
                 v-model="filterForm.assigned_to"
                 label="Assigned to"
                 :orgid="$route.params.org_id"
-              ></FormsInputsUserSelect>
+              />
             </UFormGroup>
           </UDashboardCard>
           <UDashboardCard>
@@ -81,14 +81,14 @@ const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const selectedDate = ref(new Date());
 
-const schema = z.object({
+const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
   course_id: z.string().uuid().optional(),
   student_id: z.string().uuid().optional(),
   status: z.enum(["PLANNED", "CANCELLED", "COMPLETED"]),
 });
 
-type FilterForm = z.infer<typeof schema>;
+type FilterForm = z.infer<typeof _schema>;
 
 const filterForm = ref<FilterForm>({
   assigned_to: undefined,
@@ -99,8 +99,6 @@ const filterForm = ref<FilterForm>({
 
 const {
   data: schedules,
-  error,
-  status,
 } = useAsyncData(
   async () => {
 
