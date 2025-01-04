@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 definePageMeta({
   layout: "orgs",
 });
@@ -11,33 +9,35 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const links = [
-  [
-    {
-      label: t("settings"),
-      icon: "i-heroicons-cog",
-      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings`,
-      exact: true,
-    },
-    {
-      label: t("members"),
-      icon: "i-heroicons-user-group",
-      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
-    },
-    {
-      label: t("payments"),
-      icon: "i-heroicons-credit-card",
-      to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
-    },
-  ],
-  [
-    {
-      label: "Documentation [not implemented]",
-      icon: "i-heroicons-book-open",
-      target: "_blank",
-    }
-  ],
-];
+const links = computed(() => {
+  return [
+    [
+      {
+        label: t("settings"),
+        icon: "i-heroicons-cog",
+        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings`,
+        exact: true,
+      },
+      {
+        label: t("members"),
+        icon: "i-heroicons-user-group",
+        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
+      },
+      {
+        label: t("payments"),
+        icon: "i-heroicons-credit-card",
+        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
+      },
+    ],
+    [
+      {
+        label: "Documentation [not implemented]",
+        icon: "i-heroicons-book-open",
+        target: "_blank",
+      },
+    ],
+  ];
+});
 </script>
 
 <template>
@@ -53,19 +53,19 @@ const links = [
 
 <i18n lang="json">
 {
-  "en": {
-    "settings": "Settings",
-    "members": "Members",
-    "payments": "Payments",
-    "documentation": "Documentation",
-    "subscription": "Subscription"
-  },
   "de": {
     "settings": "Einstellungen",
     "members": "Mitglieder",
     "payments": "Zahlungen",
     "documentation": "Dokumentation",
     "subscription": "Abonnement"
+  },
+  "en": {
+    "settings": "Settings",
+    "members": "Members",
+    "payments": "Payments",
+    "documentation": "Documentation",
+    "subscription": "Subscription"
   }
 }
 </i18n>

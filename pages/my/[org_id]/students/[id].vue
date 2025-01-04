@@ -84,21 +84,25 @@ const { data: subscriptions } = useAsyncData(
   }
 );
 
-const links = [
-  {
-    label: t("overview"),
-    to: `/my/${org_id}/students/${student_id}`,
-    exact: true,
-  },
-  {
-    label: t("bills"),
-    to: `/my/${org_id}/students/${student_id}/bills`,
-  },
-  {
-    label: t("subscription"),
-    to: `/my/${org_id}/students/${student_id}/subscription`,
-  },
-];
+const links = computed(() => {
+  return [
+    [
+      {
+        label: t("overview"),
+        to: `/my/${org_id}/students/${student_id}`,
+        exact: true,
+      },
+      {
+        label: t("bills"),
+        to: `/my/${org_id}/students/${student_id}/bills`,
+      },
+      {
+        label: t("subscription"),
+        to: `/my/${org_id}/students/${student_id}/subscription`,
+      },
+    ],
+  ];
+});
 </script>
 
 <style scoped></style>
