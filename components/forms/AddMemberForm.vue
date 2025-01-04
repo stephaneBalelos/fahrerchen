@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from "#ui/types";
-import path from "path";
-import { z } from "zod";
 import type { UserRole } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 
 const props = defineProps<{
   orgid: string;
 }>();
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { t:g } = useI18n({
+  useScope: "global",
+});
 
 const emit = defineEmits(["close"]);
 
@@ -19,14 +25,13 @@ type AddMemberFormProps = {
 
 const toasts = useToast();
 
-const roles: UserRole[] = ["manager", "owner", "student", "teacher"];
+const roles: UserRole[] = ["owner", "manager", "teacher", "student"];
 
 const state = reactive<AddMemberFormProps>({
   role: "manager",
   email: "",
 });
 
-// https://ui.nuxt.com/components/form
 const validate = (state: AddMemberFormProps): FormError[] => {
   const errors = [];
   if (!state.email)
@@ -38,6 +43,9 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   const orgId = props.orgid
+
+  console.log(event.data)
+  return 
   if (orgId) {
     const {data, error} = await client.functions.invoke("invite-user", {
     method: 'POST',
@@ -71,38 +79,77 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
 
 <template>
   <UForm
+  id="add-member-form"
     :validate="validate"
     :validate-on="['submit']"
     :state="state"
     class="space-y-4"
     @submit="onSubmit"
-    id="add-member-form"
   >
-    <UFormGroup label="Email" name="email">
+    <UFormGroup :label="t('form.email.label')" name="email">
       <UInput
         v-model="state.email"
         type="email"
-        placeholder="john.doe@example.com"
+        :placeholder="t('form.email.placeholder')"
         autofocus
       />
     </UFormGroup>
 
-    <UFormGroup label="Role" name="role">
+    <UFormGroup :label="t('form.role.label')" name="role">
       <USelectMenu
         v-model="state.role"
         :options="roles"
-        :ui-menu="{ select: 'capitalize', option: { base: 'capitalize' } }"
-      />
+      >
+        <template #option="{ option }">
+          {{ g(`roles.${option}`) }}
+        </template>
+
+        <template #label>
+          {{ g(`roles.${state.role}`) }}
+        </template>
+      </USelectMenu>
     </UFormGroup>
 
     <div class="flex justify-end gap-3">
       <UButton
-        label="Cancel"
+        :label="t('cancel')"
         color="gray"
         variant="ghost"
         @click="emit('close')"
       />
-      <UButton type="submit" label="Save" color="black" />
+      <UButton type="submit" :label="t('invite')" color="black" />
     </div>
   </UForm>
 </template>
+
+<i18n lang="json">
+{
+  "de": {
+    "form": {
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "maxmuestermannweb.de"
+      },
+      "role": {
+        "label": "Rolle"
+      }
+    },
+    "cancel": "Abbrechen",
+    "invite": "Einladen"   
+
+  },
+  "en": {
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "johndoegmail.com"
+      },
+      "role": {
+        "label": "Role"
+      }
+    },
+    "cancel": "Cancel",
+    "invite": "Invite"
+  }
+}
+</i18n>

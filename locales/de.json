@@ -2,6 +2,12 @@
     "welcome": "Willkommen",
     "lang_en": "Englisch",
     "lang_de": "Deutsch",
+    "roles": {
+        "owner": "Besitzer:in / Eigentümer:in",
+        "manager": "Manager:in",
+        "teacher": "Lehrer:in",
+        "student": "Schüler:in"
+    },
     "form_errors": {
         "required": "Bitte geben sie {field} ein",
         "min": "{field} muss mindestens {min} Zeichen einhalten",

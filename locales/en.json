@@ -2,6 +2,12 @@
     "welcome": "Welcome",
     "lang_en": "English",
     "lang_de": "German",
+    "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "teacher": "Teacher",
+        "student": "Student"
+    },
     "form_errors": {
         "required": "Please enter {field}",
         "min": "{field} must be at least {min} characters",
