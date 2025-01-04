@@ -6,6 +6,10 @@
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
 
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const links = computed(() => {
   const selectedOrganization = userOrganizationsStore.selectedOrganization;
   if (!selectedOrganization) {
@@ -15,24 +19,24 @@ const links = computed(() => {
 
   items.push({
     id: "dashboard",
-    label: "Dashboard [NOT IMPLEMENTED]",
+    label: t("dashboard"),
     icon: "i-heroicons-chart-pie",
     to: `/my/${selectedOrganization.organization_id}`,
     exact: true,
     tooltip: {
-      text: "Dashboard",
+      text: t("dashboard"),
       shortcuts: ["G", "D"],
     },
   });
 
   items.push({
     id: "schedules",
-    label: "Schedules",
+    label: t("schedules"),
     icon: "i-heroicons-calendar",
     to: `/my/${selectedOrganization.organization_id}/schedules`,
     exact: true,
     tooltip: {
-      text: "Schedules",
+      text: t("schedules"),
       shortcuts: ["G", "S"],
     },
   });
@@ -40,12 +44,12 @@ const links = computed(() => {
 
   items.push({
     id: "courses",
-    label: "Courses",
+    label: t("courses"),
     icon: "i-heroicons-book-open",
     to: `/my/${selectedOrganization.organization_id}/courses`,
     exact: true,
     tooltip: {
-      text: "Courses",
+      text: t("courses"),
       shortcuts: ["G", "C"],
     },
   });
@@ -53,12 +57,12 @@ const links = computed(() => {
   if (userPermissionStore.hasPermission("students.read")) {
     items.push({
       id: "students",
-      label: "Students",
+      label: t("students"),
       icon: "i-heroicons-users",
       to: `/my/${selectedOrganization.organization_id}/students`,
       exact: true,
       tooltip: {
-        text: "Students",
+        text: t("students"),
         shortcuts: ["G", "U"],
       },
     });
@@ -66,12 +70,12 @@ const links = computed(() => {
 
   items.push({
     id: "bills",
-    label: "Bills",
+    label: t("bills"),
     icon: "i-heroicons-credit-card",
     to: `/my/${selectedOrganization.organization_id}/bills/`,
     exact: true,
     tooltip: {
-      text: "Bills",
+      text: t("bills"),
       shortcuts: ["G", "B"],
     },
   });
@@ -79,27 +83,27 @@ const links = computed(() => {
   if (userPermissionStore.hasPermission("organizations.update")) {
     items.push({
       id: "settings",
-      label: "Settings",
+      label: t("settings"),
       icon: "i-heroicons-cog-8-tooth",
       to: `/my/${selectedOrganization.organization_id}/settings`,
       exact: true,
       children: [
         {
-          label: "General [NOT IMPLEMENTED]",
+          label: t("general"),
           to: `/my/${selectedOrganization.organization_id}/settings`,
           exact: true,
         },
         {
-          label: "Members",
+          label: t("members"),
           to: `/my/${selectedOrganization.organization_id}/settings/members`,
         },
         {
-          label: "Payments",
+          label: t("payments"),
           to: `/my/${selectedOrganization.organization_id}/settings/payments`,
         },
       ],
       tooltip: {
-        text: "Settings",
+        text: t("settings"),
         shortcuts: ["G", "S"],
       },
     });
@@ -110,3 +114,30 @@ const links = computed(() => {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "dashboard": "Dashboard",
+    "schedules": "Stundenpläne",
+    "courses": "Kurse",
+    "students": "Schüler",
+    "bills": "Rechnungen",
+    "settings": "Einstellungen",
+    "general": "Allgemein",
+    "members": "Mitglieder",
+    "payments": "Zahlungen"
+  },
+  "en": {
+    "dashboard": "Dashboard",
+    "schedules": "Schedules",
+    "courses": "Courses",
+    "students": "Students",
+    "bills": "Bills",
+    "settings": "Settings",
+    "general": "General",
+    "members": "Members",
+    "payments": "Payments"
+  }
+}
+</i18n>
