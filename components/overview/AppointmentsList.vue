@@ -28,7 +28,7 @@
           </p>
         </NuxtLink>
     </div>
-    <div class="min-h-96 flex flex-col items-center justify-center" v-else>
+    <div v-else class="min-h-96 flex flex-col items-center justify-center">
         <UIcon name="i-heroicons-circle-stack" class="w-5 h-5" />
         <p class="text-gray-500 dark:text-gray-400">
             {{ t('no_appointments') }}
@@ -54,7 +54,7 @@ if (!userOrganizationsStore.selectedOrganization) {
     throw new Error('No active organization')
 }
 
-const { data:schedules, error, status } = useAsyncData(async () => {
+const { data:schedules } = useAsyncData(async () => {
     if (!userOrganizationsStore.selectedOrganization) {
         throw new Error('No active organization')
     }
