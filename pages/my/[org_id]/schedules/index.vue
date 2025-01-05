@@ -83,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { endOfDay, endOfMonth, startOfDay, startOfMonth } from "date-fns";
+import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from "date-fns";
 import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
@@ -188,6 +188,20 @@ const { data: schedulesForMonth } = useAsyncData(
   },
   {
     watch: [selectedDate],
+    transform: (data) => {
+      // reduce duplicate dates
+      const datesString: string[] = []
+      return data.filter((schedule) => {
+        const date = format(new Date(schedule.start_at), "yyyy-MM-dd");
+        if (datesString.includes(date)) {
+          return false;
+        }
+        datesString.push(date);
+        return true;
+      });
+
+
+    }
   }
 );
 </script>
