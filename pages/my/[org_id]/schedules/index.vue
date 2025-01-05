@@ -1,6 +1,9 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardToolbar> {{ selectedDate.toISOString() }} </UDashboardToolbar>
+    <UDashboardToolbar>
+      <p class="text-lg font-semibold">{{ t("schedules") }}</p>
+      <USelectMenu v-model="selectedView" :options="views" :option-attribute="'label'" :value-attribute="'value'" />
+    </UDashboardToolbar>
     <div class="flex h-full">
       <UDashboardPanel :width="400">
         <UDashboardPanelContent class="gap-4">
@@ -42,7 +45,7 @@
       </UDashboardPanel>
       <UDashboardPanel grow>
         <div class="h-full">
-          <div class="absolute inset-0 overflow-y-auto">
+          <div v-if="selectedView == 'list'" class="absolute inset-0 overflow-y-auto">
             <div
               v-if="schedules && schedules.length > 0"
               class="flex flex-col gap-4 p-4"
@@ -57,6 +60,20 @@
               <p class="text-gray-500">{{ t("no_schedule_found") }}</p>
             </div>
           </div>
+          <div v-else>
+            <AppCalendar
+              v-if="schedules"
+              :selected-date="selectedDate"
+              :view="'week'"
+              :events="schedules.map((schedule) => ({
+                label: `${schedule.course_name} | ${schedule.activity_name}`,
+                id: schedule.id,
+                date: new Date(schedule.start_at),
+                start: new Date(schedule.start_at),
+                end: new Date(schedule.end_at),
+              }))"
+            />
+          </div>
         </div>
       </UDashboardPanel>
     </div>
@@ -64,8 +81,9 @@
 </template>
 
 <script setup lang="ts">
-import { startOfDay } from "date-fns";
+import { endOfDay, startOfDay } from "date-fns";
 import * as z from "zod";
+import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
 import type { Database } from "~/types/app.types";
 
@@ -76,6 +94,12 @@ const { t } = useI18n({
 const { t:g } = useI18n({
   useScope: "global",
 });
+
+const selectedView = ref("calendar");
+const views = computed(() => [
+  { label: t("list_view"), value: "list" },
+  { label: t("calendar_view"), value: "calendar" },
+]);
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -102,7 +126,8 @@ const {
 } = useAsyncData(
   async () => {
 
-    const date = startOfDay(selectedDate.value);
+    const dateStart = startOfDay(selectedDate.value);
+    const dateEnd = endOfDay(selectedDate.value);
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
@@ -110,7 +135,8 @@ const {
     const promise = client.from("course_activity_schedules_view").select();
 
     if (selectedDate.value) {
-      promise.gte("start_at", date.toISOString());
+      promise.gte("start_at", dateStart.toISOString());
+      promise.lte("end_at", dateEnd.toISOString());
     }
 
     if (filterForm.value.assigned_to) {
@@ -145,6 +171,9 @@ const {
 <i18n lang="json">
 {
     "de": {
+        "list_view": "Liste Ansicht",
+        "calendar_view": "Kalender Ansicht",
+        "schedules": "Termine",
         "no_schedule_found": "Keine Termine gefunden",
         "form": {
             "assigned_to": {
@@ -166,6 +195,9 @@ const {
         }
     },
     "en": {
+        "list_view": "List view",
+        "calendar_view": "Calendar view",
+        "schedules": "Schedules",
         "no_schedule_found": "No schedules found",
         "form": {
             "assigned_to": {
