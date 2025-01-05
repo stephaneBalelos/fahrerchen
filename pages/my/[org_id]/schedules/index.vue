@@ -9,8 +9,10 @@
         <UDashboardPanelContent class="gap-4">
           <UDashboardCard>
             <FormsInputsDatepicker
+              v-if="schedulesForMonth"
               v-model="selectedDate"
               expanded
+              :dates-highlighted="schedulesForMonth.map((schedule) => new Date(schedule.start_at))"
             />
           </UDashboardCard>
           <UDashboardCard>
@@ -81,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { endOfDay, startOfDay } from "date-fns";
+import { endOfDay, endOfMonth, startOfDay, startOfMonth } from "date-fns";
 import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
@@ -162,6 +164,30 @@ const {
   },
   {
     watch: [filterForm.value, selectedDate],
+  }
+);
+
+const { data: schedulesForMonth } = useAsyncData(
+  async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return [];
+    }
+
+    const dateStart = startOfMonth(selectedDate.value);
+    const dateEnd = endOfMonth(selectedDate.value);
+
+    const { data, error } = await client
+      .from("course_activity_schedules_view")
+      .select("start_at")
+      .gte("start_at", dateStart.toISOString())
+      .lte("end_at", dateEnd.toISOString());
+    if (error) {
+      throw error;
+    }
+    return data;
+  },
+  {
+    watch: [selectedDate],
   }
 );
 </script>

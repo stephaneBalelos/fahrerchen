@@ -12,10 +12,14 @@ const props = defineProps({
   expanded: {
     type: Boolean,
     default: false,
-  }
+  }, 
+  datesHighlighted: {
+    type: Array<Date>,
+    default: () => [],
+  },
 })
 
-const { t, locale } = useI18n()
+const { locale } = useI18n()
 
 const emit = defineEmits(['update:model-value', 'close'])
 
@@ -37,7 +41,14 @@ const attrs = {
 </script>
 
 <template>
-  <VCalendarDatePicker :locale="locale" :expanded="props.expanded" v-if="date && (typeof date === 'object')" v-model="date" :columns="1" v-bind="{ ...attrs, ...$attrs }" />
+  <VCalendarDatePicker 
+  v-if="date && (typeof date === 'object')" v-model="date"
+  :locale="locale" :expanded="props.expanded" :columns="1"
+  v-bind="{ ...attrs, ...$attrs }"
+  :attributes="[
+    { dot: true, dates: [...props.datesHighlighted] }
+  ]"
+  />
 </template>
 
 <style>

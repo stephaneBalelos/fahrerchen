@@ -14,7 +14,7 @@
     }"
   >
     <div class="calendar-event-label">
-      <p class="text-lg font-semibold">{{ event.label }}</p>
+      <p class="text-lg font-semibold truncate">{{ event.label }}</p>
       <p class="text-sm">{{ getLocalizedDateTimeString(event.date) }}</p>
     </div>
   </div>
