@@ -29,7 +29,7 @@
       <span v-if="uploadErrorType">{{ t(`upload_failed_${uploadErrorType}`) }}</span>
     </template>
     </UAlert>
-    <input ref="fileRef" class="hidden" type="file" @change="onChange" >
+    <input ref="fileRef" class="hidden" type="file" :accept="props.extensions?.join(', ')" @change="onChange" >
   </slot>
 </template>
 

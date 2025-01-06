@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from "#ui/types";
-import { title } from "process";
+import type { FormError } from "#ui/types";
 import * as z from "zod";
 import type { Database } from "~/types/app.types";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 
-const fileRef = ref<HTMLInputElement>();
 const isDeleteAccountModalOpen = ref(false);
 
-const config = useRuntimeConfig().public
+const config = useRuntimeConfig().public;
 
-const userOrganizationStore = useUserOrganizationsStore();
 const route = useRoute();
 
 const client = useSupabaseClient<Database>();
@@ -23,32 +20,34 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
-const {
-  data: org,
-  error,
-  status,
-} = await useAsyncData(`organizations/${route.params.org_id}`, async () => {
-  const { data, error } = await client
-    .from("organizations")
-    .select("*")
-    .eq("id", route.params.org_id)
-    .single();
+const { data: org } = await useAsyncData(
+  `organizations/${route.params.org_id}`,
+  async () => {
+    const { data, error } = await client
+      .from("organizations")
+      .select("*")
+      .eq("id", route.params.org_id)
+      .single();
 
-  if (error) {
-    throw error;
-  }
+    if (error) {
+      throw error;
+    }
 
-  return data;
-}, {
-  transform: (data) => {
-    const avatar_path = data.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}` : '';
-    console.log(avatar_path)
-    return {
-      ...data,
-      avatar_path,
-    };
+    return data;
   },
-});
+  {
+    transform: (data) => {
+      const avatar_path = data.avatar_path
+        ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}`
+        : "";
+      console.log(avatar_path);
+      return {
+        ...data,
+        avatar_path,
+      };
+    },
+  }
+);
 
 const schema = z.object({
   name: z.string({
@@ -166,21 +165,7 @@ const state = reactive({
 const toast = useToast();
 const isSubmitting = ref(false);
 
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement;
-
-  if (!input.files?.length) {
-    return;
-  }
-
-  state.avatar_path = URL.createObjectURL(input.files[0]);
-}
-
-function onFileClick() {
-  fileRef.value?.click();
-}
-
-async function onSubmit(event: FormSubmitEvent<any>) {
+async function onSubmit() {
   // Do something with data
   isSubmitting.value = true;
 
@@ -189,7 +174,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
   }
 
   try {
-    const { data, error } = await client
+    const { error } = await client
       .from("organizations")
       .update({
         name: state.name,
@@ -200,8 +185,7 @@ async function onSubmit(event: FormSubmitEvent<any>) {
         address_street: state.address_street,
         address_city: state.address_city,
         address_zip: state.address_zip,
-        address_country: state.address_country,
-        avatar_path: state.avatar_path,
+        address_country: state.address_country
       })
       .eq("id", org.value.id);
 
@@ -229,6 +213,32 @@ async function onSubmit(event: FormSubmitEvent<any>) {
 function onError(error: FormError) {
   // Show error message
   console.log(error);
+}
+
+async function onAvatarUploadSuccess() {
+  if (!org.value) {
+    return;
+  }
+  try {
+    const { data, error } = await client
+    .from("organizations")
+    .select("avatar_path")
+    .eq("id", org.value.id)
+    .single();
+
+    if (error) {
+      throw error;
+    }
+
+    if (data.avatar_path) {
+      state.avatar_path = `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}`;
+    }
+
+  } catch (error) {
+    console.error(error);
+  }
+
+    
 }
 </script>
 
@@ -263,6 +273,24 @@ function onError(error: FormError) {
               :loading="isSubmitting"
             />
           </template>
+          <UFormGroup
+            :label="t('settings.avatar.label')"
+            class="grid grid-cols-2 gap-2"
+            :description="t('settings.avatar.help')"
+            :ui="{
+              container: 'flex flex-wrap items-center gap-3',
+              help: 'mt-0',
+            }"
+          >
+            <UAvatar :src="state.avatar_path" :alt="state.name" size="lg" />
+            <FileUploader
+              v-if="org"
+              :bucket-id="'organizations_avatars'"
+              :path="org.id"
+              :extensions="['image/*']"
+              @uploaded="onAvatarUploadSuccess"
+            />
+          </UFormGroup>
           <UFormGroup
             name="name"
             :label="t('settings.name.label')"
@@ -328,8 +356,7 @@ function onError(error: FormError) {
               :placeholder="t('settings.phone_number.placeholder')"
               autocomplete="off"
               size="md"
-            >
-            </UInput>
+            />
           </UFormGroup>
           <UFormGroup
             name="website"
@@ -344,23 +371,6 @@ function onError(error: FormError) {
               :placeholder="t('settings.website.placeholder')"
               autocomplete="off"
               size="md"
-            >
-            </UInput>
-          </UFormGroup>
-          <UFormGroup
-            :label="t('settings.avatar.label')"
-            class="grid grid-cols-2 gap-2"
-            :help="t('settings.avatar.help')"
-            :ui="{
-              container: 'flex flex-wrap items-center gap-3',
-              help: 'mt-0',
-            }"
-          >
-            <UAvatar :src="state.avatar_path" :alt="state.name" size="lg" />
-            <FileUploader
-              v-if="org"
-              :bucket-id="'organizations_avatars'"
-              :path="org.id"
             />
           </UFormGroup>
           <UFormGroup
