@@ -107,13 +107,13 @@
             color="primary"
             variant="soft"
             icon="i-heroicons-eye"
-          ></UButton>
+          />
           <UButton
             color="primary"
             variant="soft"
             icon="i-heroicons-pencil"
             @click="(e) => openStudentForm(row.id)"
-          ></UButton>
+          />
         </template>
       </UTable>
     </UDashboardPanelContent>
@@ -122,7 +122,6 @@
 
 <script setup lang="ts">
 import type { AppStudent, AppUser, Database } from "~/types/app.types";
-import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 
 definePageMeta({
@@ -162,7 +161,6 @@ const sort = ref({ column: "id", direction: "asc" as const });
 const {
   data: students,
   status,
-  error,
   refresh,
 } = await useAsyncData(
   "students",
@@ -180,7 +178,7 @@ const {
   {
     transform: (data) => {
       return data
-        ? data.map((item: any) => {
+        ? data.map((item) => {
             return {
               ...item,
               name: `${item.firstname} ${item.lastname}`,
@@ -205,8 +203,8 @@ const openStudentForm = (id?: string) => {
     return;
   }
   slideover.open(EditStudentForm, {
-    organization_id: userOrganizationsStore.selectedOrganization.organization_id,
-    student_id: id,
+    organizationId: userOrganizationsStore.selectedOrganization.organization_id,
+    studentId: id,
     "onStudent-created": (student: AppStudent) => {
       console.log("student created", student);
       refresh();
