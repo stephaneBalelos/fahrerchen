@@ -105,13 +105,14 @@ const views = computed(() => [
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
+const courseActivitySchedules = useCourseActivitySchedules()
 const selectedDate = ref(new Date());
 
 const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
   course_id: z.string().uuid().optional(),
   student_id: z.string().uuid().optional(),
-  status: z.enum(["PLANNED", "CANCELLED", "COMPLETED"]),
+  status: z.enum(["PLANNED", "CANCELED", "COMPLETED"]),
 });
 
 type FilterForm = z.infer<typeof _schema>;
@@ -133,34 +134,15 @@ const {
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
-
-    const promise = client.from("course_activity_schedules_view").select();
-
-    if (selectedDate.value) {
-      promise.gte("start_at", dateStart.toISOString());
-      promise.lte("end_at", dateEnd.toISOString());
-    }
-
-    if (filterForm.value.assigned_to) {
-      promise.eq("assigned_to", filterForm.value.assigned_to);
-    }
-    if (filterForm.value.course_id) {
-      promise.eq("course_id", filterForm.value.course_id);
-    }
-    if (filterForm.value.student_id) {
-      promise.eq("student_id", filterForm.value.student_id);
-    }
-    if (filterForm.value.status) {
-      promise.eq("status", filterForm.value.status);
-    }
-
-    promise.order("start_at", { ascending: true });
-
-    const { data, error } = await promise;
-    if (error) {
-      throw error;
-    }
-    return data;
+    
+    return await courseActivitySchedules.fetchCourseActivitySchedules({
+      start_at: dateStart.toISOString(),
+      end_at: dateEnd.toISOString(),
+      assigned_to: filterForm.value.assigned_to,
+      course_id: filterForm.value.course_id,
+      student_id: filterForm.value.student_id,
+      status: filterForm.value.status
+    });
   },
   {
     watch: [filterForm.value, selectedDate],
