@@ -110,7 +110,7 @@ const openEditSchedule = () => {
   slideover.open(EditCourseActivitySchedule, {
     orgid: props.schedule.organization_id,
     activityid: props.schedule.activity_id,
-    activity_schedule_id: props.schedule.id,
+    scheduleId: props.schedule.id,
     courseid: props.schedule.course_id,
   });
 };

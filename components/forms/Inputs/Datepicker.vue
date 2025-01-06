@@ -17,6 +17,10 @@ const props = defineProps({
     type: Array<Date>,
     default: () => [],
   },
+  mode: {
+    type: String,
+    default: 'date',
+  }
 })
 
 const { locale } = useI18n()
@@ -43,11 +47,16 @@ const attrs = {
 <template>
   <VCalendarDatePicker 
   v-if="date && (typeof date === 'object')" v-model="date"
+  :mode="props.mode"
   :locale="locale" :expanded="props.expanded" :columns="1"
   v-bind="{ ...attrs, ...$attrs }"
   :attributes="[
     { dot: true, dates: [...props.datesHighlighted] }
   ]"
+  :rules="{
+    minutes: [0, 15, 30, 45],
+  }"
+  is24hr
   />
 </template>
 
