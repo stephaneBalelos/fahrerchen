@@ -9,7 +9,7 @@
           color="gray"
           square
           variant="solid"
-          to="/my/students"
+          :to="`/my/${$route.params.org_id}/students`"
         />
         <h2 class="font-semibold text-gray-900 dark:text-white">
           {{ t("pre_registrations") }}
@@ -98,8 +98,6 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const client = useSupabaseClient<Database>();
 const {
   data: requests,
-  status,
-  error,
   refresh,
 } = await useAsyncData(
   `students_registrations_${userOrganizationsStore.selectedOrganization?.organization_id}`,
@@ -189,7 +187,7 @@ async function confirmSelectedRequests() {
 
   // update selected requests status
   try {
-    const { data, error } = await client
+    const { error } = await client
     .from("students_registration_requests")
     .update({ status: 1 })
     .in("id", selected.value.map((item) => item.id));
@@ -225,7 +223,7 @@ async function deleteSelectedRequests() {
 
   // delete selected requests
   try {
-    const { data, error } = await client
+    const { error } = await client
     .from("students_registration_requests")
     .delete()
     .in("id", selected.value.map((item) => item.id));
@@ -250,24 +248,6 @@ async function deleteSelectedRequests() {
     });
   }
 }
-
-// test array of 50 requests
-const request_tests = Array.from({ length: 50 }, (_, i) => ({
-  id: i,
-  inserted_at: formatDate(new Date().toISOString()),
-  student: {
-    name: `Max Mustermann ${i}`,
-    has_a_license: i % 2 === 0,
-  },
-  birthdate: formatDate(new Date().toISOString()),
-  email: `email${i}@gmail.com`,
-  address: {
-    street: `Musterstraße ${i}`,
-    city: `Musterstadt ${i}`,
-    zip: `12345 ${i}`,
-    country: `Deutschland ${i}`,
-  },
-}));
 </script>
 
 <style scoped></style>
