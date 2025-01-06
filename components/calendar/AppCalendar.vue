@@ -49,7 +49,7 @@ const calendarEvents = computed(() => {
       start_hour: event.start.getHours(),
       end_hour: event.end.getHours(),
     };
-  });
+  }).sort((a, b) => a.start_hour - b.start_hour);
 });
 
 const HoursBlocks = [
@@ -81,6 +81,15 @@ const HoursBlocks = [
 
 const calendarEl = ref<HTMLElement | null>(null);
 const { y } = useScroll(calendarEl);
+
+watch(calendarEvents, () => {
+  // scroll to earliest event of the day
+  const earliestEvent = calendarEvents.value[0];
+  
+  if (earliestEvent) {
+    y.value = 6 * 16 * earliestEvent.start_hour;
+  }
+});
 
 onMounted(() => {
     // Scroll to the current hour
