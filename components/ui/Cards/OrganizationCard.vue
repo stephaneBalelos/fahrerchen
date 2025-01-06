@@ -1,35 +1,51 @@
 <template>
     <UPageCard
         v-if="organization"
-      class="mb-4"
       :key="organization.id"
+      class="mb-4"
       :title="organization.name"
       :description="organization.inserted_at"
-      :icon="organizationsStore.selectedOrganization?.organization_id == organization?.id ? 'i-simple-icons-tailwindcss' : ''"
       :ui="{ wrapper: 'relative group org-card' }"
     @click="navigateTo(`/my/${organization.id}`)"
-    />
+    >
+    <template #icon>
+        <UAvatar
+            :src="organization.avatar"
+            :alt="organization.name"
+            size="lg"
+        />
+    </template>
+    </UPageCard>
 </template>
 
 <script setup lang="ts">
 import type { Database } from '~/types/app.types';
 
 type Props = {
-    org_id: string
+    orgId: string
 }
 const props = defineProps<Props>()
 const supabase = useSupabaseClient<Database>()
-const organizationsStore = useUserOrganizationsStore()
 
-const { data: organization, error, status } = useAsyncData(`organization_${props.org_id}`, async () => {
+const config = useRuntimeConfig().public
+
+const { data: organization } = useAsyncData(`organization_${props.orgId}`, async () => {
     const { data, error } = await supabase
         .from('organizations')
         .select('*')
-        .eq('id', props.org_id).single()
+        .eq('id', props.orgId).single()
     if (error) {
         throw error
     }
+    console.log(data)
     return data
+}, {
+    transform: (data) => {
+        return {
+            ...data,
+            avatar: data.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}` : undefined
+        }
+    }
 })
 </script>
 

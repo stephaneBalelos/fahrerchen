@@ -4,6 +4,8 @@ import type { Database } from "~/types/app.types";
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
+const config = useRuntimeConfig().public;
+
 
 const { t } = useI18n({
   useScope: "local",
@@ -14,7 +16,7 @@ const { data: organizations } = await useAsyncData(
   async () => {
     const { data, error } = await client
       .from("organizations")
-      .select("id, name")
+      .select("id, name, avatar_path")
       .in(
         "id",
         userOrganizationsStore.organizations.map((o) => o.organization_id)
@@ -33,13 +35,16 @@ const { data: organizations } = await useAsyncData(
     immediate: true,
     transform: (data) => {
       return data.map((d) => {
+        const avatar_path = d.avatar_path
+        ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
+        : "";
         return {
           id: d.id,
           label: d.name,
           avatar: {
-            src: null,
+            src: avatar_path,
           },
-          icon: "i-heroicons-globe-europe-africa",
+          avatar_path: avatar_path,
           click: () => {
             userOrganizationsStore.selectOrganization(d.id);
           },
@@ -102,7 +107,7 @@ const selectedOrganization = computed(() => {
       class="w-full"
     >
       <UAvatar
-        :src="false"
+        :src="selectedOrganization?.avatar_path"
         :icon="'i-heroicons-globe-europe-africa'"
         size="2xs"
       />

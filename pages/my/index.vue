@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import CreateOrganizationForm from "~/components/forms/CreateOrganizationForm.vue";
 import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
-import type { AppOrganization, AppOrganizationMember } from "~/types/app.types";
-import { type Database } from "~/types/app.types";
 
-const client = useSupabaseClient<Database>();
 const organizationsStore = useUserOrganizationsStore();
 
 const isGeneratingDemoData = ref(false);
@@ -30,7 +27,7 @@ async function generateDemoData() {
   if (isGeneratingDemoData.value) return;
   isGeneratingDemoData.value = true;
   try {
-    const res = await $fetch("/api/demo/generate");
+    const _res = await $fetch("/api/demo/generate");
     organizationsStore.loadOrganizationsMemberships();
   } catch (error) {
     console.error(error);
@@ -53,7 +50,8 @@ async function generateDemoData() {
     />
     <OrganizationCard
       v-for="org in organizationsStore.organizations"
-      :org_id="org.organization_id"
+      :key="org.organization_id"
+      :org-id="org.organization_id"
     />
 
     <UPageCard
