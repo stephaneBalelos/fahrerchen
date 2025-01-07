@@ -1269,8 +1269,10 @@ export type Database = {
           inserted_at: string | null
           organization_id: string | null
           role: Database["public"]["Enums"]["app_role"] | null
+          user_avatar_path: string | null
           user_email: string | null
           user_firstname: string | null
+          user_fullname: string | null
           user_id: string | null
           user_lastname: string | null
         }

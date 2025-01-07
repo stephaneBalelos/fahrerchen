@@ -388,7 +388,9 @@ select
   organization_members.role,
   users.email as user_email,
   users.firstname as user_firstname,
-  users.lastname as user_lastname
+  users.lastname as user_lastname,
+  users.fullname as user_fullname,
+  users.avatar_path as user_avatar_path
 from public.organization_members
 inner join public.organizations on organization_members.organization_id = organizations.id
 inner join public.users on organization_members.user_id = users.id;

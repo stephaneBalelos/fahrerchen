@@ -57,31 +57,7 @@
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
         >
-          <USelectMenu
-            v-model="state.assigned_to"
-            :options="organization_members"
-            value-attribute="user_id"
-            option-attribute="email"
-          >
-            <template #label>
-              <div v-if="state.assigned_to && organization_members.length > 0">
-                <span class="truncate">{{
-                  organization_members.find(
-                    (m) => m.user_id === state.assigned_to
-                  )?.user?.fullname
-                }}</span>
-              </div>
-              <div v-else>
-                <span class="truncate">Zugewiesen an</span>
-              </div>
-            </template>
-            <template #option="{ option }">
-              <span v-if="option.user.firstname && option.user.lastname" class="truncate"
-                >{{ option.user.firstname }} {{ option.user.lastname }}</span
-              >
-              <span v-else class="truncate">{{ option.user.email }}</span>
-            </template>
-          </USelectMenu>
+        <FormsInputsUserSelect v-model="state.assigned_to" :orgid="props.orgid" />
         </UFormGroup>
         <UFormGroup
           name="start_at"
@@ -213,7 +189,6 @@ const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
 const course_activities = await useCourseActivities(props.orgid, props.courseid);
-const organization_members = await useOrganizationMembers(props.orgid, true);
 
 const schema = z.object({
   activity_id: z.string().uuid(),

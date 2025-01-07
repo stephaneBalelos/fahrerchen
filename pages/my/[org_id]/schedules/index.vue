@@ -2,7 +2,12 @@
   <UDashboardPanel grow>
     <UDashboardToolbar>
       <p class="text-lg font-semibold">{{ t("schedules") }}</p>
-      <USelectMenu v-model="selectedView" :options="views" :option-attribute="'label'" :value-attribute="'value'" />
+      <USelectMenu
+        v-model="selectedView"
+        :options="views"
+        :option-attribute="'label'"
+        :value-attribute="'value'"
+      />
     </UDashboardToolbar>
     <div class="flex h-full">
       <UDashboardPanel :width="400">
@@ -12,11 +17,28 @@
               v-if="schedulesForMonth"
               v-model="selectedDate"
               expanded
-              :dates-highlighted="schedulesForMonth.map((schedule) => new Date(schedule.start_at))"
+              :dates-highlighted="
+                schedulesForMonth.map((schedule) => new Date(schedule.start_at))
+              "
             />
           </UDashboardCard>
           <UDashboardCard>
-            <UFormGroup :label="t('form.assigned_to.label')" :description="t('form.assigned_to.description')" name="assigned_to">
+            <UFormGroup
+              :label="t('form.assigned_to.label')"
+              :help="t('form.assigned_to.description')"
+              name="assigned_to"
+            >
+              <template #hint>
+                <UButton
+                  v-if="filterForm.assigned_to"
+                  icon="i-heroicons-x-mark-solid"
+                  size="2xs"
+                  color="gray"
+                  square
+                  variant="ghost"
+                  @click="filterForm.assigned_to = undefined"
+                />
+              </template>
               <FormsInputsUserSelect
                 v-model="filterForm.assigned_to"
                 label="Assigned to"
@@ -25,21 +47,47 @@
             </UFormGroup>
           </UDashboardCard>
           <UDashboardCard>
-            <UFormGroup :label="t('form.status.label')" :description="t('form.status.description')" name="course_id">
-                <USelectMenu v-model="filterForm.status" :options="SCHEDULES_STATUS">
-                    <template #label>
-                        {{ g(`courses.activities.schedules.schedules_status_${filterForm.status}`) }}
-                    </template>
-                </USelectMenu>
+            <UFormGroup
+              :label="t('form.status.label')"
+              :description="t('form.status.description')"
+              name="course_id"
+            >
+              <USelectMenu
+                v-model="filterForm.status"
+                :options="SCHEDULES_STATUS"
+              >
+                <template #label>
+                  {{
+                    g(
+                      `courses.activities.schedules.schedules_status_${filterForm.status}`
+                    )
+                  }}
+                </template>
+                <template #option="{ option }">
+                  {{
+                    g(
+                      `courses.activities.schedules.schedules_status_${option}`
+                    )
+                  }}
+                </template>
+              </USelectMenu>
             </UFormGroup>
           </UDashboardCard>
           <UDashboardCard>
-            <UFormGroup :label="t('form.course.label')" :description="t('form.course.description')" name="course_id">
+            <UFormGroup
+              :label="t('form.course.label')"
+              :description="t('form.course.description')"
+              name="course_id"
+            >
               Implements Form Course Select
             </UFormGroup>
           </UDashboardCard>
           <UDashboardCard>
-            <UFormGroup :label="t('form.student.label')" :description="t('form.student.description')" name="student_id">
+            <UFormGroup
+              :label="t('form.student.label')"
+              :description="t('form.student.description')"
+              name="student_id"
+            >
               Implements Form Student Select
             </UFormGroup>
           </UDashboardCard>
@@ -47,7 +95,10 @@
       </UDashboardPanel>
       <UDashboardPanel grow>
         <div class="h-full">
-          <div v-if="selectedView == 'list'" class="absolute inset-0 overflow-y-auto">
+          <div
+            v-if="selectedView == 'list'"
+            class="absolute inset-0 overflow-y-auto"
+          >
             <div
               v-if="schedules && schedules.length > 0"
               class="flex flex-col gap-4 p-4"
@@ -67,13 +118,15 @@
               v-if="schedules"
               :selected-date="selectedDate"
               :view="'week'"
-              :events="schedules.map((schedule) => ({
-                label: `${schedule.course_name} | ${schedule.activity_name}`,
-                id: schedule.id,
-                date: new Date(schedule.start_at),
-                start: new Date(schedule.start_at),
-                end: new Date(schedule.end_at),
-              }))"
+              :events="
+                schedules.map((schedule) => ({
+                  label: `${schedule.course_name} | ${schedule.activity_name}`,
+                  id: schedule.id,
+                  date: new Date(schedule.start_at),
+                  start: new Date(schedule.start_at),
+                  end: new Date(schedule.end_at),
+                }))
+              "
             />
           </div>
         </div>
@@ -83,7 +136,13 @@
 </template>
 
 <script setup lang="ts">
-import { endOfDay, endOfMonth, format, startOfDay, startOfMonth } from "date-fns";
+import {
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfDay,
+  startOfMonth,
+} from "date-fns";
 import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
@@ -93,7 +152,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { t:g } = useI18n({
+const { t: g } = useI18n({
   useScope: "global",
 });
 
@@ -105,7 +164,7 @@ const views = computed(() => [
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
-const courseActivitySchedules = useCourseActivitySchedules()
+const courseActivitySchedules = useCourseActivitySchedules();
 const selectedDate = ref(new Date());
 
 const _schema = z.object({
@@ -124,24 +183,23 @@ const filterForm = ref<FilterForm>({
   status: "PLANNED",
 });
 
-const {
-  data: schedules,
-} = useAsyncData(
+const { data: schedules } = useAsyncData(
   async () => {
-
     const dateStart = startOfDay(selectedDate.value);
     const dateEnd = endOfDay(selectedDate.value);
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
-    
+
+    console.log(filterForm.value);
+
     return await courseActivitySchedules.fetchCourseActivitySchedules({
       start_at: dateStart.toISOString(),
       end_at: dateEnd.toISOString(),
       assigned_to: filterForm.value.assigned_to,
       course_id: filterForm.value.course_id,
       student_id: filterForm.value.student_id,
-      status: filterForm.value.status
+      status: filterForm.value.status,
     });
   },
   {
@@ -172,7 +230,7 @@ const { data: schedulesForMonth } = useAsyncData(
     watch: [selectedDate],
     transform: (data) => {
       // reduce duplicate dates
-      const datesString: string[] = []
+      const datesString: string[] = [];
       return data.filter((schedule) => {
         const date = format(new Date(schedule.start_at), "yyyy-MM-dd");
         if (datesString.includes(date)) {
@@ -181,9 +239,7 @@ const { data: schedulesForMonth } = useAsyncData(
         datesString.push(date);
         return true;
       });
-
-
-    }
+    },
   }
 );
 </script>
@@ -192,53 +248,53 @@ const { data: schedulesForMonth } = useAsyncData(
 
 <i18n lang="json">
 {
-    "de": {
-        "list_view": "Liste Ansicht",
-        "calendar_view": "Kalender Ansicht",
-        "schedules": "Termine",
-        "no_schedule_found": "Keine Termine gefunden",
-        "form": {
-            "assigned_to": {
-                "label": "Zugewiesen an",
-                "description": "Filtern Sie nach dem Benutzer, dem der Termin zugewiesen ist."
-            },
-            "status": {
-                "label": "Status",
-                "description": "Filtern Sie nach dem Status."
-            },
-            "course": {
-                "label": "Kurs",
-                "description": "Filtern Sie nach dem Kurs."
-            },
-            "student": {
-                "label": "Schüler",
-                "description": "Filtern Sie nach dem Schüler."
-            }
-        }
-    },
-    "en": {
-        "list_view": "List view",
-        "calendar_view": "Calendar view",
-        "schedules": "Schedules",
-        "no_schedule_found": "No schedules found",
-        "form": {
-            "assigned_to": {
-                "label": "Assigned to",
-                "description": "Filter by the user the schedule is assigned to."
-            },
-            "status": {
-                "label": "Status",
-                "description": "Filter by the status."
-            },
-            "course": {
-                "label": "Course",
-                "description": "Filter by the course."
-            },
-            "student": {
-                "label": "Student",
-                "description": "Filter by the student."
-            }
-        }
+  "de": {
+    "list_view": "Liste Ansicht",
+    "calendar_view": "Kalender Ansicht",
+    "schedules": "Termine",
+    "no_schedule_found": "Keine Termine gefunden",
+    "form": {
+      "assigned_to": {
+        "label": "Zugewiesen an",
+        "description": "Filtern Sie nach dem Benutzer, dem der Termin zugewiesen ist."
+      },
+      "status": {
+        "label": "Status",
+        "description": "Filtern Sie nach dem Status."
+      },
+      "course": {
+        "label": "Kurs",
+        "description": "Filtern Sie nach dem Kurs."
+      },
+      "student": {
+        "label": "Schüler",
+        "description": "Filtern Sie nach dem Schüler."
+      }
     }
+  },
+  "en": {
+    "list_view": "List view",
+    "calendar_view": "Calendar view",
+    "schedules": "Schedules",
+    "no_schedule_found": "No schedules found",
+    "form": {
+      "assigned_to": {
+        "label": "Assigned to",
+        "description": "Filter by the user the schedule is assigned to."
+      },
+      "status": {
+        "label": "Status",
+        "description": "Filter by the status."
+      },
+      "course": {
+        "label": "Course",
+        "description": "Filter by the course."
+      },
+      "student": {
+        "label": "Student",
+        "description": "Filter by the student."
+      }
+    }
+  }
 }
 </i18n>

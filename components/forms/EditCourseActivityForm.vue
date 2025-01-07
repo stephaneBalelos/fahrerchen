@@ -114,9 +114,7 @@
 <script setup lang="ts">
 import type { AppCourseActivity, Database } from "~/types/app.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
-import { format } from "date-fns";
-import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
-import UserSelect from "./Inputs/UserSelect.vue";
+
 import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
 
 type CourseActivityEdit = Omit<
