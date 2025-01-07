@@ -74,6 +74,8 @@ const { copy, copied, isSupported } = useClipboard({
   "en": {
     "onboarding_link": "Onboarding Link",
     "onboarding_link_description": "Share this link with your students so they can sign up.",
+    "tip_title": "Note",
+    "tip_description": "Anyone with this link can pre-register. You will then need to confirm the pre-registration, and then enroll the student in a course.",
     "copied": "Onboarding Link copied!",
     "close": "Close"
   }
