@@ -528,19 +528,7 @@ declare org_id uuid;
 begin
   org_id := new.organization_id;
 
-  -- insert the default activities
-  insert into public.course_activities (course_id, name, description, activity_type, required, price, organization_id)
-  values (new.id, 'Theorieunterricht', 'Theorieunterricht', 1, 12, 45, org_id),
-         (new.id, 'Übungstunde', 'Praxisunterricht', 2, 15, 64, org_id),
-         (new.id, 'Sonderfahrt', 'Praxisunterricht', 2, 8, 70, org_id),
-         (new.id, 'Praktische Prüfung', 'Vorstellungsgebühr', 3, 1, 55, org_id),
-         (new.id, 'Beispeil Workshop', 'Kostenloser Workshop', 4, 0, 0, org_id);
-
-  insert into public.course_required_documents (course_id, name, description, organization_id)
-  values (new.id, 'Personalausweis', 'Personalausweis', org_id),
-         (new.id, 'Sehtest', 'Sehtest', org_id),
-         (new.id, 'Passbild', 'Passbild', org_id),
-         (new.id, 'Erste Hilfe Kurs', 'Erste Hilfe Kurs', org_id);
+  -- Todo: May be usefull later
 
   return new;
 end;

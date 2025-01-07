@@ -3,14 +3,12 @@
     class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
     @click="openPreview(submitted_doc)"
   >
-    <UAvatar v-if="submitted_doc"
+    <UAvatar
+      v-if="submitted_doc"
       :icon="submitted_doc.extension_icon"
       size="md"
     />
-    <UAvatar v-else
-      icon="i-heroicons-exclamation-triangle"
-      size="md"
-    />
+    <UAvatar v-else icon="i-heroicons-exclamation-triangle" size="md" />
     <div class="flex justify-between text-sm flex-1">
       <div>
         <p class="text-gray-900 dark:text-white font-medium">
@@ -32,15 +30,15 @@
           :loading="isUploading"
           @click.stop="fileRef?.click()"
         />
-        <input class="hidden" ref="fileRef" type="file" @change="onChange" />
-        <UTooltip :text="t('delete_file')" v-if="submitted_doc">
+        <input ref="fileRef" class="hidden" type="file" @change="onChange" >
+        <UTooltip v-if="submitted_doc" :text="t('delete_file')">
           <UButton
             icon="i-heroicons-trash"
             size="sm"
             color="red"
             square
             variant="ghost"
-            @click=""
+            @click="deleteDocument(submitted_doc.id)"
           />
         </UTooltip>
       </div>
@@ -50,7 +48,6 @@
 
 <script setup lang="ts">
 import type {
-  AppCourse,
   AppCourseRequiredDocument,
   Database,
 } from "~/types/app.types";
@@ -70,14 +67,12 @@ const { t } = useI18n({
 const props = defineProps<Props>();
 const client = useSupabaseClient<Database>();
 const modal = useModal();
-const toast = useToast();
 const fileRef = ref<HTMLInputElement>();
 const isUploading = ref(false);
 
 const {
   data: submitted_doc,
-  error,
-  status,
+
   refresh,
 } = useAsyncData(
   `course_required_documents/${props.doc.id}`,
@@ -112,10 +107,10 @@ const openPreview = (doc: typeof submitted_doc.value) => {
       refresh();
       modal.close();
     },
-  })
+  });
 };
 
-function onChange($event: Event) {
+function onChange(_$event: Event) {
   if (fileRef.value && fileRef.value.files) {
     onFileChange(fileRef.value.files);
   }
@@ -138,6 +133,10 @@ function onFileChange(files: FileList) {
       refresh();
     },
   });
+}
+
+async function deleteDocument(docId: string) {
+  console.log("delete", docId);
 }
 </script>
 

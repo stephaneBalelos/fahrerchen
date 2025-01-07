@@ -79,13 +79,11 @@ const client = useSupabaseClient<Database>();
 
 const toast = useToast();
 
-const { data, refresh } = useAsyncData(
-  `course_progression_${props.subscription_id}`,
-  async () => {
+const { data, refresh } = useAsyncData(async () => {
     const { data, error } = await client
       .from("course_subscriptions")
       .select(
-        "*, course:courses(id, name, description, course_required_documents(*), course_activities(*, attendances:course_activity_attendances(count)))"
+        "*, course:courses(id, name, description, course_required_documents(*))"
       )
       .eq("id", props.subscription_id)
 
@@ -94,6 +92,7 @@ const { data, refresh } = useAsyncData(
     if (error) {
       throw error;
     }
+    console.log(data);
     return data;
   }
 );
