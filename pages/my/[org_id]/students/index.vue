@@ -3,7 +3,7 @@
     <UDashboardToolbar>
       <template #left>
         <h2 class="font-semibold text-gray-900 dark:text-white">
-          Students
+          {{ t("students") }}
           <UBadge color="primary" variant="soft">{{
             students?.length ?? 0
           }}</UBadge>
@@ -15,7 +15,7 @@
           v-model="q"
           icon="i-heroicons-funnel"
           autocomplete="off"
-          placeholder="Filter users..."
+          :placeholder="t('filter_users')"
           class="hidden lg:block"
           @keydown.esc="$event.target.blur()"
         >
@@ -24,14 +24,28 @@
           </template>
         </UInput>
 
+        <UDropdown 
+        :items="createUserOptions"
+        :popper="{
+          placement: 'bottom-start',
+        }"
+        :ui="{
+          width: 'w-72',
+        }">
+          <UButton
+            :label="t('new_user')"
+            trailing-icon="i-heroicons-plus"
+            color="gray"
+          />
+        </UDropdown>
         <UButton
-          label="New user"
-          trailing-icon="i-heroicons-plus"
           color="gray"
-          @click="() => openStudentForm()"
-        />
-        <UButton color="gray" variant="solid" size="2xs" :to="userOrganizationsStore.relativePath('/students/requests')">Voranmeldungen</UButton>
-
+          variant="solid"
+          size="2xs"
+          :to="userOrganizationsStore.relativePath('/students/requests')"
+        >
+          {{ t("pre_registration") }}
+        </UButton>
       </template>
     </UDashboardToolbar>
 
@@ -123,13 +137,19 @@
 <script setup lang="ts">
 import type { AppStudent, AppUser, Database } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
+import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 
 definePageMeta({
   layout: "orgs",
 });
 
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
+const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
 const selected = ref<AppUser[]>([]);
 const columns = [
@@ -171,7 +191,10 @@ const {
     const { data } = await client
       .from("students")
       .select("*")
-      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
+      .eq(
+        "organization_id",
+        userOrganizationsStore.selectedOrganization.organization_id
+      );
 
     return data;
   },
@@ -188,6 +211,40 @@ const {
     },
   }
 );
+
+const createUserOptions = ref([
+  [
+    {
+      label: t("invite_user_per_email"),
+      icon: "i-heroicons-envelope",
+      click: () => {
+        if (!userOrganizationsStore.selectedOrganization) {
+          return;
+        }
+        modal.open(AddStudentModal, {
+          orgid: userOrganizationsStore.selectedOrganization?.organization_id,
+          onClose: () => {
+            modal.close();
+          }
+        })
+      },
+    },
+    {
+      label: t("copy_invite_link"),
+      icon: "i-heroicons-link",
+      click: () => {
+        console.log("copy invite link");
+      },
+    },
+    {
+      label: t("manual_registration"),
+      icon: "i-heroicons-user-plus",
+      click: () => {
+        openStudentForm();
+      },
+    },
+  ],
+]);
 
 function onSelect(row: AppUser) {
   const index = selected.value.findIndex((item) => item.id === row.id);
@@ -213,7 +270,7 @@ const openStudentForm = (id?: string) => {
       console.log("student updated", student);
       refresh();
     },
-  })
+  });
 };
 </script>
 
@@ -272,3 +329,26 @@ const openStudentForm = (id?: string) => {
   }
 }
 </style>
+
+<i18n lang="json">
+{
+  "de": {
+    "students": "Fahrschüler:innen",
+    "new_user": "Neuer Fahrschüler:in",
+    "filter_users": "Fahrschüler:innen filtern...",
+    "pre_registration": "Voranmeldungen",
+    "invite_user_per_email": "Fahrschüler:in per E-Mail einladen",
+    "copy_invite_link": "Einladungslink kopieren",
+    "manual_registration": "Manuelle Registrierung"
+  },
+  "en": {
+    "students": "Students",
+    "new_user": "New Student",
+    "filter_users": "Filter students...",
+    "pre_registration": "Pre-registration",
+    "invite_user_per_email": "Invite student per email",
+    "copy_invite_link": "Copy invite link",
+    "manual_registration": "Manual registration"
+  }
+}
+</i18n>
