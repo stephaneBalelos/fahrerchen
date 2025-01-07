@@ -138,6 +138,7 @@
 import type { AppStudent, AppUser, Database } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
+import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
 
 definePageMeta({
   layout: "orgs",
@@ -222,7 +223,7 @@ const createUserOptions = ref([
           return;
         }
         modal.open(AddStudentModal, {
-          orgid: userOrganizationsStore.selectedOrganization?.organization_id,
+          orgid: userOrganizationsStore.selectedOrganization.organization_id,
           onClose: () => {
             modal.close();
           }
@@ -233,7 +234,15 @@ const createUserOptions = ref([
       label: t("copy_invite_link"),
       icon: "i-heroicons-link",
       click: () => {
-        console.log("copy invite link");
+        if (!userOrganizationsStore.selectedOrganization) {
+          return;
+        }
+        modal.open(OnboardingLinkModal, {
+          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          onClose: () => {
+            modal.close();
+          }
+        })
       },
     },
     {

@@ -32,6 +32,7 @@ export default defineNuxtConfig({
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
       app_version: pjson.version,
       stripe_pk: process.env.STRIPE_PK,
+      base_url: process.env.BASE_URL,
     }
   },
 
