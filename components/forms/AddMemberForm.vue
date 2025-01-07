@@ -25,7 +25,7 @@ type AddMemberFormProps = {
 
 const toasts = useToast();
 
-const roles: UserRole[] = ["owner", "manager", "teacher", "student"];
+const roles: UserRole[] = ["owner", "manager", "teacher"];
 
 const state = reactive<AddMemberFormProps>({
   role: "manager",
@@ -44,8 +44,6 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   const orgId = props.orgid
 
-  console.log(event.data)
-  return 
   if (orgId) {
     const {data, error} = await client.functions.invoke("invite-user", {
     method: 'POST',
