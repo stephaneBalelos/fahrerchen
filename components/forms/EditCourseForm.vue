@@ -1,20 +1,24 @@
 <template>
-  <UDashboardSlideover :title="`${props.course_id ? state.name : 'New Course'}`" prevent-close id="create-course-slideover">
+  <UDashboardSlideover
+    id="create-course-slideover"
+    :title="props.courseId ? state.name : t('new_course')"
+    prevent-close
+  >
     <UForm
-    ref="form"
+      ref="form"
       :state="state"
       :validate="validate"
       :validate-on="['submit']"
       @submit="onSubmit"
     >
       <UDashboardSection
-        title="Course"
-        description="This information will be displayed publicly so be careful what you share."
+        :title="props.courseId ? t('title_edit') : t('title')"
+        :description="t('basic_information')"
       >
         <UFormGroup
           name="name"
-          label="Name"
-          description="Will appear on receipts, invoices, and other communication."
+          :label="t('form.name.label')"
+          :description="t('form.name.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -24,8 +28,8 @@
 
         <UFormGroup
           name="type"
-          label="Course Type"
-          description="Select the type of course you are creating."
+          :label="t('form.type.label')"
+          :description="t('form.type.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -34,11 +38,14 @@
             v-model="state.type"
             value-attribute="id"
             :options="course_types ?? []"
-            placeholder="Select a course type"
+            :placeholder="t('form.type.placeholder')"
             option-attribute="type"
-            leadingIcon="i-heroicons-truck"
+            leading-icon="i-heroicons-truck"
             :ui="{ wrapper: 'app-select' }"
-            :ui-menu="{ container: 'app-select-menu', option: { base: 'app-select-menu-option'} }"
+            :ui-menu="{
+              container: 'app-select-menu',
+              option: { base: 'app-select-menu-option' },
+            }"
           >
             <template #option="{ option }">
               <span class="truncate">{{ option.type }}</span>
@@ -54,15 +61,15 @@
             variant="subtle"
           >
             <template #title="{ title }">
-              <span class="text-lg">Führerscheinklasse {{ title }}</span>
+              <span class="text-lg">{{ t('driver_license_class') }} {{ title }}</span>
             </template>
           </UAlert>
         </UFormGroup>
 
         <UFormGroup
           name="description"
-          label="Course Description"
-          description="Describe your course in detail."
+          :label="t('form.description.label')"
+          :description="t('form.description.description')"
           class="grid gap-2"
           :ui="{ container: '' }"
         >
@@ -76,46 +83,54 @@
       </UDashboardSection>
     </UForm>
     <template #footer>
-      <UButton v-if="props.course_id" class="app-btn-submit" block @click="form?.submit()" label="Update Course" />
-      <UButton v-else class="app-btn-submit" block @click="form?.submit()" label="Create Course" />
+      <UButton
+        v-if="props.courseId"
+        class="app-btn-submit"
+        block
+        label="Update Course"
+        @click="form?.submit()"
+      />
+      <UButton
+        v-else
+        class="app-btn-submit"
+        block
+        label="Create Course"
+        @click="form?.submit()"
+      />
     </template>
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import { type Database } from "~/types/app.types";
+import type { Database, AppCourse } from "~/types/app.types";
 import type { FormError, FormSubmitEvent } from "#ui/types";
-import type { AppCourse } from "~/types/app.types";
 
 type EditCourseFormProps = Omit<
   AppCourse,
-  "id" | "inserted_at" | "organization_id" | "is_active"
+  "id" | "inserted_at" | "organization_id" | "is_active" | "allow_self_registration" | "create_bill_on_subscription"
 >;
 
 type Props = {
-  course_id?: string;
+  courseId?: string;
 };
 
 const props = defineProps<Props>();
 const supabase = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
-const slideover = useSlideover();
 const form = ref<HTMLFormElement | null>(null);
+
+const { t } = useI18n({
+  useScope: "local",
+});
 
 const toast = useToast();
 
 const emit = defineEmits<{
-  (e: "course-created", value: AppCourse): void;
-  (e: "course-updated", value: AppCourse): void;
+  (e: "course-created" | "course-updated", value: AppCourse): void;
 }>();
 
-const {
-  data: course_types,
-  error,
-  status,
-  refresh,
-} = useAsyncData("course_types", async () => {
-  const { data, error } = await supabase.from("course_types").select("*");
+const { data: course_types } = useAsyncData("course_types", async () => {
+  const { data } = await supabase.from("course_types").select("*");
   return data ? data : [];
 });
 
@@ -130,11 +145,11 @@ const selected_type = computed(() => {
 });
 
 onMounted(async () => {
-  if (props.course_id) {
+  if (props.courseId) {
     const { data, error } = await supabase
       .from("courses")
       .select("*")
-      .eq("id", props.course_id)
+      .eq("id", props.courseId)
       .single();
     if (error) {
       console.error(error);
@@ -167,7 +182,7 @@ const validate = (state: EditCourseFormProps): FormError[] => {
   return errors;
 };
 
-async function onSubmit(event: FormSubmitEvent<any>) {
+async function onSubmit(event: FormSubmitEvent<EditCourseFormProps>) {
   if (!userOrganizationsStore.selectedOrganization) {
     toast.add({
       title: "Error",
@@ -176,10 +191,17 @@ async function onSubmit(event: FormSubmitEvent<any>) {
     });
     return;
   }
-  if (props.course_id) {
-    updateCourse(props.course_id, event.data, userOrganizationsStore.selectedOrganization.organization_id);
+  if (props.courseId) {
+    updateCourse(
+      props.courseId,
+      event.data,
+      userOrganizationsStore.selectedOrganization.organization_id
+    );
   } else {
-    createCourse(event.data, userOrganizationsStore.selectedOrganization.organization_id);
+    createCourse(
+      event.data,
+      userOrganizationsStore.selectedOrganization.organization_id
+    );
   }
 }
 
@@ -225,7 +247,11 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
     });
   }
 };
-const updateCourse = async (course_id: string, d: EditCourseFormProps, org_id:string) => {
+const updateCourse = async (
+  course_id: string,
+  d: EditCourseFormProps,
+  org_id: string
+) => {
   try {
     const { data, error } = await supabase
       .from("courses")
@@ -263,3 +289,58 @@ const updateCourse = async (course_id: string, d: EditCourseFormProps, org_id:st
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "new_course": "Neuer Fahrkurs erstellen",
+    "title": "Fahrkurs erstellen",
+    "title_edit": "Fahrkus bearbeiten",
+    "basic_information": "Grundinformationen. Diese Informationen werden öffentlich angezeigt.",
+    "driver_license_class": "Führerscheinklasse",
+    "form": {
+      "name": {
+        "label": "Name",
+        "description": "Wird auf Rechnungen, Quittungen und anderen Kommunikationen angezeigt."
+      },
+      "type": {
+        "label": "Kurstyp",
+        "description": "Wählen Sie den Typ des Kurses, den Sie erstellen.",
+        "placeholder": "Wählen Sie einen Kurs aus"
+      },
+      "description": {
+        "label": "Kursbeschreibung",
+        "description": "Beschreiben Sie Ihren Kurs im Detail."
+      },
+      "submit": "Kurs erstellen",
+      "submit_edit": "Kurs bearbeiten",
+      "type_error": "Bitte wählen Sie einen gültigen Kurs aus."
+    }
+  },
+  "en": {
+    "new_course": "Create New Course",
+    "title": "Create Course",
+    "title_edit": "Edit Course",
+    "basic_information": "Basic information. This information will be displayed publicly.",
+    "driver_license_class": "Driver License Class",
+    "form": {
+      "name": {
+        "label": "Name",
+        "description": "Will be displayed on invoices, receipts, and other communications."
+      },
+      "type": {
+        "label": "Course Type",
+        "description": "Select the type of course you are creating.",
+        "placeholder": "Select a course"
+      },
+      "description": {
+        "label": "Course Description",
+        "description": "Describe your course in detail."
+      },
+      "submit": "Create Course",
+      "submit_edit": "Edit Course",
+      "type_error": "Please select a valid course."
+    }
+  }
+}
+</i18n>

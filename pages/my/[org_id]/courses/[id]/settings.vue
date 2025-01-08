@@ -1,15 +1,22 @@
 <template>
   <UDashboardPanelContent
-    class="p-0 pb-24 divide-y divide-gray-200 dark:divide-gray-800"
     v-if="userOrganizationsStore.selectedOrganization"
+    class="p-0 pb-24 divide-y divide-gray-200 dark:divide-gray-800"
   >
+    <EditCourseSection
+      :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+      :courseid="props.courseid"
+    />
 
-  <EditCourseSection :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
+    <CourseActivitiesList
+      :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+      :courseid="props.courseid"
+    />
 
-  <CourseActivitiesList :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
-
-  <CourseRequirementsList :orgid="userOrganizationsStore.selectedOrganization.organization_id" :courseid="props.courseid" />
-
+    <CourseRequirementsList
+      :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+      :courseid="props.courseid"
+    />
   </UDashboardPanelContent>
 </template>
 
@@ -24,7 +31,6 @@ type Props = {
 
 const props = useAttrs() as Props;
 const userOrganizationsStore = useUserOrganizationsStore();
-
 </script>
 
 <style scoped></style>
