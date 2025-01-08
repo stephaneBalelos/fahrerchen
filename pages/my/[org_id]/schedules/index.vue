@@ -49,19 +49,36 @@
           <UDashboardCard>
             <UFormGroup
               :label="t('form.status.label')"
-              :description="t('form.status.description')"
+              :help="t('form.status.description')"
               name="course_id"
             >
+            <template #hint>
+                <UButton
+                  v-if="filterForm.status"
+                  icon="i-heroicons-x-mark-solid"
+                  size="2xs"
+                  color="gray"
+                  square
+                  variant="ghost"
+                  @click="filterForm.status = undefined"
+                />
+              </template>
               <USelectMenu
                 v-model="filterForm.status"
                 :options="SCHEDULES_STATUS"
               >
                 <template #label>
-                  {{
-                    g(
-                      `courses.activities.schedules.schedules_status_${filterForm.status}`
-                    )
-                  }}
+                  <span v-if="filterForm.status">
+                    {{
+                      g(
+                        `courses.activities.schedules.schedules_status_${filterForm.status}`
+                      )
+                    }}
+                  </span>
+                  <span 
+                  v-else 
+                  class="text-gray-500"
+                  >{{ t("form.status.placeholder") }}</span>
                 </template>
                 <template #option="{ option }">
                   {{
@@ -171,7 +188,7 @@ const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
   course_id: z.string().uuid().optional(),
   student_id: z.string().uuid().optional(),
-  status: z.enum(["PLANNED", "CANCELED", "COMPLETED"]),
+  status: z.enum(["PLANNED", "CANCELED", "COMPLETED"]).optional(),
 });
 
 type FilterForm = z.infer<typeof _schema>;
@@ -180,7 +197,7 @@ const filterForm = ref<FilterForm>({
   assigned_to: undefined,
   course_id: undefined,
   student_id: undefined,
-  status: "PLANNED",
+  status: undefined,
 });
 
 const { data: schedules } = useAsyncData(
@@ -190,8 +207,6 @@ const { data: schedules } = useAsyncData(
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
-
-    console.log(filterForm.value);
 
     return await courseActivitySchedules.fetchCourseActivitySchedules({
       start_at: dateStart.toISOString(),
@@ -260,6 +275,7 @@ const { data: schedulesForMonth } = useAsyncData(
       },
       "status": {
         "label": "Status",
+        "placeholder": "Status auswählen",
         "description": "Filtern Sie nach dem Status."
       },
       "course": {

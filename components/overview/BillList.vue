@@ -83,7 +83,6 @@ const { data: bills } = useAsyncData(async () => {
     .order("created_at", { ascending: false })
     .limit(10);
 
-  console.log(data);
   if (error) {
     console.log(error);
     throw error;
