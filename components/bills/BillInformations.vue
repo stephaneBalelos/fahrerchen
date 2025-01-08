@@ -5,8 +5,8 @@
     orientation="vertical"
   >
     <template #links>
-      <UBadge v-if="bill.paid_at" color="green" label="Paid" />
-      <UBadge v-else color="yellow" label="Not paid" />
+      <UBadge v-if="bill.paid_at" color="green" :label="t('paid')" />
+      <UBadge v-else color="yellow" :label="t('not_paid')" />
     </template>
     <div class="flex flex-col gap-2">
       <div class="flex flex-col flex-1 items-start">

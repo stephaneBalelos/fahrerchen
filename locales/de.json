@@ -36,5 +36,11 @@
                 "schedules_status_COMPLETED": "Erledigt"
             }
         }
+    },
+    "bills": {
+        "status": {
+            "paid": "Bezahlt",
+            "unpaid": "Unbezahlt"
+        }
     }
 }

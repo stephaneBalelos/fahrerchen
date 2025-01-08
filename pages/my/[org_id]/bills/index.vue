@@ -18,8 +18,11 @@
             {{ row.course_name }}
           </template>
           <template #status-data="{ row }">
-            <UBadge :color="row.status === 'paid' ? 'green' : 'red'">
-              {{ row.status }}
+            <UBadge v-if="row.status === 'unpaid'" :color="'red'">
+              {{ g('bills.status.unpaid') }}
+            </UBadge>
+            <UBadge v-else :color="'green'">
+              {{ g('bills.status.paid') }}
             </UBadge>
           </template>
           <template #action-data="{ row }">
@@ -27,7 +30,7 @@
               variant="link"
               color="white"
               :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)"
-              >View</UButton
+              >{{ t('table.view') }}</UButton
             >
           </template>
         </UTable>
@@ -42,6 +45,14 @@ import type { AppCourse } from "~/types/app.types";
 
 definePageMeta({
   layout: "orgs",
+});
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { t:g } = useI18n({
+  useScope: "global",
 });
 
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -71,23 +82,23 @@ courses.value = await useCourses(
 const columns = [
   {
     key: "student_firstname",
-    label: "Firstname",
+    label: t("table.firstname"),
   },
   {
     key: "student_lastname",
-    label: "Lastname",
+    label: t("table.lastname"),
   },
   {
     key: "course_name",
-    label: "Course",
+    label: t("table.course"),
   },
   {
     key: "total",
-    label: "Amount",
+    label: t("table.amount"),
   },
   {
     key: "status",
-    label: "Status",
+    label: t("table.status"),
   },
   {
     key: "action",
@@ -118,3 +129,28 @@ const { data: bills, status } = useAsyncData(
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "table": {
+      "firstname": "Vorname",
+      "lastname": "Nachname",
+      "course": "Kurs",
+      "amount": "Betrag",
+      "status": "Status",
+      "view": "Anzeigen"
+    }
+  },
+  "en": {
+    "table": {
+      "firstname": "Firstname",
+      "lastname": "Lastname",
+      "course": "Course",
+      "amount": "Amount",
+      "status": "Status",
+      "view": "View"
+    }
+  }
+}
+</i18n>
