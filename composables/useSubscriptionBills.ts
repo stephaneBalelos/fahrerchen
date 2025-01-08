@@ -67,7 +67,6 @@ export const useSubscriptionBills = () => {
             throw error
         }
 
-        console.log(data)
         return data
     }
 
