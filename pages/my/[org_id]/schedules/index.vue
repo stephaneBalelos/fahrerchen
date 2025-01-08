@@ -10,7 +10,7 @@
       />
     </UDashboardToolbar>
     <div class="flex h-full">
-      <UDashboardPanel :width="400">
+      <UDashboardPanel v-if="userOrganizationsStore.selectedOrganization" :width="400">
         <UDashboardPanelContent class="gap-4">
           <UDashboardCard>
             <FormsInputsDatepicker
@@ -41,8 +41,7 @@
               </template>
               <FormsInputsUserSelect
                 v-model="filterForm.assigned_to"
-                label="Assigned to"
-                :orgid="$route.params.org_id"
+                :orgid="userOrganizationsStore.selectedOrganization.organization_id"
               />
             </UFormGroup>
           </UDashboardCard>
@@ -96,7 +95,21 @@
               :description="t('form.course.description')"
               name="course_id"
             >
-              Implements Form Course Select
+            <template #hint>
+                <UButton
+                  v-if="filterForm.course_id"
+                  icon="i-heroicons-x-mark-solid"
+                  size="2xs"
+                  color="gray"
+                  square
+                  variant="ghost"
+                  @click="filterForm.course_id = undefined"
+                />
+              </template>
+              <FormsInputsCourseSelect
+                v-model="filterForm.course_id"
+                :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+              />
             </UFormGroup>
           </UDashboardCard>
           <UDashboardCard>

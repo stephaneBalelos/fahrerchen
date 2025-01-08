@@ -408,6 +408,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "course_subscription_bill_history_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "course_subscription_bill_history_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -467,6 +474,13 @@ export type Database = {
             columns: ["bill_id"]
             isOneToOne: false
             referencedRelation: "course_subscription_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills_view"
             referencedColumns: ["id"]
           },
           {
@@ -1214,6 +1228,76 @@ export type Database = {
             columns: ["bill_id"]
             isOneToOne: false
             referencedRelation: "course_subscription_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_subscription_bills_view: {
+        Row: {
+          course_description: string | null
+          course_id: string | null
+          course_name: string | null
+          course_subscription_id: string | null
+          created_at: string | null
+          id: string | null
+          organization_id: string | null
+          paid_at: string | null
+          ready_to_pay: boolean | null
+          stripe_payment_intent_id: string | null
+          student_email: string | null
+          student_firstname: string | null
+          student_id: string | null
+          student_lastname: string | null
+          total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_subscription_bills_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bills_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bills_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bills_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscriptions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscriptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]

@@ -396,6 +396,29 @@ inner join public.organizations on organization_members.organization_id = organi
 inner join public.users on organization_members.user_id = users.id;
 
 
+-- Bills View with Course, Subscription and Student
+create or replace view public.course_subscription_bills_view as
+select
+  course_subscription_bills.id,
+  course_subscription_bills.course_subscription_id,
+  course_subscription_bills.total,
+  course_subscription_bills.created_at,
+  course_subscription_bills.paid_at,
+  course_subscription_bills.ready_to_pay,
+  course_subscription_bills.stripe_payment_intent_id,
+  course_subscription_bills.organization_id,
+  course_subscriptions.course_id,
+  course_subscriptions.student_id,
+  courses.name as course_name,
+  courses.description as course_description,
+  students.email as student_email,
+  students.firstname as student_firstname,
+  students.lastname as student_lastname
+from public.course_subscription_bills
+inner join public.course_subscriptions on course_subscription_bills.course_subscription_id = course_subscriptions.id
+inner join public.courses on course_subscriptions.course_id = courses.id
+inner join public.students on course_subscriptions.student_id = students.id;
+
 -- Bill Items View grouped by course_activity_id
 create or replace view public.course_subscription_bill_items_view as
 select

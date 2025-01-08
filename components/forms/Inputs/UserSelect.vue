@@ -37,7 +37,7 @@ import type { Database } from "~/types/app.types";
 type Props = {
   orgid: string;
 };
-const props = useAttrs() as Props;
+const props = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: "local",

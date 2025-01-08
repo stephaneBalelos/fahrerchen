@@ -2,11 +2,10 @@
   <UDashboardPage>
     <UDashboardPanel grow>
       <UDashboardToolbar>
-        <USelectMenu
-          v-model="selectedCourse"
-          :options="courses"
-          option-attribute="name"
-          placeholder="Course"
+        <FormsInputsCourseSelect
+          v-if="userOrganizationsStore.selectedOrganization"
+          v-model="filterForm.course_id"
+          :orgid="userOrganizationsStore.selectedOrganization.organization_id"
         />
       </UDashboardToolbar>
       <UDashboardPanelContent class="p-0">
@@ -15,12 +14,8 @@
           :rows="bills ?? []"
           :loading="status === 'pending'"
         >
-          <template #course_subscriptions.course_id-data="{ row }">
-            {{
-              courses.find(
-                (course) => course.id === row.course_subscriptions.course_id
-              )?.name
-            }}
+          <template #course-data="{ row }">
+            {{ row.course_name }}
           </template>
           <template #status-data="{ row }">
             <UBadge :color="row.status === 'paid' ? 'green' : 'red'">
@@ -28,7 +23,12 @@
             </UBadge>
           </template>
           <template #action-data="{ row }">
-            <ULink :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)">View</ULink>
+            <UButton
+              variant="link"
+              color="white"
+              :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)"
+              >View</UButton
+            >
           </template>
         </UTable>
       </UDashboardPanelContent>
@@ -37,32 +37,48 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourse, Database } from "~/types/app.types";
+import { z } from "zod";
+import type { AppCourse } from "~/types/app.types";
 
 definePageMeta({
   layout: "orgs",
 });
 
-const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
+const subscriptionBills = useSubscriptionBills();
 if (!userOrganizationsStore.selectedOrganization) {
   throw new Error("Organization not found");
 }
 
-const selectedCourse = ref<AppCourse>();
-const courses = await useCourses(userOrganizationsStore.selectedOrganization.organization_id);
+const _schema = z.object({
+  student_id: z.string().uuid().optional(),
+  course_id: z.string().uuid().optional(),
+});
+
+type FilterForm = z.infer<typeof _schema>;
+
+const filterForm = ref<FilterForm>({
+  student_id: undefined,
+  course_id: undefined,
+});
+
+const courses = ref<AppCourse[]>([]);
+
+courses.value = await useCourses(
+  userOrganizationsStore.selectedOrganization.organization_id
+);
 
 const columns = [
   {
-    key: "course_subscriptions.students.firstname",
+    key: "student_firstname",
     label: "Firstname",
   },
   {
-    key: "course_subscriptions.students.lastname",
+    key: "student_lastname",
     label: "Lastname",
   },
   {
-    key: "course_subscriptions.course_id",
+    key: "course_name",
     label: "Course",
   },
   {
@@ -78,34 +94,17 @@ const columns = [
   },
 ];
 
-const {
-  data: bills,
-  error,
-  status,
-  refresh,
-} = useAsyncData(
-  `${userOrganizationsStore.selectedOrganization.organization_id}_subscriptions_bills`,
+const { data: bills, status } = useAsyncData(
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    let req = client
-      .from("course_subscription_bills")
-      .select("*, course_subscriptions(*, students(*))")
-      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
-    // if (selectedCourse.value) {
-    //   req = req.eq("course_id", selectedCourse.value);
-    // }
-    const { data, error } = await req;
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-
-    return data ? data : [];
+    return await subscriptionBills.fetchSubscriptionBills({
+      course_id: filterForm.value.course_id,
+    });
   },
   {
-    watch: [selectedCourse],
+    watch: [filterForm.value],
     transform: (data) => {
       return data?.map((bill) => {
         return {
