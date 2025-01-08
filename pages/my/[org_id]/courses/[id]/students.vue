@@ -225,7 +225,7 @@ const items = (row: AppCourseSubscription & {student: AppStudent}) => [
       icon: "i-heroicons-pencil-square-20-solid",
       click: () => {
         slideover.open(StudentCourseProfileSlideover, {
-          subscription_id: row.id,
+          subscriptionId: row.id,
           student: row.student,
         });
       },

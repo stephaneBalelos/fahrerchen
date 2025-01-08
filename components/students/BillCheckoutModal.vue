@@ -23,7 +23,7 @@
       <div class="absulute inset-0 overflow-y-auto">
         <div class="grid grid-cols-2 gap-4 p-4">
           <div class="w-full">
-            <BillsBillingList :bill_id="props.bill_id" />
+            <BillsBillingList :bill-id="props.bill_id" />
           </div>
           <div class="w-full">
             <form @submit="handleSubmit">

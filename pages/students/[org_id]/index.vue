@@ -19,7 +19,6 @@
 import StudentCourseProfile from '~/components/courses/StudentCourseProfile.vue';
 
 const studentStore = useStudentStore();
-const slideover = useSlideover()
 
 const { t } = useI18n({
   useScope: "local",

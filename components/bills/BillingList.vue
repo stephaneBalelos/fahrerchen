@@ -5,7 +5,7 @@
       :items="bill_items"
       :ui="{ wrapper: 'flex flex-col w-full' }"
     >
-      <template #default="{ item, index, open }">
+      <template #default="{ item }">
         <UButton
           color="gray"
           variant="ghost"
@@ -13,19 +13,19 @@
           :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
         >
           <div class="flex flex-col items-start">
-            <span class="text-sm text-gray-500">Label</span>
+            <span class="text-sm text-gray-500">{{ t('Label') }}</span>
             <span class="text-lg font-bold">{{ item.label }}</span>
           </div>
 
           <template #trailing>
             <div class="flex items-center gap-8">
               <div class="flex flex-col flex-1 items-end">
-                <span class="text-sm text-gray-500">Amount</span>
+                <span class="text-sm text-gray-500">{{ t('Amount') }}</span>
                 <span class="text-lg font-bold">{{ item.items?.length }}</span>
               </div>
               <div class="flex flex-col flex-1 items-end">
-                <span class="text-sm text-gray-500">Price</span>
-                <span class="text-lg font-bold" v-if="item.total">{{
+                <span class="text-sm text-gray-500">{{ t('Price') }}</span>
+                <span v-if="item.total" class="text-lg font-bold">{{
                   formatCurrency(item.total)
                 }}</span>
               </div>
@@ -35,7 +35,7 @@
       </template>
       <template #item="{ item }">
         <div class="italic text-gray-900 dark:text-white p-4">
-          <span class="font-semibold">Details</span>
+          <span class="font-semibold">{{ t('Details') }}</span>
           <ul>
             <li v-for="i in item.items" :key="i.id">
               {{ i.description }} - {{ formatCurrency(i.price) }} || attendance id: {{ i.course_activity_attendance_id }}
@@ -52,24 +52,23 @@ import type { Database } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 
 type Props = {
-  bill_id: any;
+  billId: string;
 };
 
 const props = defineProps<Props>();
 const client = useSupabaseClient<Database>();
 
+const { t } = useI18n({ useScope: "local" });
+
 const {
   data: bill_items,
-  error,
-  status,
-  refresh,
 } = await useAsyncData(
-  `${props.bill_id}_billing_list`,
+  `${props.billId}_billing_list`,
   async () => {
     const { data, error } = await client
       .from("course_subscription_bill_items_view")
       .select("*")
-      .eq("bill_id", props.bill_id);
+      .eq("bill_id", props.billId);
 
     if (error) {
       console.error(error);
@@ -93,3 +92,14 @@ const {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "Label": "Bezeichnung",
+    "Amount": "Menge",
+    "Price": "Preis",
+    "Details": "Einzelheiten"
+  }
+}
+</i18n>

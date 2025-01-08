@@ -12,9 +12,9 @@
             <UBadge v-else color="orange" variant="solid">{{ t('not_paid') }}</UBadge>
         </template>
         <div>
-            <BillsBillingList :bill_id="bill_id" />
+            <BillsBillingList :bill-id="bill_id" />
             <div class="flex justify-end py-4">
-                <span class="text-lg font-bold" v-if="bill?.total">{{ formatCurrency(bill.total) }}</span>
+                <span v-if="bill?.total" class="text-lg font-bold">{{ formatCurrency(bill.total) }}</span>
             </div>
             <div v-if="stripeStore.stripeAppSettings" class="py-4">
                 <UButton v-if="bill?.ready_to_pay && !bill.paid_at" color="primary" :label="`${t('pay_now')}`" @click="openCheckoutModal" />

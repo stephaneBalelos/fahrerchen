@@ -12,8 +12,8 @@
     </UDashboardSection>
 
     <UDashboardCard
-      class="mb-4"
       v-if="data"
+      class="mb-4"
       :title="t('course_activity_attendances')"
       :description="t('course_activity_attendances_description')"
     >
@@ -42,8 +42,8 @@
     </UDashboardCard>
 
     <UDashboardCard
-      class="mb-4"
       v-if="data && data.course?.course_required_documents"
+      class="mb-4"
       :title="t('course_required_documents')"
       :description="t('course_required_documents_description')"
     >
@@ -51,8 +51,13 @@
         0 / {{ data.course.course_required_documents.length }}
       </template>
 
-      <CourseRequiredDocumentItem v-for="(doc, index) in data.course.course_required_documents" :key="doc.id"
-        :doc="doc" :bucket-id="'course_subscription_documents'" :path="`${doc.organization_id}/${data.id}/${doc.id}`" />
+      <CourseRequiredDocumentItem
+        v-for="doc in data.course.course_required_documents"
+        :key="doc.id"
+        :doc="doc"
+        :bucket-id="'course_subscription_documents'"
+        :path="`${doc.organization_id}/${data.id}/${doc.id}`"
+      />
     </UDashboardCard>
   </UDashboardSlideover>
 </template>
@@ -62,7 +67,7 @@ import type { Database, AppStudent } from "~/types/app.types";
 import CourseRequiredDocumentItem from "../files/CourseDocuments/CourseRequiredDocumentItem.vue";
 
 type Props = {
-  subscription_id: string;
+  subscriptionId: string;
   student: AppStudent;
 };
 
@@ -74,15 +79,15 @@ const props = defineProps<Props>();
 
 const supabase = useSupabaseClient<Database>();
 
-const { data, error, status } = useAsyncData(
-  `course_progression_${props.subscription_id}`,
+const { data } = useAsyncData(
+  `course_progression_${props.subscriptionId}`,
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
       .select(
         "*, course:courses(id, course_required_documents(*), course_activities(*, attendances:course_activity_attendances(count)))"
       )
-      .eq("id", props.subscription_id)
+      .eq("id", props.subscriptionId)
 
       .single();
 
