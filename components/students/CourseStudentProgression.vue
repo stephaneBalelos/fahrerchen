@@ -1,25 +1,24 @@
 <template>
   <UDashboardCard
-  v-if="data"
+    v-if="data"
     class="mb-4"
     :title="t('course_activity_attendances')"
     :description="t('course_activity_attendances_description')"
   >
-  <StudentsCourseStudentProgressionItem 
-    v-for="activity in data.course?.course_activities"
-    :key="activity.id"
-    :subscription-id="props.subscriptionId"
-    :activity-id="activity.id"
-    :activity-name="activity.name"
-    :activity-required="activity.required"
-    :org-id="data.organization_id"
-  />
+    <StudentsCourseStudentProgressionItem
+      v-for="activity in data.course?.course_activities"
+      :key="activity.id"
+      :subscription-id="props.subscriptionId"
+      :activity-id="activity.id"
+      :activity-name="activity.name"
+      :activity-required="activity.required"
+      :org-id="data.organization_id"
+    />
   </UDashboardCard>
 </template>
 
 <script setup lang="ts">
-import type { Database } from '~/types/app.types';
-
+import type { Database } from "~/types/app.types";
 
 type Props = {
   subscriptionId: string;
@@ -28,7 +27,7 @@ type Props = {
 const props = defineProps<Props>();
 
 const { t } = useI18n({
-  useScope: 'local',
+  useScope: "local",
 });
 
 const supabase = useSupabaseClient<Database>();
@@ -38,14 +37,12 @@ const { data } = useAsyncData(
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .select(
-        "*, course:courses(id, course_activities(*))"
-      )
+      .select("*, course:courses(id, course_activities(*))")
       .eq("id", props.subscriptionId)
       .single();
 
     if (error) {
-        console.error(error);
+      console.error(error);
       throw error;
     }
     return data;
@@ -61,9 +58,9 @@ const { data } = useAsyncData(
     "course_activity_attendances": "Aktivitätsbesuche",
     "course_activity_attendances_description": "Besuchte Aktivitäten"
   },
-    "en": {
-        "course_activity_attendances": "Course Activity Attendances",
-        "course_activity_attendances_description": "Course Activity Attendances"
-    }
+  "en": {
+    "course_activity_attendances": "Course Activity Attendances",
+    "course_activity_attendances_description": "Course Activity Attendances"
+  }
 }
 </i18n>

@@ -9,7 +9,7 @@
         orientation="vertical"
         card
       >
-      <StudentCourseProfile :title="t('progression')" :description="t('progression_desc')"  :subscription_id="studentStore.subscription.id" :student="studentStore.student" />
+      <StudentCourseProfile :title="t('progression')" :description="t('progression_desc')"  :subscription-id="studentStore.subscription.id" :student="studentStore.student" />
       </UDashboardSection>
     </UContainer>
   </UDashboardPanelContent>
