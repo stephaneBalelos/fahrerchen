@@ -44,9 +44,11 @@ const { data: organizations } = await useAsyncData(
           avatar: {
             src: avatar_path,
           },
+          icon: avatar_path ? undefined : "i-heroicons-globe-europe-africa",
           avatar_path: avatar_path,
           click: () => {
             userOrganizationsStore.selectOrganization(d.id);
+            navigateTo("/my/" + d.id);
           },
         };
       });
@@ -109,7 +111,7 @@ const selectedOrganization = computed(() => {
       <UAvatar
         :src="selectedOrganization?.avatar_path"
         :icon="'i-heroicons-globe-europe-africa'"
-        size="2xs"
+        size="sm"
       />
 
       <span class="truncate text-gray-900 dark:text-white font-semibold">{{

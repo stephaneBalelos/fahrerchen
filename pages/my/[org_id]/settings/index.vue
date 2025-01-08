@@ -40,7 +40,6 @@ const { data: org } = await useAsyncData(
       const avatar_path = data.avatar_path
         ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}`
         : "";
-      console.log(avatar_path);
       return {
         ...data,
         avatar_path,
