@@ -3,7 +3,7 @@
     v-model="model"
     :searchable="search"
     :searchable-placeholder="t('search_by_name_or_email')"
-    value-attribute="id"
+    value-attribute="user_id"
     :search-attributes="['name', 'email']"
   >
     <template #label>
@@ -49,7 +49,7 @@ const selected = computed(() => {
   if (!users.value) {
     return null;
   }
-  return users.value.find((user) => user.id === model.value);
+  return users.value.find((user) => user.user_id === model.value);
 });
 
 
