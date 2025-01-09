@@ -1,13 +1,21 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardToolbar>
-        <FormsInputsCourseSelect
-          v-if="userOrganizationsStore.selectedOrganization"
-          v-model="filterForm.course_id"
-          :orgid="userOrganizationsStore.selectedOrganization.organization_id"
-        />
-      </UDashboardToolbar>
+      <UDashboardNavbar
+        v-if="userOrganizationsStore.selectedOrganization"
+        :title="t('title')"
+      >
+        <template #right>
+          <FormsInputsCourseSelect
+            v-model="filterForm.course_id"
+            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+          />
+          <StudentSelect
+            v-model="filterForm.student_id"
+            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+          />
+        </template>
+      </UDashboardNavbar>
       <UDashboardPanelContent class="p-0">
         <UTable
           :columns="columns"
@@ -19,10 +27,10 @@
           </template>
           <template #status-data="{ row }">
             <UBadge v-if="row.status === 'unpaid'" :color="'red'">
-              {{ g('bills.status.unpaid') }}
+              {{ g("bills.status.unpaid") }}
             </UBadge>
             <UBadge v-else :color="'green'">
-              {{ g('bills.status.paid') }}
+              {{ g("bills.status.paid") }}
             </UBadge>
           </template>
           <template #action-data="{ row }">
@@ -30,7 +38,7 @@
               variant="link"
               color="white"
               :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)"
-              >{{ t('table.view') }}</UButton
+              >{{ t("table.view") }}</UButton
             >
           </template>
         </UTable>
@@ -41,6 +49,7 @@
 
 <script setup lang="ts">
 import { z } from "zod";
+import StudentSelect from "~/components/forms/Inputs/StudentSelect.vue";
 import type { AppCourse } from "~/types/app.types";
 
 definePageMeta({
@@ -51,7 +60,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { t:g } = useI18n({
+const { t: g } = useI18n({
   useScope: "global",
 });
 
@@ -112,6 +121,7 @@ const { data: bills, status } = useAsyncData(
     }
     return await subscriptionBills.fetchSubscriptionBills({
       course_id: filterForm.value.course_id,
+      student_id: filterForm.value.student_id,
     });
   },
   {
@@ -133,6 +143,7 @@ const { data: bills, status } = useAsyncData(
 <i18n lang="json">
 {
   "de": {
+    "title": "Rechnungen",
     "table": {
       "firstname": "Vorname",
       "lastname": "Nachname",
@@ -143,6 +154,7 @@ const { data: bills, status } = useAsyncData(
     }
   },
   "en": {
+    "title": "Bills",
     "table": {
       "firstname": "Firstname",
       "lastname": "Lastname",
