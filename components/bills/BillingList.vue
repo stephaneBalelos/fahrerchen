@@ -37,9 +37,7 @@
         <div class="italic text-gray-900 dark:text-white p-4">
           <span class="font-semibold">{{ t('Details') }}</span>
           <ul>
-            <li v-for="i in item.items" :key="i.id">
-              {{ i.description }} - {{ formatCurrency(i.price) }} || attendance id: {{ i.course_activity_attendance_id }}
-            </li>
+            <BillAttendanceDetailsItem v-for="i in item.items" :key="i.id" :attendance-id="i.course_activity_attendance_id" :activity-price="i.price" />
           </ul>
         </div>
       </template>
@@ -50,6 +48,7 @@
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
+import BillAttendanceDetailsItem from "./BillAttendanceDetailsItem.vue";
 
 type Props = {
   billId: string;
