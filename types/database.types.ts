@@ -1157,6 +1157,7 @@ export type Database = {
           assigned_to: string | null
           assigned_to_email: string | null
           assigned_to_firstname: string | null
+          assigned_to_fullname: string | null
           assigned_to_lastname: string | null
           course_description: string | null
           course_id: string | null

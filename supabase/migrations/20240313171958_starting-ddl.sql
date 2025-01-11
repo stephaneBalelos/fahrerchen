@@ -485,7 +485,7 @@ inner join public.students on course_subscriptions.student_id = students.id;
 
 -- Organization's Schedules View joining with activities, group by course_id
 create or replace view public.course_activity_schedules_view as
-select 
+select
   course_activity_schedules.id,
   course_activity_schedules.course_id,
   course_activity_schedules.activity_id,
@@ -501,7 +501,8 @@ select
   courses.description as course_description,
   users.email as assigned_to_email,
   users.firstname as assigned_to_firstname,
-  users.lastname as assigned_to_lastname
+  users.lastname as assigned_to_lastname,
+  users.fullname as assigned_to_fullname
 from public.course_activity_schedules
 inner join public.course_activities on course_activity_schedules.activity_id = course_activities.id
 inner join public.courses on course_activity_schedules.course_id = courses.id
