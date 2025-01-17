@@ -41,7 +41,7 @@
           <UButton
             variant="ghost"
             color="primary"
-            @click="_archiveSubscription"
+            @click="archiveSubscription"
           >
             {{ t("archive_subscription") }}
           </UButton>
@@ -52,7 +52,7 @@
         :description="t('delete_subscription_description')"
       >
         <template #links>
-          <UButton variant="ghost" color="red" @click="_deleteSubscription">
+          <UButton variant="ghost" color="red" @click="deleteSubscription">
             {{ t("delete_subscription") }}
           </UButton>
         </template>
@@ -97,7 +97,7 @@ const { data, refresh } = useAsyncData(async () => {
   }
 );
 
-async function _archiveSubscription() {
+async function archiveSubscription() {
   try {
     const { error } = await client
       .from("course_subscriptions")
@@ -127,8 +127,34 @@ async function _archiveSubscription() {
   }
 }
 
-function _deleteSubscription() {
-  console.log("delete subscription");
+async function deleteSubscription() {
+  if(!data.value) {
+    return
+  }
+  try {
+    const { error } = await client
+      .from("course_subscriptions")
+      .delete()
+      .eq("id", props.subscription_id);
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    toast.add({
+      title: t("subscription_deleted"),
+      description: t("subscription_deleted_description"),
+      color: "green",
+    });
+    navigateTo(`/my/${data.value.organization_id}/students/${data.value.student_id}`);
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "An error occurred while deleting the subscription.",
+      color: "red",
+    });
+  }
 }
 </script>
 
@@ -149,7 +175,9 @@ function _deleteSubscription() {
     "delete_subscription_description": "Löschen dieses Student dauerhaft aus dem Kurs.",
     "delete_subscription": "Aus dem Kurs austragen",
     "subscription_archived": "Subscription archiviert",
-    "subscription_archived_description": "Der Student wurde erfolgreich aus dem Kurs archiviert."
+    "subscription_archived_description": "Der Student wurde erfolgreich aus dem Kurs archiviert.",
+    "subscription_deleted": "Subscription gelöscht",
+    "subscription_deleted_description": "Der Student wurde erfolgreich aus dem Kurs gelöscht."
   },
   "en": {
     "course_subscription": "Course Subscription",
@@ -164,7 +192,9 @@ function _deleteSubscription() {
     "delete_subscription_description": "Unsubscribe this student from the course permanently.",
     "delete_subscription": "Unsubscribe from course",
     "subscription_archived": "Subscription archived",
-    "subscription_archived_description": "The student has been successfully archived from the course."
+    "subscription_archived_description": "The student has been successfully archived from the course.",
+    "subscription_deleted": "Subscription deleted",
+    "subscription_deleted_description": "The student has been successfully deleted from the course."
   }
 }
 </i18n>

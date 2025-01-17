@@ -9,45 +9,37 @@
       },
     }"
   >
-    <template #links> </template>
-
-    <div
-      v-if="docs && docs.length > 0"
-      v-for="(doc, index) in docs"
-      :key="index"
-      class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-      @click="openPreview(doc)"
-    >
-      <UAvatar :icon="doc.extension_icon" size="md" />
-      <div class="text-sm flex-1">
-        <div>
-          <p class="text-gray-900 dark:text-white font-medium">
-            {{ doc.name ?? doc.path.split("/").pop() }}
-          </p>
-          <p class="text-gray-500 dark:text-gray-400">
-            {{ doc.description ?? t("no_description") }}
-          </p>
+    <div v-if="docs && docs.length > 0">
+      <div
+        v-for="(doc, index) in docs"
+        :key="index"
+        class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
+        @click="openPreview(doc)"
+      >
+        <UAvatar :icon="doc.extension_icon" size="md" />
+        <div class="text-sm flex-1">
+          <div>
+            <p class="text-gray-900 dark:text-white font-medium">
+              {{ doc.name ?? doc.path.split("/").pop() }}
+            </p>
+            <p class="text-gray-500 dark:text-gray-400">
+              {{ doc.description ?? t("no_description") }}
+            </p>
+          </div>
         </div>
+        <p class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg">
+          <UTooltip :text="t('delete_file')">
+              <UButton
+                  icon="i-heroicons-trash"
+                  size="sm"
+                  color="red"
+                  square
+                  variant="ghost"
+                  @click.stop="deleteDocument(doc)"
+              />
+          </UTooltip>
+        </p>
       </div>
-      <p class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg">
-        <UButton
-            size="sm"
-            color="gray"
-            square
-            :label="t('change')"
-            variant="solid"
-        />
-        <UTooltip :text="t('delete_file')">
-            <UButton
-                icon="i-heroicons-trash"
-                size="sm"
-                color="red"
-                square
-                variant="ghost"
-                @click="deleteDocument(doc)"
-            />
-        </UTooltip>
-      </p>
     </div>
     <div v-else>
       <UAlert
@@ -66,8 +58,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourse, AppCourseDocument, Database } from "~/types/app.types";
-import { formatDate } from "~/utils/formatters";
+import type { AppCourseDocument, Database } from "~/types/app.types";
+import { formatDateTime } from "~/utils/formatters";
 import DocumentPreview from "../files/DocumentPreview.vue";
 
 type Props = {
@@ -85,28 +77,33 @@ const { t } = useI18n({
 
 const {
   data: docs,
-  error,
-  status,
   refresh,
-} = useAsyncData(`course_documents_${props.courseid}`, async () => {
+} = await useAsyncData(async () => {
   const { data, error } = await client
     .from("course_documents")
     .select("*")
     .eq("course_id", props.courseid);
+
   if (error) {
+    console.error(error);
     throw error;
   }
+
   return data;
 }, {
-  transform: (data) => {
-    return data.map((doc: AppCourseDocument) => {
+  transform: (d) => {
+
+    return d.map((doc: AppCourseDocument) => {
       const extension = doc.path.split(".").pop();
-      return {
+      const date = formatDateTime(doc.created_at);
+      const document = {
         ...doc,
         extension_icon: extension == 'pdf' ? 'i-heroicons-document-text' : extension == 'mp4' ? 'i-heroicons-video-camera' : 'i-heroicons-photo',
-        created_at: formatDate(doc.created_at),
-      };
+        created_at: date,
+      }
+      return document;
     });
+
   },
 });
 

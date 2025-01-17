@@ -1,17 +1,19 @@
 <template>
     <div v-if="attendance" class="flex gap-2">
-        <p v-if="attendance.attended_at">{{ t('attended_at', {data: formatDateTime(attendance.attended_at)}) }}</p>
+        <p v-if="attendance.schedule">{{ t('attended_at', { data: formatDate(attendance.schedule.start_at) }) }}</p>
         <p>{{ t('unit_price') }}: {{ formatCurrency(props.activityPrice) }}</p>
+    </div>
+    <div v-else>
+        <p>{{ t('not_attended_yet') }} | {{ t('unit_price') }}: {{ formatCurrency(props.activityPrice) }}</p>
     </div>
 </template>
 
 <script setup lang="ts">
 import type { Database } from '~/types/app.types';
-import { formatDateTime, formatCurrency } from '~/utils/formatters';
+import { formatCurrency, formatDate } from '~/utils/formatters';
 
 type Props = {
-    attendanceId: string;
-    itemDetails?: string;
+    attendanceId?: string;
     activityPrice: number;
 }
 
@@ -24,9 +26,10 @@ const { t } = useI18n({
 const client = useSupabaseClient<Database>();
 
 const { data: attendance } = useAsyncData(`attendance_${props.attendanceId}`, async () => {
+    if (!props.attendanceId) return null;
     const { data, error } = await client
         .from("course_activity_attendances")
-        .select("id, attended_at, status")
+        .select("id, status, schedule:course_activity_schedules(*)")
         .eq("id", props.attendanceId).single();
 
     if (error) {
@@ -46,11 +49,13 @@ const { data: attendance } = useAsyncData(`attendance_${props.attendanceId}`, as
 {
     "de": {
         "attended_at": "teilgenommen am {data}",
-        "unit_price": "Preis pro Einheit"
+        "unit_price": "Einzelpreis",
+        "not_attended_yet": "noch nicht teilgenommen"
     },
     "en": {
         "attended_at": "attended at {data}",
-        "unit_price": "Unit price"
+        "unit_price": "Unit price",
+        "not_attended_yet": "not attended yet"
     }
 }
 </i18n>

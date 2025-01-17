@@ -107,7 +107,7 @@
             :color="
               row.status === 'subscribed'
                 ? 'green'
-                : row.status === 'bounced'
+                : row.status === 'not_subscribed'
                 ? 'orange'
                 : 'red'
             "
@@ -184,13 +184,13 @@ const {
   status,
   refresh,
 } = await useAsyncData(
-  "students",
+  'students',
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
     const { data } = await client
-      .from("students")
+      .from("students_view")
       .select("*")
       .eq(
         "organization_id",
@@ -206,6 +206,7 @@ const {
             return {
               ...item,
               name: `${item.firstname} ${item.lastname}`,
+              status: item.student_subscriptions ? "subscribed" : "not_subscribed",
             };
           })
         : [];

@@ -26,8 +26,11 @@ function openCreateOrgModal() {
 async function generateDemoData() {
   if (isGeneratingDemoData.value) return;
   isGeneratingDemoData.value = true;
+
   try {
-    const _res = await $fetch("/api/demo/generate");
+    const _res = await $fetch("/api/demo/generate", {
+      retry: 0
+    });
     organizationsStore.loadOrganizationsMemberships();
   } catch (error) {
     console.error(error);

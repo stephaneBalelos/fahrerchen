@@ -10,6 +10,8 @@ export default defineEventHandler(async (event) => {
 
     const user = event.context.auth as User
 
+    console.log('start generating demo data')
+
     if (!user) {
         return createError({
             status: 403,
@@ -84,7 +86,8 @@ export default defineEventHandler(async (event) => {
                     organization_id: org.id,
                     activity_type: 1,
                     price: 45,
-                    required: 12
+                    required: 12,
+                    sorting_order: 1
                 },
                 {
                     name: 'Praxis',
@@ -93,7 +96,8 @@ export default defineEventHandler(async (event) => {
                     organization_id: org.id,
                     activity_type: 2,
                     price: 45,
-                    required: 12
+                    required: 12,
+                    sorting_order: 2
                 },
                 {
                     name: 'Theorieprüfung',
@@ -102,7 +106,8 @@ export default defineEventHandler(async (event) => {
                     organization_id: org.id,
                     activity_type: 3,
                     price: 30,
-                    required: 1
+                    required: 1,
+                    sorting_order: 3
                 },
                 {
                     name: 'Praxisprüfung',
@@ -111,7 +116,8 @@ export default defineEventHandler(async (event) => {
                     organization_id: org.id,
                     activity_type: 4,
                     price: 60,
-                    required: 1
+                    required: 1,
+                    sorting_order: 4
                 }
             ]
             return course_activities
@@ -167,7 +173,7 @@ export default defineEventHandler(async (event) => {
 
         // Generate Students
         const studentsWithOrgId = students.data.map((student: any) => {
-            const s: Omit<AppStudent, "id" | "user_id"> = {
+            const s: Omit<AppStudent, "id" | "user_id" | "created_at"> = {
                 firstname: student.firstname,
                 lastname: student.lastname,
                 email: student.email,
@@ -179,7 +185,7 @@ export default defineEventHandler(async (event) => {
                 address_street: student.address.street,
                 address_zip: student.address.zipcode,
                 has_a_license: false,
-                self_registered: false
+                avatar_path: null
             }
             return s
         })
@@ -283,8 +289,7 @@ export default defineEventHandler(async (event) => {
                                 course_subscription_id: subscription.id,
                                 activity_schedule_id: theorySchedules[i].id,
                                 course_activity_id: theorySchedules[i].activity_id,
-                                organization_id: org.id,
-                                attended_at: theorySchedules[i].start_at
+                                organization_id: org.id
                             })
                         }
                     }
@@ -300,8 +305,7 @@ export default defineEventHandler(async (event) => {
                                 course_subscription_id: subscription.id,
                                 activity_schedule_id: practicalSchedules[i].id,
                                 course_activity_id: practicalSchedules[i].activity_id,
-                                organization_id: org.id,
-                                attended_at: practicalSchedules[i].start_at
+                                organization_id: org.id
                             })
                         }
                     }

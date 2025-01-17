@@ -73,7 +73,6 @@ const {
       console.error(error);
       throw error;
     }
-
     return data;
   },
   {
@@ -99,6 +98,12 @@ const {
     "Amount": "Menge",
     "Price": "Preis",
     "Details": "Einzelheiten"
+  },
+  "en": {
+    "Label": "Label",
+    "Amount": "Amount",
+    "Price": "Price",
+    "Details": "Details"
   }
 }
 </i18n>

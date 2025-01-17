@@ -44,6 +44,7 @@ export type Database = {
           organization_id: string
           price: number
           required: number
+          sorting_order: number
         }
         Insert: {
           activity_type: number
@@ -54,6 +55,7 @@ export type Database = {
           organization_id: string
           price?: number
           required?: number
+          sorting_order?: number
         }
         Update: {
           activity_type?: number
@@ -64,6 +66,7 @@ export type Database = {
           organization_id?: string
           price?: number
           required?: number
+          sorting_order?: number
         }
         Relationships: [
           {
@@ -99,7 +102,6 @@ export type Database = {
       course_activity_attendances: {
         Row: {
           activity_schedule_id: string | null
-          attended_at: string | null
           course_activity_id: string
           course_subscription_id: string
           id: string
@@ -108,7 +110,6 @@ export type Database = {
         }
         Insert: {
           activity_schedule_id?: string | null
-          attended_at?: string | null
           course_activity_id: string
           course_subscription_id: string
           id?: string
@@ -117,7 +118,6 @@ export type Database = {
         }
         Update: {
           activity_schedule_id?: string | null
-          attended_at?: string | null
           course_activity_id?: string
           course_subscription_id?: string
           id?: string
@@ -180,6 +180,7 @@ export type Database = {
         Row: {
           activity_id: string
           assigned_to: string | null
+          attendees: string[]
           course_id: string
           end_at: string
           id: string
@@ -190,6 +191,7 @@ export type Database = {
         Insert: {
           activity_id: string
           assigned_to?: string | null
+          attendees?: string[]
           course_id: string
           end_at: string
           id?: string
@@ -200,6 +202,7 @@ export type Database = {
         Update: {
           activity_id?: string
           assigned_to?: string | null
+          attendees?: string[]
           course_id?: string
           end_at?: string
           id?: string
@@ -266,6 +269,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          last_modified_at: string
           name: string | null
           organization_id: string
           path: string
@@ -275,6 +279,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          last_modified_at?: string
           name?: string | null
           organization_id: string
           path: string
@@ -284,6 +289,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          last_modified_at?: string
           name?: string | null
           organization_id?: string
           path?: string
@@ -688,6 +694,13 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_subscriptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       course_types: {
@@ -973,7 +986,9 @@ export type Database = {
           address_country: string | null
           address_street: string | null
           address_zip: string | null
+          avatar_path: string | null
           birth_date: string
+          created_at: string
           email: string
           firstname: string
           has_a_license: boolean
@@ -981,7 +996,6 @@ export type Database = {
           lastname: string
           organization_id: string
           phone_number: string | null
-          self_registered: boolean
           user_id: string | null
         }
         Insert: {
@@ -989,7 +1003,9 @@ export type Database = {
           address_country?: string | null
           address_street?: string | null
           address_zip?: string | null
+          avatar_path?: string | null
           birth_date: string
+          created_at?: string
           email: string
           firstname: string
           has_a_license?: boolean
@@ -997,7 +1013,6 @@ export type Database = {
           lastname: string
           organization_id: string
           phone_number?: string | null
-          self_registered?: boolean
           user_id?: string | null
         }
         Update: {
@@ -1005,7 +1020,9 @@ export type Database = {
           address_country?: string | null
           address_street?: string | null
           address_zip?: string | null
+          avatar_path?: string | null
           birth_date?: string
+          created_at?: string
           email?: string
           firstname?: string
           has_a_license?: boolean
@@ -1013,7 +1030,6 @@ export type Database = {
           lastname?: string
           organization_id?: string
           phone_number?: string | null
-          self_registered?: boolean
           user_id?: string | null
         }
         Relationships: [
@@ -1301,6 +1317,13 @@ export type Database = {
             referencedRelation: "students"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "course_subscriptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       course_subscriptions_view: {
@@ -1344,6 +1367,13 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscriptions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1411,6 +1441,41 @@ export type Database = {
           },
         ]
       }
+      students_view: {
+        Row: {
+          address_city: string | null
+          address_country: string | null
+          address_street: string | null
+          address_zip: string | null
+          avatar_path: string | null
+          birth_date: string | null
+          created_at: string | null
+          email: string | null
+          firstname: string | null
+          has_a_license: boolean | null
+          id: string | null
+          lastname: string | null
+          organization_id: string | null
+          phone_number: string | null
+          student_subscriptions: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       are_users_in_same_organization: {
@@ -1440,7 +1505,9 @@ export type Database = {
           address_country: string | null
           address_street: string | null
           address_zip: string | null
+          avatar_path: string | null
           birth_date: string
+          created_at: string
           email: string
           firstname: string
           has_a_license: boolean
@@ -1448,7 +1515,6 @@ export type Database = {
           lastname: string
           organization_id: string
           phone_number: string | null
-          self_registered: boolean
           user_id: string | null
         }
       }

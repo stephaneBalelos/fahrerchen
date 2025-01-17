@@ -1,9 +1,11 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardNavbar
-      :title="`${student?.firstname} ${student?.lastname}`"
-      :badge="t('active')"
-    >
+    <UDashboardNavbar :title="`${student?.firstname} ${student?.lastname}`">
+      <template #badge>
+        <UBadge v-if="subscriptions?.length">
+          {{ t("active") }}
+        </UBadge>
+      </template>
       <template #right>
         <USelectMenu
           v-if="subscriptions"
@@ -43,6 +45,22 @@
     <UDashboardPanelContent v-if="selectedSubscriptionId">
       <NuxtPage :subscription_id="selectedSubscriptionId" />
     </UDashboardPanelContent>
+    <div v-else class="max-w-5xl w-full mx-auto py-12">
+      <UAlert
+        icon="i-heroicons-command-line"
+        color="orange"
+        variant="soft"
+        :title="t('student_is_inactive')"
+        :description="t('student_is_inactive_description')"
+        :actions="[
+          {
+            label: t('back_to_overview'),
+            to: `/my/${org_id}/students/${student_id}`,
+            variant: 'ghost',
+          },
+        ]"
+      />
+    </div>
   </UDashboardPanel>
 </template>
 
@@ -77,10 +95,13 @@ const { data: subscriptions } = useAsyncData(
     if (error) {
       throw error;
     }
-    if (data.length) {
+    if (data.length && !selectedSubscriptionId.value) {
       selectedSubscriptionId.value = data[0].id;
     }
     return data;
+  },
+  {
+    watch: [selectedSubscriptionId],
   }
 );
 
@@ -115,7 +136,9 @@ const links = computed(() => {
     "archive": "Archiv",
     "overview": "Überblick",
     "bills": "Rechnungen",
-    "subscription": "Abonnement"
+    "subscription": "Abonnement",
+    "student_is_inactive": "Der Schüler ist inaktiv.",
+    "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements."
   },
   "en": {
     "title": "Student",
@@ -123,7 +146,9 @@ const links = computed(() => {
     "archive": "Archive",
     "overview": "Overview",
     "bills": "Bills",
-    "subscription": "Subscription"
+    "subscription": "Subscription",
+    "student_is_inactive": "The student is inactive.",
+    "student_is_inactive_description": "The student is inactive and has no active subscriptions."
   }
 }
 </i18n>

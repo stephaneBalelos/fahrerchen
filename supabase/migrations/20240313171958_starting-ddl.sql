@@ -96,13 +96,14 @@ create table public.users (
   firstname    text,
   lastname    text,
   fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
-  avatar_path    text,
+  avatar_path  text,
   status      user_status default 'OFFLINE'::public.user_status
 );
 comment on table public.users is 'Profile data for each user.';
 comment on column public.users.id is 'References the internal Supabase Auth user.';
-
 alter table public.users enable row level security;
+revoke update on table public.users from authenticated, anon;
+grant update (firstname, lastname, avatar_path) on table public.users to authenticated;
 
 
 -- ORGANIZATIONS
@@ -125,8 +126,9 @@ create table public.organizations (
   owner_id      uuid references public.users not null
 );
 comment on table public.organizations is 'organization data.';
-
 alter table public.organizations enable row level security;
+revoke update on table public.organizations from authenticated, anon;
+grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
 
 -- ORGANIZATIONS STRIPE ACCOUNTS
 create table public.organizations_stripe_accounts (
@@ -136,6 +138,8 @@ create table public.organizations_stripe_accounts (
 );
 comment on table public.organizations_stripe_accounts is 'Stripe account data for each organization.';
 alter table public.organizations_stripe_accounts enable row level security;
+revoke update on table public.organizations_stripe_accounts from authenticated, anon;
+grant update (payment_methods) on table public.organizations_stripe_accounts to authenticated;
 
 
 -- ORGANIZATIONS INVITATIONS
@@ -149,8 +153,8 @@ create table public.organizations_invitations (
   unique (email, organization_id) 
 );
 comment on table public.organizations_invitations is 'Invitations to join an organization.';
-
 alter table public.organizations_invitations enable row level security;
+revoke update on table public.organizations_invitations from authenticated, anon;
 
 
 -- ORGANIZATION MEMBERS
@@ -163,8 +167,9 @@ create table public.organization_members (
   unique (organization_id, user_id)
 );
 comment on table public.organization_members is 'Members of each organization, users can be in multiple organizations.';
-
 alter table public.organization_members enable row level security;
+revoke update on table public.organization_members from authenticated, anon;
+grant update (role) on table public.organization_members to authenticated;
 
 
 -- STUDENTS
@@ -173,6 +178,7 @@ create table public.students (
   email       text not null unique,
   firstname    text not null,
   lastname    text not null,
+  avatar_path    text,
   birth_date   date not null,
   phone_number  text,
   address_street  text,
@@ -180,14 +186,16 @@ create table public.students (
   address_city  text,
   address_country text,
   has_a_license  boolean default false not null,
-  self_registered  boolean default false not null, -- if the user registered themselves via onboarding
   user_id      uuid references public.users,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (user_id, organization_id)
+  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique (user_id, organization_id),
+  unique (email, organization_id)
 );
 comment on table public.students is 'Profile data for each student.';
-
 alter table public.students enable row level security;
+revoke update on table public.students from authenticated, anon;
+grant update (firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
 
 
 -- COURSES
@@ -205,6 +213,8 @@ create table public.courses (
 );
 comment on table public.courses is 'COURSES AVAILABLE.';
 alter table public.courses enable row level security;
+revoke update on table public.courses from authenticated, anon;
+grant update (name, description, is_active, create_bill_on_subscription, allow_self_registration) on table public.courses to authenticated;
 
 
 -- STUDENTS REGISTRATION REQUESTS
@@ -227,8 +237,10 @@ create table public.students_registration_requests (
   unique (email, organization_id)
 );
 comment on table public.students_registration_requests is 'STUDENTS REGISTRATION REQUESTS.';
-
 alter table public.students_registration_requests enable row level security;
+revoke update on table public.students_registration_requests from authenticated, anon;
+grant update (status) on table public.students_registration_requests to authenticated;
+
 
 -- COURSE DOCUMENTS
 create table public.course_documents (
@@ -238,9 +250,13 @@ create table public.course_documents (
   description   text,
   path         text not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  last_modified_at  timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_documents is 'COURSE DOCUMENTS MADE AVAILABLE FOR STUDENTS.';
+alter table public.course_documents enable row level security;
+revoke update on table public.course_documents from authenticated, anon;
+grant update (name, description, path) on table public.course_documents to authenticated;
 
 -- COURSE REQUIRED DOCUMENTS
 create table public.course_required_documents (
@@ -253,6 +269,9 @@ create table public.course_required_documents (
 );
 comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
 alter table public.course_required_documents enable row level security;
+revoke update on table public.course_required_documents from authenticated, anon;
+grant update (name, description) on table public.course_required_documents to authenticated;
+
 
 -- COURSES SUBSCRIPTIONS
 create table public.course_subscriptions (
@@ -262,12 +281,16 @@ create table public.course_subscriptions (
   student_id    uuid references public.students on delete cascade not null,
   archived_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  costs        numeric default 0 not null check (costs >= 0),
-  unique (course_id, student_id)
+  costs        numeric default 0 not null check (costs >= 0), -- The sum of all the bills
+  unique (course_id, student_id) -- unique constraint to prevent multiple subscriptions for the same course and student
 );
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
-
 alter table public.course_subscriptions enable row level security;
+revoke update on table public.course_subscriptions from authenticated, anon;
+grant update (archived_at) on table public.course_subscriptions to authenticated;
+-- unique constraint to prevent multiple active subscriptions for the same course and student
+-- create unique index on public.course_subscriptions (course_id, student_id) where archived_at is null;
+
 
 -- COURSE SUBSCRIPTION DOCUMENTS
 create table public.course_subscription_documents (
@@ -279,8 +302,9 @@ create table public.course_subscription_documents (
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_documents is 'COURSE SUBSCRIPTION DOCUMENTS.';
-
 alter table public.course_subscription_documents enable row level security;
+revoke update on table public.course_subscription_documents from authenticated, anon;
+grant update (path) on table public.course_subscription_documents to authenticated;
 
 
 -- COURSE ACTIVITIES
@@ -292,11 +316,15 @@ create table public.course_activities (
   activity_type  integer references public.course_activity_types not null,
   required     integer default 0 not null check (required >= 0),
   price        numeric default 0 not null check (price >= 0),
-  organization_id    uuid references public.organizations on delete cascade not null
+  sorting_order  integer default 0 not null check (sorting_order >= 0),
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_id, sorting_order)
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
-
 alter table public.course_activities enable row level security;
+revoke update on table public.course_activities from authenticated, anon;
+grant update (name, description, activity_type, required, price, sorting_order) on table public.course_activities to authenticated;
+
 
 -- COURSE ACTIVITY SCHEDULES
 create table public.course_activity_schedules (
@@ -307,11 +335,13 @@ create table public.course_activity_schedules (
   organization_id    uuid references public.organizations on delete cascade not null,
   status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
   start_at     timestamp with time zone not null,
-  end_at       timestamp with time zone not null
+  end_at       timestamp with time zone not null,
+  attendees     uuid[] default '{}'::uuid[] not null -- should be an array of unique student ids
 );
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
-
 alter table public.course_activity_schedules enable row level security;
+revoke update on table public.course_activity_schedules from authenticated, anon;
+grant update (assigned_to, status, start_at, end_at, attendees) on table public.course_activity_schedules to authenticated;
 
 -- ACTIVITY ATTENDANCES
 create table public.course_activity_attendances (
@@ -319,14 +349,15 @@ create table public.course_activity_attendances (
   course_activity_id   uuid references public.course_activities on delete cascade not null,
   activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  attended_at   timestamp with time zone default null,
   status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_subscription_id, activity_schedule_id)
 );
 comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
-
 alter table public.course_activity_attendances enable row level security;
+revoke update on table public.course_activity_attendances from authenticated, anon;
+grant update (status) on table public.course_activity_attendances to authenticated;
+
 
 -- COURSE SUBSCRIPTION BILLS
 create table public.course_subscription_bills (
@@ -340,8 +371,9 @@ create table public.course_subscription_bills (
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
-
 alter table public.course_subscription_bills enable row level security;
+revoke update on table public.course_subscription_bills from authenticated, anon;
+grant update (paid_at, ready_to_pay, stripe_payment_intent_id) on table public.course_subscription_bills to authenticated;
 
 -- COURSE SUBSCRIPTION BILL ITEMS
 create table public.course_subscription_bill_items (
@@ -357,6 +389,8 @@ create table public.course_subscription_bill_items (
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
+revoke update on table public.course_subscription_bill_items from authenticated, anon;
+grant update (price) on table public.course_subscription_bill_items to authenticated;
 
 -- Bill History Action type
 create type public.bill_history_action_type as enum ('ITEM_ADDED', 'ITEM_REMOVED', 'ITEM_UPDATED', 'BILL_READY_TO_PAY', 'BILL_PAID');
@@ -374,10 +408,10 @@ create table public.course_subscription_bill_history (
 );
 comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION BILL HISTORY.';
 alter table public.course_subscription_bill_history enable row level security;
+revoke update on table public.course_subscription_bill_history from authenticated, anon;
 
 
 -- VIEWS
-
 -- Organization Members View
 create or replace view public.organization_members_view as
 select
@@ -394,6 +428,38 @@ select
 from public.organization_members
 inner join public.organizations on organization_members.organization_id = organizations.id
 inner join public.users on organization_members.user_id = users.id;
+
+-- Student & Subscription View
+create or replace view public.students_view as
+select
+  students.id,
+  students.email,
+  students.firstname,
+  students.lastname,
+  students.avatar_path,
+  students.birth_date,
+  students.phone_number,
+  students.address_street,
+  students.address_zip,
+  students.address_city,
+  students.address_country,
+  students.has_a_license,
+  students.organization_id,
+  students.created_at,
+  subscriptions as student_subscriptions
+from public.students
+left join (
+  select
+    course_subscriptions.student_id,
+    jsonb_agg(jsonb_build_object(
+      'id', course_subscriptions.id,
+      'course_id', course_subscriptions.course_id,
+      'archived_at', course_subscriptions.archived_at,
+      'costs', course_subscriptions.costs
+    )) as subscriptions
+  from public.course_subscriptions
+  group by course_subscriptions.student_id
+) as subscriptions on students.id = subscriptions.student_id;
 
 
 -- Bills View with Course, Subscription and Student
@@ -521,7 +587,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = auth, public;
+$$ language plpgsql security invoker set search_path = auth, public;
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
@@ -539,7 +605,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a Org is created
 create trigger on_org_created
   after insert on public.organizations
@@ -561,29 +627,6 @@ $$ language plpgsql security definer set search_path = public;
 create trigger on_course_created
   after insert on public.courses
   for each row execute procedure public.handle_new_course();
-
-
--- handle Stripe Account update
-create or replace function public.handle_stripe_account_update()
-returns trigger as $$
-begin
-  -- prevent updating the stripe account id
-  if old.stripe_account_id <> new.stripe_account_id then
-    raise exception 'Cannot update the stripe account id';
-  end if;
-
-  -- prevent updating the id
-  if old.id <> new.id then
-    raise exception 'Cannot update the id';
-  end if;
-
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
--- trigger the function every time a stripe account is updated
-create trigger on_stripe_account_updated
-  before update on public.organizations_stripe_accounts
-  for each row execute procedure public.handle_stripe_account_update();
 
 
 -- handle Registration Request confirmation
@@ -697,7 +740,7 @@ begin
 
   -- lookup if a bill already exists for the course subscription and has not been paid
   select * into bill from public.course_subscription_bills
-  where course_subscription_id = new.course_subscription_id and paid_at is null limit 1;
+  where course_subscription_id = new.course_subscription_id and (paid_at is null or ready_to_pay = false) limit 1;
 
   -- if no bill exists, create a new one
   if bill is null then
@@ -737,6 +780,10 @@ begin
   update public.course_subscription_bills set total = (select sum(price) from public.course_subscription_bill_items where bill_id = bill.id)
   where id = bill.id;
 
+  -- aggregate attendees for the activity schedule
+  update public.course_activity_schedules set attendees = array_append(attendees, new.course_subscription_id)
+  where id = new.activity_schedule_id;
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -753,6 +800,11 @@ declare bill_item_id uuid;
 declare subscription_bill_id uuid;
 begin
   org_id := old.organization_id;
+
+  -- check if the subscription still exists
+  if not exists (select 1 from public.course_subscriptions where id = old.course_subscription_id) then
+    return old;
+  end if;
 
   -- lookup for the linked bill item
   select id, bill_id into bill_item_id, subscription_bill_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
@@ -775,6 +827,10 @@ begin
     where id = subscription_bill_id;
   end if;
 
+  -- remove the attendance from the activity schedule
+  update public.course_activity_schedules set attendees = array_remove(attendees, old.course_subscription_id)
+  where id = old.activity_schedule_id;
+
   return old;
 end;
 $$ language plpgsql security definer set search_path = public;
@@ -788,6 +844,7 @@ create trigger on_course_activity_attendance_deleted
 create or replace function public.handle_updated_bill()
 returns trigger as $$
 begin
+
   --prevent set ready_to_pay to false if the bill has been paid
   if old.ready_to_pay = true and new.ready_to_pay = false and new.paid_at is not null then
     raise exception 'Cannot set ready_to_pay to false if the bill has been paid';
@@ -860,6 +917,11 @@ declare bill_total numeric;
 begin
   org_id := old.organization_id;
 
+  -- check if the bill still exists
+  if not exists (select 1 from public.course_subscription_bills where id = old.bill_id) then
+    return old;
+  end if;
+
   -- lookup for the linked bill
   select sum(price) into bill_total from public.course_subscription_bill_items where bill_id = old.bill_id;
 
@@ -881,7 +943,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 -- trigger the function every time a course subscription bill item is deleted
 create trigger on_course_subscription_bill_item_deleted
-  after delete on public.course_subscription_bill_items
+  before delete on public.course_subscription_bill_items
   for each row execute procedure public.handle_removed_bill_item();
 
 -- handle updated Bill Item
