@@ -9,22 +9,6 @@
     <UDashboardPanelContent>
       <NuxtPage />
     </UDashboardPanelContent>
-    <div class="max-w-5xl w-full mx-auto py-12">
-      <UAlert
-        icon="i-heroicons-command-line"
-        color="orange"
-        variant="soft"
-        :title="t('student_is_inactive')"
-        :description="t('student_is_inactive_description')"
-        :actions="[
-          {
-            label: t('back_to_overview'),
-            to: `/my/${org_id}/students/${subscription_id}`,
-            variant: 'ghost',
-          },
-        ]"
-      />
-    </div>
   </UDashboardPanel>
 </template>
 
@@ -45,7 +29,7 @@ const { t } = useI18n({
 });
 
 
-const { data: subscription, error } = useAsyncData(
+const { data: subscription } = useAsyncData(
   `subscriptions_${subscription_id}`,
   async () => {
     const { data, error } = await client
@@ -59,13 +43,6 @@ const { data: subscription, error } = useAsyncData(
     return data;
   }
 );
-
-if (error) {
-  throw createError({
-    statusCode: 404,
-    message: t("subscription_not_found"),
-  });
-}
 
 const links = computed(() => {
   return [

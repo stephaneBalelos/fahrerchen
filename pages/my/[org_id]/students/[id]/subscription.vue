@@ -69,11 +69,8 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-type Props = {
-  subscription_id: string;
-};
-
-const props = useAttrs() as Props;
+const route = useRoute();
+const subscription_id = route.params.id as string;
 
 const client = useSupabaseClient<Database>();
 
@@ -85,7 +82,7 @@ const { data, refresh } = useAsyncData(async () => {
       .select(
         "*, course:courses(id, name, description, course_required_documents(*))"
       )
-      .eq("id", props.subscription_id)
+      .eq("id", subscription_id)
 
       .single();
 
@@ -104,7 +101,7 @@ async function archiveSubscription() {
       .update({
         archived_at: new Date().toISOString(),
       })
-      .eq("id", props.subscription_id);
+      .eq("id", subscription_id);
 
     if (error) {
       console.error(error);
@@ -135,7 +132,7 @@ async function deleteSubscription() {
     const { error } = await client
       .from("course_subscriptions")
       .delete()
-      .eq("id", props.subscription_id);
+      .eq("id", subscription_id);
 
     if (error) {
       console.error(error);

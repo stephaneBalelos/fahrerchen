@@ -119,6 +119,12 @@
             icon="i-heroicons-pencil"
             @click="(e) => openStudentForm(row.id)"
           />
+          <UButton
+            color="primary"
+            variant="soft"
+            icon="i-heroicons-eye"
+            @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
+          />
         </template>
       </UTable>
     </UDashboardPanelContent>
@@ -130,6 +136,7 @@ import type { AppStudent, Database } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
+import StudentSubscriptionsSlideover from "~/components/students/StudentSubscriptionsSlideover.vue";
 
 definePageMeta({
   layout: "orgs",
@@ -183,8 +190,6 @@ const {
         "organization_id",
         userOrganizationsStore.selectedOrganization.organization_id
       );
-
-      console.log(data);
     return data;
   },
   {
@@ -257,6 +262,16 @@ const openStudentForm = (id?: string) => {
     "onStudent-updated": (student: AppStudent) => {
       console.log("student updated", student);
       refresh();
+    },
+  });
+};
+
+const openStudentSubscriptionsSlideOver = (id: string) => {
+  slideover.open(StudentSubscriptionsSlideover, {
+    studentId: id,
+    onClose: (path) => {
+      slideover.close();
+      navigateTo(path);
     },
   });
 };
