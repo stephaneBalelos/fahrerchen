@@ -24,14 +24,15 @@
           </template>
         </UInput>
 
-        <UDropdown 
-        :items="createUserOptions"
-        :popper="{
-          placement: 'bottom-start',
-        }"
-        :ui="{
-          width: 'w-72',
-        }">
+        <UDropdown
+          :items="createUserOptions"
+          :popper="{
+            placement: 'bottom-start',
+          }"
+          :ui="{
+            width: 'w-72',
+          }"
+        >
           <UButton
             :label="t('new_user')"
             trailing-icon="i-heroicons-plus"
@@ -83,7 +84,6 @@
 
     <UDashboardPanelContent class="p-0">
       <UTable
-        v-model="selected"
         v-model:sort="sort"
         :rows="students ?? []"
         :columns="columns"
@@ -91,7 +91,6 @@
         sort-mode="manual"
         class="w-full"
         :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-        @select="onSelect"
       >
         <template #name-data="{ row }">
           <div class="flex items-center gap-3">
@@ -103,25 +102,17 @@
         </template>
         <template #status-data="{ row }">
           <UBadge
-            :label="row.status ?? 'unknown'"
+            :label="(row.subscriptions_count ?? 0 )? t('status_subscribed', { count: row.subscriptions_count }) : t('status_not_subscribed')"
             :color="
-              row.status === 'subscribed'
+              (row.subscriptions_count ?? 0)
                 ? 'green'
-                : row.status === 'not_subscribed'
-                ? 'orange'
-                : 'red'
+                : 'orange'
             "
             variant="subtle"
             class="capitalize"
           />
         </template>
         <template #actions-data="{ row }">
-          <UButton
-            :to="userOrganizationsStore.relativePath(`/students/${row.id}`)"
-            color="primary"
-            variant="soft"
-            icon="i-heroicons-eye"
-          />
           <UButton
             color="primary"
             variant="soft"
@@ -135,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AppStudent, AppUser, Database } from "~/types/app.types";
+import type { AppStudent, Database } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
@@ -152,11 +143,7 @@ const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
 const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
-const selected = ref<AppUser[]>([]);
 const columns = [
-  {
-    key: "avatar",
-  },
   {
     key: "name",
     label: "Fullname",
@@ -184,7 +171,7 @@ const {
   status,
   refresh,
 } = await useAsyncData(
-  'students',
+  "students",
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
@@ -197,16 +184,16 @@ const {
         userOrganizationsStore.selectedOrganization.organization_id
       );
 
+      console.log(data);
     return data;
   },
   {
     transform: (data) => {
       return data
-        ? data.map((item) => {
+        ? data.map((item) => {       
             return {
               ...item,
-              name: `${item.firstname} ${item.lastname}`,
-              status: item.student_subscriptions ? "subscribed" : "not_subscribed",
+              name: `${item.firstname} ${item.lastname}`
             };
           })
         : [];
@@ -227,8 +214,8 @@ const createUserOptions = ref([
           orgid: userOrganizationsStore.selectedOrganization.organization_id,
           onClose: () => {
             modal.close();
-          }
-        })
+          },
+        });
       },
     },
     {
@@ -242,8 +229,8 @@ const createUserOptions = ref([
           orgid: userOrganizationsStore.selectedOrganization.organization_id,
           onClose: () => {
             modal.close();
-          }
-        })
+          },
+        });
       },
     },
     {
@@ -255,15 +242,6 @@ const createUserOptions = ref([
     },
   ],
 ]);
-
-function onSelect(row: AppUser) {
-  const index = selected.value.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    selected.value.push(row);
-  } else {
-    selected.value.splice(index, 1);
-  }
-}
 
 const openStudentForm = (id?: string) => {
   if (!userOrganizationsStore.selectedOrganization) {
@@ -349,7 +327,9 @@ const openStudentForm = (id?: string) => {
     "pre_registration": "Voranmeldungen",
     "invite_user_per_email": "Fahrschüler:in per E-Mail einladen",
     "copy_invite_link": "Einladungslink kopieren",
-    "manual_registration": "Manuelle Registrierung"
+    "manual_registration": "Manuelle Registrierung",
+    "status_subscribed": "In {count} Kursen eingeschrieben",
+    "status_not_subscribed": "Nicht eingeschrieben"
   },
   "en": {
     "students": "Students",
@@ -358,7 +338,9 @@ const openStudentForm = (id?: string) => {
     "pre_registration": "Pre-registration",
     "invite_user_per_email": "Invite student per email",
     "copy_invite_link": "Copy invite link",
-    "manual_registration": "Manual registration"
+    "manual_registration": "Manual registration",
+    "status_subscribed": "Subscribed to {count} courses",
+    "status_not_subscribed": "Not subscribed"
   }
 }
 </i18n>

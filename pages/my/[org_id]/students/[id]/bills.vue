@@ -47,11 +47,8 @@
 import type { Database } from '~/types/app.types';
 import { formatDateTime, formatCurrency } from '~/utils/formatters';
 
-type Props = {
-  subscription_id: string;
-};
-
-const { subscription_id } = useAttrs() as Props;
+const route = useRoute();
+const subscription_id = route.params.id as string;
 
 const client = useSupabaseClient<Database>();
 

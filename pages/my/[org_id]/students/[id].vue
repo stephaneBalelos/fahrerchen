@@ -1,51 +1,15 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardNavbar :title="`${student?.firstname} ${student?.lastname}`">
-      <template #badge>
-        <UBadge v-if="subscriptions?.length">
-          {{ t("active") }}
-        </UBadge>
-      </template>
-      <template #right>
-        <USelectMenu
-          v-if="subscriptions"
-          v-model="selectedSubscriptionId"
-          :options="subscriptions"
-          :value-attribute="'id'"
-          :option-attribute="'course_name'"
-        >
-          <template #label>
-            <div v-if="selectedSubscriptionId" class="flex gap-2 items-center">
-              <UBadge
-                v-if="
-                  subscriptions.find((sub) => sub.id === selectedSubscriptionId)
-                    ?.archived_at
-                "
-                size="sm"
-                >{{ t("archive") }}</UBadge
-              >
-              <span>{{
-                subscriptions.find((sub) => sub.id === selectedSubscriptionId)
-                  ?.course_name
-              }}</span>
-            </div>
-          </template>
-          <template #option="{ option: subscription }">
-            <span>{{ subscription.course_name }}</span>
-          </template>
-        </USelectMenu>
-      </template>
-    </UDashboardNavbar>
+    <UDashboardNavbar v-if="subscription" :title="`${subscription.student_firstname} ${subscription.student_lastname}`" />
     <UDashboardToolbar
-      v-if="selectedSubscriptionId"
       class="py-0 px-1.5 overflow-x-auto"
     >
       <UHorizontalNavigation :links="links" />
     </UDashboardToolbar>
-    <UDashboardPanelContent v-if="selectedSubscriptionId">
-      <NuxtPage :subscription_id="selectedSubscriptionId" />
+    <UDashboardPanelContent>
+      <NuxtPage />
     </UDashboardPanelContent>
-    <div v-else class="max-w-5xl w-full mx-auto py-12">
+    <div class="max-w-5xl w-full mx-auto py-12">
       <UAlert
         icon="i-heroicons-command-line"
         color="orange"
@@ -55,7 +19,7 @@
         :actions="[
           {
             label: t('back_to_overview'),
-            to: `/my/${org_id}/students/${student_id}`,
+            to: `/my/${org_id}/students/${subscription_id}`,
             variant: 'ghost',
           },
         ]"
@@ -72,7 +36,7 @@ definePageMeta({
 });
 
 const route = useRoute();
-const student_id = route.params.id as string;
+const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 const client = useSupabaseClient<Database>();
 
@@ -80,46 +44,44 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const student = await useCourseStudent(student_id);
 
-const selectedSubscriptionId = ref();
-
-const { data: subscriptions } = useAsyncData(
-  `student_${student_id}_subscriptions`,
+const { data: subscription, error } = useAsyncData(
+  `subscriptions_${subscription_id}`,
   async () => {
     const { data, error } = await client
       .from("course_subscriptions_view")
       .select("*")
-      .eq("student_id", student_id)
-      .eq("organization_id", org_id);
+      .eq("id", subscription_id).single()
     if (error) {
       throw error;
     }
-    if (data.length && !selectedSubscriptionId.value) {
-      selectedSubscriptionId.value = data[0].id;
-    }
+
     return data;
-  },
-  {
-    watch: [selectedSubscriptionId],
   }
 );
+
+if (error) {
+  throw createError({
+    statusCode: 404,
+    message: t("subscription_not_found"),
+  });
+}
 
 const links = computed(() => {
   return [
     [
       {
         label: t("overview"),
-        to: `/my/${org_id}/students/${student_id}`,
+        to: `/my/${org_id}/students/${subscription_id}`,
         exact: true,
       },
       {
         label: t("bills"),
-        to: `/my/${org_id}/students/${student_id}/bills`,
+        to: `/my/${org_id}/students/${subscription_id}/bills`,
       },
       {
         label: t("subscription"),
-        to: `/my/${org_id}/students/${student_id}/subscription`,
+        to: `/my/${org_id}/students/${subscription_id}/subscription`,
       },
     ],
   ];
@@ -138,7 +100,8 @@ const links = computed(() => {
     "bills": "Rechnungen",
     "subscription": "Abonnement",
     "student_is_inactive": "Der Schüler ist inaktiv.",
-    "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements."
+    "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements.",
+    "subscription_not_found": "Das Abonnement wurde nicht gefunden."
   },
   "en": {
     "title": "Student",
@@ -148,7 +111,8 @@ const links = computed(() => {
     "bills": "Bills",
     "subscription": "Subscription",
     "student_is_inactive": "The student is inactive.",
-    "student_is_inactive_description": "The student is inactive and has no active subscriptions."
+    "student_is_inactive_description": "The student is inactive and has no active subscriptions.",
+    "subscription_not_found": "The subscription was not found."
   }
 }
 </i18n>

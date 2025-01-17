@@ -14,12 +14,9 @@
 definePageMeta({
   layout: "orgs",
 });
+const route = useRoute();
+const subscription_id = route.params.id as string;
 
-type Props = {
-  subscription_id: string;
-};
-
-const { subscription_id } = useAttrs() as Props;
 
 
 function _deleteStudent() {

@@ -1457,7 +1457,7 @@ export type Database = {
           lastname: string | null
           organization_id: string | null
           phone_number: string | null
-          student_subscriptions: Json | null
+          subscriptions_count: number | null
         }
         Relationships: [
           {

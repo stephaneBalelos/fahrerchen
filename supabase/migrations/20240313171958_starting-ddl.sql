@@ -429,7 +429,7 @@ from public.organization_members
 inner join public.organizations on organization_members.organization_id = organizations.id
 inner join public.users on organization_members.user_id = users.id;
 
--- Student & Subscription View
+-- Student & Subscriptions count View
 create or replace view public.students_view as
 select
   students.id,
@@ -446,20 +446,16 @@ select
   students.has_a_license,
   students.organization_id,
   students.created_at,
-  subscriptions as student_subscriptions
+  subscriptions as subscriptions_count
 from public.students
 left join (
   select
-    course_subscriptions.student_id,
-    jsonb_agg(jsonb_build_object(
-      'id', course_subscriptions.id,
-      'course_id', course_subscriptions.course_id,
-      'archived_at', course_subscriptions.archived_at,
-      'costs', course_subscriptions.costs
-    )) as subscriptions
+    student_id,
+    count(*) as subscriptions
   from public.course_subscriptions
-  group by course_subscriptions.student_id
+  group by student_id
 ) as subscriptions on students.id = subscriptions.student_id;
+
 
 
 -- Bills View with Course, Subscription and Student
