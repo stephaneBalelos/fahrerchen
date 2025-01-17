@@ -25,9 +25,7 @@
         :title="t('course_required_documents')"
         :description="t('course_required_documents_description')"
       >
-        <template #links>
-          0 / {{ data.course.docs.length }}
-        </template>
+        <template #links> 0 / {{ data.course.docs.length }} </template>
         <CourseRequiredDocumentItem
           v-for="doc in data.course.docs"
           :key="doc.id"
