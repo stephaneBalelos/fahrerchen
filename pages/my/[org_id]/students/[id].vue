@@ -75,7 +75,7 @@ const links = computed(() => {
     "archive": "Archiv",
     "overview": "Überblick",
     "bills": "Rechnungen",
-    "subscription": "Abonnement",
+    "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
     "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements.",
     "subscription_not_found": "Das Abonnement wurde nicht gefunden."
@@ -86,7 +86,7 @@ const links = computed(() => {
     "archive": "Archive",
     "overview": "Overview",
     "bills": "Bills",
-    "subscription": "Subscription",
+    "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",
     "student_is_inactive_description": "The student is inactive and has no active subscriptions.",
     "subscription_not_found": "The subscription was not found."
