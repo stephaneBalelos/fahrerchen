@@ -1182,7 +1182,6 @@ export type Database = {
           activity_schedule_id: string | null
           activity_start_at: string | null
           course_activity_id: string | null
-          course_name: string | null
           course_subscription_id: string | null
           id: string | null
           organization_id: string | null
@@ -1499,6 +1498,8 @@ export type Database = {
           address_street: string | null
           address_zip: string | null
           allow_self_registration: boolean | null
+          avatar_path: string | null
+          description: string | null
           id: string | null
           name: string | null
           organization_courses: Json | null

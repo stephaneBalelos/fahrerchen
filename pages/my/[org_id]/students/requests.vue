@@ -35,9 +35,8 @@
       </template>
     </UDashboardToolbar>
     <UTable
-      v-if="requests && selected"
       v-model="selected"
-      :rows="requests"
+      :rows="requests ?? []"
       :columns="columns"
     >
       <template #student-data="{ row }">
@@ -83,7 +82,7 @@
 
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
-import { formatDate } from "~/utils/formatters";
+import { formatDateTime } from "~/utils/formatters";
 
 definePageMeta({
   layout: "orgs",
@@ -92,6 +91,23 @@ definePageMeta({
 const { t } = useI18n({
   useScope: "local",
 });
+
+type RequestRow = {
+  id: string;
+  inserted_at: string;
+  student: {
+    name: string;
+    has_a_license: boolean;
+  };
+  birthdate: string;
+  email: string;
+  address: {
+    street: string;
+    city: string;
+    zip: string;
+    country: string;
+  };
+};
 
 const toast = useToast();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -124,14 +140,14 @@ const {
   {
     transform: (data) => {
       return data.map((request) => {
-        const row = {
+        const row: RequestRow = {
           id: request.id,
-          inserted_at: formatDate(request.inserted_at),
+          inserted_at: formatDateTime(request.inserted_at),
           student: {
             name: `${request.firstname} ${request.lastname}`,
             has_a_license: request.has_a_license,
           },
-          birthdate: formatDate(request.birth_date),
+          birthdate: formatDateTime(request.birth_date),
           email: request.email,
           address: {
             street: request.address_street,
@@ -146,7 +162,7 @@ const {
   }
 );
 
-const selected = ref<typeof requests.value>([]);
+const selected = ref<RequestRow[]>([]);
 
 const columns = [
   {

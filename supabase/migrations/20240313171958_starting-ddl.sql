@@ -502,6 +502,8 @@ create or replace view public.organizations_view as
 select
   organizations.id,
   organizations.name,
+  organizations.description,
+  organizations.avatar_path,
   organizations.address_street,
   organizations.address_zip,
   organizations.address_city,
@@ -649,6 +651,7 @@ create trigger on_course_created
 create or replace function public.handle_registration_request_confirmation()
 returns trigger as $$
 declare org_id uuid;
+declare student_id uuid;
 begin
   org_id := new.organization_id;
 
@@ -660,7 +663,12 @@ begin
   -- if the status is ACCEPTED, insert the student
   if new.status = 1 then
     insert into public.students (email, firstname, lastname, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license, organization_id)
-    values (new.email, new.firstname, new.lastname, new.birth_date, new.phone_number, new.address_street, new.address_zip, new.address_city, new.address_country, new.has_a_license, org_id);
+    values (new.email, new.firstname, new.lastname, new.birth_date, new.phone_number, new.address_street, new.address_zip, new.address_city, new.address_country, new.has_a_license, org_id)
+    returning id into student_id;
+
+    -- add the student to the wished course
+    insert into public.course_subscriptions (course_id, student_id, organization_id)
+    values (new.requested_course_id, student_id, org_id);
   end if;
 
   return new;
