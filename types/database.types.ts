@@ -476,6 +476,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
+            columns: ["course_activity_attendance_id"]
+            isOneToOne: true
+            referencedRelation: "course_activity_attendances_view"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
             isOneToOne: false
@@ -1167,6 +1174,72 @@ export type Database = {
       }
     }
     Views: {
+      course_activity_attendances_view: {
+        Row: {
+          activity_description: string | null
+          activity_end_at: string | null
+          activity_name: string | null
+          activity_schedule_id: string | null
+          activity_start_at: string | null
+          course_activity_id: string | null
+          course_name: string | null
+          course_subscription_id: string | null
+          id: string | null
+          organization_id: string | null
+          status: Database["public"]["Enums"]["attendance_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
+            columns: ["activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
+            columns: ["activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
+            columns: ["course_activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_attendances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_activity_schedules_view: {
         Row: {
           activity_description: string | null

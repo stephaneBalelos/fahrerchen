@@ -18,13 +18,11 @@
     <div v-else-if="status === 'success' && activities">
       <div v-if="activities.length === 0">No activities found</div>
       <div v-else>
-        <div v-for="activity in activities" :key="activity.id">
-          <div>{{ activity.id }}</div>
-          <div>{{ activity.course_subscription_id }}</div>
-          <div>{{ activity.course_activity_id }}</div>
-          <div>{{ activity.status }}</div>
-          <div>{{ activity.activity_schedule_id}}</div>
-        </div>
+        <StudentActivityItem
+          v-for="(activity, index) in activities"
+          :key="index"
+          :attendance="activity"
+        />
       </div>
     </div>
   </UDashboardSection>
@@ -32,19 +30,20 @@
 
 <script setup lang="ts">
 import type { Database } from '~/types/app.types';
+import StudentActivityItem from '~/components/students/StudentActivityItem.vue';
 
 const props = defineProps<{
-  subscription_id: string;
+  subscriptionId: string;
 }>();
 
 const client = useSupabaseClient<Database>();
 
 
-const { data: activities, error, status } = useAsyncData(`student_${props.subscription_id}_activities`, async () => {
+const { data: activities, error, status } = useAsyncData(`student_${props.subscriptionId}_activities`, async () => {
   const { data, error } = await client
-    .from('course_activity_attendances')
+    .from('course_activity_attendances_view')
     .select('*')
-    .eq('course_subscription_id', props.subscription_id)
+    .eq('course_subscription_id', props.subscriptionId)
   if (error) {
     throw error;
   }
@@ -61,3 +60,20 @@ const openAddActivityAttendance = () => {
 <style scoped>
 
 </style>
+
+<i18n lang="json">
+{
+  "de": {
+    "student_activities": "Schüleraktivitäten",
+    "all_activities_of_the_student": "Alle Aktivitäten des Schülers",
+    "add_activity_attendance": "Teilnahme an Aktivität hinzufügen",
+    "no_activities_found": "Keine Aktivitäten gefunden"
+  },
+  "en": {
+    "student_activities": "Student Activities",
+    "all_activities_of_the_student": "All activities of the student",
+    "add_activity_attendance": "Add Activity Attendance",
+    "no_activities_found": "No activities found"
+  }
+}
+</i18n>

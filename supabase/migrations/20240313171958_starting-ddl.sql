@@ -573,6 +573,23 @@ inner join public.course_activities on course_activity_schedules.activity_id = c
 inner join public.courses on course_activity_schedules.course_id = courses.id
 left join public.users on course_activity_schedules.assigned_to = users.id;
 
+-- Attendances view with course name, schedule
+create or replace view public.course_activity_attendances_view as
+select
+  course_activity_attendances.id,
+  course_activity_attendances.course_activity_id,
+  course_activity_attendances.activity_schedule_id,
+  course_activity_attendances.course_subscription_id,
+  course_activity_attendances.status,
+  course_activity_attendances.organization_id,
+  course_activities.name as activity_name,
+  course_activities.description as activity_description,
+  course_activity_schedules.start_at as activity_start_at,
+  course_activity_schedules.end_at as activity_end_at
+from public.course_activity_attendances
+inner join public.course_activities on course_activity_attendances.course_activity_id = course_activities.id
+inner join public.course_activity_schedules on course_activity_attendances.activity_schedule_id = course_activity_schedules.id; 
+
 
 
 -- TRIGGERS

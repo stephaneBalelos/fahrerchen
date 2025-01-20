@@ -57,6 +57,7 @@ export type StripeConnectLinkAccountPostBody = {
 }
 
 export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
+export type CourseActivityAttendanceView = Database["public"]["Views"]["course_activity_attendances_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
@@ -108,8 +109,21 @@ export type Database = MergeDeep<DatabaseGenerated, {
           assigned_to_email: string,
           assigned_to_firstname: string | null,
           assigned_to_lastname: string | null,
+          attendees: string[]
         } 
       },
+      course_activity_attendances_view: {
+        id: string,
+        course_activity_id: string,
+        activity_schedule_id: string,
+        course_subscription_id: string,
+        status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
+        organization_id: string,
+        activity_name: string,
+        activity_description: string,
+        activity_start_at: string,
+        activity_end_at: string
+      }
       user_roles_view: {
         Row: {
           email: string
