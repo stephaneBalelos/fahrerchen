@@ -143,7 +143,7 @@ async function deleteSubscription() {
       description: t("subscription_deleted_description"),
       color: "green",
     });
-    navigateTo(`/my/${data.value.organization_id}/students/${data.value.student_id}`);
+    navigateTo(`/my/${data.value.organization_id}/students`);
   } catch (error) {
     console.error(error);
     toast.add({

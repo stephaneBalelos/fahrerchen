@@ -7,6 +7,7 @@
     <template #links>
       <UBadge v-if="bill.paid_at" color="green" :label="t('paid')" />
       <UBadge v-else color="yellow" :label="t('not_paid')" />
+      <UBadge v-if="bill.canceled_at" color="red" :label="t('canceled')" />
     </template>
     <div class="flex flex-col gap-2">
       <div class="flex flex-col flex-1 items-start">
@@ -64,7 +65,8 @@ const courseSubscription = await useCourseSubscription(
     "subscribed_on": "Einschreibung am",
     "history": "Verlauf",
     "paid": "Bezahlt",
-    "not_paid": "Nicht bezahlt"
+    "not_paid": "Nicht bezahlt",
+    "canceled": "storniert"
   },
   "en": {
     "bill_information": "Bill Information",
@@ -73,7 +75,8 @@ const courseSubscription = await useCourseSubscription(
     "subscribed_on": "Subscribed on",
     "history": "History",
     "paid": "Paid",
-    "not_paid": "Not paid"
+    "not_paid": "Not paid",
+    "canceled": "Canceled"
   }
 }
 </i18n>

@@ -295,7 +295,7 @@ grant update (archived_at) on table public.course_subscriptions to authenticated
 -- COURSE SUBSCRIPTION DOCUMENTS
 create table public.course_subscription_documents (
   id            uuid default uuid_generate_v4() primary key,
-  subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   required_document_id  uuid references public.course_required_documents on delete set null,
   path         text not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -368,12 +368,14 @@ create table public.course_subscription_bills (
   paid_at       timestamp with time zone default null,
   ready_to_pay  boolean default false not null, -- if the bill is ready to be paid, the bill is should be locked
   stripe_payment_intent_id  text, -- Stripe Payment Intent ID
-  organization_id    uuid references public.organizations on delete cascade not null
+  canceled_at   timestamp with time zone default null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  check ((paid_at is not null and canceled_at is null) or (paid_at is null and canceled_at is not null) or (paid_at is null and canceled_at is null))
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
 alter table public.course_subscription_bills enable row level security;
 revoke update on table public.course_subscription_bills from authenticated, anon;
-grant update (paid_at, ready_to_pay, stripe_payment_intent_id) on table public.course_subscription_bills to authenticated;
+grant update (paid_at, ready_to_pay, stripe_payment_intent_id, canceled_at, total) on table public.course_subscription_bills to authenticated;
 
 -- COURSE SUBSCRIPTION BILL ITEMS
 create table public.course_subscription_bill_items (
@@ -452,7 +454,7 @@ left join (
   select
     student_id,
     count(*) as subscriptions
-  from public.course_subscriptions
+  from public.course_subscriptions where archived_at is null
   group by student_id
 ) as subscriptions on students.id = subscriptions.student_id;
 
@@ -466,6 +468,7 @@ select
   course_subscription_bills.total,
   course_subscription_bills.created_at,
   course_subscription_bills.paid_at,
+  course_subscription_bills.canceled_at,
   course_subscription_bills.ready_to_pay,
   course_subscription_bills.stripe_payment_intent_id,
   course_subscription_bills.organization_id,
@@ -709,9 +712,6 @@ begin
         end loop;
       end if;
     end loop;
-
-    -- set bill as ready to pay
-    update public.course_subscription_bills set ready_to_pay = true where id = bill_id;
   end if;
 
   return new;
@@ -721,6 +721,27 @@ $$ language plpgsql security invoker set search_path = public;
 create trigger on_course_subscription_created
   after insert on public.course_subscriptions
   for each row execute procedure public.handle_new_course_subscription();
+
+-- handle achrievd course subscription
+create or replace function public.handle_archived_course_subscription()
+returns trigger as $$
+declare org_id uuid;
+begin
+  org_id := old.organization_id;
+
+  if new.archived_at is not null then
+    -- cancel all open bills
+    update public.course_subscription_bills set canceled_at = timezone('utc'::text, now()) where course_subscription_id = old.id and paid_at is null;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course subscription is updated
+create trigger on_course_subscription_updated
+  after update of archived_at on public.course_subscriptions
+  for each row execute procedure public.handle_archived_course_subscription();
+
 
 
 -- handle new activity attendance
@@ -734,9 +755,9 @@ declare bill_item public.course_subscription_bill_items;
 begin
   org_id := new.organization_id;
 
-  -- lookup if a bill already exists for the course subscription and has not been paid
+  -- lookup if a bill already exists for the course subscription and has not been paid or canceled
   select * into bill from public.course_subscription_bills
-  where course_subscription_id = new.course_subscription_id and (paid_at is null or ready_to_pay = false) limit 1;
+  where course_subscription_id = new.course_subscription_id and (paid_at is null and canceled_at is null and ready_to_pay = false) order by created_at desc limit 1;
 
   -- if no bill exists, create a new one
   if bill is null then
@@ -964,7 +985,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 -- trigger the function every time a course subscription bill item is updated
 create trigger on_course_subscription_bill_item_updated
-  after update on public.course_subscription_bill_items
+  before update on public.course_subscription_bill_items
   for each row execute procedure public.handle_updated_bill_item();
 
 
@@ -1038,6 +1059,40 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 
+-- check if a subscription is active / not archived
+create or replace function public.is_subscription_active(
+  subscription_id uuid
+)
+returns boolean as $$
+declare
+  archived_date timestamp with time zone;
+begin
+  select archived_at into archived_date from public.course_subscriptions where id = subscription_id;
+
+  if archived_date is not null then
+    return false;
+  end if;
+
+  return true;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+-- check if a bill can be updated
+create or replace function public.can_update_bill(
+  bill_id uuid
+)
+returns boolean as $$
+declare
+  is_paid boolean;
+  is_ready_to_pay boolean;
+  is_cancelled boolean;
+begin
+  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_cancelled from public.course_subscription_bills where id = bill_id;
+
+  return is_paid = false or is_ready_to_pay = false or is_cancelled = false;
+end;
+$$ language plpgsql security definer set search_path = public;
 
 -- Policies
 
@@ -1182,12 +1237,12 @@ insert into public.role_permissions (role, permission) values ('teacher', 'cours
 insert into public.role_permissions (role, permission) values ('student', 'course_subscriptions.read');
 
 create policy "Owner, Manager can insert course_subscriptions" on public.course_subscriptions for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
-create policy "Owner, Manager can insert course_subscription_documents" on public.course_subscription_documents for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id));
+create policy "Owner, Manager can insert course_subscription_documents" on public.course_subscription_documents for insert to authenticated with check (public.authorize('course_subscriptions.create', organization_id) and public.is_subscription_active(course_subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.create');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.create');
 
 create policy "Owner & Manager can update course_subscriptions" on public.course_subscriptions for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
-create policy "Owner & Manager can update course_subscription_documents" on public.course_subscription_documents for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id));
+create policy "Owner & Manager can update course_subscription_documents" on public.course_subscription_documents for update to authenticated using (public.authorize('course_subscriptions.update', organization_id)) with check (public.authorize('course_subscriptions.update', organization_id) and public.is_subscription_active(course_subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.update');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscriptions.update');
 
@@ -1244,15 +1299,15 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_attendances.read');
 insert into public.role_permissions (role, permission) values ('student', 'course_activity_attendances.read');
 
-create policy "Owner, Manager can insert course_activity_attendances" on public.course_activity_attendances for insert to authenticated with check (public.authorize('course_activity_attendances.create', organization_id));
+create policy "Owner, Manager can insert course_activity_attendances" on public.course_activity_attendances for insert to authenticated with check (public.authorize('course_activity_attendances.create', organization_id) and public.is_subscription_active(course_subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.create');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.create');
 
-create policy "Owner & Manager can update course_activity_attendances" on public.course_activity_attendances for update to authenticated using (public.authorize('course_activity_attendances.update', organization_id)) with check (public.authorize('course_activity_attendances.update', organization_id));
+create policy "Owner & Manager can update course_activity_attendances" on public.course_activity_attendances for update to authenticated using (public.authorize('course_activity_attendances.update', organization_id)) with check (public.authorize('course_activity_attendances.update', organization_id) and public.is_subscription_active(course_subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.update');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.update');
 
-create policy "Owner can delete course_activity_attendances" on public.course_activity_attendances for delete to authenticated using (public.authorize('course_activity_attendances.delete', organization_id));
+create policy "Owner can delete course_activity_attendances" on public.course_activity_attendances for delete to authenticated using (public.authorize('course_activity_attendances.delete', organization_id) and public.is_subscription_active(course_subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.delete');
 
 
@@ -1265,13 +1320,13 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('student', 'course_subscription_bills.read');
 
-create policy "Owner, Manager can insert course_subscription_bills" on public.course_subscription_bills for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id));
-create policy "Owner, Manager can insert course_subscription_bill_items" on public.course_subscription_bill_items for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id));
+create policy "Owner, Manager can insert course_subscription_bills" on public.course_subscription_bills for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id) and public.is_subscription_active(course_subscription_id));
+create policy "Owner, Manager can insert course_subscription_bill_items" on public.course_subscription_bill_items for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id) and public.can_update_bill(bill_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.create');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscription_bills.create');
 
-create policy "Owner & Manager can update course_subscription_bills" on public.course_subscription_bills for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id));
-create policy "Owner & Manager can update course_subscription_bill_items" on public.course_subscription_bill_items for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id));
+create policy "Owner & Manager can update course_subscription_bills" on public.course_subscription_bills for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id) and public.can_update_bill(id));
+create policy "Owner & Manager can update course_subscription_bill_items" on public.course_subscription_bill_items for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id) and public.can_update_bill(bill_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.update');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscription_bills.update');
 

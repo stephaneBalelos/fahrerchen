@@ -40,7 +40,8 @@
     "bills": {
         "status": {
             "paid": "Bezahlt",
-            "unpaid": "Unbezahlt"
+            "unpaid": "Unbezahlt",
+            "canceled": "Storniert"
         }
     }
 }

@@ -26,11 +26,14 @@
             {{ row.course_name }}
           </template>
           <template #status-data="{ row }">
-            <UBadge v-if="row.status === 'unpaid'" :color="'red'">
-              {{ g("bills.status.unpaid") }}
-            </UBadge>
-            <UBadge v-else :color="'green'">
+            <UBadge v-if="row.status === 'paid'" :color="'green'">
               {{ g("bills.status.paid") }}
+            </UBadge>
+            <UBadge v-else-if="row.status === 'canceled'" :color="'red'">
+              {{ g("bills.status.canceled") }}
+            </UBadge>
+            <UBadge v-else :color="'orange'">
+              {{ g("bills.status.unpaid") }}
             </UBadge>
           </template>
           <template #action-data="{ row }">
@@ -130,7 +133,7 @@ const { data: bills, status } = useAsyncData(
       return data?.map((bill) => {
         return {
           ...bill,
-          status: bill.paid_at ? "paid" : "unpaid",
+          status: bill.paid_at ? "paid" : bill.canceled_at ? "canceled" : "unpaid",
         };
       });
     },

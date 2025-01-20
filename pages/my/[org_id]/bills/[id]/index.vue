@@ -35,7 +35,7 @@
             size="sm"
             color="gray"
             square
-            :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.student_id}`"
+            :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}/subscription`"
           />
         </template>
       </UDashboardNavbar>
@@ -67,7 +67,7 @@
               >
                 <template #links>
                   <UButton
-                    v-if="!bill.data.paid_at && bill.data.ready_to_pay"
+                    v-if="!bill.data.paid_at && bill.data.ready_to_pay && !bill.data.canceled_at"
                     color="green"
                     variant="solid"
                     size="xs"
@@ -76,16 +76,17 @@
                     <span>{{ t("mark_as_paid") }}</span>
                   </UButton>
                   <UButton
-                    v-if="!bill.data.ready_to_pay"
+                    v-if="!bill.data.ready_to_pay && (!bill.data.paid_at || !bill.data.canceled_at)"
                     color="primary"
                     variant="soft"
                     @click="markAsReadyToPay"
                     >{{ t("mark_as_ready_to_pay") }}</UButton
                   >
                   <UButton
-                    v-if="!bill.data.paid_at"
+                    v-if="!bill.data.paid_at && !bill.data.canceled_at"
                     color="red"
                     variant="soft"
+                    @click="markAsCanceled"
                     >{{ t("cancel_bill") }}</UButton
                   >
                 </template>
@@ -221,6 +222,32 @@ async function markAsPaid() {
     toast.add({
       title: "Error",
       description: "An error occurred while marking the bill as paid",
+      color: "red",
+    });
+  }
+}
+
+async function markAsCanceled() {
+  try {
+    const { error } = await client
+      .from("course_subscription_bills")
+      .update({ canceled_at: new Date().toISOString() })
+      .eq("id", id as string);
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    toast.add({
+      title: "Bill canceled",
+      description: "The bill has been canceled",
+      color: "green",
+    });
+  } catch (error) {
+    console.error(error);
+    toast.add({
+      title: "Error",
+      description: "An error occurred while canceling the bill",
       color: "red",
     });
   }

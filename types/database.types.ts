@@ -514,6 +514,7 @@ export type Database = {
       }
       course_subscription_bills: {
         Row: {
+          canceled_at: string | null
           course_subscription_id: string
           created_at: string
           id: string
@@ -524,6 +525,7 @@ export type Database = {
           total: number
         }
         Insert: {
+          canceled_at?: string | null
           course_subscription_id: string
           created_at?: string
           id?: string
@@ -534,6 +536,7 @@ export type Database = {
           total?: number
         }
         Update: {
+          canceled_at?: string | null
           course_subscription_id?: string
           created_at?: string
           id?: string
@@ -576,30 +579,44 @@ export type Database = {
       }
       course_subscription_documents: {
         Row: {
+          course_subscription_id: string
           created_at: string
           id: string
           organization_id: string
           path: string
           required_document_id: string | null
-          subscription_id: string
         }
         Insert: {
+          course_subscription_id: string
           created_at?: string
           id?: string
           organization_id: string
           path: string
           required_document_id?: string | null
-          subscription_id: string
         }
         Update: {
+          course_subscription_id?: string
           created_at?: string
           id?: string
           organization_id?: string
           path?: string
           required_document_id?: string | null
-          subscription_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "course_subscription_documents_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_documents_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_subscription_documents_organization_id_fkey"
             columns: ["organization_id"]
@@ -619,20 +636,6 @@ export type Database = {
             columns: ["required_document_id"]
             isOneToOne: false
             referencedRelation: "course_required_documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_documents_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_documents_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1258,6 +1261,7 @@ export type Database = {
       }
       course_subscription_bills_view: {
         Row: {
+          canceled_at: string | null
           course_description: string | null
           course_id: string | null
           course_name: string | null
@@ -1492,6 +1496,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      can_update_bill: {
+        Args: {
+          bill_id: string
+        }
+        Returns: boolean
+      }
       create_student: {
         Args: {
           firstname: string
@@ -1521,6 +1531,12 @@ export type Database = {
       is_main_owner: {
         Args: {
           org_id: string
+        }
+        Returns: boolean
+      }
+      is_subscription_active: {
+        Args: {
+          subscription_id: string
         }
         Returns: boolean
       }
