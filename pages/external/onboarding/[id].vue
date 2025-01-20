@@ -25,8 +25,8 @@
               :schema="schema"
               :state="formData"
               class="space-y-4"
-              @submit="onSubmit"
               :validate-on="['blur', 'submit']"
+              @submit="onSubmit"
             >
               <ULandingSection
                 :title="t('title', { org_name: org.name })"
@@ -44,17 +44,17 @@
                 <img
                   src="https://picsum.photos/360/360"
                   class="w-full rounded-md shadow-xl ring-1 ring-gray-300 dark:ring-gray-700"
-                />
+                >
               </ULandingSection>
               <ULandingSection :title="t('personal_data')">
                 <div class="grid grid-cols-2 gap-4">
                   <UFormGroup :label="t('form.firstname')" name="firstname">
-                    <UInput placeholder="Max" v-model="formData.firstname" />
+                    <UInput v-model="formData.firstname" placeholder="Max" />
                   </UFormGroup>
                   <UFormGroup :label="t('form.lastname')" name="lastname">
                     <UInput
-                      placeholder="Muestermann"
                       v-model="formData.lastname"
+                      placeholder="Muestermann"
                     />
                   </UFormGroup>
                   <UFormGroup
@@ -63,8 +63,8 @@
                     name="email"
                   >
                     <UInput
-                      placeholder="max.muestermann@email.de"
                       v-model="formData.email"
+                      placeholder="max.muestermann@email.de"
                     />
                   </UFormGroup>
                   <UFormGroup
@@ -72,8 +72,8 @@
                     name="phone_number"
                   >
                     <UInput
-                      placeholder="+49 123 456 789"
                       v-model="formData.phone_number"
+                      placeholder="+49 123 456 789"
                     />
                   </UFormGroup>
 
@@ -86,7 +86,7 @@
                         variant="solid"
                         block
                       />
-                      <template #panel="{ close }">
+                      <template #panel>
                         <DatePicker
                           v-model="formData.birth_date"
                           is-required
@@ -103,14 +103,14 @@
                     name="address_street"
                   >
                     <UInput
-                      placeholder="Musterstraße 123"
                       v-model="formData.address_street"
+                      placeholder="Musterstraße 123"
                     />
                   </UFormGroup>
                   <UFormGroup :label="t('form.address_zip')" name="address_zip">
                     <UInput
-                      placeholder="12345"
                       v-model="formData.address_zip"
+                      placeholder="12345"
                     />
                   </UFormGroup>
                   <UFormGroup
@@ -118,8 +118,8 @@
                     name="address_city"
                   >
                     <UInput
-                      placeholder="Musterstadt"
                       v-model="formData.address_city"
+                      placeholder="Musterstadt"
                     />
                   </UFormGroup>
                   <UFormGroup
@@ -127,8 +127,8 @@
                     name="address_country"
                   >
                     <UInput
-                      placeholder="Deutschland"
                       v-model="formData.address_country"
+                      placeholder="Deutschland"
                     />
                   </UFormGroup>
                 </div>
@@ -142,9 +142,9 @@
               >
                 <div class="grid grid-cols-2 gap-4">
                   <ULandingCard
-                    class="cursor-pointer :"
                     v-for="course in org.organization_courses"
                     :key="course.id"
+                    class="cursor-pointer :"
                     :title="course.name"
                     :description="course.description"
                     color="primary"
@@ -176,7 +176,7 @@
               </ULandingSection>
             </UForm>
           </div>
-          <div class="py-24 sm:py-32" v-else>
+          <div v-else class="py-24 sm:py-32">
             <ULandingCTA
               :title="t('error.404_title')"
               :description="t('error.404_description')"
@@ -200,11 +200,10 @@
 
 <script setup lang="ts">
 import { z } from "zod";
-import type { FormSubmitEvent } from "#ui/types";
-import {
-  type AppStudentRegistrationRequest,
-  type AppCourse,
-  type Database,
+import type {
+  AppStudentRegistrationRequest,
+  AppCourse,
+  Database,
 } from "~/types/app.types";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 import { formatDate } from "~/utils/formatters";
@@ -225,14 +224,12 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const runtimeConfig = useRuntimeConfig();
 const org_id = useRoute().params.id as string;
 const registrationForm = ref<HTMLFormElement | null>(null);
 
 const client = useSupabaseClient<Database>();
 const {
   data: org,
-  error,
   status,
 } = useAsyncData(
   async () => {
@@ -284,7 +281,6 @@ const schema = z.object({
   requested_course_id: z.string().uuid(),
   organization_id: z.string().uuid(),
 });
-type Schema = z.infer<typeof schema>;
 
 const formData = ref<
   Omit<AppStudentRegistrationRequest, "id" | "inserted_at" | "status" | "birth_date"> & {birth_date: Date}
