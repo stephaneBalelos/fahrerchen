@@ -1,6 +1,6 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardToolbar>
+    <UDashboardNavbar>
       <template #left>
         <h2 class="font-semibold text-gray-900 dark:text-white">
           {{ t("students") }}
@@ -10,20 +10,6 @@
         </h2>
       </template>
       <template #right>
-        <UInput
-          ref="input"
-          v-model="q"
-          icon="i-heroicons-funnel"
-          autocomplete="off"
-          :placeholder="t('filter_users')"
-          class="hidden lg:block"
-          @keydown.esc="$event.target.blur()"
-        >
-          <template #trailing>
-            <UKbd value="/" />
-          </template>
-        </UInput>
-
         <UDropdown
           :items="createUserOptions"
           :popper="{
@@ -48,10 +34,19 @@
           {{ t("pre_registration") }}
         </UButton>
       </template>
-    </UDashboardToolbar>
+    </UDashboardNavbar>
 
     <UDashboardToolbar>
       <template #left>
+        <UInput
+          ref="input"
+          v-model="q"
+          icon="i-heroicons-funnel"
+          autocomplete="off"
+          :placeholder="t('filter_users')"
+          class="hidden lg:block"
+          @keydown.esc="$event.target.blur()"
+        />
         <!-- <USelectMenu
             v-model="selectedStatuses"
             icon="i-heroicons-check-circle"
@@ -69,17 +64,6 @@
           /> -->
       </template>
 
-      <template #right>
-        <USelectMenu
-          v-model="selectedColumns"
-          icon="i-heroicons-adjustments-horizontal-solid"
-          :options="columns"
-          multiple
-          class="hidden lg:block"
-        >
-          <template #label> Display </template>
-        </USelectMenu>
-      </template>
     </UDashboardToolbar>
 
     <UDashboardPanelContent class="p-0">
@@ -113,18 +97,20 @@
           />
         </template>
         <template #actions-data="{ row }">
-          <UButton
-            color="primary"
-            variant="soft"
-            icon="i-heroicons-pencil"
-            @click="(e) => openStudentForm(row.id)"
-          />
-          <UButton
-            color="primary"
-            variant="soft"
-            icon="i-heroicons-eye"
-            @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
-          />
+          <div class="flex gap-2">
+            <UButton
+              color="gray"
+              variant="solid"
+              icon="i-heroicons-pencil"
+              @click="(e) => openStudentForm(row.id)"
+            />
+            <UButton
+              color="gray"
+              variant="solid"
+              icon="i-heroicons-eye"
+              @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
+            />
+          </div>
         </template>
       </UTable>
     </UDashboardPanelContent>
@@ -153,24 +139,21 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const columns = [
   {
     key: "name",
-    label: "Fullname",
-    sortable: true,
+    label: t("table.name"),
   },
   {
     key: "email",
-    label: "Email",
-    sortable: true,
+    label: t("table.email"),
   },
   {
     key: "status",
-    label: "Status",
+    label: t("table.status"),
   },
   {
     key: "actions",
   },
 ];
 const q = ref("");
-const selectedColumns = ref(columns);
 const sort = ref({ column: "id", direction: "asc" as const });
 
 const {
@@ -183,16 +166,23 @@ const {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    const { data } = await client
+    const query = client
       .from("students_view")
       .select("*")
       .eq(
         "organization_id",
         userOrganizationsStore.selectedOrganization.organization_id
       );
+
+      if (q.value) {
+        query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);
+      }
+
+    const { data } = await query;
     return data;
   },
   {
+    watch: [q],
     transform: (data) => {
       return data
         ? data.map((item) => {       
@@ -344,7 +334,13 @@ const openStudentSubscriptionsSlideOver = (id: string) => {
     "copy_invite_link": "Einladungslink kopieren",
     "manual_registration": "Manuelle Registrierung",
     "status_subscribed": "In {count} Kursen eingeschrieben",
-    "status_not_subscribed": "Nicht eingeschrieben"
+    "status_not_subscribed": "Nicht eingeschrieben",
+    "table": {
+      "name": "Name",
+      "email": "E-Mail",
+      "status": "Status",
+      "actions": "Aktionen"
+    }
   },
   "en": {
     "students": "Students",
@@ -355,7 +351,13 @@ const openStudentSubscriptionsSlideOver = (id: string) => {
     "copy_invite_link": "Copy invite link",
     "manual_registration": "Manual registration",
     "status_subscribed": "Subscribed to {count} courses",
-    "status_not_subscribed": "Not subscribed"
+    "status_not_subscribed": "Not subscribed",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "actions": "Actions"
+    }
   }
 }
 </i18n>
