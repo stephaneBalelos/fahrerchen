@@ -31,14 +31,7 @@
               <ULandingSection
                 :title="t('title', { org_name: org.name })"
                 :description="t('description')"
-                :links="[
-                  {
-                    label: t('cta_continue'),
-                    color: 'gray',
-                    trailingIcon: 'i-heroicons-arrow-right',
-                    size: 'lg',
-                  },
-                ]"
+                :links="[]"
                 align="left"
               >
                 <img
@@ -132,9 +125,6 @@
                     />
                   </UFormGroup>
                 </div>
-                <div class="grid place-items-center py-4">
-                  <UButton> {{ t("cta_continue") }} </UButton>
-                </div>
               </ULandingSection>
               <ULandingSection
                 ref="courseInfosSection"
@@ -207,6 +197,7 @@ import type {
 } from "~/types/app.types";
 import DatePicker from "~/components/forms/Inputs/Datepicker.vue";
 import { formatDate } from "~/utils/formatters";
+import { sub } from "date-fns";
 
 definePageMeta({
   validate: async (route) => {
@@ -285,15 +276,15 @@ const schema = z.object({
 const formData = ref<
   Omit<AppStudentRegistrationRequest, "id" | "inserted_at" | "status" | "birth_date"> & {birth_date: Date}
 >({
-  firstname: "Jonas",
-  lastname: "Hegen",
-  email: "jh@gmail.com",
-  phone_number: "+491789121487",
-  birth_date: new Date(1996, 8, 9),
-  address_street: "Weser 108",
-  address_zip: "26333",
-  address_city: "Wilhelmshaven",
-  address_country: "Deutschland",
+  firstname: "",
+  lastname: "",
+  email: "",
+  phone_number: "",
+  birth_date: sub(new Date(), { years: 18 }),
+  address_street: "",
+  address_zip: "",
+  address_city: "",
+  address_country: "",
   has_a_license: true,
   requested_course_id: "",
   organization_id: org_id,
@@ -334,7 +325,7 @@ function handleError() {
 {
   "de": {
     "title": "Willkommen bei {org_name}",
-    "description": "Lass uns gemeinsam starten",
+    "description": "Fülle das Formular aus, um dich bei dieser Fahrschule anzumelden",
     "personal_data": "Persönliche Daten",
     "selected_course": "Gewünschter Kurs",
     "cta_continue": "Weiter",
@@ -360,7 +351,7 @@ function handleError() {
   },
   "en": {
     "title": "Welcome to {org_name}",
-    "description": "Let's get started together",
+    "description": "Fill out the form to register with this driving school",
     "personal_data": "Personal data",
     "selected_course": "Desired course",
     "cta_continue": "Continue",
