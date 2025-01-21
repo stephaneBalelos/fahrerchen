@@ -5,6 +5,7 @@
     <div class="grid grid-cols-2 gap-4 mt-4">
       <StudentsStudentActivitiesSection
         :subscription-id="subscription_id"
+        :org-id="org_id"
       />
     </div>
   </div>
@@ -17,6 +18,7 @@ definePageMeta({
 });
 const route = useRoute();
 const subscription_id = route.params.id as string;
+const org_id = route.params.org_id as string;
 
 
 

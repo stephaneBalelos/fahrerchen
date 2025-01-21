@@ -12,7 +12,7 @@
           v-if="props.attendance.activity_start_at"
           class="text-gray-500 dark:text-gray-400 text-sm"
         >
-          {{ t("created_at") }}
+          {{ t("planned_for") }}
           {{ formatDate(props.attendance.activity_start_at) }}
         </p>
       </div>
@@ -66,13 +66,13 @@ const { t } = useI18n({
         "attended": "Teilgenommen",
         "registered": "Registriert",
         "canceled": "Abgesagt",
-        "created_at": "Erstellt am"
+        "planned_for": "Geplant für"
     },
     "en": {
         "attended": "Attended",
         "registered": "Registered",
         "canceled": "Canceled",
-        "created_at": "Created at"
+        "planned_for": "Planned for"
     }
 }
 </i18n>

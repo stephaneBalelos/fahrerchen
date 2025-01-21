@@ -77,6 +77,7 @@ const { data: subscription, status } = useAsyncData(async () => {
     "de": {
         "course": "Kurs",
         "costs": "Kosten",
+        "saldo": "Saldo",
         "progression": "Fortschritt",
         "is_active": "Ist aktiv",
         "status_active": "Aktiv",
@@ -85,6 +86,7 @@ const { data: subscription, status } = useAsyncData(async () => {
     "en": {
         "course": "Course",
         "costs": "Costs",
+        "saldo": "Saldo",
         "progression": "Progression",
         "is_active": "Is active",
         "status_active": "Active",
