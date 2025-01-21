@@ -1,10 +1,9 @@
-import type { AppStudent, Database, AppCourseSubscription, AppCourse } from "~/types/app.types";
+import type { CourseSubscriptionView, AppStudent, Database } from "~/types/app.types";
 
 export const useStudentStore = defineStore('student', () => {
     const client = useSupabaseClient<Database>()
     const student = ref<AppStudent | null>(null);
-    const subscription = ref<Database['public']['Views']['course_subscriptions_view']['Row'] | null>(null);
-    const course = ref<AppCourse | null>(null);
+    const subscriptions = ref<CourseSubscriptionView[]>([]);
     const userOrganizationsStore = useUserOrganizationsStore();
 
     async function loadStudent(org_id: string, user_id: string) {
@@ -22,9 +21,9 @@ export const useStudentStore = defineStore('student', () => {
         student.value = data
     }
 
-    async function loadSubscription(org_id: string, student_id: string) {
+    async function loadSubscriptions(org_id: string, student_id: string) {
         const { data, error } = await client.from('course_subscriptions_view').select('*').eq('organization_id', org_id)
-        .eq('student_id', student_id).single();
+        .eq('student_id', student_id);
         if (error) {
             console.error(error)
             return
@@ -34,7 +33,7 @@ export const useStudentStore = defineStore('student', () => {
             return
         }
 
-        subscription.value = data
+        subscriptions.value = data
     }
 
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
@@ -42,10 +41,10 @@ export const useStudentStore = defineStore('student', () => {
             await loadStudent(userOrganizationsStore.selectedOrganization.organization_id, userOrganizationsStore.selectedOrganization.user_id)
 
             if (student.value) {
-                await loadSubscription(userOrganizationsStore.selectedOrganization.organization_id, student.value.id)
+                await loadSubscriptions(userOrganizationsStore.selectedOrganization.organization_id, student.value.id)
             }
         }
     }, { immediate: true })
 
-    return { student, subscription, loadStudent }
+    return { student, subscriptions, loadStudent }
 });

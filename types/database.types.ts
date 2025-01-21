@@ -1609,6 +1609,7 @@ export type Database = {
           allow_self_registration: boolean | null
           avatar_path: string | null
           description: string | null
+          email: string | null
           id: string | null
           name: string | null
           organization_courses: Json | null
@@ -1616,7 +1617,9 @@ export type Database = {
           owner_firstname: string | null
           owner_id: string | null
           owner_lastname: string | null
+          phone_number: string | null
           preferred_language: string | null
+          website: string | null
         }
         Relationships: [
           {

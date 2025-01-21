@@ -244,7 +244,14 @@ async function updateStudent(data: UserSchema, student_id: string) {
   const { data: student, error } = await client
     .from("students")
     .update({
-      ...data,
+      firstname: data.firstname,
+      lastname: data.lastname,
+      phone_number: data.phone_number,
+      address_street: data.address_street,
+      address_city: data.address_city,
+      address_zip: data.address_zip,
+      address_country: data.address_country,
+      has_a_license: data.has_a_license,
       birth_date: data.birth_date.toISOString(),
     })
     .eq("id", student_id)

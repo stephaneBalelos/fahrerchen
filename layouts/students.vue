@@ -1,66 +1,53 @@
 <template>
   <UDashboardLayout>
     <UDashboardPanel grow>
-      <UHeader :links="links">
-        <template #logo> Fahari Academy </template>
+      <UHeader v-if="organization">
+        <template #logo> {{ organization?.name }} </template>
 
         <template #right>
           <UColorModeButton />
 
-          <UButton @click="logout" :label="t('logout')" color="gray" />
+          <UButton :label="t('logout')" color="gray"  @click="logout"/>
         </template>
 
         <template #panel>
-          <UNavigationTree :links="links" />
+          <!-- <UNavigationTree v-if="organization" :links="links" /> -->
         </template>
       </UHeader>
       <ClientOnly>
-        <slot></slot>
+        <slot />
       </ClientOnly>
     </UDashboardPanel>
   </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
-const runtimeConfig = useRuntimeConfig();
-const client = useSupabaseClient();
+import { computedAsync } from '@vueuse/core';
+import type { Database } from '~/types/app.types';
+
+const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const links = computed(() => {
+const organization = computedAsync(async () => {
   if (!userOrganizationsStore.selectedOrganization) {
-    return [];
+    return null;
+  }
+  const { data, error } = await client.from('organizations').select('*').eq('id', userOrganizationsStore.selectedOrganization.organization_id).single();
+  if (error) {
+    console.log(error);
+    return null;
   }
 
-  const l = [
-    {
-      label: t("overview"),
-      icon: "i-heroicons-home",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}`,
-      exact: true,
-    },
-    {
-      label: t("courses"),
-      icon: "i-heroicons-graduation-cap",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/courses`,
-      exact: true,
-    },
-    {
-      label: t("bills"),
-      icon: "i-heroicons-cash",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/bills`,
-      exact: true,
-    },
-  ];
-
-  return l;
-});
+  return data;
+})
 
 async function logout() {
   await client.auth.signOut();
+  navigateTo("/");
 }
 </script>
 
@@ -69,15 +56,9 @@ async function logout() {
 <i18n lang="json">
 {
   "de": {
-    "overview": "Übersicht",
-    "courses": "Kurse",
-    "bills": "Rechnungen",
     "logout": "Abmelden"
   },
   "en": {
-    "overview": "Overview",
-    "courses": "Courses",
-    "bills": "Bills",
     "logout": "Logout"
   }
 }

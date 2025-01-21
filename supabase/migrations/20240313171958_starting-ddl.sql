@@ -505,6 +505,9 @@ select
   organizations.name,
   organizations.description,
   organizations.avatar_path,
+  organizations.email,
+  organizations.phone_number,
+  organizations.website,
   organizations.address_street,
   organizations.address_zip,
   organizations.address_city,
@@ -608,7 +611,7 @@ select
 from public.course_subscriptions
 inner join public.courses on course_subscriptions.course_id = courses.id
 left join public.course_subscription_bills on course_subscriptions.id = course_subscription_bills.course_subscription_id
-and course_subscription_bills.canceled_at is null
+and course_subscription_bills.paid_at is not null
 group by course_subscriptions.id, courses.name, courses.description;
 
 
@@ -625,7 +628,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = auth, public;
+$$ language plpgsql security definer set search_path = auth, public;
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
@@ -765,7 +768,7 @@ create trigger on_course_subscription_created
   after insert on public.course_subscriptions
   for each row execute procedure public.handle_new_course_subscription();
 
--- handle achrievd course subscription
+-- handle archived course subscription
 create or replace function public.handle_archived_course_subscription()
 returns trigger as $$
 declare org_id uuid;

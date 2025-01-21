@@ -58,6 +58,8 @@ export type StripeConnectLinkAccountPostBody = {
 
 export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
 export type CourseActivityAttendanceView = Database["public"]["Views"]["course_activity_attendances_view"]["Row"]
+export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
+export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {

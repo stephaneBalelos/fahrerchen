@@ -13,7 +13,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             return
         }
         try {
-            const { data, error } = await supabase.from('organizations').insert({
+            const { error } = await supabase.from('organizations').insert({
                 name: organization.name,
                 owner_id: userStore.user.id
             })
