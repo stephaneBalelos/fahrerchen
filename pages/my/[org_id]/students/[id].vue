@@ -1,6 +1,6 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardNavbar v-if="subscription" :title="`${subscription.student_firstname} ${subscription.student_lastname}`" />
+    <UDashboardNavbar v-if="subscription" :title="`${subscription.student_firstname} ${subscription.student_lastname}`"/>
     <UDashboardToolbar
       class="py-0 px-1.5 overflow-x-auto"
     >
@@ -23,6 +23,7 @@ const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 const client = useSupabaseClient<Database>();
+
 
 const { t } = useI18n({
   useScope: "local",
@@ -78,7 +79,12 @@ const links = computed(() => {
     "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
     "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements.",
-    "subscription_not_found": "Das Abonnement wurde nicht gefunden."
+    "subscription_not_found": "Das Abonnement wurde nicht gefunden.",
+    "create_bill": "Rechnung erstellen",
+    "bill_generated": "Rechnung erstellt",
+    "bill_generated_description": "Die Rechnung wurde erfolgreich erstellt.",
+    "bill_not_generated": "Rechnung nicht erstellt",
+    "bill_not_generated_description": "Die Rechnung konnte nicht erstellt werden. Bitte versuchen Sie es später erneut."
   },
   "en": {
     "title": "Student",
@@ -89,7 +95,12 @@ const links = computed(() => {
     "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",
     "student_is_inactive_description": "The student is inactive and has no active subscriptions.",
-    "subscription_not_found": "The subscription was not found."
+    "subscription_not_found": "The subscription was not found.",
+    "create_bill": "Create bill",
+    "bill_generated": "Bill generated",
+    "bill_generated_description": "The bill was successfully generated.",
+    "bill_not_generated": "Bill not generated",
+    "bill_not_generated_description": "The bill could not be generated. Please try again later."
   }
 }
 </i18n>

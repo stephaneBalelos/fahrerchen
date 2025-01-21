@@ -1,5 +1,6 @@
 <template>
   <div>
+    <StudentsStudentSubscriptionStats :subscription-id="subscription_id" />
     <StudentsCourseStudentProgression :subscription-id="subscription_id" />
     <div class="grid grid-cols-2 gap-4 mt-4">
       <StudentsStudentActivitiesSection

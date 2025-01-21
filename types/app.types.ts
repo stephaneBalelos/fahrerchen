@@ -113,16 +113,31 @@ export type Database = MergeDeep<DatabaseGenerated, {
         } 
       },
       course_activity_attendances_view: {
-        id: string,
-        course_activity_id: string,
-        activity_schedule_id: string,
-        course_subscription_id: string,
-        status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
-        organization_id: string,
-        activity_name: string,
-        activity_description: string,
-        activity_start_at: string,
-        activity_end_at: string
+        Row: {
+          id: string,
+          course_activity_id: string,
+          activity_schedule_id: string,
+          course_subscription_id: string,
+          status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
+          organization_id: string,
+          activity_name: string,
+          activity_description: string,
+          activity_start_at: string,
+          activity_end_at: string
+        }
+      },
+      course_subscriptions_stats_view: {
+        Row: {
+          id: string,
+          course_id: string,
+          student_id: string,
+          archived_at: Date | null,
+          costs: number,
+          organization_id: string,
+          course_name: string,
+          course_description: string,
+          total_bills: number,
+        }
       }
       user_roles_view: {
         Row: {

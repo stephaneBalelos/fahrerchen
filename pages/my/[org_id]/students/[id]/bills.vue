@@ -1,54 +1,67 @@
 <template>
-  <UDashboardSection
-    icon="i-heroicons-document-text"
-    :title="t('bills')"
-    :description="t('bills_description')"
-    orientation="vertical"
-    class="px-4 mt-6"
-  >
-    <div v-if="bills" class="grid grid-cols-1 gap-2">
-      <UDashboardCard
-        v-for="bill in bills"
-        :key="bill.id"
-        :description="bill.id"
-      >
-        <template #title>
-          <div class="flex gap-2">
-            <p>{{ t("bill", { date: formatDateTime(bill.created_at) }) }}</p>
-            <UBadge v-if="bill.paid_at" size="xs" color="green">{{
-              t("paid_at", { date: formatDateTime(bill.paid_at) })
-            }}</UBadge>
-            <UBadge v-else-if="bill.ready_to_pay" size="xs" color="primary">{{
-              t("ready_to_pay")
-            }}</UBadge>
-            <UBadge v-else size="xs" color="orange">{{ t("not_paid") }}</UBadge>
-          </div>
-        </template>
-        <template #links>
-          <div class="flex items-center gap-4">
-            <span v-if="bill.total" class="text-lg font-bold">{{
-              formatCurrency(bill.total)
-            }}</span>
-            <UButton
-              icon="i-heroicons-arrow-right"
-              size="sm"
-              color="gray"
-              square
-              :to="`/my/${bill.organization_id}/bills/${bill.id}`"
-            />
-          </div>
-        </template>
-      </UDashboardCard>
-    </div>
-  </UDashboardSection>
+  <div>
+    <StudentSubscriptionSettlement :subscription-id="subscription_id" :org-id="org_id" @refresh="refresh" />
+    <UDashboardSection
+      icon="i-heroicons-document-text"
+      :title="t('bills')"
+      :description="t('bills_description')"
+      orientation="vertical"
+      class="px-4 mt-6"
+    >
+      <div v-if="bills && bills.length > 0" class="grid grid-cols-1 gap-2">
+        <UDashboardCard
+          v-for="bill in bills"
+          :key="bill.id"
+          :description="bill.id"
+        >
+          <template #title>
+            <div class="flex gap-2">
+              <p>{{ t("bill", { date: formatDateTime(bill.created_at) }) }}</p>
+              <UBadge v-if="bill.paid_at" size="xs" color="green">{{
+                t("paid_at", { date: formatDateTime(bill.paid_at) })
+              }}</UBadge>
+              <UBadge v-else-if="bill.ready_to_pay" size="xs" color="primary">{{
+                t("ready_to_pay")
+              }}</UBadge>
+              <UBadge v-else size="xs" color="orange">{{ t("not_paid") }}</UBadge>
+            </div>
+          </template>
+          <template #links>
+            <div class="flex items-center gap-4">
+              <span v-if="bill.total" class="text-lg font-bold">{{
+                formatCurrency(bill.total)
+              }}</span>
+              <UButton
+                icon="i-heroicons-arrow-right"
+                size="sm"
+                color="gray"
+                square
+                :to="`/my/${bill.organization_id}/bills/${bill.id}`"
+              />
+            </div>
+          </template>
+        </UDashboardCard>
+      </div>
+      <div v-else>
+        <UAlert
+          color="primary"
+          variant="outline"
+          :title="t('no_bills')"
+          :description="t('no_bills_description')"
+        />
+      </div>
+    </UDashboardSection>
+  </div>
 </template>
 
 <script setup lang="ts">
+import StudentSubscriptionSettlement from '~/components/students/StudentSubscriptionSettlement.vue';
 import type { Database } from '~/types/app.types';
 import { formatDateTime, formatCurrency } from '~/utils/formatters';
 
 const route = useRoute();
 const subscription_id = route.params.id as string;
+const org_id = route.params.org_id as string;
 
 const client = useSupabaseClient<Database>();
 
@@ -57,7 +70,7 @@ const { t } = useI18n({
 });
 
 const {
-  data: bills,
+  data: bills, refresh
 } = useAsyncData(``, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
@@ -85,7 +98,19 @@ const {
         "bill": "Rechnung vom {date}",
         "paid_at": "Bezahlt am {date}",
         "ready_to_pay": "Zahlungsbereit",
-        "not_paid": "Nicht bezahlt"
+        "not_paid": "Nicht bezahlt",
+        "no_bills": "Keine Rechnungen",
+        "no_bills_description": "Es wurden noch keine Rechnungen für diesen Einschreibung erstellt."
+    },
+    "en": {
+        "bills": "Bills",
+        "bills_description": "Here you can find all bills that have been created for this student.",
+        "bill": "Bill from {date}",
+        "paid_at": "Paid at {date}",
+        "ready_to_pay": "Ready to pay",
+        "not_paid": "Not paid",
+        "no_bills": "No bills",
+        "no_bills_description": "No bills have been created for this subscription yet."
     }
 }
 </i18n>
