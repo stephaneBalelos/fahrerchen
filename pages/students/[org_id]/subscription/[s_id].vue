@@ -1,6 +1,6 @@
 <template>
-  <UDashboardPanelContent>
-    <UDashboardToolbar>
+  <UDashboardPanelContent class="p-0">
+    <UDashboardToolbar class="p-0">
       <UContainer class="w-full p-0">
           <UHorizontalNavigation :links="links" />
       </UContainer>

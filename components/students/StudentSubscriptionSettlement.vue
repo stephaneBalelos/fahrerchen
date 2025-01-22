@@ -15,7 +15,7 @@
           {{ formatCurrency(settlement_total) }}
         </div>
       </div>
-      <UButton color="primary" variant="soft" @click="generateBill">
+      <UButton v-if="permissionsStore.hasPermission('course_subscription_bills.create')" color="primary" variant="soft" @click="generateBill">
         <span>{{ t("create_bill") }}</span>
       </UButton>
     </template>
@@ -91,6 +91,8 @@ const $emit = defineEmits(["refresh"]);
 const client = useSupabaseClient<Database>();
 const toast = useToast();
 const isGeneratingBill = ref(false);
+
+const permissionsStore = useUserPermissionsStore();
 
 const {
   data: bill_items,

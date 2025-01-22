@@ -57,8 +57,7 @@ const client = useSupabaseClient<Database>()
 
 const { data: subscription, status } = useAsyncData(async () => {
     const { data, error } = await client.from("course_subscriptions_stats_view").select().eq("id", props.subscriptionId).single()
-
-    console.log(data)
+    
     if (error) {
         throw error
     }

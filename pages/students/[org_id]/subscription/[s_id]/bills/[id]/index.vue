@@ -8,12 +8,12 @@
         >
         <template #links>
             <UBadge v-if="bill?.paid_at" color="green" variant="solid">{{ t('paid_at', {date: formatDateTime(bill.paid_at)}) }}</UBadge>
-            <UBadge v-else-if="bill?.ready_to_pay" color="primary" variant="solid">{{ t('ready_to_pay') }}</UBadge>
             <UBadge v-else color="orange" variant="solid">{{ t('not_paid') }}</UBadge>
         </template>
-        <div>
+        <div class="border-none">
             <BillsBillingList :bill-id="bill_id" />
-            <div class="flex justify-end py-4">
+            <div class="flex flex-col items-end justify-end py-4">
+                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('total') }}</span>
                 <span v-if="bill?.total" class="text-lg font-bold">{{ formatCurrency(bill.total) }}</span>
             </div>
             <div v-if="stripeStore.stripeAppSettings" class="py-4">
@@ -42,7 +42,7 @@ const { t } = useI18n({
     useScope: "local",
 });
 
-const { data: bill, error, status, refresh } = useAsyncData(
+const { data: bill, error } = useAsyncData(
     `bills/${bill_id}`,
     async () => {
         const { data, error } = await client
@@ -55,6 +55,14 @@ const { data: bill, error, status, refresh } = useAsyncData(
         return data;
     },
 );
+
+if (error.value) {
+    console.error(error.value);
+    throw createError({
+        statusCode: 404,
+        message: "Bill not found",
+    });
+}
 
 async function openCheckoutModal() {
     modal.open(BillCheckoutModal, {
@@ -80,7 +88,8 @@ async function openCheckoutModal() {
         "paid_at": "Bezahlt am {date}",
         "ready_to_pay": "Zahlungsbereit",
         "not_paid": "Nicht bezahlt",
-        "pay_now": "Jetzt bezahlen"
+        "pay_now": "Jetzt bezahlen",
+        "total": "Gesamt"
     },
     "en": {
         "bill_id": "Bill {id}",
@@ -88,7 +97,8 @@ async function openCheckoutModal() {
         "paid_at": "Paid at {date}",
         "ready_to_pay": "Ready to pay",
         "not_paid": "Not paid",
-        "pay_now": "Pay now"
+        "pay_now": "Pay now",
+        "total": "Total"
     }
 }
 </i18n>

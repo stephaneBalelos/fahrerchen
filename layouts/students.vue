@@ -2,7 +2,14 @@
   <UDashboardLayout>
     <UDashboardPanel grow>
       <UHeader v-if="organization">
-        <template #logo> {{ organization?.name }} </template>
+        <template #logo> 
+          <div class="flex items-center gap-2">
+            <UAvatar :src="$publicStorageUrl('organizations_avatars', organization.avatar_path)" :size="'sm'" />
+            <p>
+              {{ organization.name }}
+            </p>
+          </div>
+        </template>
 
         <template #right>
           <UColorModeButton />

@@ -70,8 +70,6 @@ const { data } = useAsyncData(
     if (error) {
       throw error;
     }
-
-    console.log(data.course?.docs);
     return data;
   }
 );
