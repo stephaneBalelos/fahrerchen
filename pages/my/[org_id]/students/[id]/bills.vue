@@ -20,8 +20,8 @@
               <UBadge v-if="bill.paid_at" size="xs" color="green">{{
                 t("paid_at", { date: formatDateTime(bill.paid_at) })
               }}</UBadge>
-              <UBadge v-else-if="bill.ready_to_pay" size="xs" color="primary">{{
-                t("ready_to_pay")
+              <UBadge v-else-if="bill.canceled_at" size="xs" color="red">{{
+                t("cancelled_at", { date: formatDateTime(bill.canceled_at) })
               }}</UBadge>
               <UBadge v-else size="xs" color="orange">{{ t("not_paid") }}</UBadge>
             </div>
@@ -74,8 +74,8 @@ const {
 } = useAsyncData(``, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
-    .select("id, created_at, total, organization_id, paid_at, ready_to_pay")
-    .eq("course_subscription_id", subscription_id);
+    .select("id, created_at, total, organization_id, paid_at, ready_to_pay, canceled_at")
+    .eq("course_subscription_id", subscription_id).order('created_at', { ascending: false });
 
   if (error) {
     console.error(error);
@@ -98,6 +98,7 @@ const {
         "bill": "Rechnung vom {date}",
         "paid_at": "Bezahlt am {date}",
         "ready_to_pay": "Zahlungsbereit",
+        "cancelled_at": "Storniert am {date}",
         "not_paid": "Nicht bezahlt",
         "no_bills": "Keine Rechnungen",
         "no_bills_description": "Es wurden noch keine Rechnungen für diesen Einschreibung erstellt."
@@ -108,6 +109,7 @@ const {
         "bill": "Bill from {date}",
         "paid_at": "Paid at {date}",
         "ready_to_pay": "Ready to pay",
+        "cancelled_at": "Cancelled at {date}",
         "not_paid": "Not paid",
         "no_bills": "No bills",
         "no_bills_description": "No bills have been created for this subscription yet."

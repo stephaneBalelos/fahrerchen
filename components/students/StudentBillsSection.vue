@@ -14,12 +14,12 @@
       >
         <template #title>
           <div class="flex gap-2">
-            <p>{{ t("bill", { date: formatDateTime(bill.created_at) }) }}</p>
+            <p>{{ t("bill", { date: formatDate(bill.created_at) }) }}</p>
             <UBadge v-if="bill.paid_at" size="xs" color="green">{{
-              t("paid_at", { date: formatDateTime(bill.paid_at) })
+              t("paid_at", { date: formatDate(bill.paid_at) })
             }}</UBadge>
-            <UBadge v-else-if="bill.ready_to_pay" size="xs" color="primary">{{
-              t("ready_to_pay")
+            <UBadge v-else-if="bill.canceled_at" size="xs" color="red">{{
+              t("canceled_at", { date: formatDate(bill.canceled_at) })
             }}</UBadge>
             <UBadge v-else size="xs" color="orange">{{ t("not_paid") }}</UBadge>
           </div>
@@ -30,6 +30,7 @@
               formatCurrency(bill.total)
             }}</span>
             <UButton
+            v-if="!bill.canceled_at"
               icon="i-heroicons-arrow-right"
               size="sm"
               color="gray"
@@ -53,7 +54,7 @@
 
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
-import { formatDateTime, formatCurrency } from "~/utils/formatters";
+import { formatDate, formatCurrency } from "~/utils/formatters";
 
 type Props = {
   subscriptionId: string;
@@ -70,8 +71,8 @@ const { t } = useI18n({
 const { data: bills } = useAsyncData(``, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
-    .select("id, created_at, total, organization_id, paid_at, ready_to_pay")
-    .eq("course_subscription_id", props.subscriptionId);
+    .select("id, created_at, total, organization_id, paid_at, ready_to_pay, canceled_at")
+    .eq("course_subscription_id", props.subscriptionId).order("created_at", { ascending: false });
 
   if (error) {
     console.error(error);
@@ -94,6 +95,7 @@ const { data: bills } = useAsyncData(``, async () => {
     "bill": "Rechnung vom {date}",
     "show": "Anzeigen",
     "paid_at": "Bezahlt am {date}",
+    "canceled_at": "Storniert am {date}",
     "ready_to_pay": "Zahlungsbereit",
     "not_paid": "Noch offen"
   },
@@ -105,6 +107,7 @@ const { data: bills } = useAsyncData(``, async () => {
     "bill": "Bill from {date}",
     "show": "Show",
     "paid_at": "Paid at {date}",
+    "canceled_at": "Canceled at {date}",
     "ready_to_pay": "Ready to pay",
     "not_paid": "Not paid yet"
   }

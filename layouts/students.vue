@@ -2,19 +2,27 @@
   <UDashboardLayout>
     <UDashboardPanel grow>
       <UHeader v-if="organization">
-        <template #logo> 
-          <div class="flex items-center gap-2">
-            <UAvatar :src="$publicStorageUrl('organizations_avatars', organization.avatar_path)" :size="'sm'" />
-            <p>
-              {{ organization.name }}
-            </p>
-          </div>
+        <template #left>
+          <ULink :to="`/students/${organization.id}`">
+            <div class="flex items-center gap-2">
+              <UAvatar
+                :src="$publicStorageUrl(
+                    'organizations_avatars',
+                    organization.avatar_path
+                  )"
+                :size="'sm'"
+              />
+              <p>
+                {{ organization.name }}
+              </p>
+            </div>
+          </ULink>
         </template>
 
         <template #right>
           <UColorModeButton />
 
-          <UButton :label="t('logout')" color="gray"  @click="logout"/>
+          <UButton :label="t('logout')" color="gray" @click="logout" />
         </template>
 
         <template #panel>
@@ -29,8 +37,8 @@
 </template>
 
 <script setup lang="ts">
-import { computedAsync } from '@vueuse/core';
-import type { Database } from '~/types/app.types';
+import { computedAsync } from "@vueuse/core";
+import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -43,14 +51,18 @@ const organization = computedAsync(async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     return null;
   }
-  const { data, error } = await client.from('organizations').select('*').eq('id', userOrganizationsStore.selectedOrganization.organization_id).single();
+  const { data, error } = await client
+    .from("organizations")
+    .select("*")
+    .eq("id", userOrganizationsStore.selectedOrganization.organization_id)
+    .single();
   if (error) {
     console.log(error);
     return null;
   }
 
   return data;
-})
+});
 
 async function logout() {
   await client.auth.signOut();

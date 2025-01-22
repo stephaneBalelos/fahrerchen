@@ -1,10 +1,8 @@
-import Stripe from "stripe"
-import { type AppOrganizationsStripeAccount, type Database } from "~/types/app.types"
+import type Stripe from "stripe"
+import type { AppOrganizationsStripeAccount, Database } from "~/types/app.types"
 
 export const useStripeStore = defineStore('stripe', () => {
     const client = useSupabaseClient<Database>()
-    const userStore = useUserStore()
-    const userPermissionsStore = useUserPermissionsStore()
     const userOrganizationsStore = useUserOrganizationsStore()
     const stripeAccount = ref<Stripe.Response<Stripe.Account> | null>(null)
     const stripeAppSettings = ref<AppOrganizationsStripeAccount | null>(null)

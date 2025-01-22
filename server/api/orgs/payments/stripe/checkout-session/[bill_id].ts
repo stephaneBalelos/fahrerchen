@@ -1,7 +1,6 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { getBillById } from "~/server/utils/supabase";
-import { AppStripeAccountPaymentMethodSettings, Database } from "~/types/app.types";
-import { serverSupabaseServiceRole } from '#supabase/server'
+import type { AppStripeAccountPaymentMethodSettings } from "~/types/app.types";
 
 
 export default defineEventHandler(async (event) => {

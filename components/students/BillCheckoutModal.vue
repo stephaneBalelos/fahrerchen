@@ -15,7 +15,7 @@
           <h3
             class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
           >
-            {{ t("checkout") }}
+            {{ t("checkout") }} #{{ props.billId }}
           </h3>
         </div>
       </template>
@@ -23,7 +23,7 @@
       <div class="absulute inset-0 overflow-y-auto">
         <div class="grid grid-cols-2 gap-4 p-4">
           <div class="w-full">
-            <BillsBillingList :bill-id="props.bill_id" />
+            <BillsBillingList :bill-id="props.billId" />
           </div>
           <div class="w-full">
             <form @submit="handleSubmit">
@@ -62,7 +62,7 @@
 import { loadStripe, type Stripe, type StripeElements } from "@stripe/stripe-js";
 
 type Props = {
-  bill_id: string;
+  billId: string;
 };
 
 const props = defineProps<Props>();
@@ -120,7 +120,7 @@ onMounted(async () => {
 
 async function fetchSecret() {
   const res = await $fetch(
-    `/api/orgs/payments/stripe/checkout-session/${props.bill_id}`
+    `/api/orgs/payments/stripe/checkout-session/${props.billId}`
   );
   if (!res.stripeAccountId || !res.clientSecret) {
     throw new Error("Failed to fetch client secret");
