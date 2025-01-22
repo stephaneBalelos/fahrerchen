@@ -72,6 +72,15 @@ export default defineEventHandler(async (event) => {
             }, { stripeAccount: orgStripeAccount.stripe_account_id });
         }
 
+        // check has already been paid
+        if (intent.status === 'succeeded') {
+            console.log('Payment intent already succeeded');
+            throw createError({
+                status: 400,
+                message: 'Payment intent already succeeded'
+            });
+        }
+
         return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
     } else {
         // create a new payment intent
