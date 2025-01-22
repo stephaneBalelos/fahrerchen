@@ -9,7 +9,7 @@
         <UButton
           color="gray"
           variant="ghost"
-          class="border-t border-gray-200 dark:border-gray-800 justify-between"
+          class="border-t border-gray-200 dark:border-gray-800 justify-between px-0"
           :ui="{ rounded: 'rounded-none', padding: { sm: 'p-3' } }"
         >
           <div class="flex flex-col items-start">

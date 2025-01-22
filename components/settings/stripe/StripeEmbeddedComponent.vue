@@ -1,5 +1,5 @@
 <template>
-  <div ref="stripeElement" :id="`stripe-element-${props.component}`"></div>
+  <div :id="`stripe-element-${props.component}`" ref="stripeElement" />
 </template>
 
 <script setup lang="ts">

@@ -2,8 +2,8 @@
   <UContainer class="w-full">
     <PaymentCompletedSection
       v-if="stripeStore.stripeAppSettings"
-      :stripe_account_id="stripeStore.stripeAppSettings.stripe_account_id"
-      :payment_intent_client_secret="payment_intent_client_secret"
+      :stripe-account-id="stripeStore.stripeAppSettings.stripe_account_id"
+      :payment-intent-client-secret="payment_intent_client_secret"
     />
   </UContainer>
 </template>
@@ -17,8 +17,6 @@ const payment_intent_client_secret =
   query.payment_intent_client_secret as string;
 
 const stripeStore = useStripeStore();
-
-const config = useRuntimeConfig();
 </script>
 
 <style scoped></style>

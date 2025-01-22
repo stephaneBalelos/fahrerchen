@@ -1,10 +1,12 @@
 <template>
-  <UDashboardSection :title="t('your_payment')" :description="`#${bill_id}`"
+  <UDashboardSection
+    :title="t('your_payment')"
+    :description="`#${bill_id}`"
     orientation="vertical"
     class="px-4 mt-6"
   >
     <div>
-        <USkeleton v-if="loading" class="h-48 w-full" />
+      <USkeleton v-if="loading" class="h-48 w-full" />
 
       <UAlert
         v-if="!intent && !loading"
@@ -50,14 +52,14 @@
           :description="t('payment_canceled_description')"
         />
         <div class="mt-4 flex justify-center">
-            <UButton
+          <UButton
             icon="i-heroicons-arrow-left"
             size="sm"
             color="gray"
             :label="t('back_to_bill')"
             square
-            :to="`/students/${org_id}/bills/${bill_id}`"
-        />
+            :to="`/students/${org_id}/subscription/${s_id}/bills/${bill_id}`"
+          />
         </div>
       </div>
     </div>
@@ -65,17 +67,18 @@
 </template>
 
 <script setup lang="ts">
-import { loadStripe, type PaymentIntent, type Stripe } from "@stripe/stripe-js";
+import { loadStripe, type PaymentIntent } from "@stripe/stripe-js";
 
 type Props = {
-  stripe_account_id: string;
-  payment_intent_client_secret: string;
+  stripeAccountId: string;
+  paymentIntentClientSecret: string;
 };
 
 const props = defineProps<Props>();
 
 const route = useRoute();
 const bill_id = route.params.id as string;
+const s_id = route.params.s_id as string;
 const org_id = route.params.org_id as string;
 
 const loading = ref(true);
@@ -87,7 +90,7 @@ const { t } = useI18n({
 });
 
 const stripe = await loadStripe(config.public.stripe_pk, {
-  stripeAccount: props.stripe_account_id,
+  stripeAccount: props.stripeAccountId
 });
 
 onMounted(async () => {
@@ -96,7 +99,7 @@ onMounted(async () => {
   }
 
   const { paymentIntent, error } = await stripe.retrievePaymentIntent(
-    props.payment_intent_client_secret
+    props.paymentIntentClientSecret
   );
 
   if (error) {

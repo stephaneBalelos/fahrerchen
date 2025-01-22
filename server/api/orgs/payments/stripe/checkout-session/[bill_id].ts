@@ -61,11 +61,18 @@ export default defineEventHandler(async (event) => {
     // check if the bill already has a payment intent
     if (bill.stripe_payment_intent_id) {
         // fetch the payment intent
-        const intent = await stripe.paymentIntents.retrieve(bill.stripe_payment_intent_id, {
+        let intent = await stripe.paymentIntents.retrieve(bill.stripe_payment_intent_id, {
             stripeAccount: orgStripeAccount.stripe_account_id
         });
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id};
+        // update the payment intent amount
+        if (intent.amount !== bill.total * 100) {
+            intent = await stripe.paymentIntents.update(bill.stripe_payment_intent_id, {
+                amount: bill.total * 100
+            }, { stripeAccount: orgStripeAccount.stripe_account_id });
+        }
+
+        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
     } else {
         // create a new payment intent
         const enabledPaymentMethods = ['giropay']
@@ -89,7 +96,7 @@ export default defineEventHandler(async (event) => {
             
         })
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id};
+        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
     };
 
 });
