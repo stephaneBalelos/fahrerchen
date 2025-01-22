@@ -76,6 +76,7 @@ const { data: bills } = useAsyncData(async () => {
       "*, sub:course_subscriptions(*, course:courses(*), student:students(firstname, lastname))"
     )
     .is("paid_at", null)
+    .is("canceled_at", null)
     .eq(
       "organization_id",
       userOrganizationsStore.selectedOrganization.organization_id
