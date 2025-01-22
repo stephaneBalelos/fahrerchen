@@ -43,12 +43,20 @@ export default defineEventHandler(async (event) => {
         });
     }
 
+    // Check if the bill is canceled
+    if (bill.canceled_at) {
+        console.log('Bill is canceled');
+        throw createError({
+            status: 400,
+            message: 'Bill is canceled'
+        });
+    }
+
     // get Organization Stripe Account
     const orgStripeAccount = await getOrganizationStripeAccount(event, bill.organization_id);
 
 
     if (!orgStripeAccount) {
-        console.log('Organization does not have a stripe account');
         throw createError({
             status: 404,
             message: 'Organization does not have a stripe account'

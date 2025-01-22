@@ -35,7 +35,7 @@
             size="sm"
             color="gray"
             square
-            :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}/subscription`"
+            :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
           />
         </template>
       </UDashboardNavbar>
