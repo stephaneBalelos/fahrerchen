@@ -27,6 +27,10 @@ export default defineNuxtConfig({
     stripe_pk: process.env.STRIPE_PK,
     stripe_sk: process.env.STRIPE_SK,
     stripe_wh: process.env.STRIPE_WEBHOOK_SECRET,
+
+    turnstile: {
+      secretKey: process.env.NUXT_TURNSTILE_SECRET_KEY
+    },
     
     public: {
       supabase_storage_url: process.env.SUPABASE_STORAGE_URL,
@@ -49,7 +53,8 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     '@nuxt/test-utils/module',
     '@pinia/nuxt',
-    '@nuxt/eslint'
+    '@nuxt/eslint',
+    '@nuxtjs/turnstile'
   ],
 
   ui: {
@@ -76,6 +81,9 @@ export default defineNuxtConfig({
     locales: ['de', 'en'],
     defaultLocale: 'de',
     vueI18n: './i18n.config.ts' 
+  },
+  turnstile: {
+    siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY
   },
 
   compatibilityDate: '2024-07-15'

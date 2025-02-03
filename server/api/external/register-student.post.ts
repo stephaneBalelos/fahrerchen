@@ -6,6 +6,25 @@ export default defineEventHandler(async (event) => {
   const client = await serverSupabaseClient<Database>(event)
   const body = await readBody(event) as AppStudentRegistrationRequest
 
+  const turnstileToken = event.headers.get("x-turnstile-token")
+
+  if (!turnstileToken) {
+    throw createError({
+      status: 401,
+      statusMessage: 'Unauthorized'
+    })
+  }
+
+  const { success } = await verifyTurnstileToken(turnstileToken)
+
+  if (!success) {
+    throw createError({
+      status: 401,
+      statusMessage: 'Unauthorized'
+    })
+  }
+
+
   const { data, error } = await client.from('students_registration_requests').insert({
     email: body.email,
     firstname: body.firstname,

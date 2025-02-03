@@ -174,6 +174,9 @@
                     :help="t('form.has_a_license.help')"
                   />
                 </div>
+                <div>
+                  <NuxtTurnstile v-model="turnstileToken" />
+                </div>
                 <div class="py-6 grid place-items-center">
                   <UButton type="submit"> {{ t("cta_send") }} </UButton>
                 </div>
@@ -389,6 +392,7 @@ const formData = ref<
   requested_course_id: "",
   organization_id: org_id,
 });
+const turnstileToken = ref<string>("");
 
 async function onSubmit() {
   try {
@@ -403,6 +407,7 @@ async function onSubmit() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "x-turnstile-token": turnstileToken.value,
       },
       body: JSON.stringify(data),
     });
