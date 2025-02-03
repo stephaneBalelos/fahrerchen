@@ -94,3 +94,8 @@ sw.*
 
 # Vercel
 .vercel
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+mail-preview.html

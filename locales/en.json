@@ -1,0 +1,47 @@
+{
+    "welcome": "Welcome",
+    "lang_en": "English",
+    "lang_de": "German",
+    "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "teacher": "Teacher",
+        "student": "Student"
+    },
+    "form_errors": {
+        "required": "Please enter {field}",
+        "min": "{field} must be at least {min} characters",
+        "max": "{field} must be at most {max} characters",
+        "email": "Please enter a valid email address",
+        "min_date": "the date must be after {min}",
+        "max_date": "the date must be before {max}",
+        "password": "The password must be at least 8 characters long and contain at least one uppercase letter, one number, and one special character",
+        "password_confirmation": "The passwords do not match"
+    },
+    "dates": {
+        "on_date": "On {date}",
+        "on_date_at_time": "On {date} at {time}",
+        "today": "Today",
+        "today_at": "Today at {time}",
+        "yesterday": "Yesterday",
+        "yesterday_at": "Yesterday at {time}",
+        "tomorrow": "Tomorrow",
+        "tomorrow_at": "Tomorrow at {time}"
+    },
+    "courses": {
+        "activities": {
+            "schedules": {
+                "schedules_status_PLANNED": "Planned",
+                "schedules_status_CANCELED": "Canceled",
+                "schedules_status_COMPLETED": "Completed"
+            }
+        }
+    },
+    "bills": {
+        "status": {
+            "paid": "Paid",
+            "unpaid": "Unpaid",
+            "canceled": "Canceled"
+        }
+    }
+}
