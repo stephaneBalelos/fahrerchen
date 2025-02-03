@@ -11,6 +11,8 @@ definePageMeta({
 const isDeleteAccountModalOpen = ref(false);
 const userStore = useUserStore();
 const client = useSupabaseClient<Database>();
+const isSubmitting = ref(false);
+const isAvatarDeleting = ref(false);
 
 const { t } = useI18n({
   useScope: "local",
@@ -49,6 +51,7 @@ const toast = useToast();
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (userStore.user) {
+    isSubmitting.value = true;
     try {
       const update = await client
         .from("users")
@@ -75,6 +78,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     } catch (err) {
       toast.add({ title: t("update_error"), color: "red" });
       console.log(err);
+    } finally {
+      isSubmitting.value = false;
+      await userStore.refreshUser();
     }
   }
 }
@@ -82,6 +88,33 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 onUnmounted(() => {
   stop();
 });
+
+async function deleteAvatar(path: string) {
+  isAvatarDeleting.value = true;
+  try {
+    const { error } = await client.storage.from("users_avatars").remove([path]);
+    if (error) {
+      console.log(error);
+      toast.add({
+        title: t("avatar_delete_error"),
+        color: "red",
+      });
+    }
+    toast.add({
+      title: t("avatar_deleted"),
+      icon: "i-heroicons-check-circle",
+    });
+  } catch (err) {
+    console.log(err);
+    toast.add({
+      title: t("avatar_delete_error"),
+      color: "red",
+    });
+  } finally {
+    isAvatarDeleting.value = false;
+    await userStore.refreshUser();
+  }
+}
 </script>
 
 <template>
@@ -118,16 +151,33 @@ onUnmounted(() => {
               :label="t('form.avatar.label')"
               :description="t('form.avatar.description')"
               class="grid grid-cols-2 gap-2"
-              :help="t('form.avatar.help')"
               :ui="{
                 container: 'flex flex-wrap items-center gap-3',
                 help: 'mt-0',
               }"
             >
-              <FileUploader
-                :bucket-id="'users_avatars'"
-                :path="userStore.user.id"
-              />
+              <div class="flex gap-4">
+                <UAvatar
+                  v-if="userStore.user.avatar_path"
+                  :src="$publicStorageUrl('users_avatars', userStore.user.avatar_path)"
+                />
+                <UAvatar
+                  v-else
+                  :alt="`${userStore.user.firstname} ${userStore.user.lastname}`"
+                />
+                <FileUploader
+                  :bucket-id="'users_avatars'"
+                  :path="userStore.user.id"
+                  @uploaded="userStore.refreshUser"
+                />
+                <UButton
+                  v-if="userStore.user.avatar_path"
+                  color="red"
+                  variant="ghost"
+                  :label="t('avatar_delete')"
+                  @click="deleteAvatar(userStore.user.avatar_path)"
+                />
+              </div>
             </UFormGroup>
 
             <UFormGroup
@@ -167,7 +217,8 @@ onUnmounted(() => {
 
         <UDashboardSection
           :title="t('account_title')"
-          :description="t('account_description')">
+          :description="t('account_description')"
+        >
           <div class="flex gap-4">
             <UButton
               color="black"
@@ -203,6 +254,9 @@ onUnmounted(() => {
     "account_description": "Brauchen Sie unseren Service nicht mehr? Sie können Ihr Konto hier löschen. Diese Aktion ist nicht rückgängig zu machen. Alle Informationen, die mit diesem Konto zusammenhängen, werden dauerhaft gelöscht.",
     "account_delete": "Konto löschen",
     "change_password": "Passwort ändern",
+    "avatar_delete": "Avatar löschen",
+    "avatar_delete_error": "Fehler beim Löschen des Avatars",
+    "avatar_deleted": "Avatar gelöscht",
     "form": {
       "firstname": {
         "label": "Vorname",
@@ -231,6 +285,9 @@ onUnmounted(() => {
     "account_description": "No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently.",
     "account_delete": "Delete account",
     "change_password": "Change password",
+    "avatar_delete": "Delete avatar",
+    "avatar_delete_error": "Error deleting the avatar",
+    "avatar_deleted": "Avatar deleted",
     "form": {
       "firstname": {
         "label": "Firstname",
