@@ -1,40 +1,52 @@
 <template>
-  <UCard class="max-w-sm w-full">
-    <UAuthForm
-      :fields="fields"
-      :validate="validate"
-      :title="t('title')"
-      align="top"
-      icon="i-heroicons-lock-closed"
-      :ui="{ base: 'text-center', footer: 'text-center' }"
-      :submit-button="{ label: 'Continue', color: 'primary' }"
-      @submit="onSubmit"
-      :loading="isLoading"
-    >
-      <template #description>
-        {{ t("description") }} <br>
-
-        <i18n-t keypath="text_to_login" tag="div" for="login_link">
-          <NuxtLink to="/login" class="text-primary font-medium">{{
-            t("login_link")
-          }}</NuxtLink>
-        </i18n-t>
+  <UContainer>
+    <UPageHero :title="t('title')" :description="t('description')">
+      <template #icon>
+        <UAvatar
+          :src="'/favicon-96x96.png'"
+          :icon="'i-heroicons-globe-europe-africa'"
+          size="sm"
+        />
       </template>
-
-      <template #footer>
-        <i18n-t keypath="terms_text" tag="div" for="terms_of_service">
-          <NuxtLink to="/" class="text-primary font-medium">{{
-            t("terms_of_service")
-          }}</NuxtLink>
-        </i18n-t>
+      <template #links>
+        <LocaleSwitcher />
       </template>
-    </UAuthForm>
-  </UCard>
+      <div class="flex-1 grid place-items-center">
+        <UCard class="max-w-sm w-full">
+          <UAuthForm
+            :fields="fields"
+            :schema="schema"
+            align="top"
+            icon="i-heroicons-lock-closed"
+            :ui="{ base: 'text-center', footer: 'text-center' }"
+            :submit-button="{ label: 'Continue', color: 'primary' }"
+            :loading="isLoading"
+            @submit="onSubmit"
+          >
+            <template #description>
+              <i18n-t keypath="text_to_login" tag="div" for="login_link">
+                <NuxtLink to="/login" class="text-primary font-medium">{{
+                  t("login_link")
+                }}</NuxtLink>
+              </i18n-t>
+            </template>
+            <template #footer>
+              <i18n-t keypath="terms_text" tag="div" for="terms_of_service">
+                <NuxtLink to="https://www.karjolen.de/legal/terms" target="_blank" class="text-primary font-medium">{{
+                  t("terms_of_service")
+                }}</NuxtLink>
+              </i18n-t>
+            </template>
+          </UAuthForm>
+        </UCard>
+      </div>
+    </UPageHero>
+  </UContainer>
 </template>
 
 <script setup lang="ts">
+import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
 import { z } from "zod";
-import type { FormError, FormSubmitEvent } from "#ui/types";
 
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
@@ -71,14 +83,13 @@ const fields = [
   },
 ];
 
-const validate = (state: any) => {
-  const errors: FormError[] = [];
-  if (!state.email)
-    errors.push({ path: "email", message: "Email is required" });
-  if (!state.password)
-    errors.push({ path: "password", message: "Password is required" });
-  return errors;
-};
+const schema = z.object({
+  name: z.string().nonempty("Name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+type Schema = z.infer<typeof schema>;
 
 onMounted(() => {
   if (user.value) {
@@ -86,9 +97,9 @@ onMounted(() => {
   }
 });
 
-async function onSubmit(credentials: any) {
+async function onSubmit(credentials: Schema) {
   isLoading.value = true;
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signUp({
     email: credentials.email,
     password: credentials.password,
     options: {
@@ -96,7 +107,7 @@ async function onSubmit(credentials: any) {
       data: {
         name: credentials.name,
       },
-    }
+    },
   });
   if (error) {
     // Handle Error
@@ -126,7 +137,7 @@ async function onSubmit(credentials: any) {
 <i18n lang="json">
 {
   "de": {
-    "title": "Anmelden",
+    "title": "Willkommen bei Karjolen!",
     "description": "Erstelle ein Konto, um fortzufahren.",
     "text_to_login": "Bereits ein Konto? {0}",
     "login_link": "Anmelden",
@@ -137,7 +148,7 @@ async function onSubmit(credentials: any) {
     "welcome": "Willkommen {name}!"
   },
   "en": {
-    "title": "Sign in",
+    "title": "Welcome to Karjolen!",
     "description": "Create an account to continue.",
     "text_to_login": "Already have an account? {0}",
     "login_link": "Login",
