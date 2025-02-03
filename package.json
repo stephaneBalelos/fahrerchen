@@ -32,7 +32,7 @@
     "@types/node": "^20.17.6",
     "@vue/test-utils": "^2.4.6",
     "detect-port": "^1.6.1",
-    "happy-dom": "^13.10.1",
+    "happy-dom": "^15.10.2",
     "nuxt": "^3.14.159",
     "postgres": "^3.4.5",
     "vitest": "^1.6.0",
