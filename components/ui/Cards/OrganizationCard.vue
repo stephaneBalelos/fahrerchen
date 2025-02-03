@@ -1,38 +1,72 @@
 <template>
-    <UPageCard
-        v-if="organization"
-      class="mb-4"
-      :key="organization.id"
-      :title="organization.name"
-      :description="organization.inserted_at"
-      :icon="organizationsStore.selectedOrganization?.organization_id == organization?.id ? 'i-simple-icons-tailwindcss' : ''"
-      :ui="{ wrapper: 'relative group org-card' }"
+  <UPageCard
+    v-if="organization"
+    :key="organization.id"
+    class="mb-4 cursor-pointer"
+    :title="organization.name"
+    :ui="{ wrapper: 'relative group org-card' }"
     @click="navigateTo(`/my/${organization.id}`)"
-    />
+  >
+    <template #description>
+      {{ t("created_at", { date: formatDate(organization.inserted_at) }) }}
+    </template>
+    <template #icon>
+      <UAvatar :src="organization.avatar" :alt="organization.name" size="lg" />
+    </template>
+  </UPageCard>
 </template>
 
 <script setup lang="ts">
-import type { Database } from '~/types/app.types';
+import type { Database } from "~/types/app.types";
+import { formatDate } from "~/utils/formatters";
 
 type Props = {
-    org_id: string
-}
-const props = defineProps<Props>()
-const supabase = useSupabaseClient<Database>()
-const organizationsStore = useUserOrganizationsStore()
+  orgId: string;
+};
+const props = defineProps<Props>();
+const supabase = useSupabaseClient<Database>();
 
-const { data: organization, error, status } = useAsyncData(`organization_${props.org_id}`, async () => {
+const config = useRuntimeConfig().public;
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { data: organization } = useAsyncData(
+  `organization_${props.orgId}`,
+  async () => {
     const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', props.org_id).single()
+      .from("organizations")
+      .select("*")
+      .eq("id", props.orgId)
+      .single();
     if (error) {
-        throw error
+      throw error;
     }
-    return data
-})
+    return data;
+  },
+  {
+    transform: (data) => {
+      return {
+        ...data,
+        avatar: data.avatar_path
+          ? `${config.supabase_storage_url}/object/public/organizations_avatars/${data.avatar_path}`
+          : undefined,
+      };
+    },
+  }
+);
 </script>
 
-<style scoped>
+<style scoped></style>
 
-</style>
+<i18n lang="json">
+{
+  "de": {
+    "created_at": "Erstellt am {date}"
+  },
+  "en": {
+    "created_at": "Created at {date}"
+  }
+}
+</i18n>

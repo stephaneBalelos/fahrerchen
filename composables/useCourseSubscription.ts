@@ -1,4 +1,4 @@
-import type { AppCourseSubscription, Database } from "~/types/app.types"
+import type { Database } from "~/types/app.types"
 
 
 export async function useCourseSubscription(subscription_id?: string) {

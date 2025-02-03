@@ -9,7 +9,7 @@
           color="gray"
           square
           variant="solid"
-          to="/my/students"
+          :to="`/my/${$route.params.org_id}/students`"
         />
         <h2 class="font-semibold text-gray-900 dark:text-white">
           {{ t("pre_registrations") }}
@@ -35,9 +35,8 @@
       </template>
     </UDashboardToolbar>
     <UTable
-      v-if="requests && selected"
       v-model="selected"
-      :rows="requests"
+      :rows="requests ?? []"
       :columns="columns"
     >
       <template #student-data="{ row }">
@@ -83,7 +82,7 @@
 
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
-import { formatDate } from "~/utils/formatters";
+import { formatDateTime } from "~/utils/formatters";
 
 definePageMeta({
   layout: "orgs",
@@ -93,13 +92,28 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+type RequestRow = {
+  id: string;
+  inserted_at: string;
+  student: {
+    name: string;
+    has_a_license: boolean;
+  };
+  birthdate: string;
+  email: string;
+  address: {
+    street: string;
+    city: string;
+    zip: string;
+    country: string;
+  };
+};
+
 const toast = useToast();
 const userOrganizationsStore = useUserOrganizationsStore();
 const client = useSupabaseClient<Database>();
 const {
   data: requests,
-  status,
-  error,
   refresh,
 } = await useAsyncData(
   `students_registrations_${userOrganizationsStore.selectedOrganization?.organization_id}`,
@@ -126,14 +140,14 @@ const {
   {
     transform: (data) => {
       return data.map((request) => {
-        const row = {
+        const row: RequestRow = {
           id: request.id,
-          inserted_at: formatDate(request.inserted_at),
+          inserted_at: formatDateTime(request.inserted_at),
           student: {
             name: `${request.firstname} ${request.lastname}`,
             has_a_license: request.has_a_license,
           },
-          birthdate: formatDate(request.birth_date),
+          birthdate: formatDateTime(request.birth_date),
           email: request.email,
           address: {
             street: request.address_street,
@@ -148,7 +162,7 @@ const {
   }
 );
 
-const selected = ref<typeof requests.value>([]);
+const selected = ref<RequestRow[]>([]);
 
 const columns = [
   {
@@ -189,7 +203,7 @@ async function confirmSelectedRequests() {
 
   // update selected requests status
   try {
-    const { data, error } = await client
+    const { error } = await client
     .from("students_registration_requests")
     .update({ status: 1 })
     .in("id", selected.value.map((item) => item.id));
@@ -225,7 +239,7 @@ async function deleteSelectedRequests() {
 
   // delete selected requests
   try {
-    const { data, error } = await client
+    const { error } = await client
     .from("students_registration_requests")
     .delete()
     .in("id", selected.value.map((item) => item.id));
@@ -250,24 +264,6 @@ async function deleteSelectedRequests() {
     });
   }
 }
-
-// test array of 50 requests
-const request_tests = Array.from({ length: 50 }, (_, i) => ({
-  id: i,
-  inserted_at: formatDate(new Date().toISOString()),
-  student: {
-    name: `Max Mustermann ${i}`,
-    has_a_license: i % 2 === 0,
-  },
-  birthdate: formatDate(new Date().toISOString()),
-  email: `email${i}@gmail.com`,
-  address: {
-    street: `Musterstraße ${i}`,
-    city: `Musterstadt ${i}`,
-    zip: `12345 ${i}`,
-    country: `Deutschland ${i}`,
-  },
-}));
 </script>
 
 <style scoped></style>

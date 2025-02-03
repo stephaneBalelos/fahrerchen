@@ -17,7 +17,7 @@
           <div class="flex justify-start gap-1">
             <p class="font-semibold me-2">{{ course?.name }}</p>
             <UBadge color="primary" variant="subtle" size="xs"
-              >Klasse {{ course?.type.type }}</UBadge
+              >{{ t('driving_class') }} {{ course?.type.type }}</UBadge
             >
           </div>
           <span class="text-sm text-gray-500">{{ course?.description }}</span>
@@ -70,7 +70,7 @@ const slideover = useSlideover();
 const createBillOnSubscription = ref(false);
 const allowSelfRegistration = ref(false);
 
-const { data:course, error, status, refresh } = useAsyncData(async () => {
+const { data:course, refresh } = useAsyncData(async () => {
   const { data, error } = await client
     .from("courses")
     .select("*")
@@ -97,7 +97,7 @@ const { data:course, error, status, refresh } = useAsyncData(async () => {
 
 function openCourseEditForm() {
   slideover.open(EditCourseForm, {
-    course_id: props.courseid,
+    courseId: props.courseid,
     "onCourse-updated": async () => {
       await refresh();
     },
@@ -105,7 +105,7 @@ function openCourseEditForm() {
 }
 
 async function updateCourseSettings() {
-  const { data, error } = await client
+  const { error } = await client
     .from("courses")
     .update({
       create_bill_on_subscription: createBillOnSubscription.value,
@@ -128,7 +128,8 @@ async function updateCourseSettings() {
   "de": {
     "general_settings_title": "Allgemeine Einstellungen",
     "general_settings_desc": "Allgemeine Einstellungen für den Kurs",
-    "change": "Ändern",
+    "change": "Bearbeiten",
+    "driving_class": "Fahrschulklasse",
     "create_bill_on_subscription": "Rechnung bei Anmeldung erstellen",
     "create_bill_on_subscription_desc": "Wenn aktiviert, wird eine Rechnung erstellt, wenn sich ein Benutzer für den Kurs anmeldet. Diese Rechnung basiert auf die Kurs aktivitäten.",
     "allow_self_registration": "Selbstregistrierung erlauben",
@@ -138,6 +139,7 @@ async function updateCourseSettings() {
     "general_settings_title": "General Settings",
     "general_settings_desc": "General settings for the course",
     "change": "Edit",
+    "driving_class": "Driving Class",
     "create_bill_on_subscription": "Create bill on subscription",
     "create_bill_on_subscription_desc": "If enabled, a bill will be created when a user subscribes to the course. This bill is based on the course activities.",
     "allow_self_registration": "Allow self registration",

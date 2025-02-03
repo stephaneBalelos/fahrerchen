@@ -15,30 +15,57 @@
           <h3
             class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
           >
-            {{ t("checkout") }}
+            {{ t("checkout") }} #{{ props.billId }}
           </h3>
         </div>
       </template>
 
       <div class="absulute inset-0 overflow-y-auto">
-        <div class="grid grid-cols-2 gap-4 p-4">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
           <div class="w-full">
-            <BillsBillingList :bill_id="props.bill_id" />
+            <StudentsStudentProfileCard
+              v-if="studentStore.student"
+              :student-id="studentStore.student.id"
+            />
+            <UCard class="mb-4">
+              <p
+                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"
+              >
+                {{ t("review") }}
+              </p>
+              <BillsBillingList :bill-id="props.billId" />
+            </UCard>
           </div>
           <div class="w-full">
             <form @submit="handleSubmit">
               <div ref="paymentElement">
                 <!-- A Stripe Element will be inserted here. -->
               </div>
-              <div class="flex justify-end space-x-2">
-                <UButton
-                  :loading="loading"
-                  :disabled="loading"
-                  color="primary"
-                  type="submit"
-                  >{{ t("pay_now") }}</UButton
-                >
-              </div>
+              <UCard class="mt-4">
+                <div class="flex justify-between items-center">
+                  <div class="flex flex-col">
+                    <div
+                      class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+                    >
+                      {{ t("total") }}
+                    </div>
+                    <div
+                      class="text-lg font-bold text-gray-900 dark:text-gray-100"
+                    >
+                      {{ formatCurrency(billTotal) }}
+                    </div>
+                  </div>
+
+                  <UButton
+                    :loading="loading"
+                    :disabled="loading"
+                    color="primary"
+                    type="submit"
+                  >
+                    {{ t("pay_now") }}
+                  </UButton>
+                </div>
+              </UCard>
             </form>
           </div>
         </div>
@@ -48,7 +75,8 @@
         <div class="flex justify-end space-x-2">
           <UButton
             :disabled="loading"
-            color="primary"
+            color="red"
+            variant="ghost"
             @click="$emit('close')"
             >{{ t("close") }}</UButton
           >
@@ -59,10 +87,17 @@
 </template>
 
 <script setup lang="ts">
-import { loadStripe, type Stripe, type StripeElements } from "@stripe/stripe-js";
+import {
+  loadStripe,
+  type Stripe,
+  type StripeElements,
+} from "@stripe/stripe-js";
+import { formatCurrency } from "~/utils/formatters";
+import { useCssVar } from '@vueuse/core';
+
 
 type Props = {
-  bill_id: string;
+  billId: string;
 };
 
 const props = defineProps<Props>();
@@ -82,13 +117,24 @@ const stripe = ref<Stripe | null>(null);
 
 const elements = ref<StripeElements | null>(null);
 
+const studentStore = useStudentStore();
+
+const billTotal = ref(0);
+
+const primaryColor = useCssVar("--color-primary-400");
+const backgroundColor = useCssVar("--ui-background");
+const foregroundColor = useCssVar("--ui-foreground");
+const borderColor = useCssVar("--color-gray-800");
+
 onMounted(async () => {
   try {
-    const { stripeAccountId, clientSecret } = await fetchSecret();
+    const { stripeAccountId, clientSecret, total } = await fetchSecret();
 
     if (!stripeAccountId || !clientSecret) {
       throw new Error("Failed to fetch secret");
     }
+
+    billTotal.value = total;
 
     stripe.value = await loadStripe(config.public.stripe_pk, {
       stripeAccount: stripeAccountId,
@@ -98,15 +144,27 @@ onMounted(async () => {
       throw new Error("Failed to load stripe");
     }
 
+    const appearance = {
+      variables: {
+        borderRadius: "8px",
+        colorPrimary: `rgb(${primaryColor.value.split(" ").join(",")})`,
+        colorText: `rgb(${foregroundColor.value.split(" ").join(",")})`,
+        colorBackground: `rgb(${backgroundColor.value.split(" ").join(",")})`,
+        colorBorder: `rgb(${borderColor.value.split(" ").join(",")})`,
+        overlayBackdropColor: `rgba(${backgroundColor.value
+          .split(" ")
+          .join(",")}, .7)`,
+      },
+    };
+
     elements.value = stripe.value.elements({
       clientSecret: clientSecret,
+      appearance: appearance,
     });
 
     const paymentEl = elements.value.create("payment", {
       layout: "accordion",
     });
-
-    console.log(paymentElement.value);
 
     if (!paymentElement.value) {
       throw new Error("Failed to load payment element");
@@ -120,7 +178,7 @@ onMounted(async () => {
 
 async function fetchSecret() {
   const res = await $fetch(
-    `/api/orgs/payments/stripe/checkout-session/${props.bill_id}`
+    `/api/orgs/payments/stripe/checkout-session/${props.billId}`
   );
   if (!res.stripeAccountId || !res.clientSecret) {
     throw new Error("Failed to fetch client secret");
@@ -139,7 +197,7 @@ async function handleSubmit(event: Event) {
   const { error } = await stripe.value.confirmPayment({
     elements: elements.value,
     confirmParams: {
-      return_url: window.location.href + '/payment-completed',
+      return_url: window.location.href + "/payment-completed",
     },
   });
 
@@ -147,8 +205,10 @@ async function handleSubmit(event: Event) {
     console.error(error);
     toast.add({
       title: "Error",
-      description:t(`stripe_errors.${error.code}`) || t(`stripe_errors.payment_intent_unknown_error`),
-      color: "red"
+      description:
+        t(`stripe_errors.${error.code}`) ||
+        t(`stripe_errors.payment_intent_unknown_error`),
+      color: "red",
     });
   }
 
@@ -162,21 +222,24 @@ async function handleSubmit(event: Event) {
 {
   "de": {
     "checkout": "Kasse",
-    "close": "Schließen",
+    "close": "Abbrechen",
     "pay_now": "Jetzt bezahlen",
+    "review": "Überprüfen sie ihre Rechnung",
+    "total": "Gesamt",
     "stripe_errors": {
       "payment_intent_authentication_failure": "Die Zahlung konnte nicht authentifiziert werden. Bitte versuche es erneut.",
       "payment_intent_payment_failure": "Die Zahlung konnte nicht durchgeführt werden. Bitte versuche es erneut.",
       "payment_intent_payment_canceled": "Die Zahlung wurde abgebrochen.",
       "payment_intent_unknown_error": "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.",
       "card_declined": "Die Karte wurde abgelehnt. Bitte versuche es mit einer anderen Karte."
-
     }
   },
   "en": {
     "checkout": "Checkout",
-    "close": "Close",
+    "close": "Cancel",
     "pay_now": "Pay now",
+    "review": "Review your bill",
+    "total": "Total",
     "stripe_errors": {
       "payment_intent_authentication_failure": "Payment could not be authenticated. Please try again.",
       "payment_intent_payment_failure": "Payment could not be completed. Please try again.",

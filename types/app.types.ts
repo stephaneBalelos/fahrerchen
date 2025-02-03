@@ -57,10 +57,27 @@ export type StripeConnectLinkAccountPostBody = {
 }
 
 export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
+export type CourseActivityAttendanceView = Database["public"]["Views"]["course_activity_attendances_view"]["Row"]
+export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
+export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
     Views: {
+      organization_members_view: {
+        Row: {
+          id: string
+          inserted_at: Date
+          organization_id: string
+          user_id: string
+          role: UserRole
+          user_email: string
+          user_firstname: string | null
+          user_lastname: string | null
+          user_fullname: string | null
+          user_avatar_path: string | null
+        }
+      },
       course_subscriptions_view: {
         Row: {
           id: string,
@@ -94,8 +111,36 @@ export type Database = MergeDeep<DatabaseGenerated, {
           assigned_to_email: string,
           assigned_to_firstname: string | null,
           assigned_to_lastname: string | null,
+          attendees: string[]
         } 
       },
+      course_activity_attendances_view: {
+        Row: {
+          id: string,
+          course_activity_id: string,
+          activity_schedule_id: string,
+          course_subscription_id: string,
+          status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
+          organization_id: string,
+          activity_name: string,
+          activity_description: string,
+          activity_start_at: string,
+          activity_end_at: string
+        }
+      },
+      course_subscriptions_stats_view: {
+        Row: {
+          id: string,
+          course_id: string,
+          student_id: string,
+          archived_at: Date | null,
+          costs: number,
+          organization_id: string,
+          course_name: string,
+          course_description: string,
+          total_bills: number,
+        }
+      }
       user_roles_view: {
         Row: {
           email: string

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import AddMemberForm from '~/components/forms/AddMemberForm.vue';
 import InvitationList from '~/components/settings/InvitationList.vue';
-import type { AppUserWithRole } from '~/types/app.types';
-import { type Database } from '~/types/database.types';
+import type { AppUserWithRole, Database } from '~/types/app.types';
 
 const client = useSupabaseClient<Database>()
 const userOrganizationsStore = useUserOrganizationsStore()
 
-const { data, error, refresh } = await useAsyncData('members', async () => {
+const { t } = useI18n({
+  useScope: 'local'
+})
+
+const { data, refresh } = await useAsyncData('members', async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     return null
   }
@@ -42,15 +45,15 @@ async function onClose() {
   <UDashboardPanelContent>
     <div>
       <UDashboardSection
-        title="Manage access"
-        description="Invite new members by email address."
+        :title="t('manage_access')"
+        :description="t('invite_new_members')"
         orientation="horizontal"
         :ui="{ container: 'lg:sticky top-2' }"
       >
         <template #links>
           <UButton
             id="invite-people"
-            label="Invite people"
+            :label="t('invite_people')"
             color="black"
             @click="isInviteModalOpen = true"
           />
@@ -64,7 +67,7 @@ async function onClose() {
               <UInput
                 v-model="q"
                 icon="i-heroicons-magnifying-glass"
-                placeholder="Search members"
+                :placeholder="t('search_members')"
                 autofocus
               />
             </template>
@@ -76,8 +79,8 @@ async function onClose() {
       </UDashboardSection>
       <UDashboardModal
         v-model="isInviteModalOpen"
-        title="Invite people"
-        description="Invite new members by email address"
+        :title="t('invite_people')"
+        :description="t('invite_new_members')"
         :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
       >
         <!-- ~/components/settings/MembersForm.vue -->
@@ -86,3 +89,20 @@ async function onClose() {
     </div>
   </UDashboardPanelContent>
 </template>
+
+<i18n lang="json">
+{
+  "de": {
+    "manage_access": "Zugriff verwalten",
+    "invite_new_members": "Neue Mitglieder per E-Mail-Adresse einladen",
+    "invite_people": "Personen einladen",
+    "search_members": "Mitglieder suchen"
+  },
+  "en": {
+    "manage_access": "Manage access",
+    "invite_new_members": "Invite new members by email address",
+    "invite_people": "Invite people",
+    "search_members": "Search members"
+  }
+} 
+</i18n>

@@ -1,4 +1,4 @@
-import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database } from "../_shared/types/database.types.ts"
 import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
 

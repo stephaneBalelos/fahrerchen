@@ -1,20 +1,19 @@
 <template>
   <UDashboardSlideover
-    :title="props.activity_schedule_id ? 'Edit Activity Schedule' : 'New Activity Schedule'"
-    ref="slideover"
     id="edit-activity-schedule"
+    ref="slideover"
+    :title="props.scheduleId ? 'Edit Activity Schedule' : 'New Activity Schedule'"
   >
     <UForm
       ref="form"
       :state="state"
       :schema="schema"
-      :validate-on="['submit']"
-      :onSubmit="onSubmit"
+      @submit="onSubmit"
     >
       <UDashboardSection
         title="Course Activity Schedule"
         :description="
-          props.activity_schedule_id
+          props.scheduleId
             ? 'Edit the course activity schedule'
             : 'Add a new course activity schedule'
         "
@@ -32,7 +31,7 @@
             :options="course_activities"
             value-attribute="id"
             label-attribute="name"
-            :disabled="!!props.activity_schedule_id"
+            :disabled="!!props.scheduleId"
           >
             <template #label>
               <div v-if="state.activity_id && course_activities">
@@ -58,31 +57,7 @@
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
         >
-          <USelectMenu
-            v-model="state.assigned_to"
-            :options="organization_members"
-            value-attribute="user_id"
-            option-attribute="email"
-          >
-            <template #label>
-              <div v-if="state.assigned_to && organization_members.length > 0">
-                <span class="truncate">{{
-                  organization_members.find(
-                    (m) => m.user_id === state.assigned_to
-                  )?.user?.fullname
-                }}</span>
-              </div>
-              <div v-else>
-                <span class="truncate">Zugewiesen an</span>
-              </div>
-            </template>
-            <template #option="{ option }">
-              <span v-if="option.user.firstname && option.user.lastname" class="truncate"
-                >{{ option.user.firstname }} {{ option.user.lastname }}</span
-              >
-              <span v-else class="truncate">{{ option.user.email }}</span>
-            </template>
-          </USelectMenu>
+        <FormsInputsUserSelect v-model="state.assigned_to" :orgid="props.orgid" />
         </UFormGroup>
         <UFormGroup
           name="start_at"
@@ -93,36 +68,57 @@
           :ui="{ container: '' }"
         >
           <div class="grid grid-cols-2 gap-4">
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <div class="grid grid-cols-1 gap-2 w-full">
-                Start Datum
+            <UPopover class="col-span-2" :popper="{ placement: 'bottom-start' }">
+              <div class="w-full">
                 <UButton
                   block
+                  color="white" variant="solid"
                   icon="i-heroicons-calendar-days-20-solid"
                   :label="format(new Date(state.start_at), 'd MMM, yyy')"
                 />
               </div>
-
-              <template #panel="{ close }">
+              <template #panel="">
                 <DatePicker
                   v-model="state.start_at"
                   is-required
-                  @close="close"
+                  :mode="'dateTime'"
                   @update:model-value="onUpdateStartDate"
                 />
               </template>
             </UPopover>
             <UPopover :popper="{ placement: 'bottom-start' }">
-              <div class="grid grid-cols-1 gap-2 w-full">
-                <div>End Datum</div>
+              <div class="w-full">
                 <UButton
                   block
-                  icon="i-heroicons-calendar-days-20-solid"
-                  :label="format(new Date(state.end_at), 'd MMM, yyy')"
+                  color="white" variant="solid"
+                  icon="i-heroicons-clock"
+                  :label="format(new Date(state.start_at), 'HH:mm a')"
                 />
               </div>
-              <template #panel="{ close }">
-                <DatePicker v-model="state.end_at" is-required @close="close" />
+              <template #panel="">
+                <DatePicker
+                  v-model="state.start_at"
+                  is-required
+                  :mode="'time'"
+                  @update:model-value="onUpdateStartDate"
+                />
+              </template>
+            </UPopover>
+            <UPopover :popper="{ placement: 'bottom-start' }">
+              <div class="w-full">
+                <UButton
+                  block
+                  color="white" variant="solid"
+                  icon="i-heroicons-clock"
+                  :label="format(new Date(state.end_at), 'HH:mm a')"
+                />
+              </div>
+              <template #panel="">
+                <DatePicker
+                  v-model="state.end_at"
+                  is-required
+                  :mode="'time'"
+                />
               </template>
             </UPopover>
           </div>
@@ -132,10 +128,10 @@
 
     <template #footer>
       <UButton
-        v-if="props.activity_schedule_id"
-        @click="deleteCourseActivitySchedule(props.activity_schedule_id)"
+        v-if="props.scheduleId"
         color="red"
         variant="ghost"
+        @click="deleteCourseActivitySchedule(props.scheduleId)"
         >Delete</UButton
       >
       <UButton @click="form?.submit()">Save</UButton>
@@ -145,14 +141,13 @@
 
 <script setup lang="ts">
 import type {
-  AppCourseActivity,
   AppCourseActivitySchedule,
   AppScheduleType,
   Database,
 } from "~/types/app.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
-import { addHours, format, set } from "date-fns";
+import { addHours, format } from "date-fns";
 import DatePicker from "./Inputs/Datepicker.vue";
 import { useCourseActivities } from "~/composables/useCourseActivities";
 
@@ -163,7 +158,7 @@ type CourseActivityScheduleEdit = Omit<
 
 type RepeatMode = AppScheduleType;
 
-const repeatOptions = [
+const _repeatOptions = [
   { label: "Once", value: "ONCE" },
   { label: "Daily", value: "DAILY" },
   { label: "Weekly", value: "WEEKLY" },
@@ -171,7 +166,7 @@ const repeatOptions = [
   { label: "Yearly", value: "YEARLY" },
 ] as { label: string; value: RepeatMode }[];
 
-const dayOfWeekOptions = [
+const _dayOfWeekOptions = [
   { label: "Monday", value: 1 },
   { label: "Tuesday", value: 2 },
   { label: "Wednesday", value: 3 },
@@ -183,9 +178,9 @@ const dayOfWeekOptions = [
 
 type Props = {
   orgid: string;
+  scheduleId?: string;
   courseid: string;
   activityid: string;
-  activity_schedule_id?: string;
   date?: Date;
 };
 
@@ -194,18 +189,22 @@ const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
 const course_activities = await useCourseActivities(props.orgid, props.courseid);
-const organization_members = await useOrganizationMembers(props.orgid, true);
-const zDayOfWeek = z.number().int().min(1).max(7);
 
 const schema = z.object({
   activity_id: z.string().uuid(),
   assigned_to: z.string().uuid().optional(),
   start_at: z.date(),
   end_at: z.date(),
-});
-
-schema.refine((date) => {
-  return date.start_at < date.end_at;
+}).superRefine((data, ctx) => {
+  if (data.start_at > data.end_at) {
+    ctx.addIssue({
+      path: ["start_at"],
+      code: z.ZodIssueCode.custom,
+      message: "End date must be after start date",
+    });
+    return z.NEVER;
+  }
+  return true;
 });
 
 type Schema = z.infer<typeof schema>;
@@ -220,13 +219,13 @@ const state = reactive<Schema>({
 });
 
 onMounted(async () => {
-  if (props.activity_schedule_id) {
+  if (props.scheduleId) {
     // load the course activity schedule
     try {
       const { data, error } = await client
         .from("course_activity_schedules")
         .select("*")
-        .eq("id", props.activity_schedule_id)
+        .eq("id", props.scheduleId)
         .single();
 
       if (error) {
@@ -252,7 +251,7 @@ onMounted(async () => {
   }
 })
 
-function onSubmit(event: FormSubmitEvent<Schema>) {
+function onSubmit(_event: FormSubmitEvent<Schema>) {
   const data: CourseActivityScheduleEdit = {
     activity_id: state.activity_id,
     course_id: props.courseid,
@@ -262,9 +261,9 @@ function onSubmit(event: FormSubmitEvent<Schema>) {
     end_at: state.end_at.toISOString(),
   };
 
-  if (props.activity_schedule_id) {
+  if (props.scheduleId) {
     // update the course activity schedule
-    updateCourseActivitySchedule(props.activity_schedule_id, data);
+    updateCourseActivitySchedule(props.scheduleId, data);
   } else {
     // create a new course activity schedule
     createCourseActivitySchedule(data);
@@ -273,7 +272,7 @@ function onSubmit(event: FormSubmitEvent<Schema>) {
 
 async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
   try {
-    const { data: res, error } = await client
+    const { error } = await client
       .from("course_activity_schedules")
       .insert({
         ...data,
@@ -311,7 +310,7 @@ async function updateCourseActivitySchedule(
   data: CourseActivityScheduleEdit
 ) {
   try {
-    const { data: res, error } = await client
+    const { error } = await client
       .from("course_activity_schedules")
       .update(data)
       .eq("id", id)
@@ -349,12 +348,14 @@ function deleteCourseActivitySchedule(id: string) {
 function onUpdateStartDate(date: Date) {
   state.start_at = date;
   state.end_at = addHours(date, 1);
-  const dayOfWeekStart = date.getDay() === 0 ? 7 : date.getDay();
 }
 
-function onChangeRepeat(value: RepeatMode) {
+
+function _onChangeRepeat(value: RepeatMode) {
   console.log("Change repeat", value);
 }
 </script>
 
 <style scoped></style>
+
+

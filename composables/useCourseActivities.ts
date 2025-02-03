@@ -5,7 +5,6 @@ export async function useCourseActivities(orgid: string, courseid: string): Prom
 
 export async function useCourseActivities(orgid: string, courseid: string, id?: string,) {
     const client = useSupabaseClient<Database>()
-    const userOrganizationsStore = useUserOrganizationsStore()
 
     const res = ref<AppCourseActivity[]>([])
 

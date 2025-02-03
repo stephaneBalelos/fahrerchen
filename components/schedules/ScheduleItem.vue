@@ -41,9 +41,9 @@
       <div class="flex flex-col gap-2">
         <p class="text-sm text-gray-500">{{ t("assigned_to") }}</p>
         <FormsInputsUserSelect
-          v-model="props.schedule.assigned_to"
+          v-model="assigned_to"
           :orgid="props.schedule.organization_id"
-        ></FormsInputsUserSelect>
+        />
       </div>
 
       <div class="flex flex-col gap-2">
@@ -90,8 +90,6 @@ const slideover = useSlideover();
 
 const {
   data: attendees,
-  status,
-  error,
   refresh,
 } = useAsyncData(`schedule/${props.schedule.id}/attendees`, async () => {
   const { data, error } = await client
@@ -105,12 +103,14 @@ const {
   return data;
 });
 
+const assigned_to = ref(props.schedule.assigned_to);
+
 
 const openEditSchedule = () => {
   slideover.open(EditCourseActivitySchedule, {
     orgid: props.schedule.organization_id,
     activityid: props.schedule.activity_id,
-    activity_schedule_id: props.schedule.id,
+    scheduleId: props.schedule.id,
     courseid: props.schedule.course_id,
   });
 };
@@ -124,6 +124,20 @@ const openEditAttendees = () => {
     },
   });
 };
+
+watch(assigned_to, async (value) => {
+  try {
+    const { error } = await client
+      .from("course_activity_schedules")
+      .update({ assigned_to: value })
+      .eq("id", props.schedule.id);
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
 </script>
 
 <style scoped></style>

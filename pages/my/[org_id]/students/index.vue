@@ -1,42 +1,52 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardToolbar>
+    <UDashboardNavbar>
       <template #left>
         <h2 class="font-semibold text-gray-900 dark:text-white">
-          Students
+          {{ t("students") }}
           <UBadge color="primary" variant="soft">{{
             students?.length ?? 0
           }}</UBadge>
         </h2>
       </template>
       <template #right>
+        <UDropdown
+          :items="createUserOptions"
+          :popper="{
+            placement: 'bottom-start',
+          }"
+          :ui="{
+            width: 'w-72',
+          }"
+        >
+          <UButton
+            :label="t('new_user')"
+            trailing-icon="i-heroicons-plus"
+            color="gray"
+          />
+        </UDropdown>
+        <UButton
+          color="gray"
+          variant="solid"
+          size="2xs"
+          :to="userOrganizationsStore.relativePath('/students/requests')"
+        >
+          {{ t("pre_registration") }}
+        </UButton>
+      </template>
+    </UDashboardNavbar>
+
+    <UDashboardToolbar>
+      <template #left>
         <UInput
           ref="input"
           v-model="q"
           icon="i-heroicons-funnel"
           autocomplete="off"
-          placeholder="Filter users..."
+          :placeholder="t('filter_users')"
           class="hidden lg:block"
           @keydown.esc="$event.target.blur()"
-        >
-          <template #trailing>
-            <UKbd value="/" />
-          </template>
-        </UInput>
-
-        <UButton
-          label="New user"
-          trailing-icon="i-heroicons-plus"
-          color="gray"
-          @click="() => openStudentForm()"
         />
-        <UButton color="gray" variant="solid" size="2xs" :to="userOrganizationsStore.relativePath('/students/requests')">Voranmeldungen</UButton>
-
-      </template>
-    </UDashboardToolbar>
-
-    <UDashboardToolbar>
-      <template #left>
         <!-- <USelectMenu
             v-model="selectedStatuses"
             icon="i-heroicons-check-circle"
@@ -54,22 +64,10 @@
           /> -->
       </template>
 
-      <template #right>
-        <USelectMenu
-          v-model="selectedColumns"
-          icon="i-heroicons-adjustments-horizontal-solid"
-          :options="columns"
-          multiple
-          class="hidden lg:block"
-        >
-          <template #label> Display </template>
-        </USelectMenu>
-      </template>
     </UDashboardToolbar>
 
     <UDashboardPanelContent class="p-0">
       <UTable
-        v-model="selected"
         v-model:sort="sort"
         :rows="students ?? []"
         :columns="columns"
@@ -77,7 +75,6 @@
         sort-mode="manual"
         class="w-full"
         :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-        @select="onSelect"
       >
         <template #name-data="{ row }">
           <div class="flex items-center gap-3">
@@ -89,31 +86,31 @@
         </template>
         <template #status-data="{ row }">
           <UBadge
-            :label="row.status ?? 'unknown'"
+            :label="(row.subscriptions_count ?? 0 )? t('status_subscribed', { count: row.subscriptions_count }) : t('status_not_subscribed')"
             :color="
-              row.status === 'subscribed'
+              (row.subscriptions_count ?? 0)
                 ? 'green'
-                : row.status === 'bounced'
-                ? 'orange'
-                : 'red'
+                : 'orange'
             "
             variant="subtle"
             class="capitalize"
           />
         </template>
         <template #actions-data="{ row }">
-          <UButton
-            :to="userOrganizationsStore.relativePath(`/students/${row.id}`)"
-            color="primary"
-            variant="soft"
-            icon="i-heroicons-eye"
-          ></UButton>
-          <UButton
-            color="primary"
-            variant="soft"
-            icon="i-heroicons-pencil"
-            @click="(e) => openStudentForm(row.id)"
-          ></UButton>
+          <div class="flex gap-2">
+            <UButton
+              color="gray"
+              variant="solid"
+              icon="i-heroicons-pencil"
+              @click="(e) => openStudentForm(row.id)"
+            />
+            <UButton
+              color="gray"
+              variant="solid"
+              icon="i-heroicons-eye"
+              @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
+            />
+          </div>
         </template>
       </UTable>
     </UDashboardPanelContent>
@@ -121,48 +118,47 @@
 </template>
 
 <script setup lang="ts">
-import type { AppStudent, AppUser, Database } from "~/types/app.types";
-import CreateUserForm from "~/components/forms/CreateStudentForm.vue";
+import type { AppStudent, Database } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
+import AddStudentModal from "~/components/forms/AddStudentModal.vue";
+import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
+import StudentSubscriptionsSlideover from "~/components/students/StudentSubscriptionsSlideover.vue";
 
 definePageMeta({
   layout: "orgs",
 });
 
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
+const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
-const selected = ref<AppUser[]>([]);
 const columns = [
   {
-    key: "avatar",
-  },
-  {
     key: "name",
-    label: "Fullname",
-    sortable: true,
+    label: t("table.name"),
   },
   {
     key: "email",
-    label: "Email",
-    sortable: true,
+    label: t("table.email"),
   },
   {
     key: "status",
-    label: "Status",
+    label: t("table.status"),
   },
   {
     key: "actions",
   },
 ];
 const q = ref("");
-const selectedColumns = ref(columns);
 const sort = ref({ column: "id", direction: "asc" as const });
 
 const {
   data: students,
   status,
-  error,
   refresh,
 } = await useAsyncData(
   "students",
@@ -170,20 +166,29 @@ const {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    const { data } = await client
-      .from("students")
+    const query = client
+      .from("students_view")
       .select("*")
-      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
+      .eq(
+        "organization_id",
+        userOrganizationsStore.selectedOrganization.organization_id
+      );
 
+      if (q.value) {
+        query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);
+      }
+
+    const { data } = await query;
     return data;
   },
   {
+    watch: [q],
     transform: (data) => {
       return data
-        ? data.map((item: any) => {
+        ? data.map((item) => {       
             return {
               ...item,
-              name: `${item.firstname} ${item.lastname}`,
+              name: `${item.firstname} ${item.lastname}`
             };
           })
         : [];
@@ -191,22 +196,55 @@ const {
   }
 );
 
-function onSelect(row: AppUser) {
-  const index = selected.value.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    selected.value.push(row);
-  } else {
-    selected.value.splice(index, 1);
-  }
-}
+const createUserOptions = ref([
+  [
+    {
+      label: t("invite_user_per_email"),
+      icon: "i-heroicons-envelope",
+      click: () => {
+        if (!userOrganizationsStore.selectedOrganization) {
+          return;
+        }
+        modal.open(AddStudentModal, {
+          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          onClose: () => {
+            modal.close();
+          },
+        });
+      },
+    },
+    {
+      label: t("copy_invite_link"),
+      icon: "i-heroicons-link",
+      click: () => {
+        if (!userOrganizationsStore.selectedOrganization) {
+          return;
+        }
+        modal.open(OnboardingLinkModal, {
+          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          onClose: () => {
+            modal.close();
+          },
+        });
+      },
+    },
+    {
+      label: t("manual_registration"),
+      icon: "i-heroicons-user-plus",
+      click: () => {
+        openStudentForm();
+      },
+    },
+  ],
+]);
 
 const openStudentForm = (id?: string) => {
   if (!userOrganizationsStore.selectedOrganization) {
     return;
   }
   slideover.open(EditStudentForm, {
-    organization_id: userOrganizationsStore.selectedOrganization.organization_id,
-    student_id: id,
+    organizationId: userOrganizationsStore.selectedOrganization.organization_id,
+    studentId: id,
     "onStudent-created": (student: AppStudent) => {
       console.log("student created", student);
       refresh();
@@ -215,7 +253,17 @@ const openStudentForm = (id?: string) => {
       console.log("student updated", student);
       refresh();
     },
-  })
+  });
+};
+
+const openStudentSubscriptionsSlideOver = (id: string) => {
+  slideover.open(StudentSubscriptionsSlideover, {
+    studentId: id,
+    onClose: (path) => {
+      slideover.close();
+      navigateTo(path);
+    },
+  });
 };
 </script>
 
@@ -274,3 +322,42 @@ const openStudentForm = (id?: string) => {
   }
 }
 </style>
+
+<i18n lang="json">
+{
+  "de": {
+    "students": "Fahrschüler:innen",
+    "new_user": "Neuer Fahrschüler:in",
+    "filter_users": "Fahrschüler:innen filtern...",
+    "pre_registration": "Voranmeldungen",
+    "invite_user_per_email": "Fahrschüler:in per E-Mail einladen",
+    "copy_invite_link": "Einladungslink kopieren",
+    "manual_registration": "Manuelle Registrierung",
+    "status_subscribed": "In {count} Kursen eingeschrieben",
+    "status_not_subscribed": "Nicht eingeschrieben",
+    "table": {
+      "name": "Name",
+      "email": "E-Mail",
+      "status": "Status",
+      "actions": "Aktionen"
+    }
+  },
+  "en": {
+    "students": "Students",
+    "new_user": "New Student",
+    "filter_users": "Filter students...",
+    "pre_registration": "Pre-registration",
+    "invite_user_per_email": "Invite student per email",
+    "copy_invite_link": "Copy invite link",
+    "manual_registration": "Manual registration",
+    "status_subscribed": "Subscribed to {count} courses",
+    "status_not_subscribed": "Not subscribed",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  }
+}
+</i18n>

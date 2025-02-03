@@ -10,6 +10,7 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "test": "playwright test",
+    "test_unit": "vitest --dir tests/units",
     "db_gen_types": "supabase gen types typescript --local > ./types/database.types.ts && cp ./types/database.types.ts ./supabase/functions/_shared/types/database.types.ts",
     "db_seed_sync": "pnpx @snaplet/seed sync",
     "db_seed_generate": "pnpx @snaplet/seed generate",
@@ -17,10 +18,12 @@
   },
   "devDependencies": {
     "@nuxt/devtools": "^1.6.0",
+    "@nuxt/eslint": "^0.7.4",
     "@nuxt/test-utils": "^3.14.4",
     "@nuxt/ui": "^2.19.2",
     "@nuxtjs/i18n": "^9.0.0",
     "@nuxtjs/supabase": "1.2.2",
+    "@nuxtjs/turnstile": "^0.9.11",
     "@pinia/nuxt": "^0.8.0",
     "@playwright/test": "^1.48.2",
     "@snaplet/copycat": "^5.1.0",
@@ -48,7 +51,7 @@
     "stripe": "^16.12.0",
     "tus-js-client": "^4.2.3",
     "type-fest": "^4.26.1",
-    "v-calendar": "3.0.0",
+    "v-calendar": "^3.1.2",
     "zod": "^3.23.8"
   }
 }

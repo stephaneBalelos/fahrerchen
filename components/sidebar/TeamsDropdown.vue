@@ -1,21 +1,22 @@
 <script setup lang="ts">
-import type { AppOrganization, Database } from "~/types/app.types";
+import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
-const user = useSupabaseUser();
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
+const config = useRuntimeConfig().public;
 
-const {
-  data: organizations,
-  error,
-  status,
-} = await useAsyncData(
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { data: organizations } = await useAsyncData(
   "user_organizations_select",
   async () => {
     const { data, error } = await client
       .from("organizations")
-      .select("id, name")
+      .select("id, name, avatar_path")
       .in(
         "id",
         userOrganizationsStore.organizations.map((o) => o.organization_id)
@@ -33,16 +34,21 @@ const {
     watch: [userOrganizationsStore.organizations],
     immediate: true,
     transform: (data) => {
-      return data.map((d, index) => {
+      return data.map((d) => {
+        const avatar_path = d.avatar_path
+        ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
+        : "";
         return {
           id: d.id,
           label: d.name,
           avatar: {
-            src: null,
+            src: avatar_path,
           },
-          icon: "i-heroicons-globe-europe-africa",
+          icon: avatar_path ? undefined : "i-heroicons-globe-europe-africa",
+          avatar_path: avatar_path,
           click: () => {
             userOrganizationsStore.selectOrganization(d.id);
+            navigateTo("/my/" + d.id);
           },
         };
       });
@@ -60,7 +66,7 @@ const actions = computed(() => {
     selectedOrganization
   ) {
     items.push({
-      label: "Settings",
+      label: t("settings"),
       icon: "i-heroicons-cog-8-tooth",
       click: () => {
         navigateTo(`/my/${selectedOrganization.organization_id}/settings`);
@@ -69,7 +75,7 @@ const actions = computed(() => {
   }
 
   items.push({
-    label: "Zurück zu den Teams",
+    label: t("back_to_home"),
     click: () => {
       navigateTo("/my");
     },
@@ -86,8 +92,8 @@ const selectedOrganization = computed(() => {
 
 <template>
   <UDropdown
-    id="teams-dropdown"
     v-if="organizations"
+    id="teams-dropdown"
     v-slot="{ open }"
     mode="hover"
     :items="[organizations, actions]"
@@ -103,9 +109,9 @@ const selectedOrganization = computed(() => {
       class="w-full"
     >
       <UAvatar
-        :src="false"
+        :src="selectedOrganization?.avatar_path"
         :icon="'i-heroicons-globe-europe-africa'"
-        size="2xs"
+        size="sm"
       />
 
       <span class="truncate text-gray-900 dark:text-white font-semibold">{{
@@ -114,3 +120,16 @@ const selectedOrganization = computed(() => {
     </UButton>
   </UDropdown>
 </template>
+
+<i18n lang="json">
+{
+  "de": {
+    "settings": "Einstellungen",
+    "back_to_home": "Zurück zur Startseite"
+  },
+  "en": {
+    "settings": "Settings",
+    "back_to_home": "Back to Home"
+  }
+}
+</i18n>

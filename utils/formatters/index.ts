@@ -1,14 +1,13 @@
 import { isToday, isYesterday, isTomorrow } from "date-fns";
 
 export const formatDate = (date: string) => {
-    const { t, locale } = useI18n({
+    const { locale } = useI18n({
         useScope: 'global',
     })
     return new Date(date).toLocaleDateString(locale.value)
 };
 
 export const formatDateTime = (date: string) => {
-    const dateObj = new Date(date)
     return new Date(date).toLocaleString()
 };
 

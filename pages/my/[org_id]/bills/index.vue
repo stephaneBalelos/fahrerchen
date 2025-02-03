@@ -1,34 +1,48 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardToolbar>
-        <USelectMenu
-          v-model="selectedCourse"
-          :options="courses"
-          option-attribute="name"
-          placeholder="Course"
-        />
-      </UDashboardToolbar>
+      <UDashboardNavbar
+        v-if="userOrganizationsStore.selectedOrganization"
+        :title="t('title')"
+      >
+        <template #right>
+          <FormsInputsCourseSelect
+            v-model="filterForm.course_id"
+            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+          />
+          <StudentSelect
+            v-model="filterForm.student_id"
+            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+          />
+        </template>
+      </UDashboardNavbar>
       <UDashboardPanelContent class="p-0">
         <UTable
           :columns="columns"
           :rows="bills ?? []"
           :loading="status === 'pending'"
         >
-          <template #course_subscriptions.course_id-data="{ row }">
-            {{
-              courses.find(
-                (course) => course.id === row.course_subscriptions.course_id
-              )?.name
-            }}
+          <template #course-data="{ row }">
+            {{ row.course_name }}
           </template>
           <template #status-data="{ row }">
-            <UBadge :color="row.status === 'paid' ? 'green' : 'red'">
-              {{ row.status }}
+            <UBadge v-if="row.status === 'paid'" :color="'green'">
+              {{ g("bills.status.paid") }}
+            </UBadge>
+            <UBadge v-else-if="row.status === 'canceled'" :color="'red'">
+              {{ g("bills.status.canceled") }}
+            </UBadge>
+            <UBadge v-else :color="'orange'">
+              {{ g("bills.status.unpaid") }}
             </UBadge>
           </template>
           <template #action-data="{ row }">
-            <ULink :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)">View</ULink>
+            <UButton
+              variant="link"
+              color="white"
+              :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)"
+              >{{ t("table.view") }}</UButton
+            >
           </template>
         </UTable>
       </UDashboardPanelContent>
@@ -37,80 +51,89 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourse, Database } from "~/types/app.types";
+import { z } from "zod";
+import StudentSelect from "~/components/forms/Inputs/StudentSelect.vue";
+import type { AppCourse } from "~/types/app.types";
 
 definePageMeta({
   layout: "orgs",
 });
 
-const client = useSupabaseClient<Database>();
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
 const userOrganizationsStore = useUserOrganizationsStore();
+const subscriptionBills = useSubscriptionBills();
 if (!userOrganizationsStore.selectedOrganization) {
   throw new Error("Organization not found");
 }
 
-const selectedCourse = ref<AppCourse>();
-const courses = await useCourses(userOrganizationsStore.selectedOrganization.organization_id);
+const _schema = z.object({
+  student_id: z.string().uuid().optional(),
+  course_id: z.string().uuid().optional(),
+});
+
+type FilterForm = z.infer<typeof _schema>;
+
+const filterForm = ref<FilterForm>({
+  student_id: undefined,
+  course_id: undefined,
+});
+
+const courses = ref<AppCourse[]>([]);
+
+courses.value = await useCourses(
+  userOrganizationsStore.selectedOrganization.organization_id
+);
 
 const columns = [
   {
-    key: "course_subscriptions.students.firstname",
-    label: "Firstname",
+    key: "student_firstname",
+    label: t("table.firstname"),
   },
   {
-    key: "course_subscriptions.students.lastname",
-    label: "Lastname",
+    key: "student_lastname",
+    label: t("table.lastname"),
   },
   {
-    key: "course_subscriptions.course_id",
-    label: "Course",
+    key: "course_name",
+    label: t("table.course"),
   },
   {
     key: "total",
-    label: "Amount",
+    label: t("table.amount"),
   },
   {
     key: "status",
-    label: "Status",
+    label: t("table.status"),
   },
   {
     key: "action",
   },
 ];
 
-const {
-  data: bills,
-  error,
-  status,
-  refresh,
-} = useAsyncData(
-  `${userOrganizationsStore.selectedOrganization.organization_id}_subscriptions_bills`,
+const { data: bills, status } = useAsyncData(
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    let req = client
-      .from("course_subscription_bills")
-      .select("*, course_subscriptions(*, students(*))")
-      .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
-    // if (selectedCourse.value) {
-    //   req = req.eq("course_id", selectedCourse.value);
-    // }
-    const { data, error } = await req;
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-
-    return data ? data : [];
+    return await subscriptionBills.fetchSubscriptionBills({
+      course_id: filterForm.value.course_id,
+      student_id: filterForm.value.student_id,
+    });
   },
   {
-    watch: [selectedCourse],
+    watch: [filterForm.value],
     transform: (data) => {
       return data?.map((bill) => {
         return {
           ...bill,
-          status: bill.paid_at ? "paid" : "unpaid",
+          status: bill.paid_at ? "paid" : bill.canceled_at ? "canceled" : "unpaid",
         };
       });
     },
@@ -119,3 +142,30 @@ const {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "title": "Rechnungen",
+    "table": {
+      "firstname": "Vorname",
+      "lastname": "Nachname",
+      "course": "Kurs",
+      "amount": "Betrag",
+      "status": "Status",
+      "view": "Anzeigen"
+    }
+  },
+  "en": {
+    "title": "Bills",
+    "table": {
+      "firstname": "Firstname",
+      "lastname": "Lastname",
+      "course": "Course",
+      "amount": "Amount",
+      "status": "Status",
+      "view": "View"
+    }
+  }
+}
+</i18n>

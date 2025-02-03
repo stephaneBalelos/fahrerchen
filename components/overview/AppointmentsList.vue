@@ -4,6 +4,15 @@
     :description="t('incoming_appointments_description')"
     icon="i-heroicons-calendar"
   >
+  <template #links>
+      <UButton
+        color="gray"
+        variant="solid"
+        :to="`/my/${userOrganizationsStore.selectedOrganization?.organization_id}/schedules`"
+      >
+        {{ t("view_all") }}
+      </UButton>
+    </template>
     <div v-if="schedules && schedules.length > 0">
         <NuxtLink
           v-for="(schedule, index) in schedules"
@@ -22,13 +31,13 @@
             </div>
           </div>
           <p class="text-gray-900 dark:text-white font-medium text-lg">
-            <UBadge v-if="schedule.status == 'PLANNED'" color="primary" variant="soft">Planned</UBadge>
-            <UBadge v-if="schedule.status == 'CANCELED'" color="red" variant="soft">Canceled</UBadge>
-            <UBadge v-if="schedule.status == 'COMPLETED'" color="red" variant="soft">Completed</UBadge>
+            <UBadge v-if="schedule.status == 'PLANNED'" color="primary" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
+            <UBadge v-if="schedule.status == 'CANCELED'" color="red" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
+            <UBadge v-if="schedule.status == 'COMPLETED'" color="green" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
           </p>
         </NuxtLink>
     </div>
-    <div class="min-h-96 flex flex-col items-center justify-center" v-else>
+    <div v-else class="min-h-96 flex flex-col items-center justify-center">
         <UIcon name="i-heroicons-circle-stack" class="w-5 h-5" />
         <p class="text-gray-500 dark:text-gray-400">
             {{ t('no_appointments') }}
@@ -46,6 +55,10 @@ const { t } = useI18n({
     useScope: 'local'
 })
 
+const { t:g } = useI18n({
+    useScope: 'global'
+})
+
 const client = useSupabaseClient<Database>()
 const userOrganizationsStore = useUserOrganizationsStore()
 const slideover = useSlideover()
@@ -54,13 +67,13 @@ if (!userOrganizationsStore.selectedOrganization) {
     throw new Error('No active organization')
 }
 
-const { data:schedules, error, status } = useAsyncData(async () => {
+const { data:schedules } = useAsyncData(async () => {
     if (!userOrganizationsStore.selectedOrganization) {
         throw new Error('No active organization')
     }
     const { data, error } = await client.from('course_activity_schedules_view').select('*')
     .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
-    .gte('start_at', new Date().toISOString()).limit(10)
+    .gte('start_at', new Date().toISOString()).order('start_at', { ascending: true }).limit(10)
 
     if (error) {
         throw error
@@ -74,7 +87,7 @@ async function openScheduleModal(schedule: CourseActivityScheduleView) {
         orgid: schedule.organization_id,
         courseid: schedule.course_id,
         activityid: schedule.activity_id,
-        activity_schedule_id: schedule.id,
+        scheduleId: schedule.id
     })
 }
 
@@ -89,12 +102,14 @@ async function openScheduleModal(schedule: CourseActivityScheduleView) {
     "de": {
         "incoming_appointments": "Kommende Termine",
         "incoming_appointments_description": "Hier sind die nächsten Termine, die Sie haben.",
-        "no_appointments": "Keine Termine"
+        "no_appointments": "Keine Termine",
+        "view_all": "Alle anzeigen"
     },
     "en": {
         "incoming_appointments": "Incoming Appointments",
         "incoming_appointments_description": "Here are the next appointments you have.",
-        "no_appointments": "No appointments"
+        "no_appointments": "No appointments",
+        "view_all": "View all"
     }
 }
 </i18n>

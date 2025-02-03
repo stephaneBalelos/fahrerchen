@@ -53,7 +53,7 @@
           variant="solid"
           :title="`${selected.length} student(s) selected`"
         />
-        <UButton v-if="selected.length > 0" @click="addStudents" block
+        <UButton v-if="selected.length > 0" block @click="addStudents"
           >{{ selected.length }} Add Students</UButton
         >
       </div>
@@ -62,7 +62,6 @@
 </template>
 
 <script setup lang="ts">
-import { add } from "date-fns";
 import type { Database } from "~/types/app.types";
 
 type Props = {
@@ -115,7 +114,7 @@ const filteredStudents = computed(() => {
 
 function addStudents() {
   selected.value.forEach(async (studentId) => {
-    const { data, error } = await supabase.from("course_subscriptions").upsert({
+    const { data, error } = await supabase.from("course_subscriptions").insert({
       course_id: props.courseid,
       student_id: studentId,
       organization_id: props.orgid,

@@ -1,7 +1,6 @@
-import { User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { getBillById } from "~/server/utils/supabase";
-import { AppStripeAccountPaymentMethodSettings, Database } from "~/types/app.types";
-import { serverSupabaseServiceRole } from '#supabase/server'
+import type { AppStripeAccountPaymentMethodSettings } from "~/types/app.types";
 
 
 export default defineEventHandler(async (event) => {
@@ -44,12 +43,20 @@ export default defineEventHandler(async (event) => {
         });
     }
 
+    // Check if the bill is canceled
+    if (bill.canceled_at) {
+        console.log('Bill is canceled');
+        throw createError({
+            status: 400,
+            message: 'Bill is canceled'
+        });
+    }
+
     // get Organization Stripe Account
     const orgStripeAccount = await getOrganizationStripeAccount(event, bill.organization_id);
 
 
     if (!orgStripeAccount) {
-        console.log('Organization does not have a stripe account');
         throw createError({
             status: 404,
             message: 'Organization does not have a stripe account'
@@ -62,11 +69,27 @@ export default defineEventHandler(async (event) => {
     // check if the bill already has a payment intent
     if (bill.stripe_payment_intent_id) {
         // fetch the payment intent
-        const intent = await stripe.paymentIntents.retrieve(bill.stripe_payment_intent_id, {
+        let intent = await stripe.paymentIntents.retrieve(bill.stripe_payment_intent_id, {
             stripeAccount: orgStripeAccount.stripe_account_id
         });
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id};
+        // update the payment intent amount
+        if (intent.amount !== bill.total * 100) {
+            intent = await stripe.paymentIntents.update(bill.stripe_payment_intent_id, {
+                amount: bill.total * 100
+            }, { stripeAccount: orgStripeAccount.stripe_account_id });
+        }
+
+        // check has already been paid
+        if (intent.status === 'succeeded') {
+            console.log('Payment intent already succeeded');
+            throw createError({
+                status: 400,
+                message: 'Payment intent already succeeded'
+            });
+        }
+
+        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
     } else {
         // create a new payment intent
         const enabledPaymentMethods = ['giropay']
@@ -90,7 +113,7 @@ export default defineEventHandler(async (event) => {
             
         })
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id};
+        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
     };
 
 });

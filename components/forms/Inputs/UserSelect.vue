@@ -1,85 +1,86 @@
 <template>
-    <USelectMenu
+  <USelectMenu
     v-model="model"
-    :options="users ?? []"
-    placeholder="Select a person"
-    searchable
-    searchable-placeholder="Search by name or email"
-    value-attribute="id"
+    :searchable="search"
+    :searchable-placeholder="t('search_by_name_or_email')"
+    value-attribute="user_id"
     :search-attributes="['name', 'email']"
   >
-
-  <template #label>
-    <div v-if="selected">
-        <UAvatar v-if="selected.fullname" :alt="selected.fullname" size="xs" />
-        <span class="truncate ms-3">{{ selected.name }}</span>
-    </div>
-    <div v-else>
+    <template #label>
+      <div v-if="selected">
+        <UAvatar v-if="selected.user_fullname" :alt="selected.user_fullname" size="xs" />
+        <span class="truncate ms-3">{{ selected.user_fullname }}</span>
+      </div>
+      <div v-else>
         <UAvatar icon="i-heroicons-user-circle" size="xs" />
-        <span class="truncate ms-3">Assign to someone</span>
-    </div>
-  </template>
+        <span class="truncate ms-3">{{ t('select_a_person') }}</span>
+      </div>
+    </template>
 
     <template #option="{ option: person }">
-        <UAvatar :alt="'dsa dsd'" size="2xs" />
-      <span class="truncate">{{ person.name }}</span>
+      <UAvatar :alt="person.user_fullname" size="xs" />
+      <span class="truncate">{{ person.user_fullname }}</span>
+    </template>
+
+    <template #option-empty="{ query }">
+      {{ t('no_user_found', { query }) }}
+    </template>
+    <template #empty>
+      {{ t('no_users') }}
     </template>
   </USelectMenu>
 </template>
 
 <script setup lang="ts">
-import type { AppUser, Database } from '~/types/app.types';
+import type { Database } from "~/types/app.types";
 
 type Props = {
   orgid: string;
 };
-const props = useAttrs() as Props;
-const client = useSupabaseClient<Database>();
+const props = defineProps<Props>();
+
+const { t } = useI18n({
+  useScope: "local",
+});
 
 const model = defineModel<string>({ default: null });
-const selected = ref<Omit<AppUser & {name: string}, "status"> | null>(null);
-
-const {
-  data: users,
-  error,
-  refresh,
-} = useAsyncData(`users_${props.orgid}`, async () => {
-  const { data, error } = await client.from("users").select('*').limit(10);
-  if (error) {
-    console.error(error);
-    throw error;
+const users = ref<Database['public']['Views']['organization_members_view']['Row'][] | null>(null);
+const selected = computed(() => {
+  if (!users.value) {
+    return null;
   }
-  return data;
-}, {
-    transform: (data) => {
-      return data.map((user) => {
-        if (!user.firstname || !user.lastname) {
-          return {
-            ...user,
-            name: user.email,
-          };
-        }
-        return {
-          ...user,
-          name: `${user.firstname} ${user.lastname}`,
-        };
-      });
-    }
+  return users.value.find((user) => user.user_id === model.value);
 });
 
 
-watch(model, (value) => {
-  if (!value) {
-    return;
+async function search(q: string) {
+  let result;
+  if (q.length < 3) {
+    result = await useOrganizationMembers(props.orgid, ["teacher", "manager", "owner"]);
+  } else {
+    result = await useOrganizationMembers(props.orgid, ["teacher", "manager", "owner"], q);
   }
-  if (!users.value) {
-    return;
-  }
-  const user = users.value.find((user) => user.id === value);
-  if (user) {
-    selected.value = user;
-  }
-}, { immediate: true });
+  users.value = result;
+  return result;
+}
 </script>
 
 <style scoped></style>
+
+
+<i18n lang="json">
+{
+  "de": {
+    "search_by_name_or_email": "Suche nach Name oder E-Mail",
+    "select_a_person": "Wähle eine Person aus",
+    "no_user_found": "'{query}' nicht gefunden",
+    "no_users": "Keine Benutzer"
+  },
+  "en": {
+    "search_by_name_or_email": "Search by name or email",
+    "select_a_person": "Select a person",
+    "no_user_found": "'{query}' not found",
+    "no_users": "No users"
+  }
+}
+</i18n>

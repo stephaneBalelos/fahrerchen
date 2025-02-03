@@ -4,47 +4,30 @@
     :title="props.title"
     :description="props.description"
   >
+    <template #icon>
+      <slot name="icon">
+        <UAvatar icon="i-heroicons-user" size="lg" />
+      </slot>
+    </template>
+    <template #title>
+      <slot name="title" />
+    </template>
+    <template #description>
+      <slot name="description" />
+    </template>
     <div>
+      <StudentsCourseStudentProgression
+        :subscription-id="props.subscriptionId"
+      />
       <UDashboardCard
+        v-if="data.course"
         class="mb-4"
-        v-if="data"
-        :title="t('course_activity_attendances')"
-        :description="t('course_activity_attendances_description')"
-      >
-        <div
-          v-for="activity in data.course?.course_activities"
-          :key="activity.id"
-          class="flex flex-col mb-4"
-        >
-          <p class="font-bold">{{ activity.name }}</p>
-          <UProgress
-            v-if="activity.required > 0"
-            :value="activity.attendances[0].count"
-            :max="activity.required"
-            color="primary"
-            indicator
-          >
-            <template #indicator>
-              <span :color="`primary`">
-                {{ activity.attendances[0].count }} /
-                {{ activity.required }}
-              </span>
-            </template>
-          </UProgress>
-          <div v-else>{{ activity.attendances[0].count }}</div>
-        </div>
-      </UDashboardCard>
-      <UDashboardCard
-        class="mb-4"
-        v-if="data && data.course?.course_required_documents"
         :title="t('course_required_documents')"
         :description="t('course_required_documents_description')"
       >
-        <template #links>
-          0 / {{ data.course.course_required_documents.length }}
-        </template>
+        <template #links> 0 / {{ data.course.docs.length }} </template>
         <CourseRequiredDocumentItem
-          v-for="(doc, index) in data.course.course_required_documents"
+          v-for="doc in data.course.docs"
           :key="doc.id"
           :doc="doc"
           :bucket-id="'course_subscription_documents'"
@@ -60,9 +43,9 @@ import type { Database, AppStudent } from "~/types/app.types";
 import CourseRequiredDocumentItem from "../files/CourseDocuments/CourseRequiredDocumentItem.vue";
 
 type Props = {
-  title: string;
-  description: string;
-  subscription_id: string;
+  title?: string;
+  description?: string;
+  subscriptionId: string;
   student: AppStudent;
 };
 
@@ -74,15 +57,13 @@ const props = defineProps<Props>();
 
 const supabase = useSupabaseClient<Database>();
 
-const { data, error, status } = useAsyncData(
-  `course_progression_${props.subscription_id}`,
+const { data } = useAsyncData(
+  `course_progression_${props.subscriptionId}_docs`,
   async () => {
     const { data, error } = await supabase
       .from("course_subscriptions")
-      .select(
-        "*, course:courses(id, course_required_documents(*), course_activities(*, attendances:course_activity_attendances(count)))"
-      )
-      .eq("id", props.subscription_id)
+      .select("*, course:courses(id, docs:course_required_documents(*))")
+      .eq("id", props.subscriptionId)
 
       .single();
 
