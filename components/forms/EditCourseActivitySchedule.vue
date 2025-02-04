@@ -153,7 +153,7 @@ import { useCourseActivities } from "~/composables/useCourseActivities";
 
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
-  "id" | "organization_id" | "status"
+  "id" | "organization_id" | "status" | "attendees"
 >;
 
 type RepeatMode = AppScheduleType;
@@ -312,7 +312,11 @@ async function updateCourseActivitySchedule(
   try {
     const { error } = await client
       .from("course_activity_schedules")
-      .update(data)
+      .update({
+        assigned_to: data.assigned_to,
+        start_at: data.start_at,
+        end_at: data.end_at
+      })
       .eq("id", id)
       .select();
 
