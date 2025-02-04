@@ -85,7 +85,6 @@
 </template>
 
 <script setup lang="ts">
-import CourseSubscriptionBill from "~/components/courses/CourseSubscriptionBill.vue";
 import StudentCourseProfileSlideover from "~/components/courses/StudentCourseProfileSlideover.vue";
 import AddStudentsForm from "~/components/forms/AddStudentsForm.vue";
 import type {
@@ -231,21 +230,14 @@ const items = (row: AppCourseSubscription & {student: AppStudent}) => [
       },
     },
     {
-      label: "Rechnung",
+      label: "Subscription",
       icon: "i-heroicons-document-duplicate-20-solid",
       click: () => {
-        slideover.open(CourseSubscriptionBill, { subscription_id: row.id });
+        if (!userOrganizationsStore.selectedOrganization) {
+          return;
+        }
+        navigateTo(`/my/${userOrganizationsStore.selectedOrganization.organization_id}/students/${row.id}`);
       },
-    },
-  ],
-  [
-    {
-      label: "Archive",
-      icon: "i-heroicons-archive-box-20-solid",
-    },
-    {
-      label: "Move",
-      icon: "i-heroicons-arrow-right-circle-20-solid",
     },
   ],
 ];
