@@ -214,9 +214,9 @@ export default defineEventHandler(async (event) => {
                 case 2:
                     // Practical
                     // Create 20 Schedules
-                    for (let j = 0; j < 20; j++) {
-                        await createSchedule(event, activity.course_id, activity.id, org.id)
-                    }
+                    // for (let j = 0; j < 20; j++) {
+                    //     await createSchedule(event, activity.course_id, activity.id, org.id)
+                    // }
                     break;
                 case 3:
                     // Exam

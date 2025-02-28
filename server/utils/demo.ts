@@ -9,16 +9,23 @@ import { serverSupabaseClient } from '#supabase/server'
 
 export const createSchedule = async (event: H3Event, course_id: string, activity_id: string, org_id: string, start_date?: Date, start_time?: number, duration?: number) => {
     const client = await serverSupabaseClient<Database>(event)
-    const dateStart = start_date ?? addDays(new Date(), randomNumber(-30, 30)) // 30 days before or after
+    const currentDate = new Date()
+    const dateStart = start_date ?? addDays(currentDate, randomNumber(-30, 30)) // 30 days before or after
     dateStart.setHours(start_time ?? randomNumber(8, 18)) // between 8 and 18
     const dateEnd = addHours(dateStart, duration ?? randomNumber(1, 3)) // 1-3 hours
+
+    let status = SCHEDULES_STATUS[0]
+
+    if (dateStart < currentDate) {
+        status = SCHEDULES_STATUS[randomNumber(1, SCHEDULES_STATUS.length - 1)]
+    }
     const schdl: Omit<AppCourseActivitySchedule, "id"> = {
         activity_id: activity_id,
         course_id: course_id,
         organization_id: org_id,
         start_at: dateStart.toISOString(),
         end_at: dateEnd.toISOString(),
-        status: SCHEDULES_STATUS[randomNumber(0, SCHEDULES_STATUS.length - 1)],
+        status: status,
         assigned_to: null,
         attendees: [],
     }
@@ -62,10 +69,11 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
         .select('*')
         .eq('course_id', course_id)
         .eq('activity_id', theoryActivity.id)
-        .eq('status', 'PLANNED')
         .gte('start_at', subscriptionDate.toISOString()).order('start_at', { ascending: true })
 
     if (!theorySchedules) throw new Error('No theory schedules found')
+    
+    console.log('Theory Schedules:', theorySchedules)
 
     // Generate Attendances to Theory Schedules
     let theoryAttendancesCount = 0
