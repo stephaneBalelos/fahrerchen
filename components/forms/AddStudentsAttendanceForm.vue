@@ -35,7 +35,7 @@
               :student="subscription.student"
               :activity_id="courseActivitySchedule.activity_id"
               :schedule_id="props.courseActivitySchedule.id"
-              :onChange="() => $emit('updated')"
+              :on-change="() => $emit('updated')"
             >
               <div class="flex gap-3 items-center">
                 <UAvatar
@@ -58,10 +58,7 @@
 
 <script setup lang="ts">
 import type {
-  AppCourseActivityAttendance,
   AppCourseActivitySchedule,
-  AppCourseSubscription,
-  AppStudent,
   Database,
 } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
@@ -72,30 +69,20 @@ type Props = {
 };
 
 const { t } = useI18n({ useScope: "local" });
-const { t: g } = useI18n({ useScope: "global" });
 
 const props = defineProps<Props>();
-const emits = defineEmits(["updated"]);
+const $emit = defineEmits(["updated"]);
 
 const supabase = useSupabaseClient<Database>();
 
 const q = ref("");
 
-const toast = useToast();
-
-const selected = ref<AppCourseSubscription[]>([]);
 const userOrganizationsStore = useUserOrganizationsStore();
 
 if (!userOrganizationsStore.selectedOrganization) {
   throw new Error("Organization not found");
 }
 
-const columns = [
-  {
-    key: "students",
-    label: "Student",
-  },
-];
 
 const courseActivity = await useCourseActivities(
   userOrganizationsStore.selectedOrganization.organization_id,
@@ -105,7 +92,6 @@ const courseActivity = await useCourseActivities(
 
 const {
   data: subscriptions,
-  error
 } = await useAsyncData(
   `courses_${props.courseid}_subscriptions`,
   async () => {

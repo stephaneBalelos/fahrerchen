@@ -2,14 +2,11 @@
   <UDashboardSlideover
     id="edit-activity-schedule"
     ref="slideover"
-    :title="props.scheduleId ? 'Edit Activity Schedule' : 'New Activity Schedule'"
+    :title="
+      props.scheduleId ? 'Edit Activity Schedule' : 'New Activity Schedule'
+    "
   >
-    <UForm
-      ref="form"
-      :state="state"
-      :schema="schema"
-      @submit="onSubmit"
-    >
+    <UForm ref="form" :state="state" :schema="schema" @submit="onSubmit">
       <UDashboardSection
         title="Course Activity Schedule"
         :description="
@@ -57,7 +54,10 @@
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
         >
-        <FormsInputsUserSelect v-model="state.assigned_to" :orgid="props.orgid" />
+          <FormsInputsUserSelect
+            v-model="state.assigned_to"
+            :orgid="props.orgid"
+          />
         </UFormGroup>
         <UFormGroup
           name="start_at"
@@ -68,11 +68,15 @@
           :ui="{ container: '' }"
         >
           <div class="grid grid-cols-2 gap-4">
-            <UPopover class="col-span-2" :popper="{ placement: 'bottom-start' }">
+            <UPopover
+              class="col-span-2"
+              :popper="{ placement: 'bottom-start' }"
+            >
               <div class="w-full">
                 <UButton
                   block
-                  color="white" variant="solid"
+                  color="white"
+                  variant="solid"
                   icon="i-heroicons-calendar-days-20-solid"
                   :label="format(new Date(state.start_at), 'd MMM, yyy')"
                 />
@@ -90,7 +94,8 @@
               <div class="w-full">
                 <UButton
                   block
-                  color="white" variant="solid"
+                  color="white"
+                  variant="solid"
                   icon="i-heroicons-clock"
                   :label="format(new Date(state.start_at), 'HH:mm a')"
                 />
@@ -108,17 +113,14 @@
               <div class="w-full">
                 <UButton
                   block
-                  color="white" variant="solid"
+                  color="white"
+                  variant="solid"
                   icon="i-heroicons-clock"
                   :label="format(new Date(state.end_at), 'HH:mm a')"
                 />
               </div>
               <template #panel="">
-                <DatePicker
-                  v-model="state.end_at"
-                  is-required
-                  :mode="'time'"
-                />
+                <DatePicker v-model="state.end_at" is-required :mode="'time'" />
               </template>
             </UPopover>
           </div>
@@ -188,24 +190,29 @@ const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const client = useSupabaseClient<Database>();
-const course_activities = await useCourseActivities(props.orgid, props.courseid);
+const course_activities = await useCourseActivities(
+  props.orgid,
+  props.courseid
+);
 
-const schema = z.object({
-  activity_id: z.string().uuid(),
-  assigned_to: z.string().uuid().optional(),
-  start_at: z.date(),
-  end_at: z.date(),
-}).superRefine((data, ctx) => {
-  if (data.start_at > data.end_at) {
-    ctx.addIssue({
-      path: ["start_at"],
-      code: z.ZodIssueCode.custom,
-      message: "End date must be after start date",
-    });
-    return z.NEVER;
-  }
-  return true;
-});
+const schema = z
+  .object({
+    activity_id: z.string().uuid(),
+    assigned_to: z.string().uuid().optional(),
+    start_at: z.date(),
+    end_at: z.date(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.start_at > data.end_at) {
+      ctx.addIssue({
+        path: ["start_at"],
+        code: z.ZodIssueCode.custom,
+        message: "End date must be after start date",
+      });
+      return z.NEVER;
+    }
+    return true;
+  });
 
 type Schema = z.infer<typeof schema>;
 
@@ -249,7 +256,7 @@ onMounted(async () => {
       });
     }
   }
-})
+});
 
 function onSubmit(_event: FormSubmitEvent<Schema>) {
   const data: CourseActivityScheduleEdit = {
@@ -293,7 +300,7 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
         description: "Course activity schedule created",
         color: "green",
       });
-      emits('activity-saved');
+      emits("activity-saved");
     }
   } catch (error) {
     console.error(error);
@@ -315,7 +322,7 @@ async function updateCourseActivitySchedule(
       .update({
         assigned_to: data.assigned_to,
         start_at: data.start_at,
-        end_at: data.end_at
+        end_at: data.end_at,
       })
       .eq("id", id)
       .select();
@@ -333,7 +340,7 @@ async function updateCourseActivitySchedule(
         description: "Course activity schedule updated",
         color: "green",
       });
-      emits('activity-saved');
+      emits("activity-saved");
     }
   } catch (error) {
     console.error(error);
@@ -354,12 +361,9 @@ function onUpdateStartDate(date: Date) {
   state.end_at = addHours(date, 1);
 }
 
-
 function _onChangeRepeat(value: RepeatMode) {
   console.log("Change repeat", value);
 }
 </script>
 
 <style scoped></style>
-
-

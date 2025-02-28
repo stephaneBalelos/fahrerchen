@@ -140,6 +140,9 @@ function openAddStudentsAttendanceForm(
   slideover.open(AddStudentsAttendanceForm, {
     courseid: props.courseId,
     courseActivitySchedule: course_activity_schedule,
+    onUpdated: async () => {
+      await refresh();
+    },
   });
 }
 
@@ -149,8 +152,13 @@ const openEditSchedule = (schedule_id: string) => {
     activityid: props.activityId,
     scheduleId: schedule_id,
     courseid: props.courseId,
-    onVnodeBeforeUnmount: async () => {
+    "onActivity-saved": async () => {
       await refresh();
+      slideover.close();
+    },
+    "onActivity-deleted": async () => {
+      await refresh();
+      slideover.close();
     },
   });
 };
