@@ -1,5 +1,5 @@
-create or replace extension if not exists "pgcrypto";
-create or replace extension if not exists "pg_net";
+create extension if not exists "pgcrypto";
+create extension if not exists "pg_net";
 -- Custom types
 create or replace type public.app_permission as enum (
   'users.read',
