@@ -1,6 +1,6 @@
 <template>
   <UDashboardSlideover v-if="subscriptions" :title="t('student_subscriptions')">
-    <div v-if="student" class="d-flex">
+    <div v-if="student" class="flex gap-4">
       <UAvatar
         size="3xl"
         :alt="`${student.firstname} ${student.lastname}`"
@@ -13,7 +13,10 @@
         <p class="text-gray-500">{{ student.email }}</p>
       </div>
     </div>
-    <UDivider class="py-4" size="sm" />
+    <div class="flex mt-4">
+      <StudentsStudentDashboardAccessCard :student-id="student.id" />
+    </div>
+    <UDivider class="py-4" size="xs" />
     <UDashboardSection
       :title="t('student_active_subscription')"
       :description="t('student_active_subscription_description')"
@@ -134,6 +137,8 @@ const archivedSubscriptions = computed(() => {
   "de": {
     "student_subscriptions": "Student Kurse",
     "student_active_subscription": "Aktive Kurs",
+    "allow_access": "Zugriff erlauben",
+    "allow_access_description": "Erlauben Sie dem Schüler den Zugriff auf seine/ihre Kurse.",
     "student_active_subscription_description": "Hier finden Sie Informationen zu der aktiver Kurs des Schülers.",
     "student_no_active_subscription": "Kein aktiver Kurs",
     "student_no_active_subscription_description": "Der Schüler hat keinen aktiven Kurs.",
@@ -144,6 +149,8 @@ const archivedSubscriptions = computed(() => {
   "en": {
     "student_subscriptions": "Student Subscriptions",
     "student_active_subscription": "Active Subscription",
+    "allow_access": "Allow Access",
+    "allow_access_description": "Allow the student to access their courses.",
     "student_active_subscription_description": "Here you can find information about the student's active subscription.",
     "student_no_active_subscription": "No active subscription",
     "student_no_active_subscription_description": "The student has no active subscription.",

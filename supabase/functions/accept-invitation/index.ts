@@ -129,6 +129,22 @@ Deno.serve(async (req) => {
       })
     }
 
+    // If Student Profile exists, link the user to the student profile
+    if (invitation.role === 'student') {
+      // Find student with same email
+      const { data: student, error: studentError } = await supabaseAdmin.from('students').select('*').eq('email', invitation.email).eq('organization_id', invitation.organization_id).single()
+      if (studentError) {
+        console.error('Failed to find student', studentError)
+      }
+      if (student) {
+        // Link user to student profile
+        const { data: linkData, error: linkError } = await supabaseAdmin.from('students').update({ user_id: data.user.id }).eq('id', student.id).single()
+        if (linkError || !linkData) {
+          console.error('Failed to link user to student profile', linkError)
+        }
+      }
+    }
+
     const email = invitation.email
     const otp = data.properties.email_otp
 
