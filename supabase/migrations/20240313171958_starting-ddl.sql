@@ -565,6 +565,7 @@ select
   course_activity_schedules.start_at,
   course_activity_schedules.end_at,
   course_activity_schedules.organization_id,
+  course_activity_schedules.attendees,
   course_activities.name as activity_name,
   course_activities.description as activity_description,
   course_activities.activity_type,

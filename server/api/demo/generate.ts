@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { serverSupabaseServiceRole } from '#supabase/server'
 import type { User } from '@supabase/supabase-js'
+import { addWeeks, setDay, setHours } from 'date-fns'
 import { createSchedule } from '~/server/utils/demo'
 import { randomNumber } from '~/server/utils/utilities'
 import type { AppCourse, AppCourseActivity, AppStudent, Database } from '~/types/app.types'
@@ -23,14 +24,23 @@ export default defineEventHandler(async (event) => {
 
     const client = serverSupabaseServiceRole<Database>(event)
 
-    // Get Some fake Addresses
+    // Get Current User name
+    const { data: user_data } = await client.from('users').select('firstname, lastname').eq('id', user.id).single()
+
+    if (!user_data) {
+        return createError({
+            status: 404,
+            statusMessage: 'User not found'
+        })
+    }
 
     try {
+        // Get Some fake Addresses
         const address = await $fetch(`${faker_base_url}/addresses?_quantity=1&_country_code=DE`) as any
         const students = await $fetch(`${faker_base_url}/persons?_quantity=30&_birthday_start=2005-01-01&_birthday_end=2006-12-31&_locale=DE`) as any
         // Generate Organisation
         const { data: org } = await client.from('organizations').insert({
-            name: 'Meine Fahrschule',
+            name: `${user_data.firstname}'s Fahrschule`,
             owner_id: user.id,
             preferred_language: 'de',
             address_city: address.data[0].city,
@@ -171,6 +181,54 @@ export default defineEventHandler(async (event) => {
             })
         }
 
+
+        // Get generated Courses Activities
+        const { data: activities } = await client.from('course_activities').select('*').eq('organization_id', org.id).order('activity_type', { ascending: true })
+
+        if (!activities) {
+            return createError({
+                status: 500,
+                statusMessage: 'Activities not found'
+            })
+        }
+        // Generate Schedules
+        for (let i = 0; i < activities.length; i++) {
+            const activity = activities[i];
+
+            switch (activity.activity_type) {
+                case 1:
+                    // Theory
+                    // Create 20 Schedules in the past with 2 schedules per week
+                    {
+                        let date = setHours(addWeeks(new Date(), -10), 18)
+
+                        for (let j = 0; j < 10; j++) {
+                            date = addWeeks(date, 1)
+                            const d1 = setDay(date, 2) // Tuesday
+                            const d2 = setDay(date, 4) // Thursday
+                            await createSchedule(event, activity.course_id, activity.id, org.id, d1)
+                            await createSchedule(event, activity.course_id, activity.id, org.id, d2)
+                        }
+                        break;
+                    }
+                case 2:
+                    // Practical
+                    // Create 20 Schedules
+                    // for (let j = 0; j < 20; j++) {
+                    //     await createSchedule(event, activity.course_id, activity.id, org.id)
+                    // }
+                    break;
+                case 3:
+                    // Exam
+                    break;
+                case 4:
+                    // Other
+                    break;
+                default:
+                    break;
+            }
+        }
+
         // Generate Students
         const studentsWithOrgId = students.data.map((student: any) => {
             const s: Omit<AppStudent, "id" | "user_id" | "created_at"> = {
@@ -199,8 +257,8 @@ export default defineEventHandler(async (event) => {
             })
         }
 
-        // Generate Subscriptions
-        const subscriptions = studentsData.map((student: AppStudent) => {
+        // Generate Subscriptions Data
+        const subscriptionsData = studentsData.map((student: AppStudent) => {
             // random course
             const c = courses[randomNumber(0, courses.length - 1)]
             return {
@@ -210,109 +268,10 @@ export default defineEventHandler(async (event) => {
             }
         })
 
-        const { data: subscriptionsData } = await client.from('course_subscriptions').insert(subscriptions).select('*')
-
-        if (!subscriptionsData) {
-            return createError({
-                status: 500,
-                statusMessage: 'Subscriptions not created'
-            })
+        for (let i = 0; i < subscriptionsData.length; i++) {
+            const sub = subscriptionsData[i]
+            await generateStudentPersona(event, sub.organization_id, sub.student_id, sub.course_id)
         }
-
-        // Get generated Courses Activities
-        const { data: activities } = await client.from('course_activities').select('*').eq('organization_id', org.id).order('activity_type', { ascending: true })
-
-        if (!activities) {
-            return createError({
-                status: 500,
-                statusMessage: 'Activities not found'
-            })
-        }
-        // Generate Schedules
-        for (let i = 0; i < activities.length; i++) {
-            const activity = activities[i];
-
-            switch (activity.activity_type) {
-                case 1:
-                    // Theory
-                    // Create 20 Schedules
-                    for (let j = 0; j < 20; j++) {
-                        await createSchedule(event, activity.course_id, activity.id, org.id)
-                    }
-                    break;
-                case 2:
-                    // Practical
-                    // Create 20 Schedules
-                    for (let j = 0; j < 20; j++) {
-                        await createSchedule(event, activity.course_id, activity.id, org.id)
-                    }
-                    break;
-                case 3:
-                    // Exam
-                    break;
-                case 4:
-                    // Other
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        subscriptionsData.forEach(async (subscription) => {
-
-            // TODO: Optimize this mess
-
-            const { data: activities } = await client.from('course_activities').select('*').eq('course_id', subscription.course_id).eq('organization_id', org.id)
-
-            if (!activities) {
-                return
-            }
-
-            activities.forEach(async (activity) => {
-
-                if (activity.activity_type === 3 || activity.activity_type === 4) {
-                    return // Skip Exam and Other
-                }
-                const { data: schedules } = await client.from('course_activity_schedules').select('*').eq('activity_id', activity.id).eq('organization_id', org.id)
-
-                if (!schedules) {
-                    return
-                }
-
-                if (activity.activity_type === 1) {
-                    // Get theory schedules
-                    const theorySchedules = schedules
-                    if (theorySchedules.length > 1) {
-                        const theoryCount = randomNumber(1, activity.required)
-                        for (let i = 0; i < theoryCount; i++) {
-                            await client.from('course_activity_attendances').insert({
-                                course_subscription_id: subscription.id,
-                                activity_schedule_id: theorySchedules[i].id,
-                                course_activity_id: theorySchedules[i].activity_id,
-                                organization_id: org.id
-                            })
-                        }
-                    }
-                }
-
-                if (activity.activity_type === 2) {
-                    // Get practical schedules
-                    const practicalSchedules = schedules
-                    if (practicalSchedules.length > 1) {
-                        const practicalCount = randomNumber(1, activity.required)
-                        for (let i = 0; i < practicalCount; i++) {
-                            await client.from('course_activity_attendances').insert({
-                                course_subscription_id: subscription.id,
-                                activity_schedule_id: practicalSchedules[i].id,
-                                course_activity_id: practicalSchedules[i].activity_id,
-                                organization_id: org.id
-                            })
-                        }
-                    }
-                }
-            })
-        })
-
 
         return {
             status: 200,

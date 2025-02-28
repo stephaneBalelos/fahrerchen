@@ -1,9 +1,11 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardToolbar>
-        <UHorizontalNavigation :links="links" />
-      </UDashboardToolbar>
+      <UDashboardNavbar :title="course.name">
+        <template #right>
+          <UHorizontalNavigation :links="links" />
+        </template>
+      </UDashboardNavbar>
       <NuxtPage :courseid="courseid" />
     </UDashboardPanel>
   </UDashboardPage>
@@ -17,11 +19,14 @@ definePageMeta({
 
 const route = useRoute();
 const userOrganizationsStore = useUserOrganizationsStore();
+const org_id = route.params.org_id as string;
 const courseid = route.params.id as string;
 
 const { t } = useI18n({
   useScope: 'local'
-}); 
+});
+
+const course = await useCourses(org_id, courseid);
 
 const links = computed(() => [
   [
@@ -36,13 +41,11 @@ const links = computed(() => [
       icon: "i-heroicons-user-group",
       to: userOrganizationsStore.relativePath(`/courses/${route.params.id}/students`),
     },
-  ],
-  [
     {
       label: t('settings'),
       icon: "i-heroicons-cog-6-tooth",
       to: userOrganizationsStore.relativePath(`/courses/${route.params.id}/settings`),
-    },
+    }
   ],
 ]);
 </script>
