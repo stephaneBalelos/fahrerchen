@@ -1,7 +1,7 @@
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
 -- Custom types
-create or replace type public.app_permission as enum (
+create type public.app_permission as enum (
   'users.read',
   'users.update',
   'users.delete',
@@ -53,15 +53,15 @@ create or replace type public.app_permission as enum (
   'course_subscription_bills.update',
   'course_subscription_bills.delete'
 );
-create or replace type public.app_role as enum ('owner','manager', 'teacher', 'student' );
-create or replace type public.user_status as enum ('ONLINE', 'OFFLINE');
-create or replace type public.activity_types as enum ('THEORY', 'PRACTICE', 'EXAM', 'OTHER');
-create or replace type public.schedule_type as enum ('ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
-create or replace type public.schedule_status as enum ('PLANNED', 'COMPLETED', 'CANCELED');
-create or replace type public.attendance_status as enum ('REGISTERED', 'ATTENDED', 'CANCELED');
+create type public.app_role as enum ('owner','manager', 'teacher', 'student' );
+create type public.user_status as enum ('ONLINE', 'OFFLINE');
+create type public.activity_types as enum ('THEORY', 'PRACTICE', 'EXAM', 'OTHER');
+create type public.schedule_type as enum ('ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
+create type public.schedule_status as enum ('PLANNED', 'COMPLETED', 'CANCELED');
+create type public.attendance_status as enum ('REGISTERED', 'ATTENDED', 'CANCELED');
 
 -- enum for führerscheinklassen
-create or replace type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
+create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
 
 
 -- ROLE PERMISSIONS
