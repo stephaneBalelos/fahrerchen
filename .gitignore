@@ -99,3 +99,6 @@ sw.*
 /blob-report/
 /playwright/.cache/
 mail-preview.html
+
+# Supabase
+supabase/seeds/local.sql
