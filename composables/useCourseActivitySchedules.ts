@@ -69,7 +69,7 @@ export const useCourseActivitySchedules = () => {
         }
 
         if (query.end_at) {
-            q.lte("end_at", query.end_at)
+            q.lte("start_at", query.end_at)
         }
 
         const { data, error } = await q

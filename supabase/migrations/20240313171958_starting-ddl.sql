@@ -1,5 +1,8 @@
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
+
+alter database postgres
+set timezone to 'Europe/Berlin';
 -- Custom types
 create type public.app_permission as enum (
   'users.read',
