@@ -137,6 +137,7 @@
                 v-for="schedule in schedules"
                 :key="schedule.id"
                 :schedule="schedule"
+                @update="refresh"
               />
             </div>
             <div v-else class="flex items-center justify-center h-full">

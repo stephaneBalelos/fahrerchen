@@ -35,6 +35,7 @@ import type { CourseActivityScheduleView } from "~/types/app.types";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
+import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type Props = {
   blockIndex: number;
@@ -51,12 +52,14 @@ type Props = {
 };
 
 const $emits = defineEmits(["update"]);
-
+const modal = useModal();
 const { events } = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: "local",
 });
+
+const courseActivitySchedules = useCourseActivitySchedules();
 
 const slideover = useSlideover();
 
@@ -99,13 +102,35 @@ function getDropdownItem(schedule: CourseActivityScheduleView) {
       {
         label: t("delete_schedule"),
         icon: "i-heroicons-trash-20-solid",
-        click: () => {
-          console.log("delete");
+        click: async () => {
+          await deleteSchedule(schedule.id);
         },
       },
     ],
   ];
   return items;
+}
+
+async function deleteSchedule(id: string) {
+  try {
+    modal.open(ConfirmModal, {
+      title: "Delete Course Activity Schedule",
+      description:
+        "Are you sure you want to delete this course activity schedule?",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      action: async () => {
+        const result =
+          await courseActivitySchedules.deleteCourseActivitySchedule(id);
+        if (!result) {
+          throw new Error("Failed to delete course activity schedule");
+        }
+        $emits("update");
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 </script>
 

@@ -350,7 +350,7 @@ grant update (assigned_to, status, start_at, end_at, attendees) on table public.
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity_id   uuid references public.course_activities on delete cascade not null,
-  activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
+  activity_schedule_id    uuid references public.course_activity_schedules on delete cascade not null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
   organization_id    uuid references public.organizations on delete cascade not null,
@@ -842,20 +842,26 @@ create or replace function public.handle_removed_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
 declare bill_item_id uuid;
+declare bill_item_bill_id uuid;
 begin
   org_id := old.organization_id;
 
   -- lookup for the bill item
-  select id into bill_item_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+  select id, bill_id into bill_item_id, bill_item_bill_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
 
   -- if no bill item exists, do nothing
   if bill_item_id is null then
     return old;
   end if;
 
-  -- set attendance to null
-  update public.course_subscription_bill_items set course_activity_attendance_id = null
-  where id = bill_item_id;
+  -- if the item has a bill id, set attendance to null
+  if bill_item_bill_id is not null then
+    update public.course_subscription_bill_items set course_activity_attendance_id = null
+    where id = bill_item_id;
+  else
+    -- if the item has no bill id, remove the item
+    delete from public.course_subscription_bill_items where id = bill_item_id;
+  end if;
 
   return old;
 end;
