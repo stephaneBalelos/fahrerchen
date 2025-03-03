@@ -23,18 +23,21 @@ const { t } = useI18n({
 
 const client = useSupabaseClient<Database>();
 
+const userOrganizationsStore = useUserOrganizationsStore();
+
 // Todo: Aggregate the count of inactive students
 const { data: subCount } = useAsyncData(`inactive-students-total`, async () => {
-    const { data, count, error } = await client
+  if (!userOrganizationsStore.selectedOrganization) {
+    return null;
+  }
+    const { count, error } = await client
         .from("students")
         .select("*, sub:course_subscriptions(*)", { count: "exact", head: true })
+        .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id)
         
-
     if (error) {
         throw error;
     }
-
-    console.log(data)
         
   return count;
 });
