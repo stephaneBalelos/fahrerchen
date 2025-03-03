@@ -18,6 +18,7 @@
 import type { Database } from '~/types/app.types';
 
 type Props = {
+    orgId: string
     showInactive?: boolean
 }
 
@@ -32,11 +33,15 @@ const client = useSupabaseClient<Database>();
 const { data: subCount } = useAsyncData(`${props.showInactive ? 'inactive' : 'active'}-students`, async () => {
     const req = client.from("course_subscriptions").select('*', {count: 'exact', head: true})
 
+    req.eq('organization_id', props.orgId)
+
     if (props.showInactive) {
         req.not('archived_at', 'is', null)
     } else {
         req.is('archived_at', null)
     }
+
+
 
     const { count, error } = await req
 

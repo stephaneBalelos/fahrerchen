@@ -23,10 +23,17 @@ const { t } = useI18n({
 
 const client = useSupabaseClient<Database>();
 
+const userOrganizationsStore = useUserOrganizationsStore();
+
+
 const { data: openRegCount } = useAsyncData(async () => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return null;
+  }
   const { count, error } = await client
     .from("students_registration_requests")
     .select("*", { count: "exact", head: true }).eq('status', 0)
+    .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
 
   if (error) {
     throw error;
