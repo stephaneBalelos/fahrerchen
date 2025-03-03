@@ -101,4 +101,4 @@ sw.*
 mail-preview.html
 
 # Supabase
-supabase/seeds/2_local.sql
+supabase/seeds/local.sql
