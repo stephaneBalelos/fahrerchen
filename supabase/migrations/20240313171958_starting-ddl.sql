@@ -594,6 +594,7 @@ select
   course_activity_attendances.organization_id,
   course_activities.name as activity_name,
   course_activities.description as activity_description,
+  course_activities.course_id as course_id,
   course_activity_schedules.start_at as activity_start_at,
   course_activity_schedules.end_at as activity_end_at
 from public.course_activity_attendances
@@ -843,11 +844,12 @@ returns trigger as $$
 declare org_id uuid;
 declare bill_item_id uuid;
 declare bill_item_bill_id uuid;
+declare bill_item_price numeric;
 begin
   org_id := old.organization_id;
 
   -- lookup for the bill item
-  select id, bill_id into bill_item_id, bill_item_bill_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+  select id, bill_id, price into bill_item_id, bill_item_bill_id, bill_item_price from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
 
   -- if no bill item exists, do nothing
   if bill_item_id is null then
@@ -859,8 +861,13 @@ begin
     update public.course_subscription_bill_items set course_activity_attendance_id = null
     where id = bill_item_id;
   else
+    -- aggregate subscription costs
+    update public.course_subscriptions set costs = costs - bill_item_price
+    where id = old.course_subscription_id;
+
     -- if the item has no bill id, remove the item
     delete from public.course_subscription_bill_items where id = bill_item_id;
+    
   end if;
 
   return old;

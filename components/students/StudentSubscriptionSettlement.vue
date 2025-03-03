@@ -23,7 +23,7 @@
       v-if="bill_items && status === 'success'"
       class="grid grid-cols-1 gap-2"
     >
-      <div v-if="bill_items.length > 0">
+      <div v-if="bill_items.length > 0" class="flex flex-col gap-2">
         <UDashboardCard v-for="bill_item in bill_items" :key="bill_item.id">
           <template #title>
             <div class="flex gap-2 items-center">
@@ -38,19 +38,24 @@
                 })
               }}
             </p>
+            <p 
+            v-if="bill_item.attendance?.schedule"
+            class="text-sm text-gray-500 dark:text-gray-400" >
+              {{
+                t("attended_at", {
+                  date: formatDateTime(bill_item.attendance.schedule.start_at),
+                })
+              }}
+            </p>
+            <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+              {{ t("not_attended") }}
+            </p>
           </template>
           <template #links>
             <div class="flex items-center gap-4">
               <span class="text-lg font-bold">{{
                 formatCurrency(bill_item.price)
               }}</span>
-              <UButton
-                icon="i-heroicons-trash"
-                size="sm"
-                color="gray"
-                square
-                @click="deleteItem(bill_item.id)"
-              />
             </div>
           </template>
         </UDashboardCard>
@@ -101,26 +106,17 @@ const {
 } = useAsyncData(async () => {
   const { data, error } = await client
     .from("course_subscription_bill_items")
-    .select()
+    .select("*, attendance:course_activity_attendances(*, schedule:course_activity_schedules(*))")
     .eq("course_subscription_id", props.subscriptionId)
-    .is("bill_id", null);
+    .is("bill_id", null)
+    .order("inserted_at", { ascending: true });
 
   if (error) {
     throw error;
   }
-
+  
   return data;
 });
-
-async function deleteItem(bill_id: string) {
-  try {
-    console.log(bill_id);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    refresh();
-  }
-}
 
 const settlement_total = computed(() => {
   if (bill_items.value) {
@@ -164,6 +160,8 @@ async function generateBill() {
     "settlements": "aktueller Abrechnungszeitraum",
     "settlements_description": "Hier siehst du alle Kosten, die noch nicht abgerechnet wurden.",
     "bill_created_at": "Erstellt am {date}",
+    "attended_at": "Teilgenommen am {date}",
+    "not_attended": "Nicht teilgenommen",
     "settlement_total": "Abrechnungssumme",
     "create_bill": "Rechnung jetzt erstellen",
     "no_bills_items": "Keine Rechnungspositionen",
@@ -173,6 +171,8 @@ async function generateBill() {
     "settlements": "Current settlement period",
     "settlements_description": "Here you can see all costs that have not yet been settled.",
     "bill_created_at": "Created at {date}",
+    "attended_at": "Attended at {date}",
+    "not_attended": "Not attended",
     "settlement_total": "Settlement total",
     "create_bill": "Create bill now",
     "no_bills_items": "No bill items",

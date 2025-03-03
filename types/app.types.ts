@@ -122,6 +122,7 @@ export type Database = MergeDeep<DatabaseGenerated, {
           course_subscription_id: string,
           status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
           organization_id: string,
+          course_id: string,
           activity_name: string,
           activity_description: string,
           activity_start_at: string,
