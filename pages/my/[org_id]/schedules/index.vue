@@ -155,8 +155,10 @@
                   date: new Date(schedule.start_at),
                   start: new Date(schedule.start_at),
                   end: new Date(schedule.end_at),
+                  schedule,
                 }))
               "
+              :refresh-events="refresh"
             />
           </div>
         </div>
@@ -213,7 +215,7 @@ const filterForm = ref<FilterForm>({
   status: undefined,
 });
 
-const { data: schedules } = useAsyncData(
+const { data: schedules, refresh } = useAsyncData(
   async () => {
     const dateStart = startOfDay(selectedDate.value);
     const dateEnd = endOfDay(selectedDate.value);

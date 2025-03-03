@@ -18,6 +18,7 @@
         :key="idx"
         :block-index="idx"
         :events="calendarEvents.filter((event) => event.start_hour == idx)"
+        @update="refreshEvents"
       />
     </div>
   </div>
@@ -26,6 +27,7 @@
 <script setup lang="ts">
 import { useScroll } from "@vueuse/core";
 import AppCalendarBlock from "./AppCalendarBlock.vue";
+import type { CourseActivityScheduleView } from "~/types/app.types";
 
 type AppCalendarProps = {
   selectedDate: Date;
@@ -35,21 +37,28 @@ type AppCalendarProps = {
     date: Date;
     start: Date;
     end: Date;
-  }[]
+    schedule: CourseActivityScheduleView;
+  }[];
+  refreshEvents?: () => Promise<void>;
 };
 
 const props = defineProps<AppCalendarProps>();
 
 const calendarEvents = computed(() => {
-  return props.events.map((event) => {
-    return {
-      id: event.id,
-      label: event.label,
+  return props.events
+    .map((event) => {
+      return {
+        id: event.id,
+        label: event.label,
         date: event.date,
-      start_hour: event.start.getHours(),
-      end_hour: event.end.getHours(),
-    };
-  }).sort((a, b) => a.start_hour - b.start_hour);
+        start_hour: event.start.getHours(),
+        start_minute: event.start.getMinutes(),
+        end_hour: event.end.getHours(),
+        end_minute: event.end.getMinutes(),
+        schedule: event.schedule,
+      };
+    })
+    .sort((a, b) => a.start_hour - b.start_hour);
 });
 
 const HoursBlocks = [
@@ -85,16 +94,16 @@ const { y } = useScroll(calendarEl);
 watch(calendarEvents, () => {
   // scroll to earliest event of the day
   const earliestEvent = calendarEvents.value[0];
-  
+
   if (earliestEvent) {
     y.value = 6 * 16 * earliestEvent.start_hour;
   }
 });
 
 onMounted(() => {
-    // Scroll to the current hour
-    y.value = 6 * 16 * new Date().getHours();
-})
+  // Scroll to the current hour
+  y.value = 6 * 16 * new Date().getHours();
+});
 </script>
 
 <style scoped></style>
