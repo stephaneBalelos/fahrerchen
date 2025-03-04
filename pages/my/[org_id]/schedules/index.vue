@@ -18,6 +18,7 @@
               expanded
               is-required
               :mode="'date'"
+              :dates-highlighted="schedulesForMonth ? schedulesForMonth.map((schedule) => new Date(schedule.start_at)) : []"
             />
           </UDashboardCard>
           <UDashboardCard>
@@ -178,7 +179,6 @@ import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
 import type { Database } from "~/types/app.types";
-import { formatDate } from "~/utils/formatters";
 
 const { t } = useI18n({
   useScope: "local",
