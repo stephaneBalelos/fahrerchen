@@ -1,5 +1,9 @@
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
+create extension pg_cron with schema pg_catalog;
+grant usage on schema cron to postgres;
+grant all privileges on all tables in schema cron to postgres;
+
 
 alter database postgres
 set timezone to 'Europe/Berlin';
@@ -1027,10 +1031,6 @@ declare
   bill_total numeric;
   b_id uuid;
 begin
-  -- check authorization
-  if not public.authorize('course_subscription_bills.create', organization_id) then
-    raise exception 'Unauthorized';
-  end if;
 
   select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
 
@@ -1050,6 +1050,21 @@ begin
   return null;
 end;
 $$ language plpgsql security invoker set search_path = public;
+
+-- Generate Bill for Subscriptions
+create or replace function public.generate_bill_for_subscriptions()
+returns void as $$
+declare
+  subscriptions uuid[];
+  subscription_id uuid;
+begin
+  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
+
+  foreach subscription_id in array subscriptions loop
+    perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
+  end loop;
+end;
+$$ language plpgsql security definer set search_path = public;
 
 -- Helpers Functions
 
@@ -1271,7 +1286,9 @@ create policy "Everyone can see course_activity_types" on public.course_activity
 
 
 
-
+-- Jobs
+  -- Generate Bills for Subscriptions at the end of the month at 6:00 AM
+  select cron.schedule('Generate Bills for Subscriptions at the end of the month at 6:00 AM', '0 1 1 * *', 'select public.generate_bill_for_subscriptions();');
 
 
 
