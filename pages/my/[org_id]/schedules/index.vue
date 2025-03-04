@@ -14,12 +14,10 @@
         <UDashboardPanelContent class="gap-4">
           <UDashboardCard>
             <FormsInputsDatepicker
-              v-if="schedulesForMonth"
               v-model="selectedDate"
               expanded
-              :dates-highlighted="
-                schedulesForMonth.map((schedule) => new Date(schedule.start_at))
-              "
+              is-required
+              :mode="'date'"
             />
           </UDashboardCard>
           <UDashboardCard>
@@ -180,6 +178,7 @@ import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
 import type { Database } from "~/types/app.types";
+import { formatDate } from "~/utils/formatters";
 
 const { t } = useI18n({
   useScope: "local",
