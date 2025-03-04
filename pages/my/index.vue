@@ -64,7 +64,6 @@ async function generateDemoData() {
       "
       :title="t('no_organizations_found')"
       :description="t('you_have_not_created_any_organizations_yet')"
-      icon="i-simple-icons-tailwindcss"
     />
 
     <div v-if="organizationsStore.isLoading" class="space-y-2">
