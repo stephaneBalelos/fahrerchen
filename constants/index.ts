@@ -25,7 +25,7 @@ export const COURSE_ICONS = {
 
 export const ACTIVITY_ICONS = {
     'THEORY': 'ri-book-2-line',
-    'PRACTICE': 'ri-road-map-line',
+    'PRACTICE': 'ri-steering-line',
     'EXAM': 'ri-file-list-line',
     'OTHER': 'ri-file-list-line'
 }

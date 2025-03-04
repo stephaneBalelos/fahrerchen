@@ -16,6 +16,7 @@
             :org-id="
               userOrganizationsStore.selectedOrganization.organization_id
             "
+            :activity-type-id="item.activity_type"
           />
         </template>
       </UTabs>
@@ -50,7 +51,7 @@ const { data: course_activities } = useAsyncData(
     }
     const { data, error } = await client
       .from("course_activities")
-      .select("id, name, description")
+      .select("id, name, description, activity_type")
       .eq("course_id", props.courseid)
       .eq(
         "organization_id",
@@ -73,6 +74,7 @@ const tabs = computed(() => {
     activity_id: activity.id,
     activity_name: activity.name,
     activity_description: activity.description,
+    activity_type: activity.activity_type,
   }));
 });
 </script>

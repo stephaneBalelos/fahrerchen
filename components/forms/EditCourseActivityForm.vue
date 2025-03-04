@@ -5,12 +5,12 @@
       :state="state"
       :validate="validate"
       :validate-on="['submit']"
-      :onSubmit="saveCourseActivity"
+      :on-submit="saveCourseActivity"
     >
       <UDashboardSection
         :title="t('form_section_title')"
         :description="
-          props.course_activity_id
+          props.courseActivityId
             ? t('form_section_desc')
             : t('form_section_desc_new')
         "
@@ -55,6 +55,7 @@
             v-model="state.activity_type"
             :options="activity_types"
             value-attribute="id"
+            :leading-icon="selected_activity_type ? ACTIVITY_ICONS[selected_activity_type] : undefined"
           >
             <template #label>
               <div v-if="state.activity_type && activity_types">
@@ -100,10 +101,10 @@
 
     <template #footer>
       <UButton
-        v-if="props.course_activity_id"
-        @click="deleteCourseActivity(props.course_activity_id)"
+        v-if="props.courseActivityId"
         color="red"
         variant="ghost"
+        @click="deleteCourseActivity(props.courseActivityId)"
         >Delete</UButton
       >
       <UButton @click="form?.submit()">Save</UButton>
@@ -117,19 +118,20 @@ import type { Form, FormSubmitEvent } from "#ui/types";
 
 import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
 
+import { ACTIVITY_ICONS } from "~/constants";
+
 type CourseActivityEdit = Omit<
   AppCourseActivity,
-  "id" | "course_id" | "organization_id"
+  "id" | "course_id" | "organization_id" | "sorting_order"
 >;
 type Props = {
   courseid: string;
   orgid: string;
-  course_activity_id?: string;
+  courseActivityId?: string;
 };
 
 type Emits = {
-  (event: "activity-saved", payload?: AppCourseActivity): void;
-  (event: "activity-deleted", payload?: AppCourseActivity): void;
+  (event: "activity-saved" | "activity-deleted", payload?: AppCourseActivity): void;
 };
 
 const { t } = useI18n({
@@ -150,6 +152,10 @@ const $emit = defineEmits<Emits>();
 
 const activity_types = await useCourseActivityTypes()
 
+const selected_activity_type = computed(() => {
+  return activity_types.find((r) => r.id === state.activity_type)?.type;
+});
+
 
 const state = reactive<CourseActivityEdit>({
   name: "",
@@ -160,13 +166,13 @@ const state = reactive<CourseActivityEdit>({
 });
 
 onMounted(async () => {
-  if (props.course_activity_id) {
+  if (props.courseActivityId) {
     // load the course activity
     try {
       const { data, error } = await client
         .from("course_activities")
         .select("*")
-        .eq("id", props.course_activity_id)
+        .eq("id", props.courseActivityId)
         .single();
 
       if (error) {
@@ -210,9 +216,8 @@ const validate = (state: CourseActivityEdit) => {
   return errors;
 };
 
-async function saveCourseActivity(event: FormSubmitEvent<CourseActivityEdit>) {
-  console.log(state)
-  if (props.course_activity_id) {
+async function saveCourseActivity(_event: FormSubmitEvent<CourseActivityEdit>) {
+  if (props.courseActivityId) {
     await updateCourseActivity(state);
   } else {
     await createCourseActivity(state);
@@ -220,12 +225,12 @@ async function saveCourseActivity(event: FormSubmitEvent<CourseActivityEdit>) {
 }
 
 async function updateCourseActivity(params: CourseActivityEdit) {
-  if (!props.course_activity_id) return;
+  if (!props.courseActivityId) return;
   try {
-    const { data, error } = await client
+    const { error } = await client
       .from("course_activities")
       .update({...params})
-      .eq("id", props.course_activity_id)
+      .eq("id", props.courseActivityId)
     if (error) { 
       console.error(error)
       throw error
@@ -264,7 +269,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
 
 const deleteCourseActivity = async (id: string) => {
   try {
-    const { data, error } = await client
+    const { error } = await client
       .from("course_activities")
       .delete()
       .eq("id", id).select()

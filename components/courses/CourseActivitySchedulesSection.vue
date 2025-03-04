@@ -1,6 +1,5 @@
 <template>
   <UDashboardSection
-    icon="i-heroicons-user"
     :title="props.activityName"
     :description="props.activityDescription"
     orientation="vertical"
@@ -22,7 +21,7 @@
           @click="openAddStudentsAttendanceForm(s)"
         >
           <div class="flex flex-1 gap-4">
-            <UAvatar :alt="'AM'" size="md" />
+            <UAvatar size="md" :icon="activityIcon" />
             <div class="flex items-start gap-2">
               <div class="text-sm flex-1">
                 <p class="text-gray-900 dark:text-white font-medium">
@@ -83,18 +82,30 @@ import type { AppCourseActivitySchedule, Database } from "~/types/app.types";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
+import { ACTIVITY_ICONS } from "~/constants";
 
 type Props = {
   courseId: string;
   activityId: string;
   activityName: string;
   activityDescription: string;
+  activityTypeId: number;
   orgId: string;
 };
 
 const slideover = useSlideover();
 
 const props = defineProps<Props>();
+
+const activity_types = await useCourseActivityTypes()
+
+const activityIcon = computed(() => {
+  const type = activity_types.find((t) => t.id === props.activityTypeId);
+  if (!type) {
+    return undefined
+  }
+  return ACTIVITY_ICONS[type.type]
+});
 
 const { t } = useI18n({
   useScope: "local",
