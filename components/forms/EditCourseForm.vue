@@ -40,7 +40,7 @@
             :options="course_types ?? []"
             :placeholder="t('form.type.placeholder')"
             option-attribute="type"
-            leading-icon="i-heroicons-truck"
+            :leading-icon="selected_type ? COURSE_ICONS[selected_type.type] : undefined"
             :ui="{ wrapper: 'app-select' }"
             :ui-menu="{
               container: 'app-select-menu',
@@ -104,6 +104,7 @@
 <script setup lang="ts">
 import type { Database, AppCourse } from "~/types/app.types";
 import type { FormError, FormSubmitEvent } from "#ui/types";
+import { COURSE_ICONS } from "~/constants";
 
 type EditCourseFormProps = Omit<
   AppCourse,

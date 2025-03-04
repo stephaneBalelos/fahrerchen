@@ -14,12 +14,11 @@
         <UDashboardPanelContent class="gap-4">
           <UDashboardCard>
             <FormsInputsDatepicker
-              v-if="schedulesForMonth"
               v-model="selectedDate"
               expanded
-              :dates-highlighted="
-                schedulesForMonth.map((schedule) => new Date(schedule.start_at))
-              "
+              is-required
+              :mode="'date'"
+              :dates-highlighted="schedulesForMonth ? schedulesForMonth.map((schedule) => new Date(schedule.start_at)) : []"
             />
           </UDashboardCard>
           <UDashboardCard>
@@ -137,6 +136,7 @@
                 v-for="schedule in schedules"
                 :key="schedule.id"
                 :schedule="schedule"
+                @update="refresh"
               />
             </div>
             <div v-else class="flex items-center justify-center h-full">
@@ -155,8 +155,10 @@
                   date: new Date(schedule.start_at),
                   start: new Date(schedule.start_at),
                   end: new Date(schedule.end_at),
+                  schedule,
                 }))
               "
+              :refresh-events="refresh"
             />
           </div>
         </div>
@@ -213,7 +215,7 @@ const filterForm = ref<FilterForm>({
   status: undefined,
 });
 
-const { data: schedules } = useAsyncData(
+const { data: schedules, refresh } = useAsyncData(
   async () => {
     const dateStart = startOfDay(selectedDate.value);
     const dateEnd = endOfDay(selectedDate.value);

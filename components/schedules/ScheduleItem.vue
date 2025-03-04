@@ -36,6 +36,13 @@
       <UButton size="sm" color="gray" variant="solid" @click="openEditAttendees">
         {{ t("edit_attendees") }}
       </UButton>
+      <UButton
+        size="sm"
+        color="red"
+        variant="soft"
+        icon="i-heroicons-trash"
+        @click="() => deleteSchedule(props.schedule.id)"
+      />
     </template>
     <div class="flex justify-between">
       <div class="flex flex-col gap-2">
@@ -71,6 +78,7 @@ import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue"
 import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { isFuture } from "date-fns";
+import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type ScheduleItemProps = {
   schedule: CourseActivityScheduleView;
@@ -84,9 +92,14 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
+const $emits = defineEmits(["update"]);
+
 const props = defineProps<ScheduleItemProps>();
 const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
+const modal = useModal();
+const courseActivitySchedules = useCourseActivitySchedules();
+
 
 const {
   data: attendees,
@@ -138,6 +151,28 @@ watch(assigned_to, async (value) => {
     console.error(error);
   }
 });
+
+async function deleteSchedule(id: string) {
+  try {
+    modal.open(ConfirmModal, {
+      title: "Delete Course Activity Schedule",
+      description:
+        "Are you sure you want to delete this course activity schedule?",
+      confirmLabel: "Delete",
+      cancelLabel: "Cancel",
+      action: async () => {
+        const result =
+          await courseActivitySchedules.deleteCourseActivitySchedule(id);
+        if (!result) {
+          throw new Error("Failed to delete course activity schedule");
+        }
+        $emits("update");
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
 </script>
 
 <style scoped></style>

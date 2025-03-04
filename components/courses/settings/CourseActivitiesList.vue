@@ -24,6 +24,7 @@
     >
       <div
         v-for="field in course_activities"
+        :key="field.id"
         class="flex items-center justify-between pt-4 first:pt-0 gap-2"
       >
         <div class="flex flex-col gap-1 grow">
@@ -64,8 +65,7 @@ const props = defineProps<{
 
 const {
   data: course_activities,
-  error,
-  status,
+
   refresh,
 } = useAsyncData(`course_activities_${props.courseid}`, async () => {
   const { data } = await supabase
@@ -80,7 +80,7 @@ const openEditActivityForm = (id?: string) => {
   slideover.open(EditCourseActivityForm, {
     courseid: props.courseid,
     orgid: props.orgid,
-    course_activity_id: id,
+    courseActivityId: id,
     "onActivity-saved": () => {
       slideover.close();
       refresh();

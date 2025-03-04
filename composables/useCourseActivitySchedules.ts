@@ -33,6 +33,23 @@ export const useCourseActivitySchedules = () => {
 
     }
 
+    const deleteCourseActivitySchedule = async (id: string) => {
+        if (!userOrganizationStore.selectedOrganization) {
+            return null;
+        }
+
+        const { error } = await client
+            .from("course_activity_schedules")
+            .delete()
+            .eq("id", id)
+
+        if (error) {
+            throw error
+        }
+        
+        return true
+    }
+
     const fetchCourseActivitySchedules = async (query: CourseActivityScheduleQuery) => {
         if (!userOrganizationStore.selectedOrganization) {
             return null;
@@ -69,7 +86,7 @@ export const useCourseActivitySchedules = () => {
         }
 
         if (query.end_at) {
-            q.lte("end_at", query.end_at)
+            q.lte("start_at", query.end_at)
         }
 
         const { data, error } = await q
@@ -82,7 +99,8 @@ export const useCourseActivitySchedules = () => {
 
     return {
         fetchCourseActivitySchedules,
-        fetchCourseActivitySchedulesById
+        fetchCourseActivitySchedulesById,
+        deleteCourseActivitySchedule
     }
 
 }

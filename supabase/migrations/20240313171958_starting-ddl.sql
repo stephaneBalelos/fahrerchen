@@ -1,5 +1,12 @@
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_net";
+create extension pg_cron with schema pg_catalog;
+grant usage on schema cron to postgres;
+grant all privileges on all tables in schema cron to postgres;
+
+
+alter database postgres
+set timezone to 'Europe/Berlin';
 -- Custom types
 create type public.app_permission as enum (
   'users.read',
@@ -347,7 +354,7 @@ grant update (assigned_to, status, start_at, end_at, attendees) on table public.
 create table public.course_activity_attendances (
   id            uuid default uuid_generate_v4() primary key,
   course_activity_id   uuid references public.course_activities on delete cascade not null,
-  activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
+  activity_schedule_id    uuid references public.course_activity_schedules on delete cascade not null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
   organization_id    uuid references public.organizations on delete cascade not null,
@@ -591,6 +598,7 @@ select
   course_activity_attendances.organization_id,
   course_activities.name as activity_name,
   course_activities.description as activity_description,
+  course_activities.course_id as course_id,
   course_activity_schedules.start_at as activity_start_at,
   course_activity_schedules.end_at as activity_end_at
 from public.course_activity_attendances
@@ -839,20 +847,32 @@ create or replace function public.handle_removed_activity_attendance()
 returns trigger as $$
 declare org_id uuid;
 declare bill_item_id uuid;
+declare bill_item_bill_id uuid;
+declare bill_item_price numeric;
 begin
   org_id := old.organization_id;
 
   -- lookup for the bill item
-  select id into bill_item_id from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
+  select id, bill_id, price into bill_item_id, bill_item_bill_id, bill_item_price from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
 
   -- if no bill item exists, do nothing
   if bill_item_id is null then
     return old;
   end if;
 
-  -- set attendance to null
-  update public.course_subscription_bill_items set course_activity_attendance_id = null
-  where id = bill_item_id;
+  -- if the item has a bill id, set attendance to null
+  if bill_item_bill_id is not null then
+    update public.course_subscription_bill_items set course_activity_attendance_id = null
+    where id = bill_item_id;
+  else
+    -- aggregate subscription costs
+    update public.course_subscriptions set costs = costs - bill_item_price
+    where id = old.course_subscription_id;
+
+    -- if the item has no bill id, remove the item
+    delete from public.course_subscription_bill_items where id = bill_item_id;
+    
+  end if;
 
   return old;
 end;
@@ -1011,10 +1031,6 @@ declare
   bill_total numeric;
   b_id uuid;
 begin
-  -- check authorization
-  if not public.authorize('course_subscription_bills.create', organization_id) then
-    raise exception 'Unauthorized';
-  end if;
 
   select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
 
@@ -1034,6 +1050,21 @@ begin
   return null;
 end;
 $$ language plpgsql security invoker set search_path = public;
+
+-- Generate Bill for Subscriptions
+create or replace function public.generate_bill_for_subscriptions()
+returns void as $$
+declare
+  subscriptions uuid[];
+  subscription_id uuid;
+begin
+  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
+
+  foreach subscription_id in array subscriptions loop
+    perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
+  end loop;
+end;
+$$ language plpgsql security definer set search_path = public;
 
 -- Helpers Functions
 
@@ -1255,7 +1286,9 @@ create policy "Everyone can see course_activity_types" on public.course_activity
 
 
 
-
+-- Jobs
+  -- Generate Bills for Subscriptions at the end of the month at 6:00 AM
+  select cron.schedule('Generate Bills for Subscriptions at the end of the month at 6:00 AM', '0 1 1 * *', 'select public.generate_bill_for_subscriptions();');
 
 
 

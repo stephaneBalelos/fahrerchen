@@ -2,23 +2,21 @@
   <UDashboardSlideover
     id="edit-activity-schedule"
     ref="slideover"
-    :title="
-      props.scheduleId ? 'Edit Activity Schedule' : 'New Activity Schedule'
-    "
+    :title="props.scheduleId ? t('edit_schedule') : t('add_schedule')"
   >
     <UForm ref="form" :state="state" :schema="schema" @submit="onSubmit">
       <UDashboardSection
-        title="Course Activity Schedule"
+        :title="t('activity_schedule')"
         :description="
           props.scheduleId
-            ? 'Edit the course activity schedule'
-            : 'Add a new course activity schedule'
+            ? t('edit_course_activity_schedule')
+            : t('add_course_activity_schedule')
         "
       >
         <UFormGroup
           name="activity_id"
-          :label="`Course Activity`"
-          description="Welche Aktivität wird durchgeführt."
+          :label="t('from.activity.label')"
+          :description="t('from.activity.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -38,7 +36,9 @@
                 }}</span>
               </div>
               <div v-else>
-                <span class="truncate">Select an Activity</span>
+                <span class="truncate">
+                  {{ t("form.select_activity.placeholder") }}
+                </span>
               </div>
             </template>
             <template #option="{ option }">
@@ -48,8 +48,8 @@
         </UFormGroup>
         <UFormGroup
           name="assigned_to"
-          :label="`Verantwortlich`"
-          description="Wer ist für die Aktivität verantwortlich."
+          :label="t('from.assigned_to.label')"
+          :description="t('from.assigned_to.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -61,8 +61,8 @@
         </UFormGroup>
         <UFormGroup
           name="start_at"
-          :label="`Date`"
-          description="Wann ist die Aktivität geplant."
+          :label="t('from.start_at.label')"
+          :description="t('from.start_at.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -129,14 +129,17 @@
     </UForm>
 
     <template #footer>
+      <UButton @click="form?.submit()">
+        {{ t("save") }}
+      </UButton>
       <UButton
         v-if="props.scheduleId"
         color="red"
         variant="ghost"
         @click="deleteCourseActivitySchedule(props.scheduleId)"
-        >Delete</UButton
       >
-      <UButton @click="form?.submit()">Save</UButton>
+        {{ t("delete") }}
+      </UButton>
     </template>
   </UDashboardSlideover>
 </template>
@@ -152,6 +155,7 @@ import { z } from "zod";
 import { addHours, format } from "date-fns";
 import DatePicker from "./Inputs/Datepicker.vue";
 import { useCourseActivities } from "~/composables/useCourseActivities";
+import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
@@ -189,11 +193,18 @@ type Props = {
 const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
+const modal = useModal();
 const client = useSupabaseClient<Database>();
 const course_activities = await useCourseActivities(
   props.orgid,
   props.courseid
 );
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const courseActivitySchedules = useCourseActivitySchedules();
 
 const schema = z
   .object({
@@ -207,7 +218,7 @@ const schema = z
       ctx.addIssue({
         path: ["start_at"],
         code: z.ZodIssueCode.custom,
-        message: "End date must be after start date",
+        message: t("from.start_at.errors.invalid_range"),
       });
       return z.NEVER;
     }
@@ -237,11 +248,7 @@ onMounted(async () => {
 
       if (error) {
         console.error(error);
-        toast.add({
-          title: "Error",
-          description: "Failed to load course activity schedule",
-          color: "red",
-        });
+        throw new Error("Failed to load course activity schedule");
       } else {
         state.start_at = new Date(data.start_at);
         state.end_at = new Date(data.end_at);
@@ -288,16 +295,11 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
       .select();
 
     if (error) {
-      console.error(error);
-      toast.add({
-        title: "Error",
-        description: "Failed to create course activity schedule",
-        color: "red",
-      });
+      throw new Error("Failed to create course activity schedule");
     } else {
       toast.add({
-        title: "Success",
-        description: "Course activity schedule created",
+        title: t("success.created.title"),
+        description: t("success.created.description"),
         color: "green",
       });
       emits("activity-saved");
@@ -305,8 +307,8 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
   } catch (error) {
     console.error(error);
     toast.add({
-      title: "Error",
-      description: "Failed to create course activity schedule",
+      title: t("errors.failed_to_create.title"),
+      description: t("errors.failed_to_create.description"),
       color: "red",
     });
   }
@@ -328,16 +330,11 @@ async function updateCourseActivitySchedule(
       .select();
 
     if (error) {
-      console.error(error);
-      toast.add({
-        title: "Error",
-        description: "Failed to update course activity schedule",
-        color: "red",
-      });
+      throw new Error("Failed to update course activity schedule");
     } else {
       toast.add({
-        title: "Success",
-        description: "Course activity schedule updated",
+        title: t("success.updated.title"),
+        description: t("success.updated.description"),
         color: "green",
       });
       emits("activity-saved");
@@ -345,15 +342,33 @@ async function updateCourseActivitySchedule(
   } catch (error) {
     console.error(error);
     toast.add({
-      title: "Error",
-      description: "Failed to update course activity schedule",
+      title: t("errors.failed_to_update.title"),
+      description: t("errors.failed_to_update.description"),
       color: "red",
     });
   }
 }
 
-function deleteCourseActivitySchedule(id: string) {
-  console.log("Delete course activity schedule", id);
+async function deleteCourseActivitySchedule(id: string) {
+  try {
+    modal.open(ConfirmModal, {
+      title: t("delete_course_activity_schedule"),
+      description:
+        t("delete_course_activity_schedule_description"),
+      confirmLabel: t("delete"),
+      cancelLabel: t("cancel"),
+      action: async () => {
+        const result =
+          await courseActivitySchedules.deleteCourseActivitySchedule(id);
+        if (!result) {
+          throw new Error("Failed to delete course activity schedule");
+        }
+        emits("activity-deleted");
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function onUpdateStartDate(date: Date) {
@@ -367,3 +382,58 @@ function _onChangeRepeat(value: RepeatMode) {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "edit_schedule": "Termin bearbeiten",
+    "add_schedule": "Termin hinzufügen",
+    "activity_schedule": "Aktivitätstermin",
+    "edit_course_activity_schedule": "Bearbeiten Sie den Kursaktivitätstermin",
+    "add_course_activity_schedule": "Fügen Sie den Kursaktivitätstermin hinzu",
+    "from": {
+      "activity": {
+        "label": "Aktivität",
+        "description": "Wählen Sie die Aktivität aus, die für diesen Termin geplant ist."
+      },
+      "assigned_to": {
+        "label": "Zugewiesen an",
+        "description": "Wählen Sie den Benutzer aus, der für diese Aktivität verantwortlich ist."
+      },
+      "start_at": {
+        "label": "Startzeit",
+        "description": "Wählen Sie die Startzeit für diese Aktivität aus.",
+        "placeholder": "Wählen Sie die Startzeit aus",
+        "errors": {
+          "invalid_range": "Die Startzeit kann nicht nach der Endzeit liegen."
+        }
+      }
+    },
+    "save": "Speichern",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "success": {
+      "created": {
+        "title": "Termin erstellt",
+        "description": "Der Kursaktivitätstermin wurde erfolgreich erstellt."
+      },
+      "updated": {
+        "title": "Termin aktualisiert",
+        "description": "Der Kursaktivitätstermin wurde erfolgreich aktualisiert."
+      }
+    },
+    "errors": {
+      "failed_to_create": {
+        "title": "Fehler beim Erstellen",
+        "description": "Der Kursaktivitätstermin konnte nicht erstellt werden."
+      },
+      "failed_to_update": {
+        "title": "Fehler beim Aktualisieren",
+        "description": "Der Kursaktivitätstermin konnte nicht aktualisiert werden."
+      }
+    },
+    "delete_course_activity_schedule": "Kursaktivitätstermin löschen",
+    "delete_course_activity_schedule_description": "Möchten Sie diesen Kursaktivitätstermin wirklich löschen?"
+  }
+}
+</i18n>
