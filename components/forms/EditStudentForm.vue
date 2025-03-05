@@ -122,6 +122,8 @@ const { t:g } = useI18n({
   useScope: "global",
 });
 
+const tutorialStore = useTutorialStore();
+
 const schema = z.object({
   email: z.string()
   .email(g("form_errors.email")),
@@ -238,6 +240,7 @@ async function createStudent(data: UserSchema, organization_id: string) {
     throw error;
   }
   emit("student-created", student);
+  tutorialStore.completeStep('step-6');
 }
 
 async function updateStudent(data: UserSchema, student_id: string) {
