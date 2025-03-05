@@ -129,7 +129,7 @@ const createCourseRequirement = async () => {
         });
         if (error) throw error;
         $emit('requirement-created');
-        tutorialStore.completeStep('step-4')
+        tutorialStore.completeStep('course_document_create')
     } catch (error) {
         console.error(error);
     }

@@ -240,7 +240,7 @@ async function createStudent(data: UserSchema, organization_id: string) {
     throw error;
   }
   emit("student-created", student);
-  tutorialStore.completeStep('step-6');
+  tutorialStore.completeStep('course_student_invite');
 }
 
 async function updateStudent(data: UserSchema, student_id: string) {

@@ -259,7 +259,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
     }
     console.log(data);
     $emit("activity-saved");
-    tutorialStore.completeStep('step-3')
+    tutorialStore.completeStep('course_activity_create')
   } catch (error) {
     console.log(error);
     toast.add({

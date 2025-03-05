@@ -118,7 +118,7 @@ async function connectStripe() {
 async function onOnboardingExit() {
   await stripeStore.fetchStripeAccount();
   if (stripeStore.stripeAccount?.details_submitted) {
-    tutorialStore.completeStep('step-5')
+    tutorialStore.completeStep('enable_payment')
   }
 }
 </script>

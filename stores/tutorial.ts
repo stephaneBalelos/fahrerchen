@@ -1,63 +1,42 @@
 import type { Database } from "~/types/app.types";
 
+
+type TutorialStepKey = 
+    'school_information' | 
+    'course_create' | 
+    'course_activity_create' |
+    'course_document_create' |
+    'enable_payment' |
+    'course_student_invite' |
+    'course_student_enroll' |
+    'activity_schedule_create' |
+    'activity_schedule_attendance' |
+    'invoice_create' |
+    'invoice_send' |
+    'tutorial_continue_as_student' |
+    'tutorial_complete'
+;
+
+
 type TutorialStep = {
-    id: string;
+    id: TutorialStepKey;
     completed: boolean;
 }
 
 const tutorial_steps: TutorialStep[] = [
-    {
-        id: 'step-1',
-        completed: false
-    },
-    {
-        id: 'step-2',
-        completed: false
-    },
-    {
-        id: 'step-3',
-        completed: false
-    },
-    {
-        id: 'step-4',
-        completed: false
-    },
-    {
-        id: 'step-5',
-        completed: false
-    },
-    {
-        id: 'step-6',
-        completed: false
-    },
-    {
-        id: 'step-7',
-        completed: false
-    },
-    {
-        id: 'step-8',
-        completed: false
-    },
-    {
-        id: 'step-9',
-        completed: false
-    },
-    {
-        id: 'step-10',
-        completed: false
-    },
-    {
-        id: 'step-11',
-        completed: false
-    },
-    {
-        id: 'step-12',
-        completed: false
-    },
-    {
-        id: 'step-13',
-        completed: false
-    }
+    { id: 'school_information', completed: false },
+    { id: 'course_create', completed: false },
+    { id: 'course_activity_create', completed: false },
+    { id: 'course_document_create', completed: false },
+    { id: 'enable_payment', completed: false },
+    { id: 'course_student_invite', completed: false },
+    { id: 'course_student_enroll', completed: false },
+    { id: 'activity_schedule_create', completed: false },
+    { id: 'activity_schedule_attendance', completed: false },
+    { id: 'invoice_create', completed: false },
+    { id: 'invoice_send', completed: false },
+    { id: 'tutorial_continue_as_student', completed: false },
+    { id: 'tutorial_complete', completed: false },
 ]
 
 export const useTutorialStore = defineStore('tutorial', () => {
@@ -68,7 +47,7 @@ export const useTutorialStore = defineStore('tutorial', () => {
     const steps = ref<TutorialStep[]>([]);
     const currentStep = ref<TutorialStep | null>(null);
 
-    function setCurrentStep(step_id: string) {
+    function setCurrentStep(step_id: TutorialStepKey) {
         const step = steps.value.find(step => step.id === step_id);
         if (!step) {
             return;
@@ -76,7 +55,7 @@ export const useTutorialStore = defineStore('tutorial', () => {
         currentStep.value = step;
     }
 
-    function completeStep(step_id: string) {
+    function completeStep(step_id: TutorialStepKey) {
         const index = steps.value.findIndex(step => step.id === step_id);
         if (index === -1) {
             return;

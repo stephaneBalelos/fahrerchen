@@ -258,7 +258,7 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
     });
     if (data) {
       emit("course-created", data[0]);
-      tutorialStore.completeStep("step-2");
+      tutorialStore.completeStep('course_create');
     }
   } catch (error) {
     console.error(error);

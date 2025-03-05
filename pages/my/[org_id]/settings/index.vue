@@ -200,7 +200,7 @@ async function onSubmit() {
       color: "green",
     });
 
-    tutorialStore.completeStep('step-1')
+    tutorialStore.completeStep('school_information')
 
   } catch (error) {
     console.error(error);
