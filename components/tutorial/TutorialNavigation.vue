@@ -73,6 +73,13 @@
           <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
             {{ item.content.description }}
           </p>
+          <div v-if="item.content.show_complete_button && item.content.can_complete" class="mt-4">
+            <UButton
+              color="primary"
+              @click="tutorialStore.completeStep(item.content.id)"
+              >{{ t("complete_step") }}</UButton
+            >
+          </div>
         </div>
       </template>
     </UAccordion>
@@ -99,6 +106,8 @@ const items = computed(() => {
       id: step.id,
       description: g(`tutorial.steps.${step.id}.description`),
       completed: step.completed,
+      show_complete_button: step.show_complete_button,
+      can_complete: tutorialStore.steps[index - 1]?.completed,
     },
   }));
 });
@@ -116,7 +125,8 @@ onMounted(() => {
   "de": {
     "title": "Schnellstart Tutorial",
     "description": "Lernen Sie die Grundlagen mit diesem Step-by-Step Tutorial.",
-    "progress": "Fortschritt"
+    "progress": "Fortschritt",
+    "complete_step": "Schritt abschließen"
   }
 }
 </i18n>

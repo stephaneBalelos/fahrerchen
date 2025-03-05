@@ -25,6 +25,8 @@ type Props = {
   onChange?: () => void;
 };
 
+const tutorialStore = useTutorialStore();
+
 const props = defineProps<Props>();
 
 const { t } = useI18n({ useScope: "local" });
@@ -83,6 +85,7 @@ async function addToSchedule(
     if (error) {
       throw error;
     }
+    tutorialStore.completeStep("activity_schedule_attendance");
   } catch (error) {
     console.error(error);
   }

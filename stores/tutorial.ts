@@ -21,6 +21,7 @@ type TutorialStepKey =
 type TutorialStep = {
     id: TutorialStepKey;
     completed: boolean;
+    show_complete_button?: boolean;
 }
 
 const tutorial_steps: TutorialStep[] = [
@@ -36,7 +37,7 @@ const tutorial_steps: TutorialStep[] = [
     { id: 'invoice_create', completed: false },
     { id: 'invoice_send', completed: false },
     { id: 'tutorial_continue_as_student', completed: false },
-    { id: 'tutorial_complete', completed: false },
+    { id: 'tutorial_complete', completed: false, show_complete_button: true },
 ]
 
 export const useTutorialStore = defineStore('tutorial', () => {

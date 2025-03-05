@@ -97,6 +97,8 @@ const client = useSupabaseClient<Database>();
 const toast = useToast();
 const isGeneratingBill = ref(false);
 
+const tutorialStore = useTutorialStore();
+
 const permissionsStore = useUserPermissionsStore();
 
 const {
@@ -138,6 +140,7 @@ async function generateBill() {
       color: "green",
     });
     $emit("refresh");
+    tutorialStore.completeStep('invoice_create');
   } catch (error) {
     console.error(error);
     toast.add({

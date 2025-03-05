@@ -190,6 +190,8 @@ type Props = {
   date?: Date;
 };
 
+const tutorialStore = useTutorialStore();
+
 const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
@@ -303,6 +305,7 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
         color: "green",
       });
       emits("activity-saved");
+      tutorialStore.completeStep("activity_schedule_create");
     }
   } catch (error) {
     console.error(error);

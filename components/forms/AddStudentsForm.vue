@@ -78,6 +78,8 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const tutorialStore = useTutorialStore();
+
 const props = defineProps<Props>();
 
 const emits = defineEmits(["student-added"]);
@@ -143,6 +145,7 @@ function addStudents() {
       timeout: 3000,
     });
     emits("student-added");
+    tutorialStore.completeStep('course_student_enroll')
   });
 }
 </script>
@@ -152,7 +155,7 @@ function addStudents() {
 <i18n lang="json">
 {
   "de": {
-    "title": "Abonnieren Student",
+    "title": "Registrieren Sie Student",
     "search_students": "Suche Studenten",
     "no_students_found": "Keine Studenten gefunden",
     "no_students_found_description": "Keine Studenten gefunden, die dem Kurs hinzugefügt werden können",
