@@ -12,10 +12,11 @@
         variant="soft"
         size="2xs"
         @click="openEditActivityForm('')"
-        >{{ t('add_activity') }}</UButton
+        >{{ t("add_activity") }}</UButton
       >
     </template>
     <UCard
+      v-if="course_activities && course_activities.length > 0"
       :ui="{
         body: {
           base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
@@ -40,10 +41,15 @@
           color="gray"
           variant="solid"
           @click="openEditActivityForm(field.id)"
-          >{{ t('edit') }}</UButton
+          >{{ t("edit") }}</UButton
         >
       </div>
     </UCard>
+    <UAlert
+      v-else
+      :title="t('no_activities')"
+      :description="t('no_activities_description')"
+    />
   </UDashboardSection>
 </template>
 
@@ -85,8 +91,8 @@ const openEditActivityForm = (id?: string) => {
       slideover.close();
       refresh();
       toast.add({
-        title: t('activity_saved'),
-        description: t('activity_saved_description'),
+        title: t("activity_saved"),
+        description: t("activity_saved_description"),
         color: "green",
       });
     },
@@ -94,8 +100,8 @@ const openEditActivityForm = (id?: string) => {
       slideover.close();
       refresh();
       toast.add({
-        title: t('activity_deleted'),
-        description: t('activity_deleted_description'),
+        title: t("activity_deleted"),
+        description: t("activity_deleted_description"),
         color: "green",
       });
     },
@@ -111,6 +117,8 @@ const openEditActivityForm = (id?: string) => {
     "course_activities": "Kursaktivitäten",
     "set_activities": "Setze die Aktivitäten für diesen Kurs.",
     "add_activity": "Aktivität hinzufügen",
+    "no_activities": "Keine Aktivitäten",
+    "no_activities_description": "Es gibt keine Aktivitäten für diesen Kurs. Fügen Sie Aktivitäten hinzu.",
     "edit": "Bearbeiten",
     "activity_saved": "Aktivität gespeichert",
     "activity_saved_description": "Die Aktivität wurde erfolgreich gespeichert.",
@@ -122,6 +130,8 @@ const openEditActivityForm = (id?: string) => {
     "course_activities": "Course Activities",
     "set_activities": "Set the Activities for this course.",
     "add_activity": "Add Activity",
+    "no_activities": "No activities",
+    "no_activities_description": "There are no activities for this course. Add activities.",
     "edit": "Edit",
     "activity_saved": "Activity saved",
     "activity_saved_description": "The Activity has been saved successfully.",
