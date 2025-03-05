@@ -104,13 +104,14 @@ create table public.users (
   lastname    text,
   fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
   avatar_path  text,
-  status      user_status default 'OFFLINE'::public.user_status
+  status      user_status default 'OFFLINE'::public.user_status,
+  tutorial_data jsonb default '[]'::jsonb
 );
 comment on table public.users is 'Profile data for each user.';
 comment on column public.users.id is 'References the internal Supabase Auth user.';
 alter table public.users enable row level security;
 revoke update on table public.users from authenticated, anon;
-grant update (firstname, lastname, avatar_path) on table public.users to authenticated;
+grant update (firstname, lastname, avatar_path, tutorial_data) on table public.users to authenticated;
 
 
 -- ORGANIZATIONS

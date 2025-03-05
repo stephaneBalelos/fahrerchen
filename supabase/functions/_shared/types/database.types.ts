@@ -101,7 +101,7 @@ export type Database = {
       }
       course_activity_attendances: {
         Row: {
-          activity_schedule_id: string | null
+          activity_schedule_id: string
           course_activity_id: string
           course_subscription_id: string
           id: string
@@ -109,7 +109,7 @@ export type Database = {
           status: Database["public"]["Enums"]["attendance_status"]
         }
         Insert: {
-          activity_schedule_id?: string | null
+          activity_schedule_id: string
           course_activity_id: string
           course_subscription_id: string
           id?: string
@@ -117,7 +117,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["attendance_status"]
         }
         Update: {
-          activity_schedule_id?: string | null
+          activity_schedule_id?: string
           course_activity_id?: string
           course_subscription_id?: string
           id?: string
@@ -1196,6 +1196,7 @@ export type Database = {
           id: string
           lastname: string | null
           status: Database["public"]["Enums"]["user_status"] | null
+          tutorial_data: Json | null
         }
         Insert: {
           avatar_path?: string | null
@@ -1205,6 +1206,7 @@ export type Database = {
           id: string
           lastname?: string | null
           status?: Database["public"]["Enums"]["user_status"] | null
+          tutorial_data?: Json | null
         }
         Update: {
           avatar_path?: string | null
@@ -1214,6 +1216,7 @@ export type Database = {
           id?: string
           lastname?: string | null
           status?: Database["public"]["Enums"]["user_status"] | null
+          tutorial_data?: Json | null
         }
         Relationships: []
       }
@@ -1227,12 +1230,20 @@ export type Database = {
           activity_schedule_id: string | null
           activity_start_at: string | null
           course_activity_id: string | null
+          course_id: string | null
           course_subscription_id: string | null
           id: string | null
           organization_id: string | null
           status: Database["public"]["Enums"]["attendance_status"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_activities_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
             columns: ["activity_schedule_id"]
@@ -1302,6 +1313,7 @@ export type Database = {
           assigned_to_firstname: string | null
           assigned_to_fullname: string | null
           assigned_to_lastname: string | null
+          attendees: string[] | null
           course_description: string | null
           course_id: string | null
           course_name: string | null
@@ -1720,6 +1732,10 @@ export type Database = {
           organization_id: string
         }
         Returns: string
+      }
+      generate_bill_for_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       is_main_owner: {
         Args: {
