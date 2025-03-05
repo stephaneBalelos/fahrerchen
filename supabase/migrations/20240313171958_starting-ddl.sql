@@ -751,6 +751,11 @@ begin
   org_id := new.organization_id;
   select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
 
+  -- check if Student Belong to the Organization
+  if not exists (select 1 from public.students where id = new.student_id and organization_id = org_id) then
+    raise exception 'Student does not belong to the organization';
+  end if;
+
   -- if the course is not active, raise an exception
   if not is_course_active then
     raise exception 'Course is not active';
