@@ -4,6 +4,8 @@ import * as z from "zod";
 import type { Database } from "~/types/app.types";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 
+const tutorialStore = useTutorialStore();
+
 const isDeleteAccountModalOpen = ref(false);
 
 const config = useRuntimeConfig().public;
@@ -121,8 +123,8 @@ const schema = z.object({
       g("form_errors.min", { field: t("settings.address.zip.label"), min: 3 })
     )
     .max(
-      20,
-      g("form_errors.max", { field: t("settings.address.zip.label"), max: 20 })
+      10,
+      g("form_errors.max", { field: t("settings.address.zip.label"), max: 10 })
     )
     .optional(),
   address_country: z
@@ -197,6 +199,9 @@ async function onSubmit() {
       description: t("toast_success.description"),
       color: "green",
     });
+
+    tutorialStore.completeStep('step-1')
+
   } catch (error) {
     console.error(error);
     toast.add({
@@ -256,7 +261,7 @@ async function onAvatarUploadSuccess() {
       <UForm
         :state="state"
         :schema="schema"
-        :validate-on="['submit']"
+        :validate-on="['submit', 'blur']"
         @submit="onSubmit"
         @error="onError"
       >
@@ -392,37 +397,46 @@ async function onAvatarUploadSuccess() {
             class="grid grid-cols-2 gap-2"
             :ui="{ container: '' }"
           >
-            <UInput
-              id="address_street"
-              v-model="state.address_street"
-              type="text"
-              :placeholder="t('settings.address.street.label')"
-              size="md"
-            />
-            <UInput
-              id="address_city"
-              v-model="state.address_city"
-              type="text"
-              :placeholder="t('settings.address.city.label')"
-              size="md"
-              class="mt-2"
-            />
-            <UInput
-              id="address_zip"
-              v-model="state.address_zip"
-              type="text"
-              :placeholder="t('settings.address.zip.label')"
-              size="md"
-              class="mt-2"
-            />
-            <UInput
-              id="address_country"
-              v-model="state.address_country"
-              type="text"
-              :placeholder="t('settings.address.country.label')"
-              size="md"
-              class="mt-2"
-            />
+            <UFormGroup name="address_street" :label="t('settings.address.street.label')">
+              <UInput
+                id="address_street"
+                v-model="state.address_street"
+                type="text"
+                :placeholder="t('settings.address.street.label')"
+                size="md"
+              />
+            </UFormGroup>
+            <UFormGroup name="address_city" :label="t('settings.address.city.label')">
+              <UInput
+                id="address_city"
+                v-model="state.address_city"
+                type="text"
+                :placeholder="t('settings.address.city.label')"
+                size="md"
+                class="mt-2"
+              />
+            </UFormGroup>
+            <UFormGroup name="address_zip" :label="t('settings.address.zip.label')">
+              <UInput
+                id="address_zip"
+                v-model="state.address_zip"
+                name="address_zip"
+                type="text"
+                :placeholder="t('settings.address.zip.label')"
+                size="md"
+                class="mt-2"
+              />
+            </UFormGroup>
+            <UFormGroup name="address_country" :label="t('settings.address.country.label')">
+              <UInput
+                id="address_country"
+                v-model="state.address_country"
+                type="text"
+                :placeholder="t('settings.address.country.label')"
+                size="md"
+                class="mt-2"
+              />
+            </UFormGroup>
           </UFormGroup>
         </UDashboardSection>
       </UForm>

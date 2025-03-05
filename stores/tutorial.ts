@@ -77,12 +77,25 @@ export const useTutorialStore = defineStore('tutorial', () => {
     }
 
     function completeStep(step_id: string) {
-        const step = steps.value.find(step => step.id === step_id);
-        if (!step) {
+        const index = steps.value.findIndex(step => step.id === step_id);
+        if (index === -1) {
             return;
         }
-        step.completed = true;
-        userStore.updateUser({ tutorial_data: steps.value });
+
+        // Check if previous step is completed
+        const previousStep = steps.value[index - 1];
+        
+        if (!previousStep || (previousStep && previousStep.completed)) {
+
+            steps.value[index].completed = true;
+            userStore.updateUser({ tutorial_data: steps.value });
+
+            if (index + 1 < steps.value.length) {
+                setCurrentStep(steps.value[index + 1].id);
+            } else {
+                currentStep.value = null;
+            }
+        }
     }
 
     const completedSteps = computed(() => steps.value.filter(step => step.completed));
@@ -92,10 +105,9 @@ export const useTutorialStore = defineStore('tutorial', () => {
     })
 
     async function initTutorial(user_id: string) {
-        console.log('init tutorial');
         const { data, error } = await client.from('users').select('tutorial_data').eq('id', user_id).single();
         const t_data = data?.tutorial_data as TutorialStep[];
-        if(error) {
+        if (error) {
             console.error(error);
             return;
         }
@@ -105,6 +117,8 @@ export const useTutorialStore = defineStore('tutorial', () => {
             steps.value = tutorial_steps;
             await userStore.updateUser({ tutorial_data: steps.value });
         }
+
+        currentStep.value = steps.value.find(step => !step.completed) || null;
     }
 
 

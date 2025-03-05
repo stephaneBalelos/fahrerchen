@@ -40,7 +40,9 @@
             :options="course_types ?? []"
             :placeholder="t('form.type.placeholder')"
             option-attribute="type"
-            :leading-icon="selected_type ? COURSE_ICONS[selected_type.type] : undefined"
+            :leading-icon="
+              selected_type ? COURSE_ICONS[selected_type.type] : undefined
+            "
             :ui="{ wrapper: 'app-select' }"
             :ui-menu="{
               container: 'app-select-menu',
@@ -61,7 +63,9 @@
             variant="subtle"
           >
             <template #title="{ title }">
-              <span class="text-lg">{{ t('driver_license_class') }} {{ title }}</span>
+              <span class="text-lg"
+                >{{ t("driver_license_class") }} {{ title }}</span
+              >
             </template>
           </UAlert>
         </UFormGroup>
@@ -108,7 +112,12 @@ import { COURSE_ICONS } from "~/constants";
 
 type EditCourseFormProps = Omit<
   AppCourse,
-  "id" | "inserted_at" | "organization_id" | "is_active" | "allow_self_registration" | "create_bill_on_subscription"
+  | "id"
+  | "inserted_at"
+  | "organization_id"
+  | "is_active"
+  | "allow_self_registration"
+  | "create_bill_on_subscription"
 >;
 
 type Props = {
@@ -119,6 +128,8 @@ const props = defineProps<Props>();
 const supabase = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const form = ref<HTMLFormElement | null>(null);
+
+const tutorialStore = useTutorialStore();
 
 const { t } = useI18n({
   useScope: "local",
@@ -224,26 +235,36 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
       })
       .select("*");
     if (error) {
-      toast.add({
-        title: "Error",
-        description: "Could not create course",
-        color: "red",
-      });
-      return;
+      if (error.code === "23505") {
+        const type = course_types.value?.find((t) => t.id === d.type);
+        if (type) {
+          toast.add({
+            title: t("course_error_duplicate_course_type.title"),
+            description: t("course_error_duplicate_course_type.description", {
+              type: type.type,
+            }),
+            color: "red",
+          });
+          return;
+        }
+      } else {
+        throw error;
+      }
     }
     toast.add({
-      title: "Success",
-      description: "Course created",
+      title: t("course_created.title"),
+      description: t("course_created.description"),
       color: "green",
     });
     if (data) {
       emit("course-created", data[0]);
+      tutorialStore.completeStep("step-2");
     }
   } catch (error) {
     console.error(error);
     toast.add({
-      title: "Error",
-      description: "Could not create course",
+      title: t("course_error.title"),
+      description: t("course_error.description"),
       color: "red",
     });
   }
@@ -263,16 +284,11 @@ const updateCourse = async (
       .eq("id", course_id)
       .select("*");
     if (error) {
-      toast.add({
-        title: "Error",
-        description: "Could not Update course",
-        color: "red",
-      });
       throw error;
     }
     toast.add({
-      title: "Success",
-      description: "Course Informations Updated",
+      title: t("course_updated.title"),
+      description: t("course_updated.description"),
       color: "green",
     });
     if (data) {
@@ -281,8 +297,8 @@ const updateCourse = async (
   } catch (error) {
     console.error(error);
     toast.add({
-      title: "Error",
-      description: "Could not Update Course",
+      title: t("course_error.title"),
+      description: t("course_error.description"),
       color: "red",
     });
   }
@@ -316,6 +332,22 @@ const updateCourse = async (
       "submit": "Kurs erstellen",
       "submit_edit": "Kurs bearbeiten",
       "type_error": "Bitte wählen Sie einen gültigen Kurs aus."
+    },
+    "course_created": {
+      "title": "Kurs erstellt",
+      "description": "Der Kurs wurde erfolgreich erstellt."
+    },
+    "course_updated": {
+      "title": "Kurs aktualisiert",
+      "description": "Die Kursinformationen wurden erfolgreich aktualisiert."
+    },
+    "course_error": {
+      "title": "Fehler",
+      "description": "Der Kurs konnte nicht erstellt werden."
+    },
+    "course_error_duplicate_course_type": {
+      "title": "Fehler",
+      "description": "Es existiert bereits ein Kurs für die Fürerscheinklasse {type}."
     }
   },
   "en": {
@@ -341,6 +373,22 @@ const updateCourse = async (
       "submit": "Create Course",
       "submit_edit": "Edit Course",
       "type_error": "Please select a valid course."
+    },
+    "course_created": {
+      "title": "Course Created",
+      "description": "The course was created successfully."
+    },
+    "course_updated": {
+      "title": "Course Updated",
+      "description": "The course information was updated successfully."
+    },
+    "course_error": {
+      "title": "Error",
+      "description": "The course could not be created."
+    },
+    "course_error_duplicate_course_type": {
+      "title": "Error",
+      "description": "A course for the driver's license class {type} already exists."
     }
   }
 }
