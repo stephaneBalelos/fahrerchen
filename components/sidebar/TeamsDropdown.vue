@@ -107,7 +107,7 @@ const selectedOrganization = computed(() => {
     v-if="organizations"
     id="teams-dropdown"
     v-slot="{ open }"
-    mode="hover"
+    mode="click"
     :items="[organizations, actions]"
     class="w-full"
     :ui="{ width: 'w-full' }"
