@@ -49,6 +49,7 @@ export default defineNuxtConfig({
     '/my/**': { ssr: false },
 
   },
+
   modules: [
     '@nuxtjs/supabase',
     '@nuxt/ui',
@@ -56,7 +57,8 @@ export default defineNuxtConfig({
     '@nuxt/test-utils/module',
     '@pinia/nuxt',
     '@nuxt/eslint',
-    '@nuxtjs/turnstile'
+    '@nuxtjs/turnstile',
+    '@sentry/nuxt/module'
   ],
 
   ui: {
@@ -84,9 +86,23 @@ export default defineNuxtConfig({
     defaultLocale: 'de',
     vueI18n: './i18n.config.ts' 
   },
+
   turnstile: {
     siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY
   },
 
-  compatibilityDate: '2024-07-15'
+  compatibilityDate: '2024-07-15',
+
+  sentry: {
+    sourceMapsUploadOptions: {
+      org: 'balelos',
+      project: 'javascript-nuxt'
+    },
+
+    autoInjectServerSentry: 'top-level-import'
+  },
+
+  sourcemap: {
+    client: 'hidden'
+  }
 });

@@ -102,3 +102,5 @@ mail-preview.html
 
 # Supabase
 supabase/seeds/test_local.sql
+# Sentry Config File
+.env.sentry-build-plugin
