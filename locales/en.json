@@ -44,6 +44,69 @@
             "canceled": "Canceled"
         }
     },
+    "demo": {
+        "organization": {
+            "name": "{name}'s Driving School",
+            "address": {
+                "street": "Sample Street 123",
+                "city": "Sample City",
+                "zip": "12345",
+                "country": "Germany"
+            },
+            "phone": "+49 123 456 789",
+            "email": "{name}@karjolen.de"
+        },
+        "course": {
+            "b": {
+                "name": "Driver's License Class B",
+                "description": "Driver's License Class B - Car"
+            },
+            "a": {
+                "name": "Driver's License Class A",
+                "description": "Driver's License Class A - Motorcycle"
+            },
+            "c": {
+                "name": "Driver's License Class C",
+                "description": "Driver's License Class C - Truck"
+            }
+        },
+        "activity": {
+            "theory": {
+                "name": "Theory Lesson",
+                "description": "Learn the theory of driving"
+            },
+            "practice": {
+                "name": "Driving Lesson",
+                "description": "Practical driving lesson"
+            },
+            "exam_theory": {
+                "name": "Theory Exam",
+                "description": "Theory exam preparation and presentation fee"
+            },
+            "exam_practice": {
+                "name": "Practical Exam",
+                "description": "Practical exam preparation and presentation fee"
+            }
+        },
+        "required_document": {
+            "id": {
+                "name": "ID Card",
+                "description": "Copy of ID card"
+            },
+            "photo": {
+                "name": "Passport Photo",
+                "description": "Passport photo"
+            },
+            "vision_test": {
+                "name": "Vision Test",
+                "description": "Vision test certificate"
+            },
+            "first_aid": {
+                "name": "First Aid Course",
+                "description": "First aid course certificate"
+            }
+        }
+    },
     "tutorial": {
         "steps": {
             "school_information": {

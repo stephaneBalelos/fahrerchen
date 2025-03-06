@@ -44,6 +44,69 @@
             "canceled": "Storniert"
         }
     },
+    "demo": {
+        "organization": {
+            "name": "{name}s Fahrschule",
+            "address": {
+                "street": "Musterstraße 123",
+                "city": "Musterstadt",
+                "zip": "12345",
+                "country": "Deutschland"
+            },
+            "phone": "+49 123 456 789",
+            "email": "{name}@karjolen.de"
+        },
+        "course": {
+            "b": {
+                "name": "Führerschein Klasse B",
+                "description": "Führerschein Klasse B - PKW"
+            },
+            "a": {
+                "name": "Führerschein Klasse A",
+                "description": "Führerschein Klasse A - Motorrad"
+            },
+            "c": {
+                "name": "Führerschein Klasse C",
+                "description": "Führerschein Klasse C - LKW"
+            }
+        },
+        "activity": {
+            "theory": {
+                "name": "Theorieunterricht",
+                "description": "Lernen Sie die Theorie des Fahrens"
+            },
+            "practice": {
+                "name": "Fahrstunde",
+                "description": "Praktische Fahrstunde"
+            },
+            "exam_theory": {
+                "name": "Theorieprüfung",
+                "description": "Theorieprüfung Vorbereitung und Vorstellungsgebühr"
+            },
+            "exam_practice": {
+                "name": "Praktische Prüfung",
+                "description": "Praktische Prüfung Vorbereitung und Vorstellungsgebühr"
+            }
+        },
+        "required_document": {
+            "id": {
+                "name": "Personalausweis",
+                "description": "Personalausweis Kopie"
+            },
+            "photo": {
+                "name": "Passfoto",
+                "description": "Passfoto"
+            },
+            "vision_test": {
+                "name": "Sehtest",
+                "description": "Sehtest Bescheinigung"
+            },
+            "first_aid": {
+                "name": "Erste-Hilfe-Kurs",
+                "description": "Erste-Hilfe-Kurs Bescheinigung"
+            }
+        }
+    },
     "tutorial": {
         "steps": {
             "school_information": {

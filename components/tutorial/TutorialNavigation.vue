@@ -127,6 +127,12 @@ onMounted(() => {
     "description": "Lernen Sie die Grundlagen mit diesem Step-by-Step Tutorial.",
     "progress": "Fortschritt",
     "complete_step": "Schritt abschließen"
+  },
+  "en": {
+    "title": "Quick Start Tutorial",
+    "description": "Learn the basics with this step-by-step tutorial.",
+    "progress": "Progress",
+    "complete_step": "Complete Step"
   }
 }
 </i18n>

@@ -6,8 +6,7 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
 const config = useRuntimeConfig().public;
 
-
-const { t } = useI18n({
+const { t, setLocale } = useI18n({
   useScope: "local",
 });
 
@@ -36,8 +35,8 @@ const { data: organizations } = await useAsyncData(
     transform: (data) => {
       return data.map((d) => {
         const avatar_path = d.avatar_path
-        ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
-        : "";
+          ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
+          : "";
         return {
           id: d.id,
           label: d.name,
@@ -46,9 +45,22 @@ const { data: organizations } = await useAsyncData(
           },
           icon: avatar_path ? undefined : "i-heroicons-globe-europe-africa",
           avatar_path: avatar_path,
-          click: () => {
-            userOrganizationsStore.selectOrganization(d.id);
-            navigateTo("/my/" + d.id);
+          click: async () => {
+            if (selectedOrganization.value) {
+              try {
+                await userOrganizationsStore.selectOrganization(d.id);
+                const org =
+                  await userOrganizationsStore.fetchOrganizationData();
+
+                if (org) {
+                  await setLocale(org.preferred_language as "de" | "en");
+                }
+              } catch (error) {
+                console.error(error);
+              } finally {
+                navigateTo("/my/" + d.id);
+              }
+            }
           },
         };
       });
@@ -95,7 +107,7 @@ const selectedOrganization = computed(() => {
     v-if="organizations"
     id="teams-dropdown"
     v-slot="{ open }"
-    mode="hover"
+    mode="click"
     :items="[organizations, actions]"
     class="w-full"
     :ui="{ width: 'w-full' }"
