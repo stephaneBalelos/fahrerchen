@@ -13,7 +13,7 @@
       <UNavigationTree :links="links" />
     </div>
 
-    <div class="grow relative" v-if="stripeStore.stripeAccount.details_submitted">
+    <div v-if="stripeStore.stripeAccount.details_submitted" class="grow relative">
       <div class="absolute inset-0 overflow-y-auto p-4">
         <div class="pb-4">
           <StripeEmbeddedComponent :component="'notification-banner'" />
@@ -21,8 +21,8 @@
         <NuxtPage />
       </div>
     </div>
-    <div class="absolute inset-0 p-4 overflow-y-auto" v-else>
-      <StripeOnboarding @exit="stripeStore.fetchStripeAccount"/>
+    <div v-else class="absolute inset-0 p-4 overflow-y-auto">
+      <StripeOnboarding @exit="onOnboardingExit"/>
     </div>
 
     <!-- <StripeOnboarding /> -->
@@ -57,18 +57,16 @@
 <script setup lang="ts">
 import StripeEmbeddedComponent from "~/components/settings/stripe/StripeEmbeddedComponent.vue";
 import StripeOnboarding from "~/components/settings/stripe/StripeOnboarding.vue";
-import type { Database, StripeConnectPostBody } from "~/types/app.types";
+import type { StripeConnectPostBody } from "~/types/app.types";
 
-const client = useSupabaseClient<Database>();
 const userOrganizationStore = useUserOrganizationsStore();
 const stripeStore = useStripeStore();
 const { t } = useI18n({
   useScope: "local",
 });
 
-const modal = useModal();
-
 const connectIsLoading = ref(false);
+const tutorialStore = useTutorialStore();
 
 const links = [
   {
@@ -114,6 +112,13 @@ async function connectStripe() {
     console.error(error);
   } finally {
     connectIsLoading.value = false;
+  }
+}
+
+async function onOnboardingExit() {
+  await stripeStore.fetchStripeAccount();
+  if (stripeStore.stripeAccount?.details_submitted) {
+    tutorialStore.completeStep('enable_payment')
   }
 }
 </script>

@@ -4,7 +4,7 @@
       v-if="userOrganizationsStore.selectedOrganization?.organization_id"
       class="grid lg:grid-cols-3 gap-4"
     >
-      <UTabs :items="tabs" class="w-full col-span-2">
+      <UTabs v-if="tabs.length > 0" :items="tabs" class="w-full col-span-2">
         <template #item="{ item }">
           <CourseActivitySchedulesSection
             v-if="course_activities"
@@ -20,6 +20,12 @@
           />
         </template>
       </UTabs>
+      <div v-else class="w-full col-span-2">
+        <UAlert
+          :title="t('no_activities')"
+          :description="t('no_activities_description')"
+        />
+      </div>
       <FormsCourseDocumentsForm
         v-if="userOrganizationsStore.selectedOrganization"
         :orgid="userOrganizationsStore.selectedOrganization.organization_id"
@@ -37,6 +43,10 @@ type Props = {
 };
 definePageMeta({
   layout: "orgs",
+});
+
+const { t } = useI18n({
+  useScope: "local",
 });
 
 const props = useAttrs() as Props;
@@ -80,3 +90,18 @@ const tabs = computed(() => {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "title": "Aktivitäten",
+    "no_activities": "Keine Aktivitäten",
+    "no_activities_description": "Es gibt keine Aktivitäten für diesen Kurs. Gehen Sie zur Kurseinstellungen, um Aktivitäten hinzuzufügen."
+  },
+  "en": {
+    "title": "Activities",
+    "no_activities": "No activities",
+    "no_activities_description": "There are no activities for this course."
+  }
+}
+</i18n>

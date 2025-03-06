@@ -1,5 +1,5 @@
 <template>
-  <UDashboardSlideover title="Subscribe Student">
+  <UDashboardSlideover :title="t('title')">
     <UCard
       :ui="{ header: { padding: 'p-4 sm:px-6' }, body: { padding: '' } }"
       class="min-w-0"
@@ -8,11 +8,11 @@
         <UInput
           v-model="q"
           icon="i-heroicons-magnifying-glass"
-          placeholder="Search Students"
+          :placeholder="t('search_students')"
           autofocus
         />
       </template>
-      <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-800">
+      <ul v-if="filteredStudents.length > 0" role="list" class="divide-y divide-gray-200 dark:divide-gray-800">
         <li
           v-for="(student, index) in filteredStudents"
           :key="index"
@@ -41,6 +41,11 @@
           </div>
         </li>
       </ul>
+      <UAlert
+        v-else
+        :title="t('no_students_found')"
+        :description="t('no_students_found_description')"
+      />
     </UCard>
 
     <template #footer>
@@ -51,10 +56,10 @@
           icon="i-heroicons-command-line"
           color="primary"
           variant="solid"
-          :title="`${selected.length} student(s) selected`"
+          :title="t('student_to_add', { count: selected.length })"
         />
         <UButton v-if="selected.length > 0" block @click="addStudents"
-          >{{ selected.length }} Add Students</UButton
+          >{{ t('add_students') }}</UButton
         >
       </div>
     </template>
@@ -68,6 +73,12 @@ type Props = {
   courseid: string;
   orgid: string;
 };
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
+const tutorialStore = useTutorialStore();
 
 const props = defineProps<Props>();
 
@@ -83,8 +94,6 @@ const selected = ref<string[]>([]);
 
 const {
   data: students,
-  error,
-  refresh,
 } = await useAsyncData(
   `students_${props.courseid}`,
   async () => {
@@ -92,7 +101,8 @@ const {
       .from("students")
       .select("*, course_subscriptions(*)")
       .eq("course_subscriptions.course_id", props.courseid)
-      .is("course_subscriptions", null);
+      .is("course_subscriptions", null)
+      .eq("organization_id", props.orgid);
     if (error) {
       console.error(error);
       throw error;
@@ -114,7 +124,7 @@ const filteredStudents = computed(() => {
 
 function addStudents() {
   selected.value.forEach(async (studentId) => {
-    const { data, error } = await supabase.from("course_subscriptions").insert({
+    const { error } = await supabase.from("course_subscriptions").insert({
       course_id: props.courseid,
       student_id: studentId,
       organization_id: props.orgid,
@@ -135,8 +145,34 @@ function addStudents() {
       timeout: 3000,
     });
     emits("student-added");
+    tutorialStore.completeStep('course_student_enroll')
   });
 }
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "title": "Registrieren Sie Student",
+    "search_students": "Suche Studenten",
+    "no_students_found": "Keine Studenten gefunden",
+    "no_students_found_description": "Keine Studenten gefunden, die dem Kurs hinzugefügt werden können",
+    "add_students": "Studenten hinzufügen",
+    "student_added": "Student hinzugefügt",
+    "student_added_description": "Der Student wurde dem Kurs hinzugefügt.",
+    "student_to_add": "{count} Student(innen) hinzufügen"
+  },
+  "en": {
+    "title": "Subscribe Student",
+    "search_students": "Search Students",
+    "no_students_found": "No students found",
+    "no_students_found_description": "No students found",
+    "add_students": "Add Students",
+    "student_added": "Student added",
+    "student_added_description": "The student has been added to the course.",
+    "student_to_add": "Add {count} Student(s)"
+  }
+}
+</i18n>

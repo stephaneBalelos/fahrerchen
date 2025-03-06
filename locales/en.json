@@ -43,5 +43,61 @@
             "unpaid": "Unpaid",
             "canceled": "Canceled"
         }
+    },
+    "tutorial": {
+        "steps": {
+            "school_information": {
+                "title": "Driving School Information",
+                "description": "Add your driving school information so your students know where you are located and how to contact you. You can also add your logo. Go to Settings > General."
+            },
+            "course_create": {
+                "title": "Create Courses",
+                "description": "Create the courses you want to offer. You can create different courses for different vehicle types or classes. Go to Courses and click on Create Course."
+            },
+            "course_activity_create": {
+                "title": "Create Course Activities",
+                "description": "Create course activities such as driving lessons, theory classes, exams, etc. Go to the course you want to edit, click on Settings, and scroll down to Course Activities."
+            },
+            "course_document_create": {
+                "title": "Required Course Documents",
+                "description": "Add the required documents for the course so your students know what documents they need for the course. Go to the course you want to edit, click on Settings, and scroll down to Required Documents."
+            },
+            "enable_payment": {
+                "title": "Enable Online Payment",
+                "description": "To receive payments from your students, we have an integration with Stripe. Go to Settings > Payments and connect your Stripe account. In this demo, no real credentials are required and no real payments will be made."
+            },
+            "course_student_invite": {
+                "title": "Invite Your Students",
+                "description": "Invite your students so they can sign up and book activities. Go to Students and click on New Student. You can also invite students by sending them the registration link via email, sharing a link, or adding them manually. For this demo, please add the student manually."
+            },
+            "course_student_enroll": {
+                "title": "Enroll Students in Courses",
+                "description": "The new student from step 6 can now be enrolled in a course. Go to Courses and click on the course you want to edit. Click on Participants and add the new student."
+            },
+            "activity_schedule_create": {
+                "title": "Schedule Activities",
+                "description": "Schedule activities for your students. Go to Courses and click on the course you want to edit. Click on Activities and add a new appointment for an activity you created."
+            },
+            "activity_schedule_attendance": {
+                "title": "Participate in Activities",
+                "description": "Students can participate in the activities you have scheduled. You can check attendance and update the status of the activity. Go to Courses and click on the course you want to edit. Click on Activities and see the participant list. Click on the checkbox next to the student to confirm attendance."
+            },
+            "invoice_create": {
+                "title": "Create Invoices",
+                "description": "Based on the students' participation in activities, invoices are automatically created every month. You can also create, confirm, and cancel invoices manually. Find a student in the participant list and click on Billing. Create a new invoice by clicking on Create Invoice Now."
+            },
+            "invoice_send": {
+                "title": "Share Invoice",
+                "description": "After creating the invoice, you can share it so the student can see and pay it. If the student has paid the invoice through other means, you can mark the invoice as paid. Go to Invoices and click on the invoice you want to share. Click on Mark as Ready for Payment. The student will receive an email that the invoice is ready."
+            },
+            "tutorial_continue_as_student": {
+                "title": "Continue as a Student",
+                "description": "You can log in as a student and see the platform from a student's perspective. For this demo, find the student you created in step 6. Make sure the student's email is correct, as students will receive an email to sign up. Click on Students and find the student you created. To the right of the student, you will find the eye icon. Click on it to open the Student Panel. Then click on Send Invitation. The student will receive an email to sign up."
+            },
+            "tutorial_complete": {
+                "title": "That's it!",
+                "description": "You have set up your platform and can now manage your students. Now log in as a student and see how it looks. Have fun!"
+            }
+        }
     }
 }

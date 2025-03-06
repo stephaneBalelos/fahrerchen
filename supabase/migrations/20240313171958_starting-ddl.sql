@@ -104,13 +104,14 @@ create table public.users (
   lastname    text,
   fullname    text generated always as (coalesce(firstname, '') || ' ' || coalesce(lastname, '')) stored,
   avatar_path  text,
-  status      user_status default 'OFFLINE'::public.user_status
+  status      user_status default 'OFFLINE'::public.user_status,
+  tutorial_data jsonb default '[]'::jsonb
 );
 comment on table public.users is 'Profile data for each user.';
 comment on column public.users.id is 'References the internal Supabase Auth user.';
 alter table public.users enable row level security;
 revoke update on table public.users from authenticated, anon;
-grant update (firstname, lastname, avatar_path) on table public.users to authenticated;
+grant update (firstname, lastname, avatar_path, tutorial_data) on table public.users to authenticated;
 
 
 -- ORGANIZATIONS
@@ -750,6 +751,11 @@ begin
   org_id := new.organization_id;
   select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
 
+  -- check if Student Belong to the Organization
+  if not exists (select 1 from public.students where id = new.student_id and organization_id = org_id) then
+    raise exception 'Student does not belong to the organization';
+  end if;
+
   -- if the course is not active, raise an exception
   if not is_course_active then
     raise exception 'Course is not active';
@@ -1195,6 +1201,7 @@ create policy "Owner & Manager can update organizations_stripe_accounts" on publ
 
 -- Organization Members Policies
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
+create policy "Owner can insert organization_members" on public.organization_members for insert to authenticated with check (public.authorize('organization_members.create', organization_id) or public.is_main_owner(organization_id));
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 create policy "Owner can delete organization_members" on public.organization_members for delete to authenticated using ((public.authorize('organization_members.delete', organization_id)) or (auth.uid() = user_id));
 

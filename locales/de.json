@@ -43,5 +43,61 @@
             "unpaid": "Unbezahlt",
             "canceled": "Storniert"
         }
+    },
+    "tutorial": {
+        "steps": {
+            "school_information": {
+                "title": "Fahrschule Informationen",
+                "description": "Fügen Sie die Informationen Ihrer Fahrschule hinzu, damit Ihre Schüler:innen wissen, wo sie sich befinden und wie sie Sie kontaktieren können. Sie können auch Ihr Logo hinzufügen. Gehen Sie zu Einstellungen > Allgemein."
+            },
+            "course_create": {
+                "title": "Erstellen Sie Kurse",
+                "description": "Erstellen Sie Kurse, die Sie anbieten möchten. Sie Können verschiedene Kurse für verschiedene fahrzeugtypen bzw. Klassen erstellen. Gehen Sie zu Kurse und klicken Sie auf Kurs erstellen."
+            },
+            "course_activity_create": {
+                "title": "Erstellen Sie Kursaktivitäten",
+                "description": "Erstellen Sie Kursaktivitäten, wie Fahrstunden, Theorieunterricht, Prüfungen, etc. Gehen Sie zu den Kurs, den Sie bearbeiten möchten, und klicken Sie auf Einstellungen und scrollen Sie nach unten zu Kursaktivitäten."
+            },
+            "course_document_create": {
+                "title": "Erforderliche Kurs Dokumente",
+                "description": "Fügen Sie die erforderlichen Dokumente für den Kurs hinzu, damit Ihre Schüler:innen wissen, welche Dokumente sie für den Kurs benötigen. Gehen Sie zu den Kurs, den Sie bearbeiten möchten, und klicken Sie auf Einstellungen und scrollen Sie nach unten zu Erforderliche Dokumente."
+            },
+            "enable_payment": {
+                "title": "Aktivieren Sie die Online-Zahlung",
+                "description": "Damit Sie Zahlungen von Ihren Schüler:innen erhalten können, haben wir eine Integration mit Stripe. Gehen Sie zu Einstellungen > Zahlungen und verbinden Sie Ihr Stripe-Konto. In dieser Demo können werden keine echte anmeldeinformationen benötigt und keine echten Zahlungen durchgeführt."
+            },
+            "course_student_invite": {
+                "title": "Laden Sie Ihre Schüler:innen ein",
+                "description": "Laden Sie Ihre Schüler:innen ein, damit sie sich anmelden und Aktivitäten buchen können. Gehen Sie zu Schüler:innen und klicken Sie auf neuer Fahrschüler:in. Sie können auch Schüler:innen einladen, indem Sie ihnen den Registrierungslink per E-Mail senden, einen Link Teilen oder Manuell hinzufügen. Für diese Demo tragen Sie bitte den Schüler manuell ein."
+            },
+            "course_student_enroll": {
+                "title": "Schüler:innen im Kurs anmelden",
+                "description": "Der neue Schüler aus Schritt 6 kann nun im Kurs angemeldet werden. Gehen Sie zu Kurse und klicken Sie auf den Kurs, den Sie bearbeiten möchten. Klicken Sie auf Teilnehmer und fügen Sie den neuen Schüler hinzu."
+            },
+            "activity_schedule_create": {
+                "title": "Aktivität Terminplanung",
+                "description": "Planen Sie Aktivitäten für Ihre Schüler:innen. Gehen Sie zu Kurse und klicken Sie auf den Kurs, den Sie bearbeiten möchten. Klicken Sie auf Aktivitäten und fügen Sie einen neuen Termin für eine von Ihnen erstellte Aktivität hinzu."
+            },
+            "activity_schedule_attendance": {
+                "title": "Teilnahme an Aktivitäten",
+                "description": "Schüler:innen können an den Aktivitäten teilnehmen, die Sie geplant haben. Sie können die Teilnahme überprüfen und den Status der Aktivität aktualisieren. Gehen Sie zu Kurse und klicken Sie auf den Kurs, den Sie bearbeiten möchten. Klicken Sie auf Aktivitäten und sehen Sie die Teilnehmerliste. Klicken Sie auf die Checkbox neben dem Schüler, um die Teilnahme zu bestätigen."
+            },
+            "invoice_create": {
+                "title": "Rechnungen erstellen",
+                "description": "Basiert auf die Teilnahmen der Schüler:innen an den Aktivitäten, werden Rechnungen automatich jeden Monat erstellt. Sie können Rechnungen auch manuell erstellen, bestätigen und stornieren. Gehen Sie Finden Sie einen Schüler in der Teilnehmerliste und klicken sie auf Abbrechnungen. Erstellen Sie eine neue Rechnung, indem Sie auf Rechnung jetzt erstellen klicken."
+            },
+            "invoice_send": {
+                "title": "Rechnung Freigeben",
+                "description": "Nachdem Sie die Rechnung erstellt haben, können Sie sie freigeben, damit der Schüler sie sehen und bezahlen kann. Wenn der Schüler über andere Wege die Rechnung bezahlt hat, können Sie die Rechnung als bezahlt markieren. Gehen Sie zu Rechnungen und klicken Sie auf die Rechnung, die Sie freigeben möchten. Klicken Sie auf als Zahlungsbereit markieren. Den Schüler wird eine E-Mail erhalten, dass die Rechnung bereit ist."
+            },
+            "tutorial_continue_as_student": {
+                "title": "Weiter als Schüler:in",
+                "description": "Sie können sich als Schüler:in anmelden und die Plattform aus der Sicht eines Schülers sehen. Für diese Demo können Finden Sie den Schüler den Sie beim Schritt 6 erstellt haben. Vergewissen Sie sich, dass die E-Mail des Schülers korrekt ist, da Schüler:innen eine E-Mail erhalten, um sich anzumelden. Klicken Sie auf Schüler:innen und finden Sie den Schüler, den Sie erstellt haben. Rechts neben dem Schüler finden Sie das Auge-Symbol. Klicken Sie darauf, um den Student Panel zu öffnen. Dann klicken Sie auf Einladung senden. Der Schüler erhält eine E-Mail, um sich anzumelden."
+            },
+            "tutorial_complete": {
+                "title": "Das war's!",
+                "description": "Sie haben Ihre Plattform eingerichtet und können jetzt Ihre Schüler:innen verwalten. Jetzt melden Sie sich als Schüler:in an und sehen Sie, wie es aussieht. Viel Spaß!"
+            }
+        }
     }
 }

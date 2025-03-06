@@ -139,6 +139,8 @@ const toast = useToast();
 const { t } = useI18n({ useScope: "local" });
 const slideover = useSlideover();
 
+const tutorialStore = useTutorialStore();
+
 const { data: bill, refresh } = useAsyncData(`bills_${id}`, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
@@ -191,6 +193,7 @@ async function markAsReadyToPay() {
       color: "green",
     });
     refresh();
+    tutorialStore.completeStep("invoice_send")
   } catch (error) {
     console.error(error);
     toast.add({

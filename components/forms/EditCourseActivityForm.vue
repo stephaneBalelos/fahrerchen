@@ -5,7 +5,7 @@
       :state="state"
       :validate="validate"
       :validate-on="['submit']"
-      :on-submit="saveCourseActivity"
+      @submit="saveCourseActivity"
     >
       <UDashboardSection
         :title="t('form_section_title')"
@@ -138,6 +138,8 @@ const { t } = useI18n({
   useScope: 'local'
 })
 
+const tutorialStore = useTutorialStore();
+
 const slideover = useSlideover();
 
 const toast = useToast();
@@ -257,6 +259,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
     }
     console.log(data);
     $emit("activity-saved");
+    tutorialStore.completeStep('course_activity_create')
   } catch (error) {
     console.log(error);
     toast.add({

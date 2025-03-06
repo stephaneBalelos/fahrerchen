@@ -1,14 +1,15 @@
 <template>
-    <div
-      :class="`${isVisible ? 'visible' : 'invisible'}`"
-      ref="stripeOnboardingElement"
-      :id="`stripe-onboarding-element-onboarding`"
-    ></div>
+  <div
+    :id="`stripe-onboarding-element-onboarding`"
+    ref="stripeOnboardingElement"
+    :class="`${isVisible ? 'visible' : 'invisible'}`"
+  >
     <div v-if="!isVisible" class="grid gap-2">
       <USkeleton class="h-4 w-full" />
       <USkeleton class="h-60 w-full" />
       <USkeleton class="h-60 w-full" />
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -16,7 +17,7 @@ import { loadConnectAndInitialize } from "@stripe/connect-js";
 import { useCssVar } from "@vueuse/core";
 
 const $emit = defineEmits(["exit"]);
-const { t, locale } = useI18n({
+const { locale } = useI18n({
   useScope: "local",
 });
 
@@ -55,7 +56,7 @@ onMounted(() => {
     el.setOnExit(() => {
       $emit("exit");
     });
-    el.setOnLoaderStart((event) => {
+    el.setOnLoaderStart(() => {
       isVisible.value = true;
     });
     stripeOnboardingElement.value.appendChild(el);

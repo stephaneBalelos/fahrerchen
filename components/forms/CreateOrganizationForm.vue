@@ -173,7 +173,7 @@ const createOrganization = async () => {
     return;
   }
 
-  const { data, error } = await client.from("organizations").insert({
+  const { error } = await client.from("organizations").insert({
     ...state.value,
     owner_id: user.value.id,
   });

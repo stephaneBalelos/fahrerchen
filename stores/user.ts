@@ -37,8 +37,20 @@ export const useUserStore = defineStore('user', () => {
         }
         user.value = data
     }
+
+    async function updateUser(data: Partial<AppUser>) {
+        if (!authUser.value) {
+            throw new Error('no user logged in')
+        }
+        const { error } = await supabase.from('users').update(data).eq('id', authUser.value.id);
+        if (error) {
+            console.error(error)
+            return
+        }
+        await refreshUser()
+    }
     
 
-    return { user, refreshUser }
+    return { user, refreshUser, updateUser }
     
 });

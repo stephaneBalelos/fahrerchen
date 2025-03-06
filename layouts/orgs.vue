@@ -27,7 +27,9 @@
             @update:links="(links) => (defaultColors = links)"
           /> -->
 
-        <div class="flex-1" />
+        <div class="flex-1">
+          <TutorialNavigation v-if="runtimeConfig.public.show_tutorial" />
+        </div>
 
         <UDivider class="sticky bottom-0" />
 
@@ -48,7 +50,7 @@ import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 
-// const runtimeConfig = useRuntimeConfig();
+const runtimeConfig = useRuntimeConfig();
 
 
 // const { t } = useI18n({
