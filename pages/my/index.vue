@@ -19,6 +19,7 @@ function openCreateOrgModal() {
     },
     onCreated: () => {
       organizationsStore.loadOrganizationsMemberships();
+      modal.close();
     },
   })
 }

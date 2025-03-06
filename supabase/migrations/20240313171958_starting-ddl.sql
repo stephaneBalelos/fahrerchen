@@ -1201,6 +1201,7 @@ create policy "Owner & Manager can update organizations_stripe_accounts" on publ
 
 -- Organization Members Policies
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
+create policy "Owner can insert organization_members" on public.organization_members for insert to authenticated with check (public.authorize('organization_members.create', organization_id) or public.is_main_owner(organization_id));
 create policy "Owner can update organization_members" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 create policy "Owner can delete organization_members" on public.organization_members for delete to authenticated using ((public.authorize('organization_members.delete', organization_id)) or (auth.uid() = user_id));
 
