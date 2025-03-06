@@ -8,13 +8,13 @@
       @submit="saveCourseRequirement"
     >
       <UDashboardSection
-        title="Course Requirement"
-        description="This information will be displayed publicly so be careful what you share."
+        :title="t('required_document')"
+        :description="t('required_document_description')"
       >
         <UFormGroup
           name="name"
-          label="Requirement Name"
-          description="Will appear on receipts, invoices, and other communication."
+          :label="t('form.name.label')"
+          :description="t('form.name.description')"
           required
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
@@ -24,8 +24,8 @@
 
         <UFormGroup
           name="description"
-          label="Course Description"
-          description="Describe your course in detail."
+          :label="t('form.description.label')"
+          :description="t('form.description.description')"
           class="grid gap-2"
           :ui="{ container: '' }"
         >
@@ -40,8 +40,12 @@
     </UForm>
 
     <template #footer>
-      <UButton>Cancel</UButton>
-      <UButton @click="form?.submit()">Save</UButton>
+      <UButton @click="form?.submit()">
+        {{ t('save') }}
+      </UButton>
+      <!-- <UButton v-if="props.requirementid" variant="ghost" color="red" @click="deleteCourseRequirement">
+        {{ t('delete') }}
+      </UButton> -->
     </template>
   </UDashboardSlideover>
 </template>
@@ -67,23 +71,36 @@ const client = useSupabaseClient<Database>();
 const form = ref<Form<CourseRequirementEdit> | null>(null);
 const $emit = defineEmits(['requirement-saved', 'requirement-created']);
 
+const state = reactive<CourseRequirementEdit>({
+  name: "",
+  description: ""
+});
+
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const {
   data: requirement,
-
 } = useAsyncData(`course_requirement_${props.requirementid}`, async () => {
+  console.log(props.requirementid);
   if (!props.requirementid) return null;
-  const { data } = await client
+  const { data, error } = await client
     .from("course_required_documents")
     .select("*")
     .eq("id", props.requirementid)
     .single();
+
+    console.log(data);
+
+    if (error) {
+        console.error(error);
+        throw error;
+    } else {
+      state.name = data.name;
+      state.description = data.description;
+    }
   return data;
-});
-
-
-const state = reactive<CourseRequirementEdit>({
-  name: "",
-  description: ""
 });
 
 onMounted(() => {
@@ -134,6 +151,47 @@ const createCourseRequirement = async () => {
         console.error(error);
     }
 };
+
+const _deleteCourseRequirement = async () => {
+  console.log('delete');
+};
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "required_document": "Erforderliches Dokument",
+    "required_document_description": "Beschreiben Sie das erforderliche Dokument, das die Teilnehmer:innen hochladen müssen, um den Kurs abzuschließen.",
+    "form": {
+      "name": {
+        "label": "Name",
+        "description": "Geben Sie den Namen des erforderlichen Dokuments ein."
+      },
+      "description": {
+        "label": "Beschreibung",
+        "description": "Beschreiben Sie das erforderliche Dokument."
+      }
+    },
+    "save": "Speichern",
+    "delete": "Löschen"
+  },
+  "en": {
+    "required_document": "Required Document",
+    "required_document_description": "Describe the required document that participants need to upload to complete the course.",
+    "form": {
+      "name": {
+        "label": "Name",
+        "description": "Enter the name of the required document."
+      },
+      "description": {
+        "label": "Description",
+        "description": "Describe the required document."
+      }
+    },
+    "save": "Save",
+    "delete": "Delete"
+  }
+}
+</i18n>
