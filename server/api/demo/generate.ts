@@ -10,7 +10,7 @@ import type { AppCourse, AppCourseActivity, AppStudent, Database } from '~/types
 export default defineEventHandler(async (event) => {
 
     const user = event.context.auth as User
-
+    const locale = getCookie(event, 'i18n_redirected') || 'de'
     if (!user) {
         return createError({
             status: 403,
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
         const { data: org } = await client.from('organizations').insert({
             name: event.context.$t('demo.organization.name', { name: user_data.firstname }),
             owner_id: user.id,
-            preferred_language: 'de',
+            preferred_language: locale === 'de' ? 'de' : 'en',
             address_city: address.data[0].city,
             address_country: "Deutschland",
             address_street: address.data[0].street,

@@ -50,6 +50,19 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         selectedOrganization.value = organizations.value.find(org => org.organization_id === org_id) ?? null
     }
 
+    async function fetchOrganizationData() {
+        if (!selectedOrganization.value) {
+            return
+        }
+        const { data, error } = await supabase.from('organizations').select('*').eq('id', selectedOrganization.value.organization_id).single()
+        if (error) {
+            console.error(error)
+            throw error
+        }
+        return data
+        
+    }
+
     function clearSelectedOrganization() {
         selectedOrganization.value = null
     }
@@ -62,7 +75,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
+    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, fetchOrganizationData, createOrganization, selectOrganization, clearSelectedOrganization }
 
     
 })
