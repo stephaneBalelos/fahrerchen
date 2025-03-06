@@ -11,8 +11,6 @@ export default defineEventHandler(async (event) => {
 
     const user = event.context.auth as User
 
-    console.log('start generating demo data')
-
     if (!user) {
         return createError({
             status: 403,
@@ -40,7 +38,7 @@ export default defineEventHandler(async (event) => {
         const students = await $fetch(`${faker_base_url}/persons?_quantity=30&_birthday_start=2005-01-01&_birthday_end=2006-12-31&_locale=DE`) as any
         // Generate Organisation
         const { data: org } = await client.from('organizations').insert({
-            name: `${user_data.firstname}'s Fahrschule`,
+            name: event.context.$t('demo.organization.name', { name: user_data.firstname }),
             owner_id: user.id,
             preferred_language: 'de',
             address_city: address.data[0].city,
@@ -60,8 +58,8 @@ export default defineEventHandler(async (event) => {
         // Generate Courses
         const { data: courses } = await client.from('courses').insert([
             {
-                name: 'Führerschein Klasse B',
-                description: 'Führerschein Klasse B - PKW',
+                name: event.context.$t('demo.course.b.name'),
+                description: event.context.$t('demo.course.b.description'),
                 organization_id: org.id,
                 allow_self_registration: false,
                 create_bill_on_subscription: false,
@@ -69,8 +67,8 @@ export default defineEventHandler(async (event) => {
                 type: 5
             },
             {
-                name: 'Führerschein Klasse A',
-                description: 'Führerschein Klasse A - Motorrad',
+                name: event.context.$t('demo.course.a.name'),
+                description: event.context.$t('demo.course.a.description'),
                 organization_id: org.id,
                 allow_self_registration: false,
                 create_bill_on_subscription: true,
@@ -90,8 +88,8 @@ export default defineEventHandler(async (event) => {
         const courseActivities = courses.map((course: AppCourse) => {
             const course_activities: Omit<AppCourseActivity, "id">[] = [
                 {
-                    name: 'Theorie',
-                    description: 'Theorieunterricht',
+                    name: event.context.$t('demo.activity.theory.name'),
+                    description: event.context.$t('demo.activity.theory.description'),
                     course_id: course.id,
                     organization_id: org.id,
                     activity_type: 1,
@@ -100,18 +98,18 @@ export default defineEventHandler(async (event) => {
                     sorting_order: 1
                 },
                 {
-                    name: 'Praxis',
-                    description: 'Praxisunterricht',
+                    name: event.context.$t('demo.activity.practice.name'),
+                    description: event.context.$t('demo.activity.practice.description'),
                     course_id: course.id,
                     organization_id: org.id,
                     activity_type: 2,
-                    price: 45,
+                    price: 55,
                     required: 12,
                     sorting_order: 2
                 },
                 {
-                    name: 'Theorieprüfung',
-                    description: 'Theorieprüfung',
+                    name: event.context.$t('demo.activity.exam_theory.name'),
+                    description: event.context.$t('demo.activity.exam_theory.description'),
                     course_id: course.id,
                     organization_id: org.id,
                     activity_type: 3,
@@ -120,8 +118,8 @@ export default defineEventHandler(async (event) => {
                     sorting_order: 3
                 },
                 {
-                    name: 'Praxisprüfung',
-                    description: 'Praxisprüfung',
+                    name: event.context.$t('demo.activity.exam_practice.name'),
+                    description: event.context.$t('demo.activity.exam_practice.description'),
                     course_id: course.id,
                     organization_id: org.id,
                     activity_type: 4,
@@ -148,26 +146,26 @@ export default defineEventHandler(async (event) => {
                 {
                     course_id: course.id,
                     organization_id: org.id,
-                    name: 'Personalausweis',
-                    description: 'Personalausweis'
+                    name: event.context.$t('demo.required_document.id.name'),
+                    description: event.context.$t('demo.required_document.id.description')
                 },
                 {
                     course_id: course.id,
                     organization_id: org.id,
-                    name: 'Passbild',
-                    description: 'Passbild'
+                    name: event.context.$t('demo.required_document.photo.name'),
+                    description: event.context.$t('demo.required_document.photo.description')
                 },
                 {
                     course_id: course.id,
                     organization_id: org.id,
-                    name: 'Sehtest',
-                    description: 'Sehtest'
+                    name: event.context.$t('demo.required_document.vision_test.name'),
+                    description: event.context.$t('demo.required_document.vision_test.description')
                 },
                 {
                     course_id: course.id,
                     organization_id: org.id,
-                    name: 'Erste Hilfe Kurs',
-                    description: 'Erste Hilfe Kurs'
+                    name: event.context.$t('demo.required_document.first_aid.name'),
+                    description: event.context.$t('demo.required_document.first_aid.description')
                 }
             ]
         }).flat()
