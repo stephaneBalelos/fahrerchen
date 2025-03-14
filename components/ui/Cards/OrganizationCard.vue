@@ -8,7 +8,7 @@
     @click="navigateTo(`/my/${organization.id}`)"
   >
     <template #description>
-      {{ t("created_at", { date: formatDate(organization.inserted_at) }) }}
+      {{ t("created_at", { date: getLocalizedDateTimeString(new Date(organization.inserted_at), { timeStyle: 'short'}) }) }}
     </template>
     <template #icon>
       <UAvatar :src="organization.avatar" :alt="organization.name" size="lg" />
@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
-import { formatDate } from "~/utils/formatters";
+import { getLocalizedDateTimeString } from "~/utils/formatters";
 
 type Props = {
   orgId: string;
