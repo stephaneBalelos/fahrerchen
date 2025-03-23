@@ -1969,7 +1969,7 @@ packages:
       pathe: 2.0.3
       std-env: 3.8.1
 
-  /@nuxt/scripts@0.11.2(@stripe/stripe-js@4.10.0)(@unhead/vue@2.0.0-rc.13)(nuxt@3.16.1)(typescript@5.8.2)(vue@3.5.13):
+  /@nuxt/scripts@0.11.2(@stripe/stripe-js@4.10.0)(@unhead/vue@2.0.0)(nuxt@3.16.1)(typescript@5.8.2)(vue@3.5.13):
     resolution: {integrity: sha512-m+/c6PevQmJOI8sepB/gN1MKhCcdNhQ/Z6kF8Nb9LN/y9xl7JAdZFRNo9aG1z3+NMjb0t9ozROs6r/M/UcdzOQ==}
     peerDependencies:
       '@stripe/stripe-js': ^5.10.0
@@ -1990,7 +1990,7 @@ packages:
     dependencies:
       '@nuxt/kit': 3.16.1(magicast@0.3.5)
       '@stripe/stripe-js': 4.10.0
-      '@unhead/vue': 2.0.0-rc.13(vue@3.5.13)
+      '@unhead/vue': 2.0.0(vue@3.5.13)
       '@vueuse/core': 13.0.0(vue@3.5.13)
       consola: 3.4.2
       defu: 6.1.4
@@ -2364,7 +2364,7 @@ packages:
       '@nuxt/scripts': ^0.11.0
     dependencies:
       '@nuxt/kit': 3.16.1(magicast@0.3.5)
-      '@nuxt/scripts': 0.11.2(@stripe/stripe-js@4.10.0)(@unhead/vue@2.0.0-rc.13)(nuxt@3.16.1)(typescript@5.8.2)(vue@3.5.13)
+      '@nuxt/scripts': 0.11.2(@stripe/stripe-js@4.10.0)(@unhead/vue@2.0.0)(nuxt@3.16.1)(typescript@5.8.2)(vue@3.5.13)
       '@types/cloudflare-turnstile': 0.2.2
       defu: 6.1.4
       pathe: 2.0.3
@@ -4448,13 +4448,13 @@ packages:
       eslint-visitor-keys: 4.2.0
     dev: true
 
-  /@unhead/vue@2.0.0-rc.13(vue@3.5.13):
-    resolution: {integrity: sha512-9jF2Y85HtEdxfaa6Y4wn2Gh1eXJHVNvvecWs3+qfEV83kSOFFowOpm6nIYmNpVGPQtnS0OW1JeIZjQEPZR+LAQ==}
+  /@unhead/vue@2.0.0(vue@3.5.13):
+    resolution: {integrity: sha512-QkgWNZ9ZWXhhTYZL2JJs33YwmJP7Ix8l28hofV0qM2txlIVhp747bdxdD/eMysMusbvvtHtMgvPEQE6kByqUTw==}
     peerDependencies:
       vue: '>=3.5.13'
     dependencies:
       hookable: 5.5.3
-      unhead: 2.0.0-rc.13
+      unhead: 2.0.0
       vue: 3.5.13(typescript@5.8.2)
 
   /@unrs/rspack-resolver-binding-darwin-arm64@1.2.2:
@@ -8441,7 +8441,7 @@ packages:
       '@nuxt/vite-builder': 3.16.1(@types/node@20.17.25)(eslint@9.23.0)(rollup@4.37.0)(typescript@5.8.2)(vue@3.5.13)
       '@oxc-parser/wasm': 0.60.0
       '@types/node': 20.17.25
-      '@unhead/vue': 2.0.0-rc.13(vue@3.5.13)
+      '@unhead/vue': 2.0.0(vue@3.5.13)
       '@vue/shared': 3.5.13
       c12: 3.0.2(magicast@0.3.5)
       chokidar: 4.0.3
@@ -10612,8 +10612,8 @@ packages:
       pathe: 2.0.3
       ufo: 1.5.4
 
-  /unhead@2.0.0-rc.13:
-    resolution: {integrity: sha512-cuG4Uu6kS9/zF2+XL/5od6S1J4GJqm3xB/I6PVoXgqEVCKryziGdLo+uaqewgOWnv5y5kDRiSuRQz/7fh0nUfw==}
+  /unhead@2.0.0:
+    resolution: {integrity: sha512-3H+CpXTMq1FPWc6tWj4VjG+NfWrIXswfpNWC29Ux8Dq0RyWcU1pF00Qx/KjaXprkXH53pE/lTT+1+D8BJ430ew==}
     dependencies:
       hookable: 5.5.3
 
