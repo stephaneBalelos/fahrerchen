@@ -8,8 +8,9 @@ export default defineEventHandler(async (event) => {
             event.context.auth = user
         }
     
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-        console.error(error)
+        event.context.auth = null
     }
 
 })
