@@ -58,7 +58,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/eslint',
     '@nuxtjs/turnstile',
-    '@sentry/nuxt/module'
+    '@sentry/nuxt/module',
+    '@nuxt/fonts'
   ],
 
   ui: {
