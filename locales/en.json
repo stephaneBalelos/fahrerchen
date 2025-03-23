@@ -37,6 +37,72 @@
             }
         }
     },
+    "course_types": {
+        "AM": {
+            "name": "AM",
+            "description": "Light two-wheeled motor vehicles with a maximum speed of no more than 45 km/h, a rated continuous power of no more than 4 kW, and an internal combustion engine with a displacement of no more than 50 cm³ or another form of drive. Three-wheeled mopeds and four-wheeled light motor vehicles with the same restrictions."
+        },
+        "A1": {
+            "name": "A1",
+            "description": "Motorcycles with a displacement of no more than 125 cm³ and an engine power of no more than 11 kW, where the power-to-weight ratio does not exceed 0.1 kW/kg. Three-wheeled motor vehicles up to 15 kW."
+        },
+        "A2": {
+            "name": "A2",
+            "description": "Motorcycles up to 35 kW power, where the power-to-weight ratio does not exceed 0.2 kW/kg and which are not derived from a motorcycle with an engine power of more than 70 kW."
+        },
+        "A": {
+            "name": "A",
+            "description": "All motorcycles and three-wheeled motor vehicles."
+        },
+        "B": {
+            "name": "B",
+            "description": "Motor vehicles with a maximum permissible mass (MPM) of no more than 3,500 kg and no more than 8 seats excluding the driver's seat (also with a trailer with an MPM of no more than 750 kg or a heavy trailer, provided the MPM of the combination does not exceed 3,500 kg)."
+        },
+        "BE": {
+            "name": "BE",
+            "description": "Combinations of a towing vehicle of class B and a trailer, provided the MPM of the trailer does not exceed 3,500 kg."
+        },
+        "C1": {
+            "name": "C1",
+            "description": "Motor vehicles with an MPM of more than 3,500 kg but not more than 7,500 kg and no more than 8 seats excluding the driver's seat (also with a trailer with an MPM of no more than 750 kg)."
+        },
+        "C1E": {
+            "name": "C1E",
+            "description": "Combinations of a towing vehicle of class C1 and a trailer over 750 kg or of class B and a trailer over 3,500 kg, provided the MPM of the combination does not exceed 12,000 kg in each case."
+        },
+        "C": {
+            "name": "C",
+            "description": "Motor vehicles with an MPM of more than 3,500 kg and no more than 8 seats excluding the driver's seat (also with a trailer with an MPM of no more than 750 kg)."
+        },
+        "CE": {
+            "name": "CE",
+            "description": "Combinations of a towing vehicle of class C and a trailer with an MPM of more than 750 kg."
+        },
+        "D1": {
+            "name": "D1",
+            "description": "Motor vehicles up to 8 m in length, designed and built to carry no more than 16 persons excluding the driver (also with a trailer with an MPM of no more than 750 kg)."
+        },
+        "D1E": {
+            "name": "D1E",
+            "description": "Combinations of a towing vehicle of class D1 and a trailer over 750 kg MPM."
+        },
+        "D": {
+            "name": "D",
+            "description": "Motor vehicles designed and built to carry more than 8 persons excluding the driver (also with a trailer with an MPM of no more than 750 kg)."
+        },
+        "DE": {
+            "name": "DE",
+            "description": "Combinations of a towing vehicle of class D and a trailer with an MPM of more than 750 kg."
+        },
+        "L": {
+            "name": "L",
+            "description": "Tractors up to 40 km/h (with trailers up to 25 km/h), which are intended by their design for use in agriculture or forestry and are used for such purposes."
+        },
+        "T": {
+            "name": "T",
+            "description": "Tractors with a design-related maximum speed of up to 60 km/h as well as self-propelled work machines and feed mixers with a design-related maximum speed of up to 40 km/h, which are each intended by their design for use in agriculture or forestry and are used for such purposes (each also with trailers)."
+        }
+    },
     "bills": {
         "status": {
             "paid": "Paid",

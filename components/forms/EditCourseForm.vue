@@ -38,7 +38,6 @@
             v-model="state.type"
             :options="COURSE_TYPES"
             :placeholder="t('form.type.placeholder')"
-            option-attribute="type"
             :leading-icon="COURSE_ICONS[state.type]"
             :ui="{ wrapper: 'app-select' }"
             :ui-menu="{

@@ -9,11 +9,11 @@ export const COURSE_TYPES: AppCourseType[] = [
 ]
 
 export const COURSE_ICONS = {
+    'B': 'ri-car-line',
     'AM': 'ri-motorbike-line',
     'A1': 'ri-motorbike-line',
     'A2': 'ri-motorbike-line',
     'A': 'ri-motorbike-line',
-    'B': 'ri-car-line',
     'BE': 'ri-caravan-line',
     'C1': 'ri-truck-line',
     'C1E': 'ri-truck-line',
