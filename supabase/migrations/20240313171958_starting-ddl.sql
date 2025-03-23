@@ -554,6 +554,7 @@ select
   course_subscriptions.organization_id,
   courses.name as course_name,
   courses.description as course_description,
+  courses.type as course_type,
   students.email as student_email,
   students.firstname as student_firstname,
   students.lastname as student_lastname

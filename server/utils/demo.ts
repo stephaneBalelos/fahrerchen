@@ -72,8 +72,6 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
         .gte('start_at', subscriptionDate.toISOString()).order('start_at', { ascending: true })
 
     if (!theorySchedules) throw new Error('No theory schedules found')
-    
-    console.log('Theory Schedules:', theorySchedules)
 
     // Generate Attendances to Theory Schedules
     let theoryAttendancesCount = 0

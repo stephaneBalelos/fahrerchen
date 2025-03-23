@@ -117,7 +117,20 @@
               :description="t('form.student.description')"
               name="student_id"
             >
-              Implements Form Student Select
+            <template #hint>
+                <UButton
+                  v-if="filterForm.student_id"
+                  icon="i-heroicons-x-mark-solid"
+                  size="2xs"
+                  color="gray"
+                  square
+                  variant="ghost"
+                  @click="filterForm.student_id = undefined"
+                />
+              </template>
+             <FormsInputsStudentSubscriptionSelect
+              v-model="filterForm.student_id"
+              :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
             </UFormGroup>
           </UDashboardCard>
         </UDashboardPanelContent>
@@ -223,6 +236,8 @@ const { data: schedules, refresh } = useAsyncData(
       return [];
     }
 
+    console.log(filterForm.value)
+
     return await courseActivitySchedules.fetchCourseActivitySchedules({
       start_at: dateStart.toISOString(),
       end_at: dateEnd.toISOString(),
@@ -249,8 +264,10 @@ const { data: schedulesForMonth } = useAsyncData(
     const { data, error } = await client
       .from("course_activity_schedules_view")
       .select("start_at")
+      .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
       .gte("start_at", dateStart.toISOString())
       .lte("end_at", dateEnd.toISOString());
+
     if (error) {
       throw error;
     }
@@ -315,6 +332,7 @@ const { data: schedulesForMonth } = useAsyncData(
       },
       "status": {
         "label": "Status",
+        "placeholder": "Choose a Status",
         "description": "Filter by the status."
       },
       "course": {
