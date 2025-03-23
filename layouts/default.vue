@@ -3,9 +3,10 @@
     <UDashboardPage>
       <UDashboardPanel grow>
         <UDashboardNavbar
-          title="Karjolen App"
+          title="Karjolen | App"
           :badge="runtimeConfig.public.app_version"
         >
+        
           <template #title>
             <NuxtLink to="/"> Karjolen App </NuxtLink>
           </template>
@@ -15,6 +16,7 @@
         </UDashboardNavbar>
 
         <slot />
+
       </UDashboardPanel>
     </UDashboardPage>
   </UDashboardLayout>

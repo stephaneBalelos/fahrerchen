@@ -42,37 +42,36 @@ async function generateDemoData() {
 </script>
 
 <template>
-  <UContainer class="w-full">
-    <UPageHeader
-      :headline="t('organizations')"
-      :title="t('my_organizations')"
-      :description="t('description')"
-      :links="[
-        { label: t('create_new_organization'), click: () => openCreateOrgModal() },
-        { label: t('generate_demo_data'), click: () => generateDemoData(), loading: isGeneratingDemoData },
-      ]"
-    />
-    <OrganizationCard
-      v-for="org in organizationsStore.organizations"
-      :key="org.organization_id"
-      :org-id="org.organization_id"
-    />
-
-    <UPageCard
-      v-if="
-        organizationsStore.organizations.length == 0 &&
-        !organizationsStore.isLoading
-      "
-      :title="t('no_organizations_found')"
-      :description="t('you_have_not_created_any_organizations_yet')"
-    />
-
-    <div v-if="organizationsStore.isLoading" class="space-y-2">
-      <USkeleton class="h-24 w-full" />
-      <USkeleton class="h-24 w-full" />
-    </div>
-
-  </UContainer>
+    <UDashboardPanelContent>
+      <UContainer class="w-full">
+        <UPageHeader
+          :headline="t('organizations')"
+          :title="t('my_organizations')"
+          :description="t('description')"
+          :links="[
+            { label: t('create_new_organization'), click: () => openCreateOrgModal() },
+            { label: t('generate_demo_data'), click: () => generateDemoData(), loading: isGeneratingDemoData },
+          ]"
+        />
+        <OrganizationCard
+          v-for="org in organizationsStore.organizations"
+          :key="org.organization_id"
+          :org-id="org.organization_id"
+        />
+        <UPageCard
+          v-if="
+            organizationsStore.organizations.length == 0 &&
+            !organizationsStore.isLoading
+          "
+          :title="t('no_organizations_found')"
+          :description="t('you_have_not_created_any_organizations_yet')"
+        />
+        <div v-if="organizationsStore.isLoading" class="space-y-2">
+          <USkeleton class="h-24 w-full" />
+          <USkeleton class="h-24 w-full" />
+        </div>
+      </UContainer>
+    </UDashboardPanelContent>
 </template>
 
 <i18n lang="json">
@@ -88,8 +87,8 @@ async function generateDemoData() {
   },
   "en": {
     "organizations": "Organizations",
-    "my_organizations": "My Organizations",
-    "description": "All your organizations in one place.",
+    "my_organizations": "My Drinving Schools",
+    "description": "All your driving schools in one place.",
     "no_organizations_found": "No organizations found",
     "you_have_not_created_any_organizations_yet": "You have not created any organizations yet.",
     "create_new_organization": "Create new organization",

@@ -78,7 +78,8 @@ export const useCourseActivitySchedules = () => {
         }
 
         if (query.student_id) {
-            q.eq("student_id", query.student_id)
+            console.log(query.student_id)
+            q.contains('attendees', [query.student_id])
         }
 
         if (query.start_at) {

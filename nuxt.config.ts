@@ -58,7 +58,8 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/eslint',
     '@nuxtjs/turnstile',
-    '@sentry/nuxt/module'
+    '@sentry/nuxt/module',
+    '@nuxt/fonts'
   ],
 
   ui: {
@@ -76,7 +77,7 @@ export default defineNuxtConfig({
       login: '/login',
       callback: '/confirm',
       exclude: ['/', '/forgot-password', '/confirm', '/login', '/signup', '/external/*'],
-      cookieRedirect: true
+      saveRedirectToCookie: true
     }
   },
 
@@ -84,21 +85,23 @@ export default defineNuxtConfig({
     strategy: 'no_prefix',
     locales: ['de', 'en'],
     defaultLocale: 'de',
-    vueI18n: './i18n.config.ts' 
+    vueI18n: "../i18n.config.ts",
+    bundle: {
+      optimizeTranslationDirective: false
+    }
   },
 
   turnstile: {
     siteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY
   },
 
-  compatibilityDate: '2024-07-15',
+  compatibilityDate: '2025-01-15',
 
   sentry: {
     sourceMapsUploadOptions: {
       org: 'balelos',
       project: 'javascript-nuxt'
     },
-
     autoInjectServerSentry: 'top-level-import'
   },
 
