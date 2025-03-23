@@ -27,7 +27,7 @@
       <template #option="{ option: person }">
         <UAvatar :alt="`${person.student_firstname} ${person.student_lastname}`" size="xs" />
         <span class="truncate">{{ `${person.student_firstname} ${person.student_lastname}` }}</span>
-        <CoursesCourseTypeBadge :id="person.course_type" />
+        <CoursesCourseTypeBadge :type="person.course_type" />
       </template>
   
       <template #option-empty="{ query }">

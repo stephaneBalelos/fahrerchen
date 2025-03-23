@@ -17,7 +17,7 @@
           <div class="flex justify-start gap-1">
             <p class="font-semibold me-2">{{ course?.name }}</p>
             <UBadge color="primary" variant="subtle" size="xs"
-              >{{ t('driving_class') }} {{ course?.type.type }}</UBadge
+              >{{ t('driving_class') }} {{ course?.type }}</UBadge
             >
           </div>
           <span class="text-sm text-gray-500">{{ course?.description }}</span>
@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
 import EditCourseForm from "~/components/forms/EditCourseForm.vue";
-import { useCourseTypes } from "~/composables/useCourseTypes";
 
 const props = defineProps<{
   orgid: string;
@@ -85,14 +84,6 @@ const { data:course, refresh } = useAsyncData(async () => {
     allowSelfRegistration.value = data.allow_self_registration;
 
   return data;
-}, {
-  transform: async (data) => {
-    const courseType = await useCourseTypes(data.type);
-    return {
-      ...data,
-      type: courseType,
-    };
-  },
 });
 
 function openCourseEditForm() {

@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
                 allow_self_registration: false,
                 create_bill_on_subscription: false,
                 is_active: true,
-                type: 5
+                type: 'B'
             },
             {
                 name: event.context.$t('demo.course.a.name'),
@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
                 allow_self_registration: false,
                 create_bill_on_subscription: true,
                 is_active: true,
-                type: 4
+                type: 'A'
             }
         ]).select('*')
 
