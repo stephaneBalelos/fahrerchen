@@ -758,24 +758,6 @@ export type Database = {
           },
         ]
       }
-      course_types: {
-        Row: {
-          description: string | null
-          id: number
-          type: Database["public"]["Enums"]["course_type"]
-        }
-        Insert: {
-          description?: string | null
-          id?: number
-          type: Database["public"]["Enums"]["course_type"]
-        }
-        Update: {
-          description?: string | null
-          id?: number
-          type?: Database["public"]["Enums"]["course_type"]
-        }
-        Relationships: []
-      }
       courses: {
         Row: {
           allow_self_registration: boolean
@@ -786,7 +768,7 @@ export type Database = {
           is_active: boolean
           name: string
           organization_id: string
-          type: number
+          type: Database["public"]["Enums"]["course_type"]
         }
         Insert: {
           allow_self_registration?: boolean
@@ -797,7 +779,7 @@ export type Database = {
           is_active?: boolean
           name: string
           organization_id: string
-          type: number
+          type: Database["public"]["Enums"]["course_type"]
         }
         Update: {
           allow_self_registration?: boolean
@@ -808,7 +790,7 @@ export type Database = {
           is_active?: boolean
           name?: string
           organization_id?: string
-          type?: number
+          type?: Database["public"]["Enums"]["course_type"]
         }
         Relationships: [
           {
@@ -823,13 +805,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_type_fkey"
-            columns: ["type"]
-            isOneToOne: false
-            referencedRelation: "course_types"
             referencedColumns: ["id"]
           },
         ]
@@ -1530,6 +1505,7 @@ export type Database = {
           course_description: string | null
           course_id: string | null
           course_name: string | null
+          course_type: Database["public"]["Enums"]["course_type"] | null
           id: string | null
           organization_id: string | null
           student_email: string | null

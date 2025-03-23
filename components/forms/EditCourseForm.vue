@@ -36,13 +36,10 @@
         >
           <USelectMenu
             v-model="state.type"
-            value-attribute="id"
-            :options="course_types ?? []"
+            :options="COURSE_TYPES"
             :placeholder="t('form.type.placeholder')"
             option-attribute="type"
-            :leading-icon="
-              selected_type ? COURSE_ICONS[selected_type.type] : undefined
-            "
+            :leading-icon="COURSE_ICONS[state.type]"
             :ui="{ wrapper: 'app-select' }"
             :ui-menu="{
               container: 'app-select-menu',
@@ -50,15 +47,15 @@
             }"
           >
             <template #option="{ option }">
-              <span class="truncate">{{ option.type }}</span>
+              <span class="truncate">{{ option }}</span>
             </template>
           </USelectMenu>
         </UFormGroup>
 
-        <UFormGroup v-if="selected_type" :ui="{ container: '' }">
+        <UFormGroup v-if="state.type" :ui="{ container: '' }">
           <UAlert
-            :title="selected_type.type"
-            :description="selected_type.description ?? ''"
+            :title="state.type"
+            :description="g(`course_types.${state.type}.description`)"
             color="primary"
             variant="subtle"
           >
@@ -108,7 +105,7 @@
 <script setup lang="ts">
 import type { Database, AppCourse } from "~/types/app.types";
 import type { FormError, FormSubmitEvent } from "#ui/types";
-import { COURSE_ICONS } from "~/constants";
+import { COURSE_ICONS, COURSE_TYPES } from "~/constants";
 
 type EditCourseFormProps = Omit<
   AppCourse,
@@ -135,25 +132,20 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t:g } = useI18n({
+  useScope: "global",
+});
+
 const toast = useToast();
 
 const emit = defineEmits<{
   (e: "course-created" | "course-updated", value: AppCourse): void;
 }>();
 
-const { data: course_types } = useAsyncData("course_types", async () => {
-  const { data } = await supabase.from("course_types").select("*");
-  return data ? data : [];
-});
-
 const state = reactive<EditCourseFormProps>({
   name: "",
-  type: 1,
+  type: "AM",
   description: "",
-});
-
-const selected_type = computed(() => {
-  return course_types.value?.find((t) => t.id === state.type);
 });
 
 onMounted(async () => {
@@ -179,12 +171,8 @@ const validate = (state: EditCourseFormProps): FormError[] => {
   const errors = [];
   if (!state.name)
     errors.push({ path: "name", message: "Please enter an email." });
-  if (
-    course_types.value &&
-    state.type >= course_types.value.length &&
-    state.type < 1
-  ) {
-    errors.push({ path: "type", message: "willst du mich verarschen?!" });
+  if (!state.type) {
+    errors.push({ path: "type", message: "Choose a course type" });
   }
   if (!state.description)
     errors.push({
@@ -236,17 +224,13 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
       .select("*");
     if (error) {
       if (error.code === "23505") {
-        const type = course_types.value?.find((t) => t.id === d.type);
-        if (type) {
-          toast.add({
-            title: t("course_error_duplicate_course_type.title"),
-            description: t("course_error_duplicate_course_type.description", {
-              type: type.type,
-            }),
-            color: "red",
-          });
-          return;
-        }
+        toast.add({
+          title: t("course_error_duplicate_course_type.title"),
+          description: t("course_error_duplicate_course_type.description", {
+            type: state.type,
+          }),
+          color: "red",
+        });
       } else {
         throw error;
       }
@@ -258,7 +242,7 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
     });
     if (data) {
       emit("course-created", data[0]);
-      tutorialStore.completeStep('course_create');
+      tutorialStore.completeStep("course_create");
     }
   } catch (error) {
     console.error(error);

@@ -1,7 +1,11 @@
-import type { Database } from "~/types/app.types";
+import type { AppCourseType, Database } from "~/types/app.types";
 
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
+]
+
+export const COURSE_TYPES: AppCourseType[] = [
+    'AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T'
 ]
 
 export const COURSE_ICONS = {
