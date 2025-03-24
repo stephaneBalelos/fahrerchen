@@ -31,9 +31,11 @@
               </i18n-t>
             </template>
             <template #password-hint>
-              <NuxtLink to="/forgot-password" class="text-primary font-medium">{{
-                t("forgot_password")
-              }}</NuxtLink>
+              <NuxtLink
+                to="/forgot-password"
+                class="text-primary font-medium"
+                >{{ t("forgot_password") }}</NuxtLink
+              >
             </template>
             <template #footer>
               <i18n-t keypath="terms_text" tag="div" for="terms_of_service">
@@ -55,6 +57,7 @@
 <script setup lang="ts">
 import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
 import { z } from "zod";
+import type { AuthError } from "@supabase/supabase-js";
 const supabase = useSupabaseClient();
 const user = useSupabaseUser();
 
@@ -99,24 +102,35 @@ onMounted(() => {
 
 async function onSubmit(credentials: Schema) {
   isLoading.value = true;
-  const { error } = await supabase.auth.signInWithPassword({
-    email: credentials.email,
-    password: credentials.password,
-  });
-  if (error) {
-    // Handle Error
-    toast.add({
-      title: "Error",
-      description: ``,
-      color: "red",
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
     });
-    console.error(error);
-    return;
+    if (error) {
+      // Handle Error
+      throw error;
+    }
+    navigateTo("/my");
+  } catch (e) {
+    const error = e as AuthError;
+
+    if (error.code === "invalid_credentials") {
+      toast.add({
+        title: t("error.credentials.title"),
+        description: t("error.credentials.description"),
+        color: "red",
+      });
+    } else {
+      toast.add({
+        title: t("error.title"),
+        description: t("error.description"),
+        color: "red",
+      });
+    }
+  } finally {
+    isLoading.value = false;
   }
-
-  isLoading.value = false;
-
-  navigateTo("/my");
 }
 </script>
 
@@ -138,7 +152,15 @@ async function onSubmit(credentials: Schema) {
     "continue": "Weiter",
     "invalid_credentials": "Ungültige Anmeldeinformationen",
     "terms_of_service": "Nutzungsbedingungen",
-    "terms_text": "Mit dem Anmelden stimmen Sie unseren {0} zu."
+    "terms_text": "Mit dem Anmelden stimmen Sie unseren {0} zu.",
+    "error": {
+      "credentials": {
+        "title": "Oops!",
+        "description": "Ihre E-Mail-Adresse oder Ihr Passwort ist falsch. Bitte versuchen Sie es erneut."
+      },
+      "title": "Fehler",
+      "description": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    }
   },
   "en": {
     "title": "Welcome back!",
@@ -154,7 +176,15 @@ async function onSubmit(credentials: Schema) {
     "continue": "Continue",
     "invalid_credentials": "Invalid credentials",
     "terms_of_service": "Terms of Service",
-    "terms_text": "By signing in, you agree to our {0}."
+    "terms_text": "By signing in, you agree to our {0}.",
+    "error": {
+      "credentials": {
+        "title": "Oops!",
+        "description": "Your email or password is incorrect. Please try again."
+      },
+      "title": "Error",
+      "description": "An error occurred. Please try again."
+    }
   }
 }
 </i18n>
