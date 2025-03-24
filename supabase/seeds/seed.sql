@@ -172,6 +172,8 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 -- ('L', 'Zugmaschinen bis 40 km/h (mit Anhängern bis 25 km/h), die nach ihrer bauartbedingten Höchstgeschwindigkeit für die Verwendung zu land- oder forstwirtschaftlichen Zwecken bestimmt sind und für solche Zwecke eingesetzt werden.'),
 -- ('T', 'Zugmaschinen mit einer bauartbedingten Höchstgeschwindigkeit bis 60 km/h sowie selbstfahrende Arbeitsmaschinen und Futtermischwagen mit einer bauartbedingten Höchstgeschwindigkeit bis 40 km/h, die jeweils nach ihrer Bauart für die Verwendung zu land- oder forstwirtschaftlichen Zwecken bestimmt sind und für solche Zwecke eingesetzt werden (jeweils auch mit Anhängern).');
 
+    -- Delete all existing data
+DELETE FROM public.course_activity_types;
     -- Einfügen der Kurs Aktivitätstypen
 INSERT INTO public.course_activity_types (type) VALUES
 ('THEORY'),
