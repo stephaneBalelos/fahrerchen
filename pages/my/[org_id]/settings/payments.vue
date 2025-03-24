@@ -57,6 +57,7 @@
 <script setup lang="ts">
 import StripeEmbeddedComponent from "~/components/settings/stripe/StripeEmbeddedComponent.vue";
 import StripeOnboarding from "~/components/settings/stripe/StripeOnboarding.vue";
+import type { StripeConnectPostResponse } from "~/server/api/orgs/payments/stripe/connect/index.post";
 import type { StripeConnectPostBody } from "~/types/app.types";
 
 const userOrganizationStore = useUserOrganizationsStore();
@@ -97,7 +98,7 @@ async function connectStripe() {
   };
   connectIsLoading.value = true;
   try {
-    const { accountId } = await $fetch("/api/orgs/payments/stripe/connect", {
+    const { accountId } = await $fetch<StripeConnectPostResponse>("/api/orgs/payments/stripe/connect", {
       cache: "no-cache",
       method: "POST",
       headers: {

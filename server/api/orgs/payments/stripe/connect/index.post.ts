@@ -1,13 +1,16 @@
-import { serverSupabaseClient, serverSupabaseSession } from '#supabase/server'
-import { User } from '@supabase/supabase-js'
+import { serverSupabaseClient } from '#supabase/server'
+import type { User } from '@supabase/supabase-js'
 import { stripeClient } from '~/server/utils/stripe'
 import { getOrganizationStripeAccount } from '~/server/utils/supabase'
-import { AppUser, Database, StripeConnectPostBody } from '~/types/app.types'
+import type { Database, StripeConnectPostBody } from '~/types/app.types'
 
-export default defineEventHandler(async (event) => {
+export type StripeConnectPostResponse = {
+    accountId: string
+}
+
+export default defineEventHandler(async (event): Promise<StripeConnectPostResponse> => {
     const config = useRuntimeConfig()
     const stripe = await stripeClient(config.stripe_sk)
-    const origin = event.headers.get('origin')
     const user = event.context.auth as User
     if (!user) {
         throw createError({
@@ -17,11 +20,8 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-
         const body = await readBody<StripeConnectPostBody>(event)
-
         const client = await serverSupabaseClient<Database>(event)
-    
         const org = await getOrganisationById(event, body.org_id)
 
         if (!org) {

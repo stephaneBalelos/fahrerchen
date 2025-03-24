@@ -1,4 +1,4 @@
-import { User } from "@supabase/supabase-js"
+import type { User } from "@supabase/supabase-js"
 import { getOrganizationStripeAccount } from "~/server/utils/supabase"
 
 export default defineEventHandler(async (event) => {
