@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
+import DeleteAccountModal from "~/components/account/DeleteAccountModal.vue";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 import type { Database } from "~/types/database.types";
 
@@ -8,7 +9,6 @@ definePageMeta({
   layout: "default",
 });
 
-const isDeleteAccountModalOpen = ref(false);
 const userStore = useUserStore();
 const client = useSupabaseClient<Database>();
 const isSubmitting = ref(false);
@@ -21,6 +21,8 @@ const { t } = useI18n({
 const { t: g } = useI18n({
   useScope: "global",
 });
+
+const modal = useModal();
 
 const query = useRoute().query;
 
@@ -115,6 +117,9 @@ async function deleteAvatar(path: string) {
     await userStore.refreshUser();
   }
 }
+function openDeleteAccountModal() {
+  modal.open(DeleteAccountModal);
+}
 </script>
 
 <template>
@@ -143,7 +148,12 @@ async function deleteAvatar(path: string) {
             :description="t('profile_description')"
           >
             <template #links>
-              <UButton type="submit" :label="t('profile_save')" color="black" />
+              <UButton type="submit" :label="t('profile_save')" />
+              <UButton
+                color="black"
+                :label="t('change_password')"
+                :to="'/account/password-reset'"
+              />
             </template>
 
             <UFormGroup
@@ -159,11 +169,17 @@ async function deleteAvatar(path: string) {
               <div class="flex gap-4">
                 <UAvatar
                   v-if="userStore.user.avatar_path"
-                  :src="$publicStorageUrl('users_avatars', userStore.user.avatar_path)"
+                  :src="
+                    $publicStorageUrl(
+                      'users_avatars',
+                      userStore.user.avatar_path
+                    )
+                  "
+                  size="md"
                 />
                 <UAvatar
                   v-else
-                  :alt="`${userStore.user.firstname} ${userStore.user.lastname}`"
+                  :alt="`${userStore.user.firstname} ${userStore.user.lastname}`" size="md"
                 />
                 <FileUploader
                   :bucket-id="'users_avatars'"
@@ -219,24 +235,15 @@ async function deleteAvatar(path: string) {
           :title="t('account_title')"
           :description="t('account_description')"
         >
-          <div class="flex gap-4">
-            <UButton
-              color="black"
-              :label="t('change_password')"
-              size="md"
-              :to="'/account/password-reset'"
-            />
+          <template #links>
             <UButton
               color="red"
               :label="t('account_delete')"
               size="md"
-              @click="isDeleteAccountModalOpen = true"
+              @click="openDeleteAccountModal"
             />
-          </div>
+          </template>
         </UDashboardSection>
-
-        <!-- ~/components/settings/DeleteAccountModal.vue -->
-        <!-- <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" /> -->
       </UContainer>
     </UDashboardPanelContent>
   </ClientOnly>

@@ -3,11 +3,11 @@ import type { FormError } from "#ui/types";
 import * as z from "zod";
 import type { Database } from "~/types/app.types";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
+import DeleteAccountModal from "~/components/settings/DeleteSchoolModal.vue";
 
 const tutorialStore = useTutorialStore();
 
-const isDeleteAccountModalOpen = ref(false);
-
+const modal = useModal();
 const config = useRuntimeConfig().public;
 
 const route = useRoute();
@@ -241,8 +241,15 @@ async function onAvatarUploadSuccess() {
   } catch (error) {
     console.error(error);
   }
+}
 
-    
+function openDeleteOrganizationModal() {
+  if (!org.value.id) {
+    return
+  }
+  modal.open(DeleteAccountModal, {
+    orgId: org.value.id
+  });
 }
 </script>
 
@@ -269,14 +276,6 @@ async function onAvatarUploadSuccess() {
           :title="t('settings.title')"
           :description="t('settings.description')"
         >
-          <template #links>
-            <UButton
-              type="submit"
-              :label="t('settings.save_changes')"
-              color="black"
-              :loading="isSubmitting"
-            />
-          </template>
           <UFormGroup
             :label="t('settings.avatar.label')"
             class="grid grid-cols-2 gap-2"
@@ -438,24 +437,33 @@ async function onAvatarUploadSuccess() {
               />
             </UFormGroup>
           </UFormGroup>
+          <div class="flex justify-end py-4">
+            <UButton
+              type="submit"
+              :label="t('settings.save_changes')"
+              color="black"
+              :loading="isSubmitting"
+            />
+          </div>
         </UDashboardSection>
       </UForm>
-      <UDivider class="mb-4" />
+      <UDivider />
       <UDashboardSection
-        title="Account"
-        description="No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently."
+        :title="t('settings.delete_account.title')"
+        :description="t('settings.delete_account.description')"
       >
-        <div>
-          <UButton
+      <template #links>
+        <UButton
             color="red"
-            label="Delete account"
+            :label="t('settings.delete_account.label')"
             size="md"
-            @click="isDeleteAccountModalOpen = true"
+            @click="openDeleteOrganizationModal"
           />
-        </div>
+      </template>
+
+      <div class="py-24" />
+      
       </UDashboardSection>
-      <!-- ~/components/settings/DeleteAccountModal.vue -->
-      <!-- <SettingsDeleteAccountModal v-model="isDeleteAccountModalOpen" /> -->
     </div>
   </UDashboardPanelContent>
 </template>
@@ -466,6 +474,11 @@ async function onAvatarUploadSuccess() {
     "settings": {
       "title": "Fahrschul-Einstellungen",
       "description": "Informationen über Ihre Fahrschule. Diese Informationen werden auf Rechnungen, Rechnungen und anderen Kommunikationsmitteln angezeigt.",
+      "delete_account": {
+        "title": "Fahrschule löschen",
+        "description": "Löschen Sie Ihre Fahrschule und alle damit verbundenen Daten. Diese Aktion kann nicht rückgängig gemacht werden.",
+        "label": "Fahrschule löschen"
+      },
       "name": {
         "label": "Name",
         "description": "Der Name Ihrer Fahrschule."
@@ -525,6 +538,11 @@ async function onAvatarUploadSuccess() {
     "settings": {
       "title": "School settings",
       "description": "Information about your school. This information will appear on receipts, invoices, and other communication.",
+      "delete_account": {
+        "title": "Delete school",
+        "description": "Delete your school and all associated data. This action cannot be undone.",
+        "label": "Delete school"
+      },
       "name": {
         "label": "Name",
         "description": "The name of your school."

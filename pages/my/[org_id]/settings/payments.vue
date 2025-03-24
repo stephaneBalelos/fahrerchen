@@ -22,6 +22,15 @@
       </div>
     </div>
     <div v-else class="absolute inset-0 p-4 overflow-y-auto">
+      <div class="pb-4">
+        <UButton
+          color="red"
+          variant="soft"
+          @click="openDeleteStripeAccountModal"
+        >
+          {{ t('remove_stripe') }}
+        </UButton>
+      </div>
       <StripeOnboarding @exit="onOnboardingExit"/>
     </div>
 
@@ -57,7 +66,9 @@
 <script setup lang="ts">
 import StripeEmbeddedComponent from "~/components/settings/stripe/StripeEmbeddedComponent.vue";
 import StripeOnboarding from "~/components/settings/stripe/StripeOnboarding.vue";
+import type { StripeConnectPostResponse } from "~/server/api/orgs/payments/stripe/connect/index.post";
 import type { StripeConnectPostBody } from "~/types/app.types";
+import StripeDeleteAccountModal from "~/components/settings/stripe/StripeDeleteAccountModal.vue";
 
 const userOrganizationStore = useUserOrganizationsStore();
 const stripeStore = useStripeStore();
@@ -67,6 +78,7 @@ const { t } = useI18n({
 
 const connectIsLoading = ref(false);
 const tutorialStore = useTutorialStore();
+const modal = useModal();
 
 const links = [
   {
@@ -97,7 +109,7 @@ async function connectStripe() {
   };
   connectIsLoading.value = true;
   try {
-    const { accountId } = await $fetch("/api/orgs/payments/stripe/connect", {
+    const { accountId } = await $fetch<StripeConnectPostResponse>("/api/orgs/payments/stripe/connect", {
       cache: "no-cache",
       method: "POST",
       headers: {
@@ -120,6 +132,10 @@ async function onOnboardingExit() {
   if (stripeStore.stripeAccount?.details_submitted) {
     tutorialStore.completeStep('enable_payment')
   }
+}
+
+function openDeleteStripeAccountModal() {
+  modal.open(StripeDeleteAccountModal);
 }
 </script>
 

@@ -1,5 +1,4 @@
 import { getOrganisationById, getOrganizationStripeAccount } from '~/server/utils/supabase'
-import type { Database } from '~/types/app.types'
 
 
 export default defineEventHandler(async (event) => {
@@ -13,7 +12,7 @@ export default defineEventHandler(async (event) => {
     if (!orgid) {
         throw createError({
             status: 400,
-            message: 'Account ID is required'
+            message: 'Org ID is required'
         })
     }
 
