@@ -89,7 +89,7 @@ create table public.course_activity_types (
 
 -- USERS
 create table public.users (
-  id          uuid references auth.users not null primary key, -- UUID from auth.users
+  id          uuid references auth.users on delete cascade not null primary key, -- UUID from auth.users
   email       text not null unique,
   firstname    text,
   lastname    text,
