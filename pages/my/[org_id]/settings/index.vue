@@ -3,7 +3,7 @@ import type { FormError } from "#ui/types";
 import * as z from "zod";
 import type { Database } from "~/types/app.types";
 import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
-import DeleteAccountModal from "~/components/settings/DeleteAccountModal.vue";
+import DeleteAccountModal from "~/components/settings/DeleteSchoolModal.vue";
 
 const tutorialStore = useTutorialStore();
 
