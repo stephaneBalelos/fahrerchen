@@ -46,8 +46,6 @@ export default defineEventHandler(async (event): Promise<StripeConnectPostRespon
                 country: "DE",
                 email: user.email,
             });
-    
-            console.log(account)
 
             if (!account) {
                 throw createError({
