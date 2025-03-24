@@ -1190,6 +1190,7 @@ create policy "Owner can delete organizations" on public.organizations for delet
 create policy "Everyone in Org can see organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
 create policy "Main Owner can insert organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.is_main_owner(id));
 create policy "Owner & Manager can update organizations_stripe_accounts" on public.organizations_stripe_accounts for update to authenticated using (public.authorize('organizations_stripe_accounts.update', id));
+create policy "Owner can delete organizations_stripe_accounts" on public.organizations_stripe_accounts for delete to authenticated using (public.is_main_owner(id));
 
 -- Organization Members Policies
 create policy "Every Member can see organization_members" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));
