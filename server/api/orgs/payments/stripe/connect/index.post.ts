@@ -42,21 +42,33 @@ export default defineEventHandler(async (event): Promise<StripeConnectPostRespon
         const stripeAccount = await getOrganizationStripeAccount(event, body.org_id)
 
         if (!stripeAccount) {
-            const account = await stripe.accounts.create({
-                country: "DE",
-                email: user.email,
-            });
-
-            if (!account) {
-                throw createError({
-                    status: 500,
-                    message: 'Failed to create account'
-                })
+            let accountId: string
+            // Check if connected account already exists with the same email & org_id
+            const accounts = await stripe.accounts.list()
+            const connectedAccount = accounts.data.find(account => account.email === user.email)
+            if (connectedAccount && connectedAccount.metadata && connectedAccount.metadata.org_id === body.org_id) {
+                accountId = connectedAccount.id
+            } else {
+                const account = await stripe.accounts.create({
+                    country: "DE",
+                    email: user.email,
+                    metadata: {
+                        org_id: body.org_id
+                    }
+                });
+    
+                if (!account) {
+                    throw createError({
+                        status: 500,
+                        message: 'Failed to create account'
+                    })
+                }
+                accountId = account.id
             }
 
             const {error} = await client.from('organizations_stripe_accounts').insert({
                 id: body.org_id,
-                stripe_account_id: account.id
+                stripe_account_id: accountId
             })
 
             if (error) {
@@ -65,8 +77,16 @@ export default defineEventHandler(async (event): Promise<StripeConnectPostRespon
                     message: 'Failed to save Account'
                 }) 
             }
-            return {accountId: account.id}
+            return {accountId: accountId}
         } else {
+            // Verify if the account exists
+            const account = await stripe.accounts.retrieve(stripeAccount.stripe_account_id)
+            if (!account) {
+                throw createError({
+                    status: 500,
+                    message: 'Saved account not found'
+                })
+            }
             return {accountId: stripeAccount.stripe_account_id}
         }
 
