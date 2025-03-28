@@ -809,6 +809,107 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          date: string
+          id: string
+          organization_id: string | null
+          ressource_id: string | null
+          target_roles: Database["public"]["Enums"]["app_role"][]
+          targets: string[] | null
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          date?: string
+          id?: string
+          organization_id?: string | null
+          ressource_id?: string | null
+          target_roles?: Database["public"]["Enums"]["app_role"][]
+          targets?: string[] | null
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          date?: string
+          id?: string
+          organization_id?: string | null
+          ressource_id?: string | null
+          target_roles?: Database["public"]["Enums"]["app_role"][]
+          targets?: string[] | null
+          type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications_read_status: {
+        Row: {
+          id: string
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_read_status_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_read_status_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_read_status_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           id: string
@@ -1551,6 +1652,47 @@ export type Database = {
           },
         ]
       }
+      notifications_view: {
+        Row: {
+          actor_email: string | null
+          actor_firstname: string | null
+          actor_fullname: string | null
+          actor_id: string | null
+          actor_lastname: string | null
+          date: string | null
+          id: string | null
+          organization_id: string | null
+          read_at: string | null
+          ressource_id: string | null
+          target_roles: Database["public"]["Enums"]["app_role"][] | null
+          targets: string[] | null
+          type: Database["public"]["Enums"]["notification_type"] | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members_view: {
         Row: {
           id: string | null
@@ -1676,6 +1818,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_notification: {
+        Args: {
+          a_id: string
+          n_type: Database["public"]["Enums"]["notification_type"]
+          n_roles: Database["public"]["Enums"]["app_role"][]
+          n_targets: string[]
+          r_id: string
+          org_id: string
+        }
+        Returns: string
+      }
       create_student: {
         Args: {
           firstname: string
@@ -1722,6 +1875,15 @@ export type Database = {
       is_subscription_active: {
         Args: {
           subscription_id: string
+        }
+        Returns: boolean
+      }
+      is_user_targeted: {
+        Args: {
+          notification_id: string
+          target_roles: Database["public"]["Enums"]["app_role"][]
+          targets: string[]
+          org_id: string
         }
         Returns: boolean
       }
@@ -1811,6 +1973,18 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
+      notification_type:
+        | "students_registration_requests.created"
+        | "students.created"
+        | "course_subscriptions.created"
+        | "course_activity_schedules.created"
+        | "course_activity_schedules.updated"
+        | "course_activity_attendances.created"
+        | "course_activity_attendances.updated"
+        | "course_subscription_bills.created"
+        | "course_subscription_bills.updated"
+        | "course_subscription_bills.paid"
+        | "course_subscription_bills.canceled"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"

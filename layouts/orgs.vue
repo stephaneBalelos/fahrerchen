@@ -1,7 +1,7 @@
 <template>
   <UDashboardLayout>
     <UDashboardPanel
-      :width="250"
+      :width="300"
       :resizable="{ min: 200, max: 300 }"
       collapsible
     >
@@ -9,9 +9,16 @@
         <template #left>
           <ClientOnly>
             <TeamsDropdown />
+
+          </ClientOnly>
+        </template>
+        <template #right>
+          <ClientOnly>
+            <NotificationsButton />
           </ClientOnly>
         </template>
       </UDashboardNavbar>
+      
 
       <UDashboardSidebar>
         <template #header>
@@ -49,6 +56,7 @@
 import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
+import NotificationsButton from "~/components/sidebar/NotificationsButton.vue";
 
 const runtimeConfig = useRuntimeConfig();
 

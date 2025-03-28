@@ -1,5 +1,5 @@
 <template>
-  <USelectMenu v-model="selectedLocale" :options="availableLocales">
+  <USelectMenu v-model="selectedLocale" :options="availableLocales" class="w-full">
     <template #label> <UIcon :name="`i-circle-flags-${ locale }`"/> {{ $t(`lang_${selectedLocale}`) }}</template>
     <template #option="{ option }">
       <UIcon :name="`i-circle-flags-${ option }`"/>

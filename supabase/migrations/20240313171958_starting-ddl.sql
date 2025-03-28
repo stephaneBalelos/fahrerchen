@@ -70,6 +70,22 @@ create type public.attendance_status as enum ('REGISTERED', 'ATTENDED', 'CANCELE
 -- enum for führerscheinklassen
 create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
 
+-- Notifications Types
+create type public.notification_type as enum (
+  'students_registration_requests.created',
+  'students.created',
+  'course_subscriptions.created',
+  'course_activity_schedules.created',
+  'course_activity_schedules.updated',
+  'course_activity_attendances.created',
+  'course_activity_attendances.updated',
+  'course_subscription_bills.created',
+  'course_subscription_bills.updated',
+  'course_subscription_bills.paid',
+  'course_subscription_bills.canceled'
+);
+
+
 
 -- ROLE PERMISSIONS
 create table public.role_permissions (
@@ -413,6 +429,36 @@ alter table public.course_subscription_bill_history enable row level security;
 revoke update on table public.course_subscription_bill_history from authenticated, anon;
 
 
+-- Notifications
+create table public.notifications (
+  id            uuid default uuid_generate_v4() primary key,
+  actor_id      uuid references public.users on delete set null,
+  type          public.notification_type not null,
+  target_roles   public.app_role[] default '{}'::public.app_role[] not null,
+  targets       uuid[],
+  date          timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  ressource_id    uuid,
+  organization_id    uuid references public.organizations on delete set null
+);
+
+comment on table public.notifications is 'Notifications for each user.';
+alter table public.notifications enable row level security;
+revoke update on table public.notifications from authenticated, anon;
+grant update (targets, updated_at) on table public.notifications to authenticated;
+
+-- Notifications Read Status
+create table public.notifications_read_status (
+  id            uuid default uuid_generate_v4() primary key,
+  notification_id    uuid references public.notifications on delete cascade not null,
+  user_id       uuid references public.users on delete cascade not null,
+  read_at       timestamp with time zone default timezone('utc'::text, now()) not null
+);
+comment on table public.notifications_read_status is 'Notifications read status for each user.';
+alter table public.notifications_read_status enable row level security;
+revoke update on table public.notifications_read_status from authenticated, anon;
+
+
 -- VIEWS
 -- Organization Members View
 create or replace view public.organization_members_view as
@@ -617,6 +663,252 @@ and course_subscription_bills.paid_at is not null
 group by course_subscriptions.id, courses.name, courses.description;
 
 
+create or replace view public.notifications_view as
+select
+  notifications.id,
+  notifications.actor_id,
+  notifications.type,
+  notifications.target_roles,
+  notifications.targets,
+  notifications.date,
+  notifications.updated_at,
+  notifications.ressource_id,
+  notifications.organization_id,
+  users.email as actor_email,
+  users.firstname as actor_firstname,
+  users.lastname as actor_lastname,
+  users.fullname as actor_fullname,
+  notifications_read_status.read_at as read_at
+from public.notifications
+left join public.users on notifications.actor_id = users.id
+left join public.notifications_read_status on notifications.id = notifications_read_status.notification_id;
+
+-- Functions
+
+-- Generate Bill for Subscription
+create or replace function public.generate_bill_for_subscription(
+  subscription_id uuid,
+  organization_id uuid
+)
+returns uuid as $$
+declare
+  bill_items uuid[];
+  bill_total numeric;
+  b_id uuid;
+begin
+
+  select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
+
+  if array_length(bill_items, 1) > 0 then
+    select sum(price) into bill_total from public.course_subscription_bill_items where id = any(bill_items);
+
+    insert into public.course_subscription_bills (course_subscription_id, organization_id, total)
+    values (subscription_id, organization_id, bill_total)
+    returning id into b_id;
+
+    update public.course_subscription_bill_items set bill_id = b_id
+    where id = any(bill_items);
+
+    return b_id;
+  end if;
+
+  return null;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+-- Generate Bill for Subscriptions
+create or replace function public.generate_bill_for_subscriptions()
+returns void as $$
+declare
+  subscriptions uuid[];
+  subscription_id uuid;
+begin
+  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
+
+  foreach subscription_id in array subscriptions loop
+    perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
+  end loop;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- Helpers Functions
+
+-- Authorize function
+create or replace function public.authorize(
+  requested_permission app_permission,
+  org_id uuid
+)
+returns boolean as $$
+declare
+  bind_permissions int;
+  user_role public.app_role;
+  owner uuid;
+begin
+
+  select owner_id into owner from public.organizations where id = org_id;
+
+  --check if the user is the main owner
+  if owner = auth.uid() then
+    return true;
+  end if;
+
+  -- Fetch user role once and store it to reduce number of calls
+  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+
+  if user_role is null then
+    return false;
+  end if;
+
+  select count(*)
+  into bind_permissions
+  from public.role_permissions
+  where role_permissions.permission = requested_permission
+    and role_permissions.role = user_role;
+
+  return bind_permissions > 0;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+create or replace function is_main_owner(
+  org_id uuid
+)
+returns boolean as $$
+declare
+  owner uuid;
+begin
+  select owner_id into owner from public.organizations where id = org_id;
+
+  return owner = auth.uid();
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- 2 users are in the same organization
+create or replace function public.are_users_in_same_organization(
+  user_id_1 uuid,
+  user_id_2 uuid
+)
+returns boolean as $$
+declare
+  org_id_1 uuid;
+  org_id_2 uuid;
+begin
+
+
+  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
+  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+-- check if a subscription is active / not archived
+create or replace function public.is_subscription_active(
+  subscription_id uuid
+)
+returns boolean as $$
+declare
+  archived_date timestamp with time zone;
+begin
+  select archived_at into archived_date from public.course_subscriptions where id = subscription_id;
+
+  if archived_date is not null then
+    return false;
+  end if;
+
+  return true;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+-- check if a bill can be updated
+create or replace function public.can_update_bill(
+  bill_id uuid
+)
+returns boolean as $$
+declare
+  is_paid boolean;
+  is_ready_to_pay boolean;
+  is_cancelled boolean;
+begin
+  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_cancelled from public.course_subscription_bills where id = bill_id;
+
+  return is_paid = false or is_ready_to_pay = false or is_cancelled = false;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- check if a user is targeted by a notification
+create or replace function public.is_user_targeted(
+  notification_id uuid,
+  target_roles app_role[],
+  targets uuid[],
+  org_id uuid
+)
+returns boolean as $$
+declare
+  user_role public.app_role;
+begin
+  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+
+  -- Check if the user has the right role in the Organization
+  if user_role is null then
+    return false;
+  end if;
+
+  -- if user_role is not included in the target_roles, return false
+  if not (user_role = any(target_roles)) then
+    return false;
+  end if;
+
+  -- if target is null or empty, return true
+  if targets is null or array_length(targets, 1) = 0 then
+    return true;
+  end if;
+
+  -- if the user is in the targets, return true
+  if auth.uid() = any(targets) then
+    return true;
+  end if;
+
+  return false;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+create or replace function public.create_notification(
+  a_id uuid,
+  n_type public.notification_type,
+  n_roles public.app_role[],
+  n_targets uuid[],
+  r_id uuid,
+  org_id uuid
+)
+returns uuid as $$
+declare
+  notification_id uuid;
+begin
+  -- find the last notification where the actor, type, target_roles, ressource_id and org_id are the same
+  select id into notification_id from public.notifications
+  where actor_id = a_id
+  and type = n_type
+  and target_roles = n_roles
+  and ressource_id = r_id
+  and organization_id = org_id
+  limit 1;
+
+  if notification_id is not null then
+    -- update the notification
+    update public.notifications set targets = n_targets, updated_at = timezone('utc'::text, now())
+    where id = notification_id;
+
+    return notification_id;
+  end if;
+
+  insert into public.notifications (actor_id, type, target_roles, targets, ressource_id, organization_id)
+  values (a_id, n_type, n_roles, n_targets, r_id, org_id)
+  returning id into notification_id;
+
+  return notification_id;
+end;
+$$ language plpgsql security invoker set search_path = public;
 
 
 -- TRIGGERS
@@ -671,6 +963,26 @@ create trigger on_course_created
   after insert on public.courses
   for each row execute procedure public.handle_new_course();
 
+-- handle New Registration Request
+create or replace function public.handle_new_registration_request()
+returns trigger as $$
+declare org_id uuid;
+begin
+  perform public.create_notification(
+    auth.uid(),
+    'students_registration_requests.created',
+    '{owner, manager}'::app_role[],
+    null,
+    null,
+    new.organization_id
+  );
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a registration request is created
+create trigger on_registration_request_created
+  after insert on public.students_registration_requests
+  for each row execute procedure public.handle_new_registration_request();
 
 -- handle Registration Request confirmation
 create or replace function public.handle_registration_request_confirmation()
@@ -1016,159 +1328,6 @@ create trigger on_course_subscription_bill_item_updated
   for each row execute procedure public.handle_updated_bill_item();
 
 
--- Functions
-
--- Generate Bill for Subscription
-create or replace function public.generate_bill_for_subscription(
-  subscription_id uuid,
-  organization_id uuid
-)
-returns uuid as $$
-declare
-  bill_items uuid[];
-  bill_total numeric;
-  b_id uuid;
-begin
-
-  select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
-
-  if array_length(bill_items, 1) > 0 then
-    select sum(price) into bill_total from public.course_subscription_bill_items where id = any(bill_items);
-
-    insert into public.course_subscription_bills (course_subscription_id, organization_id, total)
-    values (subscription_id, organization_id, bill_total)
-    returning id into b_id;
-
-    update public.course_subscription_bill_items set bill_id = b_id
-    where id = any(bill_items);
-
-    return b_id;
-  end if;
-
-  return null;
-end;
-$$ language plpgsql security invoker set search_path = public;
-
--- Generate Bill for Subscriptions
-create or replace function public.generate_bill_for_subscriptions()
-returns void as $$
-declare
-  subscriptions uuid[];
-  subscription_id uuid;
-begin
-  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
-
-  foreach subscription_id in array subscriptions loop
-    perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
-  end loop;
-end;
-$$ language plpgsql security definer set search_path = public;
-
--- Helpers Functions
-
--- Authorize function
-create or replace function public.authorize(
-  requested_permission app_permission,
-  org_id uuid
-)
-returns boolean as $$
-declare
-  bind_permissions int;
-  user_role public.app_role;
-  owner uuid;
-begin
-
-  select owner_id into owner from public.organizations where id = org_id;
-
-  --check if the user is the main owner
-  if owner = auth.uid() then
-    return true;
-  end if;
-
-  -- Fetch user role once and store it to reduce number of calls
-  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
-
-  if user_role is null then
-    return false;
-  end if;
-
-  select count(*)
-  into bind_permissions
-  from public.role_permissions
-  where role_permissions.permission = requested_permission
-    and role_permissions.role = user_role;
-
-  return bind_permissions > 0;
-end;
-$$ language plpgsql security definer set search_path = public;
-
-
-create or replace function is_main_owner(
-  org_id uuid
-)
-returns boolean as $$
-declare
-  owner uuid;
-begin
-  select owner_id into owner from public.organizations where id = org_id;
-
-  return owner = auth.uid();
-end;
-$$ language plpgsql security definer set search_path = public;
-
--- 2 users are in the same organization
-create or replace function public.are_users_in_same_organization(
-  user_id_1 uuid,
-  user_id_2 uuid
-)
-returns boolean as $$
-declare
-  org_id_1 uuid;
-  org_id_2 uuid;
-begin
-
-
-  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
-  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
-end;
-$$ language plpgsql security definer set search_path = public;
-
-
--- check if a subscription is active / not archived
-create or replace function public.is_subscription_active(
-  subscription_id uuid
-)
-returns boolean as $$
-declare
-  archived_date timestamp with time zone;
-begin
-  select archived_at into archived_date from public.course_subscriptions where id = subscription_id;
-
-  if archived_date is not null then
-    return false;
-  end if;
-
-  return true;
-end;
-$$ language plpgsql security definer set search_path = public;
-
-
--- check if a bill can be updated
-create or replace function public.can_update_bill(
-  bill_id uuid
-)
-returns boolean as $$
-declare
-  is_paid boolean;
-  is_ready_to_pay boolean;
-  is_cancelled boolean;
-begin
-  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_cancelled from public.course_subscription_bills where id = bill_id;
-
-  return is_paid = false or is_ready_to_pay = false or is_cancelled = false;
-end;
-$$ language plpgsql security definer set search_path = public;
-
 -- Policies
 
 -- Role Permissions Policies
@@ -1282,6 +1441,14 @@ create policy "Owner can delete course_subscription_bill_items" on public.course
 
 create policy "Everyone can see course_activity_types" on public.course_activity_types for select to authenticated using (true);
 
+
+create policy "Only Actor can create a notification" on public.notifications for insert to authenticated with check (auth.uid() = actor_id);
+create policy "Only Actor can update a notification" on public.notifications for update to authenticated using (auth.uid() = actor_id);
+create policy "Only Actor can delete a notification" on public.notifications for delete to authenticated using (auth.uid() = actor_id);
+create policy "Only targeted users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted(id, target_roles, targets, organization_id));
+
+create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
+create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
 
 
 -- Jobs

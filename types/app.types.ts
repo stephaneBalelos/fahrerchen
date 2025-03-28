@@ -23,8 +23,11 @@ export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['c
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
 
-
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
+export type AppNotification = MergeDeep<DatabaseGenerated['public']['Tables']['notifications']['Row'], {
+  target_roles: UserRole[]
+}>
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
@@ -43,11 +46,6 @@ export type AppStripeAccountPaymentMethodSettings = {
 
 export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
 
-
-
-
-
-
 export type StripeConnectPostBody = {
   org_id: string
 }
@@ -60,6 +58,7 @@ export type CourseActivityScheduleView = Database["public"]["Views"]["course_act
 export type CourseActivityAttendanceView = Database["public"]["Views"]["course_activity_attendances_view"]["Row"]
 export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
 export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
+export type NotificationView = Database["public"]["Views"]["notifications_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
@@ -150,7 +149,25 @@ export type Database = MergeDeep<DatabaseGenerated, {
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         };
-      };
+      }
+      notifications_view: {
+        Row: {
+          actor_email: string | null
+          actor_firstname: string | null
+          actor_lastname: string | null
+          actor_fullname: string | null
+          actor_id: string | null
+          date: string
+          id: string
+          organization_id: string
+          read_at: string | null
+          ressource_id: string
+          target_roles: UserRole[]
+          targets: string[] | null
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+        }
+      }
     };
   };
   storage: {
