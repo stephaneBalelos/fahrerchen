@@ -3,7 +3,7 @@
     class="p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
     @click="notificationsStore.markAsRead(props.notification.id)"
   >
-    <UChip color="primary" :show="true" inset>
+    <UChip color="primary" :show="!props.notification.read_at" inset>
       <UAvatar
         :alt="'sdasdasd asdadfq'"
         size="md"
