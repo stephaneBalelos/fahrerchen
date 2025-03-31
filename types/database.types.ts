@@ -1613,6 +1613,7 @@ export type Database = {
           student_firstname: string | null
           student_id: string | null
           student_lastname: string | null
+          student_user_id: string | null
         }
         Relationships: [
           {
@@ -1648,6 +1649,13 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["student_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1872,6 +1880,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_schedule_active: {
+        Args: {
+          schedule_id: string
+        }
+        Returns: boolean
+      }
       is_subscription_active: {
         Args: {
           subscription_id: string
@@ -1979,8 +1993,9 @@ export type Database = {
         | "course_subscriptions.created"
         | "course_activity_schedules.created"
         | "course_activity_schedules.updated"
+        | "course_activity_schedules.assigned"
         | "course_activity_attendances.created"
-        | "course_activity_attendances.updated"
+        | "course_activity_attendances.deleted"
         | "course_subscription_bills.created"
         | "course_subscription_bills.updated"
         | "course_subscription_bills.paid"

@@ -595,7 +595,8 @@ select
   courses.type as course_type,
   students.email as student_email,
   students.firstname as student_firstname,
-  students.lastname as student_lastname
+  students.lastname as student_lastname,
+  students.user_id as student_user_id
 from public.course_subscriptions
 inner join public.courses on course_subscriptions.course_id = courses.id
 inner join public.students on course_subscriptions.student_id = students.id;

@@ -89,7 +89,8 @@ export type Database = MergeDeep<DatabaseGenerated, {
           course_description: string,
           student_email: string,
           student_firstname: string,
-          student_lastname: string
+          student_lastname: string,
+          student_user_id: string,
         }
       },
       course_activity_schedules_view: {
