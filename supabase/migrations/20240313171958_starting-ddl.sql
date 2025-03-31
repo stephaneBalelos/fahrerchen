@@ -436,13 +436,16 @@ create table public.notifications (
   actor_id      uuid references public.users on delete set null,
   type          public.notification_type not null,
   target_roles   public.app_role[] default '{}'::public.app_role[] not null,
-  targets       uuid[],
+  target       uuid,
   date          timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   ressource_id    uuid,
   organization_id    uuid references public.organizations on delete set null
 );
 comment on table public.notifications is 'Notifications for each user.';
+alter table public.notifications enable row level security;
+revoke update on table public.notifications from authenticated, anon;
+grant update (updated_at) on table public.notifications to authenticated;
 
 
 -- Notifications Read Status
@@ -454,6 +457,9 @@ create table public.notifications_read_status (
   unique (notification_id, user_id)
 );
 comment on table public.notifications_read_status is 'Notifications read status for each user.';
+alter table public.notifications_read_status enable row level security;
+revoke update on table public.notifications_read_status from authenticated, anon;
+grant update (read_at) on table public.notifications_read_status to authenticated;
 
 
 -- VIEWS
@@ -667,7 +673,7 @@ select
   notifications.actor_id,
   notifications.type,
   notifications.target_roles,
-  notifications.targets,
+  notifications.target,
   notifications.date,
   notifications.updated_at,
   notifications.ressource_id,
@@ -854,77 +860,35 @@ $$ language plpgsql security definer set search_path = public;
 -- check if a user is targeted by a notification
 create or replace function public.is_user_targeted(
   notification_id uuid,
-  target_roles app_role[],
-  targets uuid[],
   org_id uuid
 )
 returns boolean as $$
 declare
   user_role public.app_role;
+  target_roles public.app_role[];
+  target uuid;
 begin
   select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+  select target_roles, target into target_roles, target from public.notifications where id = notification_id;
 
   -- Check if the user has the right role in the Organization
   if user_role is null then
     return false;
   end if;
 
-  -- if user_role is not included in the target_roles, return false
-  if not (user_role = any(target_roles)) then
-    return false;
-  end if;
-
-  -- if target is null or empty, return true
-  if targets is null or array_length(targets, 1) = 0 then
+  -- Check if the user is the target of the notification
+  if target = auth.uid() then
     return true;
   end if;
 
-  -- if the user is in the targets, return true
-  if auth.uid() = any(targets) then
+  -- if user_role is included in the target_roles, return true
+  if user_role = any(target_roles) then
     return true;
   end if;
 
   return false;
 end;
 $$ language plpgsql security definer set search_path = public;
-
-create or replace function public.create_notification(
-  a_id uuid,
-  n_type public.notification_type,
-  n_roles public.app_role[],
-  n_targets uuid[],
-  r_id uuid,
-  org_id uuid
-)
-returns uuid as $$
-declare
-  notification_id uuid;
-begin
-  -- find the last notification where the actor, type, target_roles, ressource_id and org_id are the same
-  select id into notification_id from public.notifications
-  where actor_id = a_id
-  and type = n_type
-  and target_roles = n_roles
-  and ressource_id = r_id
-  and organization_id = org_id
-  limit 1;
-
-  if notification_id is not null then
-    -- update the notification
-    update public.notifications set targets = n_targets, updated_at = timezone('utc'::text, now())
-    where id = notification_id;
-
-    return notification_id;
-  end if;
-
-  insert into public.notifications (actor_id, type, target_roles, targets, ressource_id, organization_id)
-  values (a_id, n_type, n_roles, n_targets, r_id, org_id)
-  returning id into notification_id;
-
-  return notification_id;
-end;
-$$ language plpgsql security invoker set search_path = public;
-
 
 -- TRIGGERS
 create function public.handle_new_user() 
@@ -983,14 +947,7 @@ create or replace function public.handle_new_registration_request()
 returns trigger as $$
 declare org_id uuid;
 begin
-  perform public.create_notification(
-    auth.uid(),
-    'students_registration_requests.created',
-    '{owner, manager}'::app_role[],
-    null,
-    null,
-    new.organization_id
-  );
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1159,16 +1116,6 @@ begin
   update public.course_activity_schedules set attendees = array_append(attendees, new.course_subscription_id)
   where id = new.activity_schedule_id;
 
-  -- Notify the user
-  perform public.create_notification(
-    auth.uid(),
-    'course_activity_attendances.created',
-    '{student}'::app_role[],
-    array[student_user_id],
-    new.id,
-    new.organization_id
-  );
-
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1214,14 +1161,6 @@ begin
   -- Notify the user
   select student_id into student_id from public.course_subscriptions where id = old.course_subscription_id;
   select user_id into student_user_id from public.students where id = student_id;
-  perform public.create_notification(
-    auth.uid(),
-    'course_activity_attendances.deleted',
-    '{student}'::app_role[],
-    array[student_user_id],
-    old.id,
-    old.organization_id
-  );
 
   return old;
 end;
@@ -1262,15 +1201,6 @@ begin
   -- Notify the Students
   select array_agg(course_subscription_id) into student_subscription_ids from public.course_activity_attendances where activity_schedule_id = new.id;
   select array_agg(student_id) into student_user_ids from public.course_subscriptions where id = any(student_subscription_ids);
-
-  perform public.create_notification(
-    auth.uid(),
-    'course_activity_schedules.updated',
-    '{student}'::app_role[],
-    student_user_ids,
-    new.id,
-    new.organization_id
-  );
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1289,15 +1219,6 @@ begin
 
   -- Notify the User
   select assigned_to into user_id from public.course_activity_schedules where id = new.id;
-  perform public.create_notification(
-    auth.uid(),
-    'course_activity_schedules.updated',
-    '{owner, manager, teacher}'::app_role[],
-    array[user_id],
-    new.id,
-    new.organization_id
-  );
-
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1554,13 +1475,8 @@ create policy "Owner can delete course_subscription_bill_items" on public.course
 
 create policy "Everyone can see course_activity_types" on public.course_activity_types for select to authenticated using (true);
 
-
--- create policy "Only Actor can create a notification" on public.notifications for insert to authenticated with check (true);
--- create policy "Only Actor can update a notification" on public.notifications for update to authenticated using (true);
--- create policy "Only targeted users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted(id, target_roles, targets, organization_id));
-
--- create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
--- create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
+create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
+create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
 
 
 -- Jobs
