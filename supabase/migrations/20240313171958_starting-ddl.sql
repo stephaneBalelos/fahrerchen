@@ -436,7 +436,7 @@ create table public.notifications (
   actor_id      uuid references public.users on delete set null,
   type          public.notification_type not null,
   target_roles   public.app_role[] default '{}'::public.app_role[] not null,
-  target       uuid,
+  target_id       uuid,
   date          timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   ressource_id    uuid,
@@ -673,7 +673,7 @@ select
   notifications.actor_id,
   notifications.type,
   notifications.target_roles,
-  notifications.target,
+  notifications.target_id,
   notifications.date,
   notifications.updated_at,
   notifications.ressource_id,
@@ -865,19 +865,19 @@ create or replace function public.is_user_targeted(
 returns boolean as $$
 declare
   user_role public.app_role;
-  target_roles public.app_role[];
-  target uuid;
+  n_target_roles public.app_role[];
+  n_target_id uuid;
 begin
   select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
-  select target_roles, target into target_roles, target from public.notifications where id = notification_id;
+  select target_roles, target_id into n_target_roles, n_target_id from public.notifications where id = notification_id;
 
   -- Check if the user has the right role in the Organization
   if user_role is null then
     return false;
   end if;
 
-  -- Check if the user is the target of the notification
-  if target = auth.uid() then
+  -- Check if the user is the target_id of the notification
+  if target_id = auth.uid() then
     return true;
   end if;
 
