@@ -452,7 +452,8 @@ create table public.notifications_read_status (
   id            uuid default uuid_generate_v4() primary key,
   notification_id    uuid references public.notifications on delete cascade not null,
   user_id       uuid references public.users on delete cascade not null,
-  read_at       timestamp with time zone default timezone('utc'::text, now()) not null
+  read_at       timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique (notification_id, user_id)
 );
 comment on table public.notifications_read_status is 'Notifications read status for each user.';
 alter table public.notifications_read_status enable row level security;
@@ -681,7 +682,9 @@ select
   notifications_read_status.read_at as read_at
 from public.notifications
 left join public.users on notifications.actor_id = users.id
-left join public.notifications_read_status on notifications.id = notifications_read_status.notification_id;
+left join public.notifications_read_status on notifications.id = notifications_read_status.notification_id and notifications_read_status.user_id = auth.uid();
+
+alter view public.notifications_view set (security_invoker = true);
 
 -- Functions
 

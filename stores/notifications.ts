@@ -22,6 +22,11 @@ export const useNotificationsStore = defineStore('notifications', () => {
         if (!userStore.user) {
             return
         }
+        const n = notifications.value.find(n => n.id === id)
+        if (!n || n.read_at) {
+            // console.warn('Notification not found or already read')
+            return
+        }
         const { error } = await client.from('notifications_read_status').insert({
             notification_id: id,
             user_id: userStore.user.id

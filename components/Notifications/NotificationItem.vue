@@ -21,6 +21,8 @@
           }}
         </span>
 
+        {{ formatTimeAgo(new Date(notification.updated_at)) }}
+
         <time
           :datetime="props.notification.updated_at"
           class="text-gray-500 dark:text-gray-400 text-xs whitespace-nowrap"
@@ -38,6 +40,8 @@ import type { NotificationView } from "~/types/app.types";
 type Props = {
   notification: NotificationView;
 };
+
+
 
 const props = defineProps<Props>();
 const notificationsStore = useNotificationsStore();
