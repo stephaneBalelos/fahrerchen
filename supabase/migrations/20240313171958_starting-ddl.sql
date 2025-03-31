@@ -77,8 +77,9 @@ create type public.notification_type as enum (
   'course_subscriptions.created',
   'course_activity_schedules.created',
   'course_activity_schedules.updated',
+  'course_activity_schedules.assigned',
   'course_activity_attendances.created',
-  'course_activity_attendances.updated',
+  'course_activity_attendances.deleted',
   'course_subscription_bills.created',
   'course_subscription_bills.updated',
   'course_subscription_bills.paid',
@@ -210,7 +211,7 @@ create table public.students (
 comment on table public.students is 'Profile data for each student.';
 alter table public.students enable row level security;
 revoke update on table public.students from authenticated, anon;
-grant update (firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
+grant update (email, firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
 
 
 -- COURSES
@@ -302,7 +303,7 @@ create table public.course_subscriptions (
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 alter table public.course_subscriptions enable row level security;
 revoke update on table public.course_subscriptions from authenticated, anon;
-grant update (archived_at) on table public.course_subscriptions to authenticated;
+grant update (archived_at, costs) on table public.course_subscriptions to authenticated;
 -- unique constraint to prevent multiple active subscriptions for the same course and student
 -- create unique index on public.course_subscriptions (course_id, student_id) where archived_at is null;
 
@@ -441,11 +442,8 @@ create table public.notifications (
   ressource_id    uuid,
   organization_id    uuid references public.organizations on delete set null
 );
-
 comment on table public.notifications is 'Notifications for each user.';
-alter table public.notifications enable row level security;
-revoke update on table public.notifications from authenticated, anon;
-grant update (targets, updated_at) on table public.notifications to authenticated;
+
 
 -- Notifications Read Status
 create table public.notifications_read_status (
@@ -456,8 +454,6 @@ create table public.notifications_read_status (
   unique (notification_id, user_id)
 );
 comment on table public.notifications_read_status is 'Notifications read status for each user.';
-alter table public.notifications_read_status enable row level security;
-revoke update on table public.notifications_read_status from authenticated, anon;
 
 
 -- VIEWS
@@ -733,7 +729,7 @@ begin
     perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
   end loop;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 
 -- Helpers Functions
 
@@ -823,6 +819,21 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public;
 
+-- check if schedule is COMPLETED or CANCELED
+create or replace function public.is_schedule_active(
+  schedule_id uuid
+)
+returns boolean as $$
+declare s_status public.schedule_status;
+begin
+  select status into s_status from public.course_activity_schedules where id = schedule_id;
+  if s_status = 'COMPLETED' or s_status = 'CANCELED' then
+    return false;
+  end if;
+  return true;
+end;
+$$ language plpgsql security definer set search_path = public;
+
 
 -- check if a bill can be updated
 create or replace function public.can_update_bill(
@@ -832,11 +843,11 @@ returns boolean as $$
 declare
   is_paid boolean;
   is_ready_to_pay boolean;
-  is_cancelled boolean;
+  is_canceled boolean;
 begin
-  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_cancelled from public.course_subscription_bills where id = bill_id;
+  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_canceled from public.course_subscription_bills where id = bill_id;
 
-  return is_paid = false or is_ready_to_pay = false or is_cancelled = false;
+  return is_paid = false or is_ready_to_pay = false or is_canceled = false;
 end;
 $$ language plpgsql security definer set search_path = public;
 
@@ -875,7 +886,7 @@ begin
 
   return false;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security definer set search_path = public;
 
 create or replace function public.create_notification(
   a_id uuid,
@@ -926,7 +937,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = auth, public;
+$$ language plpgsql security invoker set search_path = auth, public;
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
@@ -961,7 +972,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course is created
 create trigger on_course_created
   after insert on public.courses
@@ -1111,8 +1122,6 @@ create trigger on_course_subscription_updated
   after update of archived_at on public.course_subscriptions
   for each row execute procedure public.handle_archived_course_subscription();
 
-
-
 -- handle new activity attendance
 create or replace function public.handle_new_activity_attendance()
 returns trigger as $$
@@ -1120,6 +1129,8 @@ declare org_id uuid;
 declare bill_item public.course_subscription_bill_items;
 declare activity_price numeric;
 declare activity_name text;
+declare student_id uuid;
+declare student_user_id uuid;
 begin
   org_id := new.organization_id;
 
@@ -1148,6 +1159,16 @@ begin
   update public.course_activity_schedules set attendees = array_append(attendees, new.course_subscription_id)
   where id = new.activity_schedule_id;
 
+  -- Notify the user
+  perform public.create_notification(
+    auth.uid(),
+    'course_activity_attendances.created',
+    '{student}'::app_role[],
+    array[student_user_id],
+    new.id,
+    new.organization_id
+  );
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1163,6 +1184,8 @@ declare org_id uuid;
 declare bill_item_id uuid;
 declare bill_item_bill_id uuid;
 declare bill_item_price numeric;
+declare student_id uuid;
+declare student_user_id uuid;
 begin
   org_id := old.organization_id;
 
@@ -1188,13 +1211,100 @@ begin
     
   end if;
 
+  -- Notify the user
+  select student_id into student_id from public.course_subscriptions where id = old.course_subscription_id;
+  select user_id into student_user_id from public.students where id = student_id;
+  perform public.create_notification(
+    auth.uid(),
+    'course_activity_attendances.deleted',
+    '{student}'::app_role[],
+    array[student_user_id],
+    old.id,
+    old.organization_id
+  );
+
   return old;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course activity attendance is deleted
 create trigger on_course_activity_attendance_deleted
   before delete on public.course_activity_attendances
   for each row execute procedure public.handle_removed_activity_attendance();
+
+-- handle updated activity schedule status
+create or replace function public.handle_updated_activity_schedule_status()
+returns trigger as $$
+declare org_id uuid;
+declare student_subscription_ids uuid[];
+declare student_user_ids uuid[];
+begin
+
+  -- if new Status is CANCELED, remove the attendances
+  if new.status = 'CANCELED' then
+    delete from public.course_activity_attendances where activity_schedule_id = new.id;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course activity schedule is updated
+create trigger on_course_activity_schedule_updated
+  after update of status on public.course_activity_schedules
+  for each row execute procedure public.handle_updated_activity_schedule_status();
+
+-- handle updated course activity schedule start_at and end_at
+create or replace function public.handle_updated_activity_schedule_dates()
+returns trigger as $$
+declare org_id uuid;
+declare student_subscription_ids uuid[];
+declare student_user_ids uuid[];
+begin
+  -- Notify the Students
+  select array_agg(course_subscription_id) into student_subscription_ids from public.course_activity_attendances where activity_schedule_id = new.id;
+  select array_agg(student_id) into student_user_ids from public.course_subscriptions where id = any(student_subscription_ids);
+
+  perform public.create_notification(
+    auth.uid(),
+    'course_activity_schedules.updated',
+    '{student}'::app_role[],
+    student_user_ids,
+    new.id,
+    new.organization_id
+  );
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course activity schedule is updated
+create trigger on_course_activity_schedule_updated_dates
+  after update of start_at, end_at on public.course_activity_schedules
+  for each row execute procedure public.handle_updated_activity_schedule_dates();
+
+
+-- handle updated course activity schedule assigned_to
+create or replace function public.handle_updated_activity_schedule_assigned_to()
+returns trigger as $$
+declare org_id uuid;
+declare user_id uuid;
+begin
+
+  -- Notify the User
+  select assigned_to into user_id from public.course_activity_schedules where id = new.id;
+  perform public.create_notification(
+    auth.uid(),
+    'course_activity_schedules.updated',
+    '{owner, manager, teacher}'::app_role[],
+    array[user_id],
+    new.id,
+    new.organization_id
+  );
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a course activity schedule is updated
+create trigger on_course_activity_schedule_updated_assigned_to
+  after update of assigned_to on public.course_activity_schedules
+  for each row execute procedure public.handle_updated_activity_schedule_assigned_to();
 
 
 -- handle updated bill ready to pay
@@ -1242,7 +1352,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill is updated
 create trigger on_course_subscription_bill_updated
   after update on public.course_subscription_bills
@@ -1263,7 +1373,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill item is created
 create trigger on_course_subscription_bill_item_created
   after insert on public.course_subscription_bill_items
@@ -1300,7 +1410,7 @@ begin
 
   return old;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill item is deleted
 create trigger on_course_subscription_bill_item_deleted
   before delete on public.course_subscription_bill_items
@@ -1325,12 +1435,11 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill item is updated
 create trigger on_course_subscription_bill_item_updated
   before update on public.course_subscription_bill_items
   for each row execute procedure public.handle_updated_bill_item();
-
 
 -- Policies
 
@@ -1418,14 +1527,14 @@ create policy "Owner can delete course_activities" on public.course_activities f
 -- Course Activity Schedules Policies
 create policy "Everyone can see course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
 create policy "Owner, Manager & Teacher can insert course_activity_schedules" on public.course_activity_schedules for insert to authenticated with check (public.authorize('course_activity_schedules.create', organization_id));
-create policy "Owner, Manager & Teacher can update course_activity_schedules" on public.course_activity_schedules for update to authenticated using (public.authorize('course_activity_schedules.update', organization_id)) with check (public.authorize('course_activity_schedules.update', organization_id));
+create policy "Owner, Manager & Teacher can update course_activity_schedules" on public.course_activity_schedules for update to authenticated using (public.authorize('course_activity_schedules.update', organization_id)) with check (public.authorize('course_activity_schedules.update', organization_id) and public.is_schedule_active(id));
 create policy "Owner, Manger % Teacher can delete course_activity_schedules" on public.course_activity_schedules for delete to authenticated using (public.authorize('course_activity_schedules.delete', organization_id));
 
 
 -- Course Activity Attendances Policies
 create policy "Everyone can see course_activity_attendances" on public.course_activity_attendances for select to authenticated using (public.authorize('course_activity_attendances.read', organization_id));
 create policy "Owner, Manager can insert course_activity_attendances" on public.course_activity_attendances for insert to authenticated with check (public.authorize('course_activity_attendances.create', organization_id) and public.is_subscription_active(course_subscription_id));
-create policy "Owner & Manager can update course_activity_attendances" on public.course_activity_attendances for update to authenticated using (public.authorize('course_activity_attendances.update', organization_id)) with check (public.authorize('course_activity_attendances.update', organization_id) and public.is_subscription_active(course_subscription_id));
+create policy "Owner & Manager can update course_activity_attendances" on public.course_activity_attendances for update to authenticated using (public.authorize('course_activity_attendances.update', organization_id)) with check (public.authorize('course_activity_attendances.update', organization_id) and public.is_subscription_active(course_subscription_id) and public.is_schedule_active(activity_schedule_id));
 create policy "Owner can delete course_activity_attendances" on public.course_activity_attendances for delete to authenticated using (public.authorize('course_activity_attendances.delete', organization_id) and public.is_subscription_active(course_subscription_id));
 
 
@@ -1446,13 +1555,12 @@ create policy "Owner can delete course_subscription_bill_items" on public.course
 create policy "Everyone can see course_activity_types" on public.course_activity_types for select to authenticated using (true);
 
 
-create policy "Only Actor can create a notification" on public.notifications for insert to authenticated with check (auth.uid() = actor_id);
-create policy "Only Actor can update a notification" on public.notifications for update to authenticated using (auth.uid() = actor_id);
-create policy "Only Actor can delete a notification" on public.notifications for delete to authenticated using (auth.uid() = actor_id);
-create policy "Only targeted users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted(id, target_roles, targets, organization_id));
+-- create policy "Only Actor can create a notification" on public.notifications for insert to authenticated with check (true);
+-- create policy "Only Actor can update a notification" on public.notifications for update to authenticated using (true);
+-- create policy "Only targeted users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted(id, target_roles, targets, organization_id));
 
-create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
-create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
+-- create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
+-- create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
 
 
 -- Jobs
@@ -1498,7 +1606,7 @@ create policy "Read read status if user_id matches the user" on public.notificat
 -- create or replace function public.create_user(
 --     email text
 -- ) returns uuid
---     security definer
+--     security invoker
 --     set search_path = auth
 -- as $$
 --   declare
@@ -1531,7 +1639,7 @@ create policy "Read read status if user_id matches the user" on public.notificat
   
 --   return bind_permissions > 0;
 -- end;
--- $$ language plpgsql security definer set search_path = public;
+-- $$ language plpgsql security invoker set search_path = public;
 
 -- -- Secure the tables
 -- alter table public.users enable row level security;
