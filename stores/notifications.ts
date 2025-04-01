@@ -4,12 +4,19 @@ export const useNotificationsStore = defineStore('notifications', () => {
     const client = useSupabaseClient();
     const userStore = useUserStore()
     const notifications = ref<NotificationView[]>([])
+    const organizationsStore = useUserOrganizationsStore()
 
     async function loadNotifications() {
         if (!userStore.user) {
             return
         }
-        const { data, error } = await client.from('notifications_view').select('*').overrideTypes<Array<NotificationView>, { merge: false }>()
+        if (!organizationsStore.selectedOrganization) {
+            return
+        }
+        const { data, error } = await client.from('notifications_view').select('*')
+        .eq('organization_id', organizationsStore.selectedOrganization.organization_id)
+        .order('date', { ascending: false })
+        .overrideTypes<Array<NotificationView>, { merge: false }>()
         if (error) {
             console.error(error)
             return
@@ -41,6 +48,13 @@ export const useNotificationsStore = defineStore('notifications', () => {
 
     watch(() => userStore.user, async () => {
         if (userStore.user) {
+            await loadNotifications()
+        }
+    }, {
+        immediate: true
+    })
+    watch(() => organizationsStore.selectedOrganization, async () => {
+        if (organizationsStore.selectedOrganization) {
             await loadNotifications()
         }
     }, {
