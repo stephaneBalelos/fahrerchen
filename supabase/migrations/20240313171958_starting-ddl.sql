@@ -905,7 +905,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = auth, public;
+$$ language plpgsql security definer set search_path = auth, public;
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
@@ -1065,6 +1065,17 @@ begin
     end loop;
   end if;
 
+  -- Send Notification to the staff
+  perform private.send_notification(
+    auth.uid(),
+    'course_subscriptions.created',
+    '{owner, manager, teacher}'::public.app_role[],
+    null,
+    new.id,
+    to_jsonb(new),
+    new.organization_id
+  );
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public, private;
@@ -1100,8 +1111,9 @@ declare org_id uuid;
 declare bill_item public.course_subscription_bill_items;
 declare activity_price numeric;
 declare activity_name text;
-declare student_id uuid;
+declare s_id uuid;
 declare student_user_id uuid;
+declare assigned_to_user_id uuid;
 begin
   org_id := new.organization_id;
 
@@ -1130,6 +1142,34 @@ begin
   update public.course_activity_schedules set attendees = array_append(attendees, new.course_subscription_id)
   where id = new.activity_schedule_id;
 
+  -- Notify the Student
+  select student_id into s_id from public.course_subscriptions where id = new.course_subscription_id;
+  select user_id into student_user_id from public.students where id = s_id;
+  if student_user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_attendances.created',
+      '{student}'::public.app_role[],
+      student_user_id,
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
+  end if;
+  -- Notify the Staff Assigned User
+  select assigned_to into assigned_to_user_id from public.course_activity_schedules where id = new.activity_schedule_id;
+  if assigned_to_user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_attendances.created',
+      '{owner, manager, teacher}'::public.app_role[],
+      assigned_to_user_id,
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
+  end if;
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1145,8 +1185,9 @@ declare org_id uuid;
 declare bill_item_id uuid;
 declare bill_item_bill_id uuid;
 declare bill_item_price numeric;
-declare student_id uuid;
+declare s_id uuid;
 declare student_user_id uuid;
+declare assigned_to_user_id uuid;
 begin
   org_id := old.organization_id;
 
@@ -1173,8 +1214,33 @@ begin
   end if;
 
   -- Notify the user
-  select student_id into student_id from public.course_subscriptions where id = old.course_subscription_id;
-  select user_id into student_user_id from public.students where id = student_id;
+  select student_id into s_id from public.course_subscriptions where id = old.course_subscription_id;
+  select user_id into student_user_id from public.students where id = s_id;
+
+  if student_user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_attendances.deleted',
+      '{student}'::public.app_role[],
+      student_user_id,
+      old.id,
+      to_jsonb(old),
+      old.organization_id
+    );
+  end if;
+  -- Notify the Staff Assigned User
+  select assigned_to into assigned_to_user_id from public.course_activity_schedules where id = old.activity_schedule_id;
+  if assigned_to_user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_attendances.deleted',
+      '{owner, manager, teacher}'::public.app_role[],
+      assigned_to_user_id,
+      old.id,
+      to_jsonb(old),
+      old.organization_id
+    );
+  end if;
 
   return old;
 end;
@@ -1215,6 +1281,18 @@ begin
   -- Notify the Students
   select array_agg(course_subscription_id) into student_subscription_ids from public.course_activity_attendances where activity_schedule_id = new.id;
   select array_agg(student_id) into student_user_ids from public.course_subscriptions where id = any(student_subscription_ids);
+  for i in 1..array_length(student_user_ids, 1) loop
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_schedules.updated',
+      '{student}'::public.app_role[],
+      student_user_ids[i],
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
+  end loop;
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
@@ -1233,6 +1311,18 @@ begin
 
   -- Notify the User
   select assigned_to into user_id from public.course_activity_schedules where id = new.id;
+  if user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_activity_schedules.assigned',
+      '{owner, manager, teacher}'::public.app_role[],
+      user_id,
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
+  end if;
+
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;

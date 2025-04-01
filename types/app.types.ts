@@ -162,9 +162,9 @@ export type Database = MergeDeep<DatabaseGenerated, {
           id: string
           organization_id: string
           read_at: string | null
-          ressource_id: string
+          resource_id: string
           target_roles: UserRole[]
-          targets: string[] | null
+          target_id: string
           type: Database["public"]["Enums"]["notification_type"]
           updated_at: string
         }
