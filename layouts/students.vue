@@ -23,6 +23,8 @@
           <UColorModeButton />
 
           <UButton :label="t('logout')" color="gray" @click="logout" />
+
+          <NotificationsButton />
         </template>
 
         <template #panel>
@@ -38,6 +40,7 @@
 
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core";
+import NotificationsButton from "~/components/sidebar/NotificationsButton.vue";
 import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
