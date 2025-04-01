@@ -247,6 +247,7 @@ async function updateStudent(data: UserSchema, student_id: string) {
   const { data: student, error } = await client
     .from("students")
     .update({
+      email: data.email,
       firstname: data.firstname,
       lastname: data.lastname,
       phone_number: data.phone_number,
