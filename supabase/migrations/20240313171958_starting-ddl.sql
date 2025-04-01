@@ -4,9 +4,13 @@ create extension pg_cron with schema pg_catalog;
 grant usage on schema cron to postgres;
 grant all privileges on all tables in schema cron to postgres;
 
+create schema if not exists private;
+grant usage on schema private to anon, authenticated, service_role, postgres;
+
 
 alter database postgres
 set timezone to 'Europe/Berlin';
+
 -- Custom types
 create type public.app_permission as enum (
   'users.read',
@@ -439,7 +443,7 @@ create table public.notifications (
   target_id       uuid,
   date          timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  ressource_id    uuid,
+  resource_id    uuid,
   organization_id    uuid references public.organizations on delete set null
 );
 comment on table public.notifications is 'Notifications for each user.';
@@ -676,7 +680,7 @@ select
   notifications.target_id,
   notifications.date,
   notifications.updated_at,
-  notifications.ressource_id,
+  notifications.resource_id,
   notifications.organization_id,
   users.email as actor_email,
   users.firstname as actor_firstname,
@@ -858,7 +862,7 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 -- check if a user is targeted by a notification
-create or replace function public.is_user_targeted(
+create or replace function public.is_user_targeted_by_notification(
   notification_id uuid,
   org_id uuid
 )
@@ -877,12 +881,12 @@ begin
   end if;
 
   -- Check if the user is the target_id of the notification
-  if target_id = auth.uid() then
+  if n_target_id = auth.uid() then
     return true;
   end if;
 
   -- if user_role is included in the target_roles, return true
-  if user_role = any(target_roles) then
+  if user_role = any(n_target_roles) then
     return true;
   end if;
 
@@ -947,10 +951,20 @@ create or replace function public.handle_new_registration_request()
 returns trigger as $$
 declare org_id uuid;
 begin
+    -- Send Notification to the student
+  perform private.send_notification(
+    auth.uid(),
+    'course_subscriptions.created',
+    '{owner, manager, teacher}'::public.app_role[],
+    null,
+    new.id,
+    to_jsonb(new),
+    new.organization_id
+  );
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = public, private;
 -- trigger the function every time a registration request is created
 create trigger on_registration_request_created
   after insert on public.students_registration_requests
@@ -1053,7 +1067,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = public, private;
 -- trigger the function every time a course subscription is created
 create trigger on_course_subscription_created
   after insert on public.course_subscriptions
@@ -1478,6 +1492,9 @@ create policy "Everyone can see course_activity_types" on public.course_activity
 create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
 create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
 
+
+-- Notifications Policies
+create policy "Targeted Users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted_by_notification(id, organization_id));
 
 -- Jobs
   -- Generate Bills for Subscriptions at the end of the month at 6:00 AM

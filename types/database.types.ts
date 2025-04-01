@@ -815,9 +815,9 @@ export type Database = {
           date: string
           id: string
           organization_id: string | null
-          ressource_id: string | null
+          resource_id: string | null
+          target_id: string | null
           target_roles: Database["public"]["Enums"]["app_role"][]
-          targets: string[] | null
           type: Database["public"]["Enums"]["notification_type"]
           updated_at: string
         }
@@ -826,9 +826,9 @@ export type Database = {
           date?: string
           id?: string
           organization_id?: string | null
-          ressource_id?: string | null
+          resource_id?: string | null
+          target_id?: string | null
           target_roles?: Database["public"]["Enums"]["app_role"][]
-          targets?: string[] | null
           type: Database["public"]["Enums"]["notification_type"]
           updated_at?: string
         }
@@ -837,9 +837,9 @@ export type Database = {
           date?: string
           id?: string
           organization_id?: string | null
-          ressource_id?: string | null
+          resource_id?: string | null
+          target_id?: string | null
           target_roles?: Database["public"]["Enums"]["app_role"][]
-          targets?: string[] | null
           type?: Database["public"]["Enums"]["notification_type"]
           updated_at?: string
         }
@@ -1671,9 +1671,9 @@ export type Database = {
           id: string | null
           organization_id: string | null
           read_at: string | null
-          ressource_id: string | null
+          resource_id: string | null
+          target_id: string | null
           target_roles: Database["public"]["Enums"]["app_role"][] | null
-          targets: string[] | null
           type: Database["public"]["Enums"]["notification_type"] | null
           updated_at: string | null
         }
@@ -1826,43 +1826,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      create_notification: {
-        Args: {
-          a_id: string
-          n_type: Database["public"]["Enums"]["notification_type"]
-          n_roles: Database["public"]["Enums"]["app_role"][]
-          n_targets: string[]
-          r_id: string
-          org_id: string
-        }
-        Returns: string
-      }
-      create_student: {
-        Args: {
-          firstname: string
-          lastname: string
-          email: string
-          birth_date: string
-          organization_id: string
-        }
-        Returns: {
-          address_city: string | null
-          address_country: string | null
-          address_street: string | null
-          address_zip: string | null
-          avatar_path: string | null
-          birth_date: string
-          created_at: string
-          email: string
-          firstname: string
-          has_a_license: boolean
-          id: string
-          lastname: string
-          organization_id: string
-          phone_number: string | null
-          user_id: string | null
-        }
-      }
       generate_bill_for_subscription: {
         Args: {
           subscription_id: string
@@ -1895,16 +1858,7 @@ export type Database = {
       is_user_targeted: {
         Args: {
           notification_id: string
-          target_roles: Database["public"]["Enums"]["app_role"][]
-          targets: string[]
           org_id: string
-        }
-        Returns: boolean
-      }
-      send_transactional_email: {
-        Args: {
-          message_id: string
-          payload: Json
         }
         Returns: boolean
       }
