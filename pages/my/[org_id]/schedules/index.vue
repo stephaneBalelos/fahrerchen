@@ -201,7 +201,7 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
-const selectedView = ref("calendar");
+const selectedView = ref("list");
 const views = computed(() => [
   { label: t("list_view"), value: "list" },
   { label: t("calendar_view"), value: "calendar" },
@@ -235,8 +235,6 @@ const { data: schedules, refresh } = useAsyncData(
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
-
-    console.log(filterForm.value)
 
     return await courseActivitySchedules.fetchCourseActivitySchedules({
       start_at: dateStart.toISOString(),
