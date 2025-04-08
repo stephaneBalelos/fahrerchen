@@ -1318,17 +1318,19 @@ begin
     'activity_start_at', new.start_at,
     'activity_end_at', new.end_at
   );
-  for i in 1..array_length(student_user_ids, 1) loop
-    perform private.send_notification(
-      auth.uid(),
-      'course_activity_schedules.updated',
-      '{student}'::public.app_role[],
-      student_user_ids[i],
-      new.id,
-      n_payload,
-      new.organization_id
-    );
-  end loop;
+  if array_length(student_user_ids, 1) > 0 then
+    for i in 1..array_length(student_user_ids, 1) loop
+      perform private.send_notification(
+        auth.uid(),
+        'course_activity_schedules.updated',
+        '{student}'::public.app_role[],
+        student_user_ids[i],
+        new.id,
+        n_payload,
+        new.organization_id
+      );
+    end loop;
+  end if;
 
   return new;
 end;
