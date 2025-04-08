@@ -15,6 +15,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         }
         const { data, error } = await client.from('notifications_view').select('*')
         .eq('organization_id', organizationsStore.selectedOrganization.organization_id)
+        .neq('actor_id', userStore.user.id)
         .order('date', { ascending: false })
         .overrideTypes<Array<NotificationView>, { merge: false }>()
         if (error) {

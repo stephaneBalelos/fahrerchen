@@ -5,21 +5,6 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1
 
 const secret = Deno.env.get('NOTIFICATION_WEBHOOK_SECRET_KEY') as string
 
-// type RessourcePayload = {
-//     "students_registration_requests.created": Database['public']['Tables']['students_registration_requests']['Row'],
-//     'students.created': Database['public']['Tables']['students']['Row'],
-//     'course_subscriptions.created': Database['public']['Tables']['course_subscriptions']['Row'],
-//     'course_activity_schedules.created': Database['public']['Tables']['course_activity_schedules']['Row'],
-//     'course_activity_schedules.updated': Database['public']['Tables']['course_activity_schedules']['Row'],
-//     'course_activity_schedules.assigned': Database['public']['Tables']['course_activity_schedules']['Row'],
-//     'course_activity_attendances.created': Database['public']['Tables']['course_activity_attendances']['Row'],
-//     'course_activity_attendances.deleted': Database['public']['Tables']['course_activity_attendances']['Row'],
-//     'course_subscription_bills.created': Database['public']['Tables']['course_subscription_bills']['Row'],
-//     'course_subscription_bills.updated': Database['public']['Tables']['course_subscription_bills']['Row'],
-//     'course_subscription_bills.paid': Database['public']['Tables']['course_subscription_bills']['Row'],
-//     'course_subscription_bills.canceled': Database['public']['Tables']['course_subscription_bills']['Row']
-// }
-
 type WebhookPayload = {
     type: Database['public']['Enums']['notification_type']
     actor_id: string | null
@@ -75,8 +60,9 @@ const insertNotification = async (supabaseAdmin: SupabaseClient<Database>, paylo
             actor_id: payload.actor_id,
             target_id: payload.target_id,
             resource_id: payload.resource_id,
+            payload: payload.payload,
             target_roles: payload.target_roles,
-            organization_id: payload.organization_id
+            organization_id: payload.organization_id,
         })
         .select()
         .single()

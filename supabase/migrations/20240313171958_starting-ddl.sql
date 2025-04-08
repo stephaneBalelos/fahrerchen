@@ -77,14 +77,12 @@ create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 
 -- Notifications Types
 create type public.notification_type as enum (
   'students_registration_requests.created',
-  'students.created',
   'course_subscriptions.created',
-  'course_activity_schedules.created',
   'course_activity_schedules.updated',
   'course_activity_schedules.assigned',
   'course_activity_attendances.created',
   'course_activity_attendances.deleted',
-  'course_subscription_bills.created',
+  'course_subscription_bills.ready_to_pay',
   'course_subscription_bills.updated',
   'course_subscription_bills.paid',
   'course_subscription_bills.canceled'
@@ -444,6 +442,7 @@ create table public.notifications (
   date          timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   resource_id    uuid,
+  payload      jsonb,
   organization_id    uuid references public.organizations on delete set null
 );
 comment on table public.notifications is 'Notifications for each user.';
@@ -682,6 +681,7 @@ select
   notifications.updated_at,
   notifications.resource_id,
   notifications.organization_id,
+  notifications.payload,
   users.email as actor_email,
   users.firstname as actor_firstname,
   users.lastname as actor_lastname,
@@ -954,7 +954,7 @@ begin
     -- Send Notification to the student
   perform private.send_notification(
     auth.uid(),
-    'course_subscriptions.created',
+    'students_registration_requests.created',
     '{owner, manager, teacher}'::public.app_role[],
     null,
     new.id,
@@ -1037,6 +1037,7 @@ declare is_course_active boolean;
 declare create_bill boolean;
 declare bill_id uuid;
 declare activity public.course_activities;
+declare n_payload jsonb;
 begin
   org_id := new.organization_id;
   select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
@@ -1066,13 +1067,17 @@ begin
   end if;
 
   -- Send Notification to the staff
+  n_payload := jsonb_build_object(
+    'course_name', (select name from public.courses where id = new.course_id),
+    'student_name', (select concat(firstname, ' ', lastname) from public.students where id = new.student_id)
+  );
   perform private.send_notification(
     auth.uid(),
     'course_subscriptions.created',
     '{owner, manager, teacher}'::public.app_role[],
     null,
     new.id,
-    to_jsonb(new),
+    n_payload,
     new.organization_id
   );
 
@@ -1114,6 +1119,7 @@ declare activity_name text;
 declare s_id uuid;
 declare student_user_id uuid;
 declare assigned_to_user_id uuid;
+declare n_payload jsonb;
 begin
   org_id := new.organization_id;
 
@@ -1146,26 +1152,35 @@ begin
   select student_id into s_id from public.course_subscriptions where id = new.course_subscription_id;
   select user_id into student_user_id from public.students where id = s_id;
   if student_user_id is not null then
+    n_payload := jsonb_build_object(
+      'activity_name', activity_name,
+      'activity_start_at', (select start_at from public.course_activity_schedules where id = new.activity_schedule_id)
+    );
     perform private.send_notification(
       auth.uid(),
       'course_activity_attendances.created',
       '{student}'::public.app_role[],
       student_user_id,
       new.id,
-      to_jsonb(new),
+      n_payload,
       new.organization_id
     );
   end if;
   -- Notify the Staff Assigned User
   select assigned_to into assigned_to_user_id from public.course_activity_schedules where id = new.activity_schedule_id;
   if assigned_to_user_id is not null then
+    n_payload := jsonb_build_object(
+      'activity_name', activity_name,
+      'activity_start_at', (select start_at from public.course_activity_schedules where id = new.activity_schedule_id),
+      'stundent_name', (select concat(firstname, ' ', lastname) from public.students where id = s_id)
+    );
     perform private.send_notification(
       auth.uid(),
       'course_activity_attendances.created',
       '{owner, manager, teacher}'::public.app_role[],
       assigned_to_user_id,
       new.id,
-      to_jsonb(new),
+      n_payload,
       new.organization_id
     );
   end if;
@@ -1188,6 +1203,7 @@ declare bill_item_price numeric;
 declare s_id uuid;
 declare student_user_id uuid;
 declare assigned_to_user_id uuid;
+declare n_payload jsonb;
 begin
   org_id := old.organization_id;
 
@@ -1213,31 +1229,45 @@ begin
     
   end if;
 
+  -- aggregate attendees for the activity schedule
+  update public.course_activity_schedules set attendees = array_remove(attendees, old.course_subscription_id)
+  where id = old.activity_schedule_id;
+
   -- Notify the user
   select student_id into s_id from public.course_subscriptions where id = old.course_subscription_id;
   select user_id into student_user_id from public.students where id = s_id;
 
   if student_user_id is not null then
+    n_payload := jsonb_build_object(
+      'activity_name', (select name from public.course_activities where id = old.course_activity_id),
+      'activity_start_at', old.start_at,
+      'activity_end_at', old.end_at
+    );
     perform private.send_notification(
       auth.uid(),
       'course_activity_attendances.deleted',
       '{student}'::public.app_role[],
       student_user_id,
       old.id,
-      to_jsonb(old),
+      n_payload,
       old.organization_id
     );
   end if;
   -- Notify the Staff Assigned User
   select assigned_to into assigned_to_user_id from public.course_activity_schedules where id = old.activity_schedule_id;
   if assigned_to_user_id is not null then
+    n_payload := jsonb_build_object(
+      'activity_name', (select name from public.course_activities where id = old.course_activity_id),
+      'activity_start_at', old.start_at,
+      'activity_end_at', old.end_at
+    );
     perform private.send_notification(
       auth.uid(),
       'course_activity_attendances.deleted',
       '{owner, manager, teacher}'::public.app_role[],
       assigned_to_user_id,
       old.id,
-      to_jsonb(old),
+      n_payload,
       old.organization_id
     );
   end if;
@@ -1277,10 +1307,17 @@ returns trigger as $$
 declare org_id uuid;
 declare student_subscription_ids uuid[];
 declare student_user_ids uuid[];
+declare n_payload jsonb;
 begin
   -- Notify the Students
   select array_agg(course_subscription_id) into student_subscription_ids from public.course_activity_attendances where activity_schedule_id = new.id;
   select array_agg(student_id) into student_user_ids from public.course_subscriptions where id = any(student_subscription_ids);
+  n_payload := jsonb_build_object(
+    'course_name', (select name from public.courses where id = new.course_id),
+    'activity_name', (select name from public.course_activities where id = new.activity_id),
+    'activity_start_at', new.start_at,
+    'activity_end_at', new.end_at
+  );
   for i in 1..array_length(student_user_ids, 1) loop
     perform private.send_notification(
       auth.uid(),
@@ -1288,7 +1325,7 @@ begin
       '{student}'::public.app_role[],
       student_user_ids[i],
       new.id,
-      to_jsonb(new),
+      n_payload,
       new.organization_id
     );
   end loop;
@@ -1307,18 +1344,25 @@ create or replace function public.handle_updated_activity_schedule_assigned_to()
 returns trigger as $$
 declare org_id uuid;
 declare user_id uuid;
+declare n_payload jsonb;
 begin
 
   -- Notify the User
   select assigned_to into user_id from public.course_activity_schedules where id = new.id;
   if user_id is not null then
+    n_payload := jsonb_build_object(
+      'course_name', (select name from public.courses where id = new.course_id),
+      'activity_name', (select name from public.course_activities where id = new.activity_id),
+      'activity_start_at', new.start_at,
+      'activity_end_at', new.end_at
+    );
     perform private.send_notification(
       auth.uid(),
       'course_activity_schedules.assigned',
       '{owner, manager, teacher}'::public.app_role[],
       user_id,
       new.id,
-      to_jsonb(new),
+      n_payload,
       new.organization_id
     );
   end if;
@@ -1335,8 +1379,9 @@ create trigger on_course_activity_schedule_updated_assigned_to
 -- handle updated bill ready to pay
 create or replace function public.handle_updated_bill()
 returns trigger as $$
+declare student_id uuid;
+declare student_user_id uuid;
 begin
-
   --prevent set ready_to_pay to false if the bill has been paid
   if old.ready_to_pay = true and new.ready_to_pay = false and new.paid_at is not null then
     raise exception 'Cannot set ready_to_pay to false if the bill has been paid';
@@ -1352,27 +1397,79 @@ begin
     raise exception 'Cannot set canceled_at to null if the bill is paid';
   end if;
 
+    -- prevent removing the stripe_payment_intent_id when bill is paid
+  if old.stripe_payment_intent_id is not null and new.stripe_payment_intent_id is null and new.paid_at is not null then
+    raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
+  end if;
+
+  student_id := (select student_id from public.course_subscriptions where id = new.course_subscription_id);
+  select user_id into student_user_id from public.students where id = student_id;
+
   if new.ready_to_pay = true and old.ready_to_pay = false then
     -- insert the bill history
     insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
     values (new.id, auth.uid(), 'BILL_READY_TO_PAY', '', 0, new.organization_id);
-  end if;
 
-  -- prevent removing the stripe_payment_intent_id when bill is paid
-  if old.stripe_payment_intent_id is not null and new.stripe_payment_intent_id is null and new.paid_at is not null then
-    raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
+    -- Notify the user
+    if student_user_id is not null then
+      perform private.send_notification(
+        auth.uid(),
+        'course_subscription_bills.ready_to_pay',
+        '{student}'::public.app_role[],
+        student_user_id,
+        new.id,
+        to_jsonb(new),
+        new.organization_id
+      );
+    end if;
   end if;
 
   if new.paid_at is not null then
     -- insert the bill history
     insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
     values (new.id, auth.uid(), 'BILL_PAID', '', 0, new.organization_id);
+
+    -- Notify the user
+    if student_user_id is not null then
+      perform private.send_notification(
+        auth.uid(),
+        'course_subscription_bills.paid',
+        '{student}'::public.app_role[],
+        student_user_id,
+        new.id,
+        to_jsonb(new),
+        new.organization_id
+      );
+    end if;
+    -- Notify the staff
+    perform private.send_notification(
+      auth.uid(),
+      'course_subscription_bills.paid',
+      '{owner, manager}'::public.app_role[],
+      null,
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
   end if;
 
   -- if bill is canceled, unlink all the bill items
   if new.canceled_at is not null then
     update public.course_subscription_bill_items set bill_id = null
     where bill_id = new.id;
+
+    -- Notify the user
+    if student_user_id is not null then
+      perform private.send_notification(
+        auth.uid(),
+        'course_subscription_bills.canceled',
+        '{student}'::public.app_role[],
+        student_user_id,
+        new.id,
+        to_jsonb(new),
+        new.organization_id
+      );
+    end if;
   end if;
 
   return new;
@@ -1389,12 +1486,29 @@ create or replace function public.handle_new_bill_item()
 returns trigger as $$
 declare org_id uuid;
 declare bill_total numeric;
+declare student_id uuid;
+declare student_user_id uuid;
 begin
   org_id := new.organization_id;
 
   -- aggregate subscription costs
   update public.course_subscriptions set costs = costs + new.price
   where id = new.course_subscription_id;
+
+  -- Notify the Student
+  select student_id into student_id from public.course_subscriptions where id = new.course_subscription_id;
+  select user_id into student_user_id from public.students where id = student_id;
+  if student_user_id is not null then
+    perform private.send_notification(
+      auth.uid(),
+      'course_subscription_bills.updated',
+      '{student}'::public.app_role[],
+      student_user_id,
+      new.id,
+      to_jsonb(new),
+      new.organization_id
+    );
+  end if;
 
   return new;
 end;

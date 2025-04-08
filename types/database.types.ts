@@ -815,6 +815,7 @@ export type Database = {
           date: string
           id: string
           organization_id: string | null
+          payload: Json | null
           resource_id: string | null
           target_id: string | null
           target_roles: Database["public"]["Enums"]["app_role"][]
@@ -826,6 +827,7 @@ export type Database = {
           date?: string
           id?: string
           organization_id?: string | null
+          payload?: Json | null
           resource_id?: string | null
           target_id?: string | null
           target_roles?: Database["public"]["Enums"]["app_role"][]
@@ -837,6 +839,7 @@ export type Database = {
           date?: string
           id?: string
           organization_id?: string | null
+          payload?: Json | null
           resource_id?: string | null
           target_id?: string | null
           target_roles?: Database["public"]["Enums"]["app_role"][]
@@ -1670,6 +1673,7 @@ export type Database = {
           date: string | null
           id: string | null
           organization_id: string | null
+          payload: Json | null
           read_at: string | null
           resource_id: string | null
           target_id: string | null
@@ -1943,14 +1947,12 @@ export type Database = {
         | "T"
       notification_type:
         | "students_registration_requests.created"
-        | "students.created"
         | "course_subscriptions.created"
-        | "course_activity_schedules.created"
         | "course_activity_schedules.updated"
         | "course_activity_schedules.assigned"
         | "course_activity_attendances.created"
         | "course_activity_attendances.deleted"
-        | "course_subscription_bills.created"
+        | "course_subscription_bills.ready_to_pay"
         | "course_subscription_bills.updated"
         | "course_subscription_bills.paid"
         | "course_subscription_bills.canceled"
@@ -2472,14 +2474,12 @@ export const Constants = {
       ],
       notification_type: [
         "students_registration_requests.created",
-        "students.created",
         "course_subscriptions.created",
-        "course_activity_schedules.created",
         "course_activity_schedules.updated",
         "course_activity_schedules.assigned",
         "course_activity_attendances.created",
         "course_activity_attendances.deleted",
-        "course_subscription_bills.created",
+        "course_subscription_bills.ready_to_pay",
         "course_subscription_bills.updated",
         "course_subscription_bills.paid",
         "course_subscription_bills.canceled",
