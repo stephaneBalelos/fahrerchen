@@ -1204,6 +1204,9 @@ declare s_id uuid;
 declare student_user_id uuid;
 declare assigned_to_user_id uuid;
 declare n_payload jsonb;
+declare activity_name text;
+declare activity_start_at timestamp with time zone;
+declare activity_end_at timestamp with time zone;
 begin
   org_id := old.organization_id;
 
@@ -1236,12 +1239,14 @@ begin
   -- Notify the user
   select student_id into s_id from public.course_subscriptions where id = old.course_subscription_id;
   select user_id into student_user_id from public.students where id = s_id;
+  select name, start_at, end_at into activity_name, activity_start_at, activity_end_at from public.course_activities where id = old.course_activity_id;
+
 
   if student_user_id is not null then
     n_payload := jsonb_build_object(
-      'activity_name', (select name from public.course_activities where id = old.course_activity_id),
-      'activity_start_at', old.start_at,
-      'activity_end_at', old.end_at
+      'activity_name', activity_name,
+      'activity_start_at', activity_start_at,
+      'activity_end_at', activity_end_at
     );
     perform private.send_notification(
       auth.uid(),
@@ -1257,9 +1262,9 @@ begin
   select assigned_to into assigned_to_user_id from public.course_activity_schedules where id = old.activity_schedule_id;
   if assigned_to_user_id is not null then
     n_payload := jsonb_build_object(
-      'activity_name', (select name from public.course_activities where id = old.course_activity_id),
-      'activity_start_at', old.start_at,
-      'activity_end_at', old.end_at
+      'activity_name', activity_name,
+      'activity_start_at', activity_start_at,
+      'activity_end_at', activity_end_at
     );
     perform private.send_notification(
       auth.uid(),
@@ -1381,7 +1386,7 @@ create trigger on_course_activity_schedule_updated_assigned_to
 -- handle updated bill ready to pay
 create or replace function public.handle_updated_bill()
 returns trigger as $$
-declare student_id uuid;
+declare s_id uuid;
 declare student_user_id uuid;
 begin
   --prevent set ready_to_pay to false if the bill has been paid
@@ -1404,8 +1409,8 @@ begin
     raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
   end if;
 
-  student_id := (select student_id from public.course_subscriptions where id = new.course_subscription_id);
-  select user_id into student_user_id from public.students where id = student_id;
+  select student_id into s_id from public.course_subscriptions where id = new.course_subscription_id;
+  select user_id into student_user_id from public.students where id = s_id;
 
   if new.ready_to_pay = true and old.ready_to_pay = false then
     -- insert the bill history
@@ -1488,7 +1493,7 @@ create or replace function public.handle_new_bill_item()
 returns trigger as $$
 declare org_id uuid;
 declare bill_total numeric;
-declare student_id uuid;
+declare s_id uuid;
 declare student_user_id uuid;
 begin
   org_id := new.organization_id;
@@ -1498,8 +1503,8 @@ begin
   where id = new.course_subscription_id;
 
   -- Notify the Student
-  select student_id into student_id from public.course_subscriptions where id = new.course_subscription_id;
-  select user_id into student_user_id from public.students where id = student_id;
+  select student_id into s_id from public.course_subscriptions where id = new.course_subscription_id;
+  select user_id into student_user_id from public.students where id = s_id;
   if student_user_id is not null then
     perform private.send_notification(
       auth.uid(),

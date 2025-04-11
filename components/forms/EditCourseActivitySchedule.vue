@@ -4,129 +4,150 @@
     ref="slideover"
     :title="props.scheduleId ? t('edit_schedule') : t('add_schedule')"
   >
-    <UForm ref="form" :state="state" :schema="schema" @submit="onSubmit">
-      <UDashboardSection
-        :title="t('activity_schedule')"
-        :description="
-          props.scheduleId
-            ? t('edit_course_activity_schedule')
-            : t('add_course_activity_schedule')
-        "
-      >
-        <UFormGroup
-          name="activity_id"
-          :label="t('from.activity.label')"
-          :description="t('from.activity.description')"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <USelectMenu
-            v-model="state.activity_id"
-            :options="course_activities"
-            value-attribute="id"
-            label-attribute="name"
-            :disabled="!!props.scheduleId"
+    <UTabs :items="tabs" class="w-full">
+      <template #item="{ item }">
+        <UForm v-if="item.key == 'schedule'" ref="form" :state="state" :schema="schema" @submit="onSubmit">
+          <UDashboardSection
+            :title="t('activity_schedule')"
+            :description="
+              props.scheduleId
+                ? t('edit_course_activity_schedule')
+                : t('add_course_activity_schedule')
+            "
           >
-            <template #label>
-              <div v-if="state.activity_id && course_activities">
-                <span class="truncate">{{
-                  course_activities.find((a) => a.id === state.activity_id)
-                    ?.name
-                }}</span>
-              </div>
-              <div v-else>
-                <span class="truncate">
-                  {{ t("form.select_activity.placeholder") }}
-                </span>
-              </div>
-            </template>
-            <template #option="{ option }">
-              <span class="truncate">{{ option.name }}</span>
-            </template>
-          </USelectMenu>
-        </UFormGroup>
-        <UFormGroup
-          name="assigned_to"
-          :label="t('from.assigned_to.label')"
-          :description="t('from.assigned_to.description')"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <FormsInputsUserSelect
-            v-model="state.assigned_to"
-            :orgid="props.orgid"
-          />
-        </UFormGroup>
-        <UFormGroup
-          name="start_at"
-          :label="t('from.start_at.label')"
-          :description="t('from.start_at.description')"
-          required
-          class="grid grid-cols-1 gap-4 items-center"
-          :ui="{ container: '' }"
-        >
-          <div class="grid grid-cols-2 gap-4">
-            <UPopover
-              class="col-span-2"
-              :popper="{ placement: 'bottom-start' }"
+          <template #links>
+            <UButton v-if="data && data.status === 'PLANNED'" color="green" @click="updateScheduleStatus('COMPLETED')">
+              {{ t("mark_as_completed") }}
+            </UButton>
+            <UButton v-if="data && data.status === 'PLANNED'" color="red" variant="ghost" @click="updateScheduleStatus('CANCELED')">
+              {{ t("mark_as_canceled") }}
+            </UButton>
+          </template>
+            <UFormGroup
+              name="activity_id"
+              :label="t('from.activity.label')"
+              :description="t('from.activity.description')"
+              required
+              class="grid grid-cols-1 gap-4 items-center"
+              :ui="{ container: '' }"
             >
-              <div class="w-full">
-                <UButton
-                  block
-                  color="white"
-                  variant="solid"
-                  icon="i-heroicons-calendar-days-20-solid"
-                  :label="format(new Date(state.start_at), 'd MMM, yyy')"
-                />
+              <USelectMenu
+                v-model="state.activity_id"
+                :options="course_activities"
+                value-attribute="id"
+                label-attribute="name"
+                :disabled="!!props.scheduleId"
+              >
+                <template #label>
+                  <div v-if="state.activity_id && course_activities">
+                    <span class="truncate">{{
+                      course_activities.find((a) => a.id === state.activity_id)
+                        ?.name
+                    }}</span>
+                  </div>
+                  <div v-else>
+                    <span class="truncate">
+                      {{ t("form.select_activity.placeholder") }}
+                    </span>
+                  </div>
+                </template>
+                <template #option="{ option }">
+                  <span class="truncate">{{ option.name }}</span>
+                </template>
+              </USelectMenu>
+            </UFormGroup>
+            <UFormGroup
+              name="assigned_to"
+              :label="t('from.assigned_to.label')"
+              :description="t('from.assigned_to.description')"
+              required
+              class="grid grid-cols-1 gap-4 items-center"
+              :ui="{ container: '' }"
+            >
+              <FormsInputsUserSelect
+                v-model="state.assigned_to"
+                :orgid="props.orgid"
+              />
+            </UFormGroup>
+            <UFormGroup
+              name="start_at"
+              :label="t('from.start_at.label')"
+              :description="t('from.start_at.description')"
+              required
+              class="grid grid-cols-1 gap-4 items-center"
+              :ui="{ container: '' }"
+            >
+              <div class="grid grid-cols-2 gap-4">
+                <UPopover
+                  class="col-span-2"
+                  :popper="{ placement: 'bottom-start' }"
+                >
+                  <div class="w-full">
+                    <UButton
+                      block
+                      color="white"
+                      variant="solid"
+                      icon="i-heroicons-calendar-days-20-solid"
+                      :label="format(new Date(state.start_at), 'd MMM, yyy')"
+                    />
+                  </div>
+                  <template #panel="">
+                    <DatePicker
+                      v-model="state.start_at"
+                      is-required
+                      :mode="'dateTime'"
+                      @update:model-value="onUpdateStartDate"
+                    />
+                  </template>
+                </UPopover>
+                <UPopover :popper="{ placement: 'bottom-start' }">
+                  <div class="w-full">
+                    <UButton
+                      block
+                      color="white"
+                      variant="solid"
+                      icon="i-heroicons-clock"
+                      :label="format(new Date(state.start_at), 'HH:mm a')"
+                    />
+                  </div>
+                  <template #panel="">
+                    <DatePicker
+                      v-model="state.start_at"
+                      is-required
+                      :mode="'time'"
+                      @update:model-value="onUpdateStartDate"
+                    />
+                  </template>
+                </UPopover>
+                <UPopover :popper="{ placement: 'bottom-start' }">
+                  <div class="w-full">
+                    <UButton
+                      block
+                      color="white"
+                      variant="solid"
+                      icon="i-heroicons-clock"
+                      :label="format(new Date(state.end_at), 'HH:mm a')"
+                    />
+                  </div>
+                  <template #panel="">
+                    <DatePicker
+                      v-model="state.end_at"
+                      is-required
+                      :mode="'time'"
+                    />
+                  </template>
+                </UPopover>
               </div>
-              <template #panel="">
-                <DatePicker
-                  v-model="state.start_at"
-                  is-required
-                  :mode="'dateTime'"
-                  @update:model-value="onUpdateStartDate"
-                />
-              </template>
-            </UPopover>
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <div class="w-full">
-                <UButton
-                  block
-                  color="white"
-                  variant="solid"
-                  icon="i-heroicons-clock"
-                  :label="format(new Date(state.start_at), 'HH:mm a')"
-                />
-              </div>
-              <template #panel="">
-                <DatePicker
-                  v-model="state.start_at"
-                  is-required
-                  :mode="'time'"
-                  @update:model-value="onUpdateStartDate"
-                />
-              </template>
-            </UPopover>
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <div class="w-full">
-                <UButton
-                  block
-                  color="white"
-                  variant="solid"
-                  icon="i-heroicons-clock"
-                  :label="format(new Date(state.end_at), 'HH:mm a')"
-                />
-              </div>
-              <template #panel="">
-                <DatePicker v-model="state.end_at" is-required :mode="'time'" />
-              </template>
-            </UPopover>
-          </div>
-        </UFormGroup>
-      </UDashboardSection>
-    </UForm>
+            </UFormGroup>
+          </UDashboardSection>
+        </UForm>
+        <AddStudentsAttendanceForm
+          v-else-if="item.key == 'attendees' && data"
+          :courseid="props.courseid"
+          :course-activity-schedule="data"
+        />
+      </template>
+    </UTabs>
 
     <template #footer>
       <UButton @click="form?.submit()">
@@ -148,14 +169,15 @@
 import type {
   AppCourseActivitySchedule,
   AppScheduleType,
-  Database,
 } from "~/types/app.types";
+import type { Database } from "~/types/database.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
 import { addHours, format } from "date-fns";
 import DatePicker from "./Inputs/Datepicker.vue";
 import { useCourseActivities } from "~/composables/useCourseActivities";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
+import AddStudentsAttendanceForm from "./AddStudentsAttendanceForm.vue";
 
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
@@ -206,6 +228,35 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { data, refresh } = await useAsyncData(async () => {
+  if (!props.scheduleId) {
+    return null;
+  }
+  const { data, error } = await client
+    .from("course_activity_schedules")
+    .select("*")
+    .eq("id", props.scheduleId)
+    .single();
+  if (error) {
+    throw error;
+  }
+  return data;
+});
+
+const tabs = computed(() => [
+  {
+    key: "schedule",
+    label: t("activity_schedule"),
+    description: t("edit_course_activity_schedule"),
+  },
+  {
+    key: "attendees",
+    label: t("activity_attendees"),
+    description: t("edit_course_activity_attendees"),
+    disabled: !data.value,
+  },
+]);
+
 const courseActivitySchedules = useCourseActivitySchedules();
 
 const schema = z
@@ -232,39 +283,12 @@ type Schema = z.infer<typeof schema>;
 const form = ref<Form<Schema>>();
 
 const state = reactive<Schema>({
-  start_at: new Date(),
-  end_at: addHours(new Date(), 1),
+  start_at: data.value?.start_at
+    ? new Date(data.value.start_at)
+    : props.date ?? new Date(),
+  end_at: data.value?.end_at ? new Date(data.value.end_at) : addHours(new Date(), 1),
   activity_id: props.activityid,
-  assigned_to: undefined,
-});
-
-onMounted(async () => {
-  if (props.scheduleId) {
-    // load the course activity schedule
-    try {
-      const { data, error } = await client
-        .from("course_activity_schedules")
-        .select("*")
-        .eq("id", props.scheduleId)
-        .single();
-
-      if (error) {
-        console.error(error);
-        throw new Error("Failed to load course activity schedule");
-      } else {
-        state.start_at = new Date(data.start_at);
-        state.end_at = new Date(data.end_at);
-        state.assigned_to = data.assigned_to ?? undefined;
-      }
-    } catch (error) {
-      console.error(error);
-      toast.add({
-        title: "Error",
-        description: "Failed to load course activity schedule",
-        color: "red",
-      });
-    }
-  }
+  assigned_to: data.value?.assigned_to ?? undefined,
 });
 
 function onSubmit(_event: FormSubmitEvent<Schema>) {
@@ -356,8 +380,7 @@ async function deleteCourseActivitySchedule(id: string) {
   try {
     modal.open(ConfirmModal, {
       title: t("delete_course_activity_schedule"),
-      description:
-        t("delete_course_activity_schedule_description"),
+      description: t("delete_course_activity_schedule_description"),
       confirmLabel: t("delete"),
       cancelLabel: t("cancel"),
       action: async () => {
@@ -369,6 +392,26 @@ async function deleteCourseActivitySchedule(id: string) {
         emits("activity-deleted");
       },
     });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function updateScheduleStatus(status: Database["public"]["Enums"]["schedule_status"]) {
+  if (!props.scheduleId) {
+    return;
+  }
+  try {
+    const { error } = await client
+      .from("course_activity_schedules")
+      .update({ status })
+      .eq("id", props.scheduleId)
+
+    if (error) {
+      throw new Error("Failed to update course activity schedule");
+    }
+    refresh();
+    emits("activity-saved");
   } catch (error) {
     console.error(error);
   }
@@ -394,6 +437,8 @@ function _onChangeRepeat(value: RepeatMode) {
     "activity_schedule": "Aktivitätstermin",
     "edit_course_activity_schedule": "Bearbeiten Sie den Kursaktivitätstermin",
     "add_course_activity_schedule": "Fügen Sie den Kursaktivitätstermin hinzu",
+    "activity_attendees": "Aktivitätsteilnehmer",
+    "edit_course_activity_attendees": "Bearbeiten Sie die Kursaktivitätsteilnehmer",
     "from": {
       "activity": {
         "label": "Aktivität",
@@ -437,6 +482,52 @@ function _onChangeRepeat(value: RepeatMode) {
     },
     "delete_course_activity_schedule": "Kursaktivitätstermin löschen",
     "delete_course_activity_schedule_description": "Möchten Sie diesen Kursaktivitätstermin wirklich löschen?"
+  },
+  "en": {
+    "edit_schedule": "Edit schedule",
+    "add_schedule": "Add schedule",
+    "activity_schedule": "Activity schedule",
+    "edit_course_activity_schedule": "Edit course activity schedule",
+    "add_course_activity_schedule": "Add course activity schedule",
+    "activity_attendees": "Activity attendees",
+    "edit_course_activity_attendees": "Edit course activity attendees",
+    "from": {
+      "activity": {
+        "label": "Activity",
+        "description": "Select the activity to be scheduled for this date."
+      },
+      "assigned_to": {
+        "label": "Assigned to",
+        "description": "Select the user responsible for this activity."
+      },
+      "start_at": {
+        "label": "Start time",
+        "description": "Select the start time for this activity.",
+        "placeholder": "Select start time",
+        "errors": {
+          "invalid_range": "The start time cannot be after the end time."
+        }
+      }
+    },
+    "save": "Save",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "success": {
+      "created": {
+        "title": "Schedule created",
+        "description": "The course activity schedule has been created successfully."
+      },
+      "updated": {
+        "title": "Schedule updated",
+        "description": "The course activity schedule has been updated successfully."
+      }
+    },
+    "errors": {
+      "failed_to_create": {
+        "title": "",
+        "description": ""
+      }
+    }
   }
 }
 </i18n>

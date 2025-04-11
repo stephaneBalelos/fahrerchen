@@ -18,7 +18,7 @@
           v-for="(s, index) in schedules"
           :key="index"
           class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-          @click="openAddStudentsAttendanceForm(s)"
+          @click.stop="() => openEditSchedule(s.id)"
         >
           <div class="flex flex-1 gap-4">
             <UAvatar size="md" :icon="activityIcon" />
@@ -54,13 +54,6 @@
                 {{ s.attendees.length }} {{ t("attendees") }}
               </p>
             </div>
-            <UButton
-              icon="i-heroicons-pencil-square"
-              color="gray"
-              variant="solid"
-              square
-              @click.stop="() => openEditSchedule(s.id)"
-            />
           </div>
           <!-- <p class="text-gray-900 dark:text-white font-medium text-lg">
             {{ s.attendees.length }}
@@ -78,9 +71,8 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourseActivitySchedule, Database } from "~/types/app.types";
+import type { Database } from "~/types/app.types";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
-import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { ACTIVITY_ICONS } from "~/constants";
 
@@ -143,18 +135,6 @@ const {
 
 if (error.value) {
   console.error(error);
-}
-
-function openAddStudentsAttendanceForm(
-  course_activity_schedule: AppCourseActivitySchedule
-) {
-  slideover.open(AddStudentsAttendanceForm, {
-    courseid: props.courseId,
-    courseActivitySchedule: course_activity_schedule,
-    onUpdated: async () => {
-      await refresh();
-    },
-  });
 }
 
 const openEditSchedule = (schedule_id: string) => {

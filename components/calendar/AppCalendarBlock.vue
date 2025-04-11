@@ -34,7 +34,6 @@
 import type { CourseActivityScheduleView } from "~/types/app.types";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
-import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type Props = {
@@ -83,20 +82,7 @@ function getDropdownItem(schedule: CourseActivityScheduleView) {
             },
           });
         },
-      },
-      {
-        label: t("edit_attendees"),
-        icon: "i-heroicons-users-20-solid",
-        click: () => {
-          slideover.open(AddStudentsAttendanceForm, {
-            courseid: schedule.course_id,
-            courseActivitySchedule: schedule,
-            onUpdated: () => {
-              $emits("update");
-            },
-          });
-        },
-      },
+      }
     ],
     [
       {

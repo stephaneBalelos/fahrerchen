@@ -1,66 +1,58 @@
 <template>
-  <UDashboardSlideover :title="t('title')">
-    <UDashboardSection
-      :title="
-        t('section_title', {
-          activityName: courseActivity.name,
-          date: formatDate(courseActivitySchedule.start_at),
-          time: formatDate(courseActivitySchedule.start_at),
-        })
-      "
-      :description="t('description')"
-      orientation="vertical"
-    >
-      <div>
-        <UCard
-          :ui="{ header: { padding: 'p-4' }, body: { padding: '' } }"
-          class="min-w-0"
-        >
-          <template #header>
-            <UInput
-              v-model="q"
-              icon="i-heroicons-magnifying-glass"
-              placeholder="Search"
-              autofocus
-            />
-          </template>
+  <UDashboardSection
+    :title="
+      t('section_title', {
+        activityName: courseActivity.name,
+        date: formatDate(courseActivitySchedule.start_at),
+        time: formatDate(courseActivitySchedule.start_at),
+      })
+    "
+    :description="t('description')"
+    orientation="vertical"
+  >
+    <div>
+      <UCard
+        :ui="{ header: { padding: 'p-4' }, body: { padding: '' } }"
+        class="min-w-0"
+      >
+        <template #header>
+          <UInput
+            v-model="q"
+            icon="i-heroicons-magnifying-glass"
+            placeholder="Search"
+            autofocus
+          />
+        </template>
 
-          <div
-            v-for="subscription in filteredStudents"
-            :key="subscription.id"
+        <div v-for="subscription in filteredStudents" :key="subscription.id">
+          <FormsInputsStudentAttendanceCheckbox
+            v-if="subscription.student"
+            :subscription_id="subscription.id"
+            :student="subscription.student"
+            :activity_id="courseActivitySchedule.activity_id"
+            :schedule_id="props.courseActivitySchedule.id"
+            :on-change="() => $emit('updated')"
           >
-            <FormsInputsStudentAttendanceCheckbox
-              v-if="subscription.student"
-              :subscription_id="subscription.id"
-              :student="subscription.student"
-              :activity_id="courseActivitySchedule.activity_id"
-              :schedule_id="props.courseActivitySchedule.id"
-              :on-change="() => $emit('updated')"
-            >
-              <div class="flex gap-3 items-center">
-                <UAvatar
-                  :alt="`${subscription.student?.firstname} ${subscription.student?.lastname}`"
-                  size="xs"
-                />
-                <span class="text-gray-900 dark:text-white font-medium">
-                  {{
-                    `${subscription.student?.firstname} ${subscription.student?.lastname}`
-                  }}
-                </span>
-              </div>
-            </FormsInputsStudentAttendanceCheckbox>
-          </div>
-        </UCard>
-      </div>
-    </UDashboardSection>
-  </UDashboardSlideover>
+            <div class="flex gap-3 items-center">
+              <UAvatar
+                :alt="`${subscription.student?.firstname} ${subscription.student?.lastname}`"
+                size="xs"
+              />
+              <span class="text-gray-900 dark:text-white font-medium">
+                {{
+                  `${subscription.student?.firstname} ${subscription.student?.lastname}`
+                }}
+              </span>
+            </div>
+          </FormsInputsStudentAttendanceCheckbox>
+        </div>
+      </UCard>
+    </div>
+  </UDashboardSection>
 </template>
 
 <script setup lang="ts">
-import type {
-  AppCourseActivitySchedule,
-  Database,
-} from "~/types/app.types";
+import type { AppCourseActivitySchedule, Database } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 
 type Props = {
@@ -83,16 +75,13 @@ if (!userOrganizationsStore.selectedOrganization) {
   throw new Error("Organization not found");
 }
 
-
 const courseActivity = await useCourseActivities(
   userOrganizationsStore.selectedOrganization.organization_id,
   props.courseid,
   props.courseActivitySchedule.activity_id
 );
 
-const {
-  data: subscriptions,
-} = await useAsyncData(
+const { data: subscriptions } = await useAsyncData(
   `courses_${props.courseid}_subscriptions`,
   async () => {
     const { data, error } = await supabase

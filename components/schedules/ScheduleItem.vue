@@ -33,9 +33,6 @@
       <UButton size="sm" color="gray" variant="solid" @click="openEditSchedule">
         {{ t("edit_schedule") }}
       </UButton>
-      <UButton size="sm" color="gray" variant="solid" @click="openEditAttendees">
-        {{ t("edit_attendees") }}
-      </UButton>
       <UButton
         size="sm"
         color="red"
@@ -75,7 +72,6 @@
 <script setup lang="ts">
 import type { Database, CourseActivityScheduleView } from "~/types/app.types";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
-import AddStudentsAttendanceForm from "../forms/AddStudentsAttendanceForm.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { isFuture } from "date-fns";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
@@ -102,8 +98,7 @@ const courseActivitySchedules = useCourseActivitySchedules();
 
 
 const {
-  data: attendees,
-  refresh,
+  data: attendees
 } = useAsyncData(`schedule/${props.schedule.id}/attendees`, async () => {
   const { data, error } = await client
     .from("course_activity_attendances")
@@ -128,15 +123,6 @@ const openEditSchedule = () => {
   });
 };
 
-const openEditAttendees = () => {
-  slideover.open(AddStudentsAttendanceForm, {
-    courseid: props.schedule.course_id,
-    courseActivitySchedule: props.schedule,
-    onUpdated: () => {
-      refresh();
-    },
-  });
-};
 
 watch(assigned_to, async (value) => {
   try {
