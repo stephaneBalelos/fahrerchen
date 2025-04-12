@@ -1,27 +1,25 @@
 <template>
-  <div v-if="attendances" class="flex flex-col mb-4">
+  <div v-if="attended_schedules" class="flex flex-col mb-4">
     <p class="font-bold">{{ props.activityName }}</p>
     <UProgress
       v-if="props.activityRequired > 0"
-      :value="attendances.length"
+      :value="attended_schedules.length"
       :max="props.activityRequired"
       color="primary"
       indicator
     >
       <template #indicator>
         <span :color="`primary`">
-          {{ attendances.length }} /
+          {{ attended_schedules.length }} /
           {{ props.activityRequired }}
         </span>
       </template>
     </UProgress>
-    <div v-else>{{ attendances.length }}</div>
+    <div v-else>{{ attended_schedules.length }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
-
 type Props = {
   subscriptionId: string;
   activityId: string;
@@ -32,22 +30,24 @@ type Props = {
 
 const props = defineProps<Props>();
 
-const supabase = useSupabaseClient<Database>();
+const supabase = useSupabaseClient();
 
-const { data: attendances, } = useAsyncData(
-  `course_attendance_${props.subscriptionId}_${props.activityId}`,
+const { data: attended_schedules } = useAsyncData(
+  'attended_schedule_' + props.subscriptionId + '_' + props.activityId,
   async () => {
     const { data, error } = await supabase
-      .from("course_activity_attendances")
+      .from("course_activity_schedules")
       .select("*")
-      .eq("course_activity_id", props.activityId)
-      .eq("course_subscription_id", props.subscriptionId)
-      .eq("organization_id", props.orgId);
-
+      .eq("activity_id", props.activityId)
+      .eq("organization_id", props.orgId)
+      .eq('status', 'COMPLETED')
+      .contains('attendees', [props.subscriptionId])
     if (error) {
       console.error(error);
       throw error;
     }
+
+    console.log("Attendanded schedule data", data);
     return data;
   }
 );
