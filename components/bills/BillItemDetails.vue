@@ -1,9 +1,16 @@
 <template>
-    <div>
-        <p>{{ props.billItem.description }}</p>
-        <p>{{ t('unit_price') }}: {{ formatCurrency(props.billItem.price) }}</p>
+    <div class="mb-4">
+        <div class="flex gap-2">
+            <p class="font-bold">
+                {{ props.billItem.description }}
+            </p>
+            <p>({{ t('unit_price') }}: {{ formatCurrency(props.billItem.price) }})</p>
+        </div>
         <div v-if="schedule" class="flex gap-2">
-            <p>{{ t('attended_at', { data: formatDate(schedule.start_at) }) }}</p>
+            <p class="font-bold text-primary">{{ t('attended_at', { data: formatDate(schedule.start_at) }) }}</p>
+        </div>
+        <div v-else>
+            <p class="font-bold text-orange-200">{{ t('not_attended_yet') }}</p>
         </div>
     </div>
 </template>
@@ -24,8 +31,9 @@ const { t } = useI18n({
 
 const client = useSupabaseClient();
 
-console.log("Bill item", props.billItem);
-const { data: schedule } = useAsyncData(async () => {
+console.log("BillItemDetails", props.billItem.course_activity_schedule_id);
+
+const { data: schedule } = useAsyncData(`bill_item_details_${props.billItem.id}`, async () => {
     if (!props.billItem.course_activity_schedule_id) return null;
     const { data, error } = await client
         .from("course_activity_schedules")
@@ -37,7 +45,7 @@ const { data: schedule } = useAsyncData(async () => {
         throw error;
     }
 
-    console.log("Schedule data", data);
+    console.log("BillItemDetails schedule", data);
 
     return data;
 });

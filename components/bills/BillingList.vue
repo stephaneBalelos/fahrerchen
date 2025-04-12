@@ -34,8 +34,8 @@
         </UButton>
       </template>
       <template #item="{ item }">
-        <div class="italic text-gray-900 dark:text-white p-4">
-          <span class="font-semibold">{{ t('Details') }}</span>
+        <div class="italic text-gray-900 dark:text-white px-4">
+          <span class="font-semibold text-md">{{ t('Details') }}</span>
           <ul>
             <BillItemDetails v-for="i in item.items" :key="i.id" :bill-item="i" />
           </ul>

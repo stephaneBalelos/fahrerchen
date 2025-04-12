@@ -46,8 +46,6 @@ const { data: attended_schedules } = useAsyncData(
       console.error(error);
       throw error;
     }
-
-    console.log("Attendanded schedule data", data);
     return data;
   }
 );

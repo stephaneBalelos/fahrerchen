@@ -15,21 +15,21 @@
       </template>
       <div v-if="status === 'pending'">Loading...</div>
       <div v-else-if="status === 'error'">Error: {{ error }}</div>
-      <div v-else-if="status === 'success' && activities">
-        <div v-if="activities.length === 0">
+      <div v-else-if="status === 'success' && schedules">
+        <div v-if="schedules.length === 0">
           <UAlert :title="t('no_activities_found')" />
         </div>
         <div v-else>
           <StudentActivityItem
-            v-for="(activity, index) in activities"
+            v-for="(schedule, index) in schedules"
             :key="index"
-            :attendance="activity"
+            :activity-schedule="schedule"
             @open-edit-schedule="
               () =>
                 openEditSchedule(
-                  activity.activity_schedule_id,
-                  activity.course_activity_id,
-                  activity.course_id
+                  schedule.id,
+                  schedule.activity_id,
+                  schedule.course_id
                 )
             "
           />
@@ -40,7 +40,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import StudentActivityItem from "~/components/students/StudentActivityItem.vue";
 import AddScheduleForSubscriptionsForm from "~/components/forms/AddScheduleForSubscriptionsForm.vue";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
@@ -50,7 +49,7 @@ const props = defineProps<{
   orgId: string;
 }>();
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const slideover = useSlideover();
 
 const { t } = useI18n({
@@ -58,16 +57,17 @@ const { t } = useI18n({
 });
 
 const {
-  data: activities,
+  data: schedules,
   error,
   status,
   refresh,
-} = useAsyncData(`student_${props.subscriptionId}_activities`, async () => {
+} = useAsyncData(`subscription_schedules_${props.subscriptionId}`, async () => {
   const { data, error } = await client
-    .from("course_activity_attendances_view")
+    .from("course_activity_schedules")
     .select("*")
-    .eq("course_subscription_id", props.subscriptionId)
-    .order("activity_start_at", { ascending: false });
+    .contains("attendees", [props.subscriptionId])
+    .eq("organization_id", props.orgId)
+    .order("start_at", { ascending: false });
   if (error) {
     throw error;
   }

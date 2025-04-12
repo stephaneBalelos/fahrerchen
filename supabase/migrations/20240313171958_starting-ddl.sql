@@ -1134,23 +1134,34 @@ create trigger on_course_subscription_updated
 create or replace function public.handle_update_schedule_status()
 returns trigger as $$
 declare
-  course_activity_id uuid;
+  activity_id uuid;
   course_activity_name text;
   course_activity_price numeric;
+  existing_bill_item uuid;
 begin
   -- If Schedule ist Completed, generate Attendances for all attendees
   if new.status = 'COMPLETED' then
     -- get the course activity id, name and price
-    select id, name, price into course_activity_id, course_activity_name, course_activity_price from public.course_activities where id = new.activity_id;
+    select id, name, price into activity_id, course_activity_name, course_activity_price from public.course_activities where id = new.activity_id;
     -- loop over the attendees and insert a new bill item for each one
     for i in 1..array_length(new.attendees, 1) loop
       -- check if the subscription is active
       if public.is_subscription_active(new.attendees[i]) then
-        -- insert a new bill item for each attendee
-        insert into public.course_subscription_bill_items (course_activity_id, course_activity_schedule_id, course_subscription_id, description, price, organization_id)
-        values (course_activity_id, new.id, new.attendees[i], course_activity_name, course_activity_price, new.organization_id);
-      end if;
+        -- check if there is a bill item with the same course activity id and course subscription id
+        select id into existing_bill_item from public.course_subscription_bill_items 
+          where course_activity_id = activity_id and course_subscription_id = new.attendees[i] and course_activity_schedule_id is null limit 1;
 
+        if existing_bill_item is not null then
+          -- if the bill item already exists, update it with the new schedule id
+          update public.course_subscription_bill_items
+          set course_activity_schedule_id = new.id
+          where id = existing_bill_item;
+        else
+          -- if the bill item does not exist, insert a new one
+          insert into public.course_subscription_bill_items (course_activity_id, course_activity_schedule_id, course_subscription_id, description, price, organization_id)
+          values (activity_id, new.id, new.attendees[i], course_activity_name, course_activity_price, new.organization_id);
+        end if;
+      end if;
     end loop;
   end if;
 
