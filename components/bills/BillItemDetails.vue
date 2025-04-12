@@ -31,8 +31,6 @@ const { t } = useI18n({
 
 const client = useSupabaseClient();
 
-console.log("BillItemDetails", props.billItem.course_activity_schedule_id);
-
 const { data: schedule } = useAsyncData(`bill_item_details_${props.billItem.id}`, async () => {
     if (!props.billItem.course_activity_schedule_id) return null;
     const { data, error } = await client
@@ -44,8 +42,6 @@ const { data: schedule } = useAsyncData(`bill_item_details_${props.billItem.id}`
         console.error(error);
         throw error;
     }
-
-    console.log("BillItemDetails schedule", data);
 
     return data;
 });
