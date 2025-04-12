@@ -4,7 +4,6 @@
     :title="t('settlements')"
     :description="t('settlements_description')"
     orientation="vertical"
-    class="px-4 mt-6 mb-8"
   >
     <template #links>
       <div class="flex flex-col px-4">
@@ -39,11 +38,11 @@
               }}
             </p>
             <p 
-            v-if="bill_item.attendance?.schedule"
+            v-if="bill_item.schedule"
             class="text-sm text-gray-500 dark:text-gray-400" >
               {{
                 t("attended_at", {
-                  date: formatDateTime(bill_item.attendance.schedule.start_at),
+                  date: formatDateTime(bill_item.schedule.start_at),
                 })
               }}
             </p>
@@ -79,7 +78,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import { formatDateTime, formatCurrency } from "~/utils/formatters";
 
 type Props = {
@@ -93,7 +91,7 @@ const { t } = useI18n({
 
 const props = defineProps<Props>();
 const $emit = defineEmits(["refresh"]);
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const toast = useToast();
 const isGeneratingBill = ref(false);
 
@@ -108,7 +106,7 @@ const {
 } = useAsyncData(async () => {
   const { data, error } = await client
     .from("course_subscription_bill_items")
-    .select("*, attendance:course_activity_attendances(*, schedule:course_activity_schedules(*))")
+    .select("*, schedule:course_activity_schedule_id(*)")
     .eq("course_subscription_id", props.subscriptionId)
     .is("bill_id", null)
     .order("inserted_at", { ascending: true });

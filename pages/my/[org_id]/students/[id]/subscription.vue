@@ -1,22 +1,17 @@
 <template>
   <UDashboardSection
-    :title="t('course_subscription')"
-    :description="t('course_subscription_description')"
+    :title="data?.course?.name"
+    :description="data?.course?.description"
   >
-    <div class="grid grid-cols-1 gap-4">
-      <UDashboardCard
-        :title="data?.course?.name"
-        :description="data?.course?.description"
+    <template #links>
+      <UButton
+        :to="`/my/${data?.organization_id}/courses/${data?.course_id}`"
+        variant="ghost"
       >
-        <template #links>
-          <UButton
-            :to="`/my/${data?.organization_id}/courses/${data?.course_id}`"
-            variant="ghost"
-          >
-            {{ t("view_course") }}
-          </UButton>
-        </template>
-      </UDashboardCard>
+        {{ t("view_course") }}
+      </UButton>
+    </template>
+    <div class="grid grid-cols-1 gap-4">
       <UDashboardCard
         v-if="data && data.course?.course_required_documents"
         class="mb-4"
@@ -38,11 +33,7 @@
         :description="t('archive_subscription_description')"
       >
         <template #links>
-          <UButton
-            variant="ghost"
-            color="primary"
-            @click="archiveSubscription"
-          >
+          <UButton variant="ghost" color="primary" @click="archiveSubscription">
             {{ t("archive_subscription") }}
           </UButton>
         </template>
@@ -62,7 +53,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import CourseRequiredDocumentItem from "~/components/files/CourseDocuments/CourseRequiredDocumentItem.vue";
 
 const { t } = useI18n({
@@ -72,27 +62,25 @@ const { t } = useI18n({
 const route = useRoute();
 const subscription_id = route.params.id as string;
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
 const toast = useToast();
 
 const { data, refresh } = useAsyncData(async () => {
-    const { data, error } = await client
-      .from("course_subscriptions")
-      .select(
-        "*, course:courses(id, name, description, course_required_documents(*))"
-      )
-      .eq("id", subscription_id)
+  const { data, error } = await client
+    .from("course_subscriptions")
+    .select(
+      "*, course:courses(id, name, description, course_required_documents(*))"
+    )
+    .eq("id", subscription_id)
 
-      .single();
+    .single();
 
-    if (error) {
-      throw error;
-    }
-    console.log(data);
-    return data;
+  if (error) {
+    throw error;
   }
-);
+  return data;
+});
 
 async function archiveSubscription() {
   try {
@@ -125,8 +113,8 @@ async function archiveSubscription() {
 }
 
 async function deleteSubscription() {
-  if(!data.value) {
-    return
+  if (!data.value) {
+    return;
   }
   try {
     const { error } = await client
