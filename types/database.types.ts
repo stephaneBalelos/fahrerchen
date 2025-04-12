@@ -99,90 +99,6 @@ export type Database = {
           },
         ]
       }
-      course_activity_attendances: {
-        Row: {
-          activity_schedule_id: string
-          course_activity_id: string
-          course_subscription_id: string
-          id: string
-          organization_id: string
-          status: Database["public"]["Enums"]["attendance_status"]
-        }
-        Insert: {
-          activity_schedule_id: string
-          course_activity_id: string
-          course_subscription_id: string
-          id?: string
-          organization_id: string
-          status?: Database["public"]["Enums"]["attendance_status"]
-        }
-        Update: {
-          activity_schedule_id?: string
-          course_activity_id?: string
-          course_subscription_id?: string
-          id?: string
-          organization_id?: string
-          status?: Database["public"]["Enums"]["attendance_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
-            columns: ["course_activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_stats_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_activity_schedules: {
         Row: {
           activity_id: string
@@ -446,8 +362,8 @@ export type Database = {
       course_subscription_bill_items: {
         Row: {
           bill_id: string | null
-          course_activity_attendance_id: string | null
           course_activity_id: string | null
+          course_activity_schedule_id: string | null
           course_subscription_id: string
           description: string
           id: string
@@ -457,8 +373,8 @@ export type Database = {
         }
         Insert: {
           bill_id?: string | null
-          course_activity_attendance_id?: string | null
           course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
           course_subscription_id: string
           description: string
           id?: string
@@ -468,8 +384,8 @@ export type Database = {
         }
         Update: {
           bill_id?: string | null
-          course_activity_attendance_id?: string | null
           course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
           course_subscription_id?: string
           description?: string
           id?: string
@@ -478,20 +394,6 @@ export type Database = {
           price?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
-            columns: ["course_activity_attendance_id"]
-            isOneToOne: true
-            referencedRelation: "course_activity_attendances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
-            columns: ["course_activity_attendance_id"]
-            isOneToOne: true
-            referencedRelation: "course_activity_attendances_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
@@ -511,6 +413,20 @@ export type Database = {
             columns: ["course_activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_view"
             referencedColumns: ["id"]
           },
           {
@@ -1301,86 +1217,6 @@ export type Database = {
       }
     }
     Views: {
-      course_activity_attendances_view: {
-        Row: {
-          activity_description: string | null
-          activity_end_at: string | null
-          activity_name: string | null
-          activity_schedule_id: string | null
-          activity_start_at: string | null
-          course_activity_id: string | null
-          course_id: string | null
-          course_subscription_id: string | null
-          id: string | null
-          organization_id: string | null
-          status: Database["public"]["Enums"]["attendance_status"] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_activities_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
-            columns: ["course_activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_stats_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_activity_schedules_view: {
         Row: {
           activity_description: string | null
@@ -1810,6 +1646,13 @@ export type Database = {
       }
     }
     Functions: {
+      add_attendee_to_schedule: {
+        Args: {
+          course_schedule_id: string
+          course_subscription_id: string
+        }
+        Returns: boolean
+      }
       are_users_in_same_organization: {
         Args: {
           user_id_1: string
@@ -1866,6 +1709,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      remove_attendee_from_schedule: {
+        Args: {
+          course_schedule_id: string
+          course_subscription_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_types: "THEORY" | "PRACTICE" | "EXAM" | "OTHER"
@@ -1912,16 +1762,11 @@ export type Database = {
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
         | "course_activity_schedules.delete"
-        | "course_activity_attendances.read"
-        | "course_activity_attendances.create"
-        | "course_activity_attendances.update"
-        | "course_activity_attendances.delete"
         | "course_subscription_bills.read"
         | "course_subscription_bills.create"
         | "course_subscription_bills.update"
         | "course_subscription_bills.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
-      attendance_status: "REGISTERED" | "ATTENDED" | "CANCELED"
       bill_history_action_type:
         | "ITEM_ADDED"
         | "ITEM_REMOVED"
@@ -1950,8 +1795,6 @@ export type Database = {
         | "course_subscriptions.created"
         | "course_activity_schedules.updated"
         | "course_activity_schedules.assigned"
-        | "course_activity_attendances.created"
-        | "course_activity_attendances.deleted"
         | "course_subscription_bills.ready_to_pay"
         | "course_subscription_bills.updated"
         | "course_subscription_bills.paid"
@@ -2436,17 +2279,12 @@ export const Constants = {
         "course_activity_schedules.create",
         "course_activity_schedules.update",
         "course_activity_schedules.delete",
-        "course_activity_attendances.read",
-        "course_activity_attendances.create",
-        "course_activity_attendances.update",
-        "course_activity_attendances.delete",
         "course_subscription_bills.read",
         "course_subscription_bills.create",
         "course_subscription_bills.update",
         "course_subscription_bills.delete",
       ],
       app_role: ["owner", "manager", "teacher", "student"],
-      attendance_status: ["REGISTERED", "ATTENDED", "CANCELED"],
       bill_history_action_type: [
         "ITEM_ADDED",
         "ITEM_REMOVED",
@@ -2477,8 +2315,6 @@ export const Constants = {
         "course_subscriptions.created",
         "course_activity_schedules.updated",
         "course_activity_schedules.assigned",
-        "course_activity_attendances.created",
-        "course_activity_attendances.deleted",
         "course_subscription_bills.ready_to_pay",
         "course_subscription_bills.updated",
         "course_subscription_bills.paid",

@@ -123,22 +123,8 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules.delete');
 
 
-    -- Course Activity Attendances
-insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.read');
-insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.read');
-insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_attendances.read');
-insert into public.role_permissions (role, permission) values ('student', 'course_activity_attendances.read');
 
-insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.create');
-insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.create');
-
-insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.update');
-insert into public.role_permissions (role, permission) values ('manager', 'course_activity_attendances.update');
-
-insert into public.role_permissions (role, permission) values ('owner', 'course_activity_attendances.delete');
-
-
-    -- Course Subscription Bills
+-- Course Subscription Bills
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_subscription_bills.read');
 insert into public.role_permissions (role, permission) values ('teacher', 'course_subscription_bills.read');
