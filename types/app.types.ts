@@ -18,6 +18,7 @@ export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_typ
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
 
 export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
+export type AppCourseSubscriptionBillItem = DatabaseGenerated['public']['Tables']['course_subscription_bill_items']['Row']
 
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
@@ -56,6 +57,7 @@ export type StripeConnectLinkAccountPostBody = {
 export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
 export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
 export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
+export type CourseSubscriptionBillItemView = Database["public"]["Views"]["course_subscription_bill_items_view"]["Row"]
 export type NotificationView = Database["public"]["Views"]["notifications_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
@@ -123,6 +125,15 @@ export type Database = MergeDeep<DatabaseGenerated, {
           course_name: string,
           course_description: string,
           total_bills: number,
+        }
+      }
+      course_subscription_bill_items_view: {
+        Row: {
+          activity_name: string,
+          activity_description: string,
+          bill_id: string,
+          items: AppCourseSubscriptionBillItem[]
+          total: number
         }
       }
       user_roles_view: {

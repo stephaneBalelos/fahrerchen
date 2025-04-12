@@ -281,9 +281,7 @@ export default defineEventHandler(async (event) => {
         }
         for (let i = 0; i < schedules.length; i++) {
             const schedule = schedules[i]
-            if (new Date(schedule.start_at) < new Date()) {
-                await client.from('course_activity_schedules').update({ status: randomNumber(1, 2) == 2 ? 'CANCELED': 'COMPLETED' }).eq('id', schedule.id)
-            }
+            await client.from('course_activity_schedules').update({ status: randomNumber(1, 2) == 2 ? 'CANCELED': 'COMPLETED' }).eq('id', schedule.id)
         }
 
         // Generate Bills

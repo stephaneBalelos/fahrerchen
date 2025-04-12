@@ -126,7 +126,6 @@
 import { useClipboard } from "@vueuse/core";
 import BillInformations from "~/components/bills/BillInformations.vue";
 import StudentCourseProfileSlideover from "~/components/courses/StudentCourseProfileSlideover.vue";
-import type { Database } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 
 definePageMeta({
@@ -134,7 +133,7 @@ definePageMeta({
 });
 
 const { id } = useRoute().params;
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const toast = useToast();
 const { t } = useI18n({ useScope: "local" });
 const slideover = useSlideover();

@@ -1141,7 +1141,7 @@ begin
   -- If Schedule ist Completed, generate Attendances for all attendees
   if new.status = 'COMPLETED' then
     -- get the course activity id, name and price
-    select activity_id, name, price into course_activity_id, course_activity_name, course_activity_price from public.course_activities where id = new.activity_id;
+    select id, name, price into course_activity_id, course_activity_name, course_activity_price from public.course_activities where id = new.activity_id;
     -- loop over the attendees and insert a new bill item for each one
     for i in 1..array_length(new.attendees, 1) loop
       -- check if the subscription is active
