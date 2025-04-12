@@ -46,9 +46,6 @@
                 })
               }}
             </p>
-            <p v-else class="text-sm text-gray-500 dark:text-gray-400">
-              {{ t("not_attended") }}
-            </p>
           </template>
           <template #links>
             <div class="flex items-center gap-4">

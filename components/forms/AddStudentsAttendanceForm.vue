@@ -15,7 +15,7 @@
         :ui="{ header: { padding: 'p-4' }, body: { padding: '' } }"
         class="min-w-0"
       >
-        <template #header>
+        <template v-if="courseActivitySchedule.status === 'PLANNED'" #header>
           <UInput
             v-model="q"
             icon="i-heroicons-magnifying-glass"
@@ -31,6 +31,7 @@
             :student="subscription.student"
             :schedule-id="courseActivitySchedule.id"
             :attendees="courseActivitySchedule.attendees"
+            :status="courseActivitySchedule.status"
             :on-change="() => $emit('updated')"
           >
             <div class="flex gap-3 items-center">
@@ -84,10 +85,17 @@ const courseActivity = await useCourseActivities(
 const { data: subscriptions } = await useAsyncData(
   `courses_${props.courseid}_subscriptions`,
   async () => {
-    const { data, error } = await supabase
+    const q = supabase
       .from("course_subscriptions")
       .select("*, student:students(*)")
-      .eq("course_id", props.courseid);
+      .eq("course_id", props.courseid)
+    
+    // If the course activity schedule is not planned, we only want to show the attendees
+    if (props.courseActivitySchedule.status !== "PLANNED") {
+      q.in("id", props.courseActivitySchedule.attendees)
+    }
+
+    const { data, error } = await q
     if (error) {
       console.error(error);
       throw error;

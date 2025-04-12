@@ -14,6 +14,9 @@ const nuxtApp = useNuxtApp();
 const config = useRuntimeConfig().public;
 
 nuxtApp.provide('publicStorageUrl', (bucket:string, path:string) => {
+  if (!path) {
+    return null;
+  }
   return `${config.supabase_storage_url}/object/public/${bucket}/${path}`
 })
 

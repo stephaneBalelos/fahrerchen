@@ -8,7 +8,7 @@
       <template #item="{ item }">
         <UForm v-if="item.key == 'schedule'" ref="form" :state="state" :schema="schema" @submit="onSubmit">
           <UDashboardSection
-            :title="t('activity_schedule')"
+            :title="selectedActivity ? selectedActivity.name : t('activity_schedule')"
             :description="
               props.scheduleId
                 ? t('edit_course_activity_schedule')
@@ -145,6 +145,7 @@
           v-else-if="item.key == 'attendees' && data"
           :courseid="props.courseid"
           :course-activity-schedule="data"
+          @updated="refresh"
         />
       </template>
     </UTabs>
@@ -289,6 +290,10 @@ const state = reactive<Schema>({
   end_at: data.value?.end_at ? new Date(data.value.end_at) : addHours(new Date(), 1),
   activity_id: props.activityid,
   assigned_to: data.value?.assigned_to ?? undefined,
+});
+
+const selectedActivity = computed(() => {
+  return course_activities.find((a) => a.id === state.activity_id);
 });
 
 function onSubmit(_event: FormSubmitEvent<Schema>) {

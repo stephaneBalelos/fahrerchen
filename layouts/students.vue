@@ -9,8 +9,9 @@
                 :src="$publicStorageUrl(
                     'organizations_avatars',
                     organization.avatar_path
-                  )"
+                  ) ?? undefined"
                 :size="'sm'"
+                :alt="organization.name"
               />
               <p>
                 {{ organization.name }}
