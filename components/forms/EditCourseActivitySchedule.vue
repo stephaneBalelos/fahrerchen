@@ -218,7 +218,7 @@ const props = defineProps<Props>();
 const emits = defineEmits(["activity-saved", "activity-deleted"]);
 const toast = useToast();
 const modal = useModal();
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const course_activities = await useCourseActivities(
   props.orgid,
   props.courseid
@@ -439,6 +439,8 @@ function _onChangeRepeat(value: RepeatMode) {
     "add_course_activity_schedule": "Fügen Sie den Kursaktivitätstermin hinzu",
     "activity_attendees": "Aktivitätsteilnehmer",
     "edit_course_activity_attendees": "Bearbeiten Sie die Kursaktivitätsteilnehmer",
+    "mark_as_completed": "Als abgeschlossen markieren",
+    "mark_as_canceled": "Als storniert markieren",
     "from": {
       "activity": {
         "label": "Aktivität",
@@ -491,6 +493,8 @@ function _onChangeRepeat(value: RepeatMode) {
     "add_course_activity_schedule": "Add course activity schedule",
     "activity_attendees": "Activity attendees",
     "edit_course_activity_attendees": "Edit course activity attendees",
+    "mark_as_completed": "Mark as completed",
+    "mark_as_canceled": "Mark as canceled",
     "from": {
       "activity": {
         "label": "Activity",

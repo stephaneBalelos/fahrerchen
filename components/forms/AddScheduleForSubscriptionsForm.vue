@@ -137,7 +137,7 @@ import { addHours, format } from "date-fns";
 import { z } from "zod";
 import type { Form, FormSubmitEvent } from "#ui/types";
 import DatePicker from "./Inputs/Datepicker.vue";
-import type { AppCourseActivitySchedule, Database } from "~/types/app.types";
+import type { AppCourseActivitySchedule } from "~/types/app.types";
 
 type Props = {
   subscriptionId: string;
@@ -145,7 +145,7 @@ type Props = {
 };
 type CourseActivityScheduleEdit = Omit<
   AppCourseActivitySchedule,
-  "id" | "organization_id" | "status"
+  "id" | "organization_id" | "status" | "attendees" | "created_at"
 >;
 
 const { t } = useI18n({
@@ -154,7 +154,7 @@ const { t } = useI18n({
 
 const props = defineProps<Props>();
 const $emit = defineEmits(["close", "created"]);
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const toast = useToast();
 
 const subscription = await useCourseSubscription(props.subscriptionId);
@@ -205,11 +205,10 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         activity_id: state.activity_id,
         assigned_to: state.assigned_to ?? null,
         start_at: state.start_at.toISOString(),
-        end_at: state.end_at.toISOString(),
-        attendees: [],
+        end_at: state.end_at.toISOString()
     }
   try {
-    const { data:newSchedule, error: scheduleError } = await client.from("course_activity_schedules").insert({
+    const { data, error: scheduleError } = await client.from("course_activity_schedules").insert({
         ...schedule,
         organization_id: props.orgId
     }).select().single();
@@ -219,18 +218,21 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       throw scheduleError;
     }
 
-    console.log(newSchedule);
+    if (!data) {
+      throw new Error("Failed to create course activity schedule");
+    }
 
-    const { error: attendanceError } = await client.from("course_activity_attendances").insert({
-        course_activity_id: state.activity_id,
-        activity_schedule_id: newSchedule.id,
-        course_subscription_id: props.subscriptionId,
-        organization_id: props.orgId
-    });
+    const { data: added, error: errorAdd } = await client.rpc('add_attendee_to_schedule', {
+      course_schedule_id: data.id,
+      course_subscription_id: props.subscriptionId,
+    })
 
-    if (attendanceError) {
-        console.error(attendanceError);
-      throw attendanceError;
+    if (errorAdd) {
+      console.error(errorAdd);
+      throw errorAdd;
+    }
+    if (!added) {
+      throw new Error("Failed to add attendee to schedule");
     }
 
     $emit("created");

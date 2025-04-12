@@ -352,6 +352,7 @@ create table public.course_activity_schedules (
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 alter table public.course_activity_schedules enable row level security;
 revoke update on table public.course_activity_schedules from authenticated, anon;
+revoke insert (attendees) on table public.course_activity_schedules from authenticated, anon;
 grant update (assigned_to, status, start_at, end_at, attendees) on table public.course_activity_schedules to authenticated;
 
 

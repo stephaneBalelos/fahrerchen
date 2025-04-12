@@ -27,10 +27,10 @@
         <div v-for="subscription in filteredStudents" :key="subscription.id">
           <FormsInputsStudentAttendanceCheckbox
             v-if="subscription.student"
-            :subscription_id="subscription.id"
+            :subscription-id="subscription.id"
             :student="subscription.student"
-            :activity_id="courseActivitySchedule.activity_id"
-            :schedule_id="props.courseActivitySchedule.id"
+            :schedule-id="courseActivitySchedule.id"
+            :attendees="courseActivitySchedule.attendees"
             :on-change="() => $emit('updated')"
           >
             <div class="flex gap-3 items-center">
@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourseActivitySchedule, Database } from "~/types/app.types";
+import type { AppCourseActivitySchedule } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 
 type Props = {
@@ -65,7 +65,7 @@ const { t } = useI18n({ useScope: "local" });
 const props = defineProps<Props>();
 const $emit = defineEmits(["updated"]);
 
-const supabase = useSupabaseClient<Database>();
+const supabase = useSupabaseClient();
 
 const q = ref("");
 
