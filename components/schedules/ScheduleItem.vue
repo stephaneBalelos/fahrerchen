@@ -56,8 +56,8 @@
           <UAvatar
             v-for="attendee in attendees"
             :key="attendee.id"
-            :src="attendee.subscription?.students?.id"
-            :alt="`${attendee.subscription?.students?.firstname} ${attendee.subscription?.students?.lastname}`"
+            :src="undefined"
+            :alt="`${attendee.student_firstname} ${attendee.student_lastname}`"
           />
         </UAvatarGroup>
         <div v-else class="">
@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Database, CourseActivityScheduleView } from "~/types/app.types";
+import  type { CourseSubscriptionView, CourseActivityScheduleView } from "~/types/app.types";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { isFuture } from "date-fns";
@@ -91,7 +91,7 @@ const { t: g } = useI18n({
 const $emits = defineEmits(["update"]);
 
 const props = defineProps<ScheduleItemProps>();
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const slideover = useSlideover();
 const modal = useModal();
 const courseActivitySchedules = useCourseActivitySchedules();
@@ -101,9 +101,9 @@ const {
   data: attendees
 } = useAsyncData(`schedule/${props.schedule.id}/attendees`, async () => {
   const { data, error } = await client
-    .from("course_activity_attendances")
-    .select("*, subscription:course_subscriptions(*, students(*))")
-    .eq("activity_schedule_id", props.schedule.id);
+    .from('course_subscriptions_view')
+    .select('*')
+    .in('id', props.schedule.attendees).overrideTypes<CourseSubscriptionView[]>()
   if (error) {
     console.error(error);
     throw error;
