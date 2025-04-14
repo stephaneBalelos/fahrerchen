@@ -104,7 +104,7 @@
               </UDashboardSection>
             </div>
             <UDashboardToolbar
-              class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-8 pt-4 bg-white dark:bg-gray-900"
+              class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-24 pt-4 bg-white dark:bg-gray-900"
             >
               <template #right>
                 <div class="flex flex-col flex-1 items-end">
