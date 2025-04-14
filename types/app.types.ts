@@ -124,6 +124,7 @@ export type Database = MergeDeep<DatabaseGenerated, {
           organization_id: string,
           course_name: string,
           course_description: string,
+          total_costs: number,
           total_bills: number,
         }
       }
