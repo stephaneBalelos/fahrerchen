@@ -1676,7 +1676,6 @@ export type Database = {
       generate_bill_for_subscription: {
         Args: {
           subscription_id: string
-          organization_id: string
         }
         Returns: string
       }
