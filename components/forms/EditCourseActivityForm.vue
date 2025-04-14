@@ -128,6 +128,7 @@ type Props = {
   courseid: string;
   orgid: string;
   courseActivityId?: string;
+  sortingOrder?: number;
 };
 
 type Emits = {
@@ -251,7 +252,7 @@ async function createCourseActivity(params: CourseActivityEdit) {
   try {
     const { data, error } = await client
       .from("course_activities")
-      .insert({...params, course_id: props.courseid, organization_id: props.orgid})
+      .insert({...params, sorting_order: props.sortingOrder ?? 1, course_id: props.courseid, organization_id: props.orgid})
       .select("*").single()
     if (error) { 
       console.error(error)

@@ -99,90 +99,6 @@ export type Database = {
           },
         ]
       }
-      course_activity_attendances: {
-        Row: {
-          activity_schedule_id: string
-          course_activity_id: string
-          course_subscription_id: string
-          id: string
-          organization_id: string
-          status: Database["public"]["Enums"]["attendance_status"]
-        }
-        Insert: {
-          activity_schedule_id: string
-          course_activity_id: string
-          course_subscription_id: string
-          id?: string
-          organization_id: string
-          status?: Database["public"]["Enums"]["attendance_status"]
-        }
-        Update: {
-          activity_schedule_id?: string
-          course_activity_id?: string
-          course_subscription_id?: string
-          id?: string
-          organization_id?: string
-          status?: Database["public"]["Enums"]["attendance_status"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
-            columns: ["course_activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_stats_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_activity_schedules: {
         Row: {
           activity_id: string
@@ -446,8 +362,8 @@ export type Database = {
       course_subscription_bill_items: {
         Row: {
           bill_id: string | null
-          course_activity_attendance_id: string | null
           course_activity_id: string | null
+          course_activity_schedule_id: string | null
           course_subscription_id: string
           description: string
           id: string
@@ -457,8 +373,8 @@ export type Database = {
         }
         Insert: {
           bill_id?: string | null
-          course_activity_attendance_id?: string | null
           course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
           course_subscription_id: string
           description: string
           id?: string
@@ -468,8 +384,8 @@ export type Database = {
         }
         Update: {
           bill_id?: string | null
-          course_activity_attendance_id?: string | null
           course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
           course_subscription_id?: string
           description?: string
           id?: string
@@ -478,20 +394,6 @@ export type Database = {
           price?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
-            columns: ["course_activity_attendance_id"]
-            isOneToOne: true
-            referencedRelation: "course_activity_attendances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
-            columns: ["course_activity_attendance_id"]
-            isOneToOne: true
-            referencedRelation: "course_activity_attendances_view"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
@@ -511,6 +413,20 @@ export type Database = {
             columns: ["course_activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_view"
             referencedColumns: ["id"]
           },
           {
@@ -805,6 +721,110 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          date: string
+          id: string
+          organization_id: string | null
+          payload: Json | null
+          resource_id: string | null
+          target_id: string | null
+          target_roles: Database["public"]["Enums"]["app_role"][]
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          date?: string
+          id?: string
+          organization_id?: string | null
+          payload?: Json | null
+          resource_id?: string | null
+          target_id?: string | null
+          target_roles?: Database["public"]["Enums"]["app_role"][]
+          type: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          date?: string
+          id?: string
+          organization_id?: string | null
+          payload?: Json | null
+          resource_id?: string | null
+          target_id?: string | null
+          target_roles?: Database["public"]["Enums"]["app_role"][]
+          type?: Database["public"]["Enums"]["notification_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications_read_status: {
+        Row: {
+          id: string
+          notification_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_read_status_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_read_status_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_read_status_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1197,86 +1217,6 @@ export type Database = {
       }
     }
     Views: {
-      course_activity_attendances_view: {
-        Row: {
-          activity_description: string | null
-          activity_end_at: string | null
-          activity_name: string | null
-          activity_schedule_id: string | null
-          activity_start_at: string | null
-          course_activity_id: string | null
-          course_id: string | null
-          course_subscription_id: string | null
-          id: string | null
-          organization_id: string | null
-          status: Database["public"]["Enums"]["attendance_status"] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_activities_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_activity_schedule_id_fkey"
-            columns: ["activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_activity_id_fkey"
-            columns: ["course_activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_stats_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_attendances_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_view"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       course_activity_schedules_view: {
         Row: {
           activity_description: string | null
@@ -1512,6 +1452,7 @@ export type Database = {
           student_firstname: string | null
           student_id: string | null
           student_lastname: string | null
+          student_user_id: string | null
         }
         Relationships: [
           {
@@ -1547,6 +1488,55 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["student_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications_view: {
+        Row: {
+          actor_email: string | null
+          actor_firstname: string | null
+          actor_fullname: string | null
+          actor_id: string | null
+          actor_lastname: string | null
+          date: string | null
+          id: string | null
+          organization_id: string | null
+          payload: Json | null
+          read_at: string | null
+          resource_id: string | null
+          target_id: string | null
+          target_roles: Database["public"]["Enums"]["app_role"][] | null
+          type: Database["public"]["Enums"]["notification_type"] | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
             referencedColumns: ["id"]
           },
         ]
@@ -1656,6 +1646,13 @@ export type Database = {
       }
     }
     Functions: {
+      add_attendee_to_schedule: {
+        Args: {
+          course_schedule_id: string
+          course_subscription_id: string
+        }
+        Returns: boolean
+      }
       are_users_in_same_organization: {
         Args: {
           user_id_1: string
@@ -1676,36 +1673,9 @@ export type Database = {
         }
         Returns: boolean
       }
-      create_student: {
-        Args: {
-          firstname: string
-          lastname: string
-          email: string
-          birth_date: string
-          organization_id: string
-        }
-        Returns: {
-          address_city: string | null
-          address_country: string | null
-          address_street: string | null
-          address_zip: string | null
-          avatar_path: string | null
-          birth_date: string
-          created_at: string
-          email: string
-          firstname: string
-          has_a_license: boolean
-          id: string
-          lastname: string
-          organization_id: string
-          phone_number: string | null
-          user_id: string | null
-        }
-      }
       generate_bill_for_subscription: {
         Args: {
           subscription_id: string
-          organization_id: string
         }
         Returns: string
       }
@@ -1719,16 +1689,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_schedule_active: {
+        Args: {
+          schedule_id: string
+        }
+        Returns: boolean
+      }
       is_subscription_active: {
         Args: {
           subscription_id: string
         }
         Returns: boolean
       }
-      send_transactional_email: {
+      is_user_targeted_by_notification: {
         Args: {
-          message_id: string
-          payload: Json
+          notification_id: string
+          org_id: string
+        }
+        Returns: boolean
+      }
+      remove_attendee_from_schedule: {
+        Args: {
+          course_schedule_id: string
+          course_subscription_id: string
         }
         Returns: boolean
       }
@@ -1778,16 +1761,11 @@ export type Database = {
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
         | "course_activity_schedules.delete"
-        | "course_activity_attendances.read"
-        | "course_activity_attendances.create"
-        | "course_activity_attendances.update"
-        | "course_activity_attendances.delete"
         | "course_subscription_bills.read"
         | "course_subscription_bills.create"
         | "course_subscription_bills.update"
         | "course_subscription_bills.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
-      attendance_status: "REGISTERED" | "ATTENDED" | "CANCELED"
       bill_history_action_type:
         | "ITEM_ADDED"
         | "ITEM_REMOVED"
@@ -1811,6 +1789,15 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
+      notification_type:
+        | "students_registration_requests.created"
+        | "course_subscriptions.created"
+        | "course_activity_schedules.updated"
+        | "course_activity_schedules.assigned"
+        | "course_subscription_bills.ready_to_pay"
+        | "course_subscription_bills.updated"
+        | "course_subscription_bills.paid"
+        | "course_subscription_bills.canceled"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
@@ -2136,27 +2123,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -2164,20 +2153,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -2185,20 +2176,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -2206,21 +2199,23 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
+    | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
@@ -2229,7 +2224,108 @@ export type CompositeTypes<
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      activity_types: ["THEORY", "PRACTICE", "EXAM", "OTHER"],
+      app_permission: [
+        "users.read",
+        "users.update",
+        "users.delete",
+        "organizations.read",
+        "organizations.create",
+        "organizations.update",
+        "organizations.delete",
+        "organizations_stripe_accounts.read",
+        "organizations_stripe_accounts.create",
+        "organizations_stripe_accounts.update",
+        "organization_members.read",
+        "organization_members.create",
+        "organization_members.update",
+        "organization_members.delete",
+        "organization_invitations.read",
+        "organization_invitations.create",
+        "organization_invitations.update",
+        "organization_invitations.delete",
+        "students.read",
+        "students.create",
+        "students.update",
+        "students.delete",
+        "students_registration_requests.read",
+        "students_registration_requests.create",
+        "students_registration_requests.update",
+        "students_registration_requests.delete",
+        "courses.read",
+        "courses.create",
+        "courses.update",
+        "courses.delete",
+        "course_subscriptions.read",
+        "course_subscriptions.create",
+        "course_subscriptions.update",
+        "course_subscriptions.delete",
+        "course_activities.read",
+        "course_activities.create",
+        "course_activities.update",
+        "course_activities.delete",
+        "course_activity_schedules.read",
+        "course_activity_schedules.create",
+        "course_activity_schedules.update",
+        "course_activity_schedules.delete",
+        "course_subscription_bills.read",
+        "course_subscription_bills.create",
+        "course_subscription_bills.update",
+        "course_subscription_bills.delete",
+      ],
+      app_role: ["owner", "manager", "teacher", "student"],
+      bill_history_action_type: [
+        "ITEM_ADDED",
+        "ITEM_REMOVED",
+        "ITEM_UPDATED",
+        "BILL_READY_TO_PAY",
+        "BILL_PAID",
+      ],
+      course_type: [
+        "AM",
+        "A1",
+        "A2",
+        "A",
+        "B",
+        "BE",
+        "C1",
+        "C1E",
+        "C",
+        "CE",
+        "D1",
+        "D1E",
+        "D",
+        "DE",
+        "L",
+        "T",
+      ],
+      notification_type: [
+        "students_registration_requests.created",
+        "course_subscriptions.created",
+        "course_activity_schedules.updated",
+        "course_activity_schedules.assigned",
+        "course_subscription_bills.ready_to_pay",
+        "course_subscription_bills.updated",
+        "course_subscription_bills.paid",
+        "course_subscription_bills.canceled",
+      ],
+      schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],
+      schedule_type: ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
+      user_status: ["ONLINE", "OFFLINE"],
+    },
+  },
+  storage: {
+    Enums: {},
+  },
+} as const
 

@@ -1,6 +1,6 @@
 import { addDays, addHours, addMonths, differenceInMonths } from "date-fns"
 import { randomNumber } from "./utilities"
-import type { AppCourseActivitySchedule, Database } from "~/types/app.types"
+import type { AppCourseActivitySchedule } from "~/types/app.types"
 import { SCHEDULES_STATUS } from "~/constants"
 import type { H3Event } from 'h3';
 import { serverSupabaseClient } from '#supabase/server'
@@ -8,17 +8,14 @@ import { serverSupabaseClient } from '#supabase/server'
 
 
 export const createSchedule = async (event: H3Event, course_id: string, activity_id: string, org_id: string, start_date?: Date, start_time?: number, duration?: number) => {
-    const client = await serverSupabaseClient<Database>(event)
+    const client = await serverSupabaseClient(event)
     const currentDate = new Date()
     const dateStart = start_date ?? addDays(currentDate, randomNumber(-30, 30)) // 30 days before or after
     dateStart.setHours(start_time ?? randomNumber(8, 18)) // between 8 and 18
     const dateEnd = addHours(dateStart, duration ?? randomNumber(1, 3)) // 1-3 hours
 
-    let status = SCHEDULES_STATUS[0]
+    const status = SCHEDULES_STATUS[0]
 
-    if (dateStart < currentDate) {
-        status = SCHEDULES_STATUS[randomNumber(1, SCHEDULES_STATUS.length - 1)]
-    }
     const schdl: Omit<AppCourseActivitySchedule, "id"> = {
         activity_id: activity_id,
         course_id: course_id,
@@ -36,7 +33,7 @@ export const createSchedule = async (event: H3Event, course_id: string, activity
 
 export const generateStudentPersona = async (event: H3Event, org_id: string, student_id: string, course_id: string) => {
 
-    const client = await serverSupabaseClient<Database>(event)
+    const client = await serverSupabaseClient(event)
 
     const subscriptionDate = randomDate(addMonths(new Date(), -5), new Date())
 
@@ -76,12 +73,12 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
     // Generate Attendances to Theory Schedules
     let theoryAttendancesCount = 0
     for (const schedule of theorySchedules) {
-        await client.from('course_activity_attendances').insert({
-            course_activity_id: schedule.activity_id,
-            activity_schedule_id: schedule.id,
+        const { data, error} = await client.rpc('add_attendee_to_schedule', {
+            course_schedule_id: schedule.id,
             course_subscription_id: subscription.id,
-            organization_id: org_id,
         })
+        if (error) throw new Error('Theory Attendance not created')
+        if (!data) throw new Error('Theory Attendance not created')
         theoryAttendancesCount++
     }
 
@@ -95,17 +92,11 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
             activity_id: practiceActivity.id,
             organization_id: org_id,
             start_at: start_date.toISOString(),
+            attendees: [subscription.id],
             end_at: addHours(start_date, 2).toISOString()
         }).select('*').single()
 
         if (!s) throw new Error('Practice Schedule not created')
-
-        await client.from('course_activity_attendances').insert({
-            course_activity_id: practiceActivity.id,
-            activity_schedule_id: s.id,
-            course_subscription_id: subscription.id,
-            organization_id: org_id,
-        })
         practiceAttendancesCount++
     }
 
@@ -124,13 +115,6 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
 
         if (!examSchedule) throw new Error('Exam Schedule not created')
 
-        await client.from('course_activity_attendances').insert({
-            course_activity_id: examActivity.id,
-            activity_schedule_id: examSchedule.id,
-            course_subscription_id: subscription.id,
-            organization_id: org_id,
-        })
-
         if (practiceAttendancesCount >= practiceActivity.required) {
             const practiceExamDate = addMonths(theoryExamDate, 1)
             const { data: practiceExamSchedule } = await client.from('course_activity_schedules').insert({
@@ -143,13 +127,6 @@ export const generateStudentPersona = async (event: H3Event, org_id: string, stu
             }).select('*').single()
 
             if (!practiceExamSchedule) throw new Error('Practice Exam Schedule not created')
-
-            await client.from('course_activity_attendances').insert({
-                course_activity_id: examActivity.id,
-                activity_schedule_id: practiceExamSchedule.id,
-                course_subscription_id: subscription.id,
-                organization_id: org_id,
-            })
         }
     }    
 }

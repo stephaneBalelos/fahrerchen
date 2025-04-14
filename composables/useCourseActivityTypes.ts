@@ -1,4 +1,4 @@
-import type { Database } from '~/types/app.types'
+import type { AppCourseActivityType, Database } from '~/types/app.types'
 
 
 
@@ -6,7 +6,7 @@ export async function useCourseActivityTypes() {
     const client = useSupabaseClient<Database>()
 
     try {
-        const { data, error } = await client.from('course_activity_types').select('*')
+        const { data, error } = await client.from('course_activity_types').select('*').overrideTypes<AppCourseActivityType[]>()
         if (error) {
             throw error
         }

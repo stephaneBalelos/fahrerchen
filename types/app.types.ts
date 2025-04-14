@@ -16,15 +16,18 @@ export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['cours
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
-export type AppCourseActivityAttendance = DatabaseGenerated['public']['Tables']['course_activity_attendances']['Row']
 
 export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
+export type AppCourseSubscriptionBillItem = DatabaseGenerated['public']['Tables']['course_subscription_bill_items']['Row']
 
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
 
-
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
+export type AppNotification = MergeDeep<DatabaseGenerated['public']['Tables']['notifications']['Row'], {
+  target_roles: UserRole[]
+}>
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
@@ -43,11 +46,6 @@ export type AppStripeAccountPaymentMethodSettings = {
 
 export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
 
-
-
-
-
-
 export type StripeConnectPostBody = {
   org_id: string
 }
@@ -57,9 +55,10 @@ export type StripeConnectLinkAccountPostBody = {
 }
 
 export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
-export type CourseActivityAttendanceView = Database["public"]["Views"]["course_activity_attendances_view"]["Row"]
 export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
 export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
+export type CourseSubscriptionBillItemView = Database["public"]["Views"]["course_subscription_bill_items_view"]["Row"]
+export type NotificationView = Database["public"]["Views"]["notifications_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
@@ -90,7 +89,8 @@ export type Database = MergeDeep<DatabaseGenerated, {
           course_description: string,
           student_email: string,
           student_firstname: string,
-          student_lastname: string
+          student_lastname: string,
+          student_user_id: string,
         }
       },
       course_activity_schedules_view: {
@@ -114,21 +114,6 @@ export type Database = MergeDeep<DatabaseGenerated, {
           attendees: string[]
         } 
       },
-      course_activity_attendances_view: {
-        Row: {
-          id: string,
-          course_activity_id: string,
-          activity_schedule_id: string,
-          course_subscription_id: string,
-          status: DatabaseGenerated["public"]["Enums"]["attendance_status"],
-          organization_id: string,
-          course_id: string,
-          activity_name: string,
-          activity_description: string,
-          activity_start_at: string,
-          activity_end_at: string
-        }
-      },
       course_subscriptions_stats_view: {
         Row: {
           id: string,
@@ -142,6 +127,15 @@ export type Database = MergeDeep<DatabaseGenerated, {
           total_bills: number,
         }
       }
+      course_subscription_bill_items_view: {
+        Row: {
+          activity_name: string,
+          activity_description: string,
+          bill_id: string,
+          items: AppCourseSubscriptionBillItem[]
+          total: number
+        }
+      }
       user_roles_view: {
         Row: {
           email: string
@@ -150,7 +144,26 @@ export type Database = MergeDeep<DatabaseGenerated, {
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         };
-      };
+      }
+      notifications_view: {
+        Row: {
+          actor_email: string | null
+          actor_firstname: string | null
+          actor_lastname: string | null
+          actor_fullname: string | null
+          actor_id: string | null
+          date: string
+          id: string
+          organization_id: string
+          read_at: string | null
+          resource_id: string
+          target_roles: UserRole[]
+          target_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+          payload: unknown
+          updated_at: string
+        }
+      }
     };
   };
   storage: {

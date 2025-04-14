@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js'
 import { addWeeks, setDay, setHours } from 'date-fns'
 import { createSchedule } from '~/server/utils/demo'
 import { randomNumber } from '~/server/utils/utilities'
-import type { AppCourse, AppCourseActivity, AppStudent, Database } from '~/types/app.types'
+import type { AppCourse, AppCourseActivity, AppStudent } from '~/types/app.types'
 
 
 export default defineEventHandler(async (event) => {
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
     const faker_base_url = 'https://fakerapi.it/api/v2'
 
-    const client = serverSupabaseServiceRole<Database>(event)
+    const client = serverSupabaseServiceRole(event)
 
     // Get Current User name
     const { data: user_data } = await client.from('users').select('firstname, lastname').eq('id', user.id).single()
@@ -270,6 +270,22 @@ export default defineEventHandler(async (event) => {
             const sub = subscriptionsData[i]
             await generateStudentPersona(event, sub.organization_id, sub.student_id, sub.course_id)
         }
+
+        // Set randow status for past schedules
+        const { data: schedules } = await client.from('course_activity_schedules').select('*').eq('organization_id', org.id).lt('start_at', new Date().toISOString())
+        if (!schedules) {
+            return createError({
+                status: 500,
+                statusMessage: 'Schedules not found'
+            })
+        }
+        for (let i = 0; i < schedules.length; i++) {
+            const schedule = schedules[i]
+            await client.from('course_activity_schedules').update({ status: randomNumber(1, 2) == 2 ? 'CANCELED': 'COMPLETED' }).eq('id', schedule.id)
+        }
+
+        // Generate Bills
+        await client.rpc('generate_bill_for_subscriptions')
 
         return {
             status: 200,

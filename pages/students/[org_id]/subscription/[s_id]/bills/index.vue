@@ -1,5 +1,5 @@
 <template>
-  <UContainer class="w-full">
+  <UContainer class="w-full py-4">
     <StudentSubscriptionSettlement :subscription-id="subscription_id" :org-id="org_id" />
     <StudentBillsSection :subscription-id="subscription_id" />
   </UContainer>

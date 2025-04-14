@@ -87,6 +87,7 @@ const openEditActivityForm = (id?: string) => {
     courseid: props.courseid,
     orgid: props.orgid,
     courseActivityId: id,
+    sortingOrder: course_activities.value ? course_activities.value.length + 1 : 1,
     "onActivity-saved": () => {
       slideover.close();
       refresh();

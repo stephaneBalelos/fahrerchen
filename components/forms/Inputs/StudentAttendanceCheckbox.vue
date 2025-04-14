@@ -1,28 +1,29 @@
 <template>
   <UCheckbox
-    class="items-center p-4 sm:px-6"
     v-model="isAttending"
+    class="items-center p-4 sm:px-6"
+    :disabled="props.status !== 'PLANNED'"
     @change="handleChange"
   >
     <template #label>
-      <slot></slot>
+      <slot />
     </template>
   </UCheckbox>
 </template>
 
 <script setup lang="ts">
 import type {
-  AppCourseSubscription,
-  AppStudent,
-  Database,
+  AppStudent
 } from "~/types/app.types";
+import type { Database } from "~/types/database.types";
 
 type Props = {
-  subscription_id: string;
+  subscriptionId: string;
   student: AppStudent;
-  activity_id: string;
-  schedule_id: string;
-  onChange?: () => void;
+  scheduleId: string;
+  attendees: string[];
+  status: Database["public"]["Enums"]["schedule_status"];
+  onChange: () => void;
 };
 
 const tutorialStore = useTutorialStore();
@@ -31,83 +32,69 @@ const props = defineProps<Props>();
 
 const { t } = useI18n({ useScope: "local" });
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
-const isAttending = ref(false);
-
-const { data, error, status, refresh } = useAsyncData(async () => {
-  const { data, error } = await client
-    .from("course_activity_attendances")
-    .select("*")
-    .eq("course_subscription_id", props.subscription_id)
-    .eq("activity_schedule_id", props.schedule_id);
-
-  if (error) {
-    throw error;
-  }
-
-  if (data[0]) {
-    isAttending.value = true;
-  }
-  return data[0];
+const isAttending = computed(() => {
+  return props.attendees.includes(props.subscriptionId);
 });
 
 async function handleChange($event: boolean) {
+
   if ($event) {
-    await addToSchedule(
-      props.student.organization_id,
-      props.subscription_id,
-      props.schedule_id,
-      props.activity_id
-    );
+    await addStudentSubscriptionToSchedule();
   } else {
-    await removeFromSchedule(props.subscription_id, props.schedule_id);
+    await removeStudentSubscriptionFromSchedule();
   }
-  refresh();
-  props.onChange && props.onChange();
 }
 
-async function addToSchedule(
-  org_id: string,
-  subscription_id: string,
-  schedule_id: string,
-  activity_id: string
-) {
+const toast = useToast();
+
+async function addStudentSubscriptionToSchedule() {
   try {
-    const { data, error } = await client
-      .from("course_activity_attendances")
-      .insert({
-        course_subscription_id: subscription_id,
-        activity_schedule_id: schedule_id,
-        organization_id: org_id,
-        course_activity_id: activity_id,
+    const { data, error } = await client.rpc('add_attendee_to_schedule', {
+      course_schedule_id: props.scheduleId,
+      course_subscription_id: props.subscriptionId,
+    })
+    if (error) {
+      throw error
+    }
+    if (data) {
+      toast.add({
+        title: t('success.student_added_to_schedule'),
+        color: 'green'
       });
-    if (error) {
-      throw error;
     }
-    tutorialStore.completeStep("activity_schedule_attendance");
   } catch (error) {
-    console.error(error);
+    console.error('Error adding student to schedule:', error);
+    toast.add({
+        title: t('errors.failed_to_add_student'),
+        color: 'red'
+      });
   }
+  tutorialStore.completeStep('activity_schedule_attendance');
 }
 
-async function removeFromSchedule(
-  subscription_id: string,
-  schedule_id: string
-) {
+async function removeStudentSubscriptionFromSchedule() {
   try {
-    const { data, error } = await client
-      .from("course_activity_attendances")
-      .delete()
-      .eq("course_subscription_id", subscription_id)
-      .eq("activity_schedule_id", schedule_id);
-
+    const { data, error } = await client.rpc('remove_attendee_from_schedule', {
+      course_schedule_id: props.scheduleId,
+      course_subscription_id: props.subscriptionId,
+    })
     if (error) {
-      console.log(error);
-      throw error;
+      throw error
+    }
+    if (data) {
+      toast.add({
+        title: t('success.student_removed_from_schedule'),
+        color: 'green'
+      });
     }
   } catch (error) {
-    console.error(error);
+    console.error('Error removing student from schedule:', error);
+    toast.add({
+        title: t('errors.failed_to_remove_student'),
+        color: 'red'
+      });
   }
 }
 </script>

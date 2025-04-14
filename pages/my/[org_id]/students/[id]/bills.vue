@@ -6,7 +6,6 @@
       :title="t('bills')"
       :description="t('bills_description')"
       orientation="vertical"
-      class="px-4 mt-6"
     >
       <div v-if="bills && bills.length > 0" class="grid grid-cols-1 gap-2">
         <UDashboardCard
@@ -56,14 +55,13 @@
 
 <script setup lang="ts">
 import StudentSubscriptionSettlement from '~/components/students/StudentSubscriptionSettlement.vue';
-import type { Database } from '~/types/app.types';
 import { formatDateTime, formatCurrency } from '~/utils/formatters';
 
 const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
 const { t } = useI18n({
   useScope: "local",

@@ -4,9 +4,13 @@ create extension pg_cron with schema pg_catalog;
 grant usage on schema cron to postgres;
 grant all privileges on all tables in schema cron to postgres;
 
+create schema if not exists private;
+grant usage on schema private to anon, authenticated, service_role, postgres;
+
 
 alter database postgres
 set timezone to 'Europe/Berlin';
+
 -- Custom types
 create type public.app_permission as enum (
   'users.read',
@@ -51,10 +55,6 @@ create type public.app_permission as enum (
   'course_activity_schedules.create',
   'course_activity_schedules.update',
   'course_activity_schedules.delete',
-  'course_activity_attendances.read',
-  'course_activity_attendances.create',
-  'course_activity_attendances.update',
-  'course_activity_attendances.delete',
   'course_subscription_bills.read',
   'course_subscription_bills.create',
   'course_subscription_bills.update',
@@ -65,10 +65,22 @@ create type public.user_status as enum ('ONLINE', 'OFFLINE');
 create type public.activity_types as enum ('THEORY', 'PRACTICE', 'EXAM', 'OTHER');
 create type public.schedule_type as enum ('ONCE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
 create type public.schedule_status as enum ('PLANNED', 'COMPLETED', 'CANCELED');
-create type public.attendance_status as enum ('REGISTERED', 'ATTENDED', 'CANCELED');
 
 -- enum for führerscheinklassen
 create type public.course_type as enum ('AM', 'A1', 'A2', 'A', 'B', 'BE', 'C1', 'C1E', 'C', 'CE', 'D1', 'D1E', 'D', 'DE', 'L', 'T');
+
+-- Notifications Types
+create type public.notification_type as enum (
+  'students_registration_requests.created',
+  'course_subscriptions.created',
+  'course_activity_schedules.updated',
+  'course_activity_schedules.assigned',
+  'course_subscription_bills.ready_to_pay',
+  'course_subscription_bills.updated',
+  'course_subscription_bills.paid',
+  'course_subscription_bills.canceled'
+);
+
 
 
 -- ROLE PERMISSIONS
@@ -194,7 +206,7 @@ create table public.students (
 comment on table public.students is 'Profile data for each student.';
 alter table public.students enable row level security;
 revoke update on table public.students from authenticated, anon;
-grant update (firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
+grant update (email, firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
 
 
 -- COURSES
@@ -286,7 +298,7 @@ create table public.course_subscriptions (
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 alter table public.course_subscriptions enable row level security;
 revoke update on table public.course_subscriptions from authenticated, anon;
-grant update (archived_at) on table public.course_subscriptions to authenticated;
+grant update (archived_at, costs) on table public.course_subscriptions to authenticated;
 -- unique constraint to prevent multiple active subscriptions for the same course and student
 -- create unique index on public.course_subscriptions (course_id, student_id) where archived_at is null;
 
@@ -340,22 +352,8 @@ create table public.course_activity_schedules (
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 alter table public.course_activity_schedules enable row level security;
 revoke update on table public.course_activity_schedules from authenticated, anon;
+revoke insert (attendees) on table public.course_activity_schedules from authenticated, anon;
 grant update (assigned_to, status, start_at, end_at, attendees) on table public.course_activity_schedules to authenticated;
-
--- ACTIVITY ATTENDANCES
-create table public.course_activity_attendances (
-  id            uuid default uuid_generate_v4() primary key,
-  course_activity_id   uuid references public.course_activities on delete cascade not null,
-  activity_schedule_id    uuid references public.course_activity_schedules on delete cascade not null,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  status        public.attendance_status default 'REGISTERED'::public.attendance_status not null,
-  organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_subscription_id, activity_schedule_id)
-);
-comment on table public.course_activity_attendances is 'ACTIVITY ATTENDANCES.';
-alter table public.course_activity_attendances enable row level security;
-revoke update on table public.course_activity_attendances from authenticated, anon;
-grant update (status) on table public.course_activity_attendances to authenticated;
 
 
 -- COURSE SUBSCRIPTION BILLS
@@ -380,19 +378,19 @@ grant update (paid_at, ready_to_pay, stripe_payment_intent_id, canceled_at, tota
 create table public.course_subscription_bill_items (
   id            uuid default uuid_generate_v4() primary key,
   bill_id      uuid references public.course_subscription_bills on delete set null,
-  course_activity_attendance_id    uuid references public.course_activity_attendances on delete set null,
   course_activity_id    uuid references public.course_activities on delete set null,
+  course_activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   description   text not null,
   price       numeric default 0 not null check (price >= 0),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_activity_attendance_id)
+  unique (bill_id, course_activity_id, course_activity_schedule_id, course_subscription_id)
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
 revoke update on table public.course_subscription_bill_items from authenticated, anon;
-grant update (bill_id, course_activity_attendance_id) on table public.course_subscription_bill_items to authenticated;
+grant update (bill_id, course_activity_schedule_id) on table public.course_subscription_bill_items to authenticated;
 
 -- Bill History Action type
 create type public.bill_history_action_type as enum ('ITEM_ADDED', 'ITEM_REMOVED', 'ITEM_UPDATED', 'BILL_READY_TO_PAY', 'BILL_PAID');
@@ -411,6 +409,39 @@ create table public.course_subscription_bill_history (
 comment on table public.course_subscription_bill_history is 'COURSE SUBSCRIPTION BILL HISTORY.';
 alter table public.course_subscription_bill_history enable row level security;
 revoke update on table public.course_subscription_bill_history from authenticated, anon;
+
+
+-- Notifications
+create table public.notifications (
+  id            uuid default uuid_generate_v4() primary key,
+  actor_id      uuid references public.users on delete set null,
+  type          public.notification_type not null,
+  target_roles   public.app_role[] default '{}'::public.app_role[] not null,
+  target_id       uuid,
+  date          timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  resource_id    uuid,
+  payload      jsonb,
+  organization_id    uuid references public.organizations on delete set null
+);
+comment on table public.notifications is 'Notifications for each user.';
+alter table public.notifications enable row level security;
+revoke update on table public.notifications from authenticated, anon;
+grant update (updated_at) on table public.notifications to authenticated;
+
+
+-- Notifications Read Status
+create table public.notifications_read_status (
+  id            uuid default uuid_generate_v4() primary key,
+  notification_id    uuid references public.notifications on delete cascade not null,
+  user_id       uuid references public.users on delete cascade not null,
+  read_at       timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique (notification_id, user_id)
+);
+comment on table public.notifications_read_status is 'Notifications read status for each user.';
+alter table public.notifications_read_status enable row level security;
+revoke update on table public.notifications_read_status from authenticated, anon;
+grant update (read_at) on table public.notifications_read_status to authenticated;
 
 
 -- VIEWS
@@ -457,7 +488,6 @@ left join (
   from public.course_subscriptions where archived_at is null
   group by student_id
 ) as subscriptions on students.id = subscriptions.student_id;
-
 
 
 -- Bills View with Course, Subscription and Student
@@ -548,7 +578,8 @@ select
   courses.type as course_type,
   students.email as student_email,
   students.firstname as student_firstname,
-  students.lastname as student_lastname
+  students.lastname as student_lastname,
+  students.user_id as student_user_id
 from public.course_subscriptions
 inner join public.courses on course_subscriptions.course_id = courses.id
 inner join public.students on course_subscriptions.student_id = students.id;
@@ -580,23 +611,6 @@ inner join public.course_activities on course_activity_schedules.activity_id = c
 inner join public.courses on course_activity_schedules.course_id = courses.id
 left join public.users on course_activity_schedules.assigned_to = users.id;
 
--- Attendances view with course name, schedule
-create or replace view public.course_activity_attendances_view as
-select
-  course_activity_attendances.id,
-  course_activity_attendances.course_activity_id,
-  course_activity_attendances.activity_schedule_id,
-  course_activity_attendances.course_subscription_id,
-  course_activity_attendances.status,
-  course_activity_attendances.organization_id,
-  course_activities.name as activity_name,
-  course_activities.description as activity_description,
-  course_activities.course_id as course_id,
-  course_activity_schedules.start_at as activity_start_at,
-  course_activity_schedules.end_at as activity_end_at
-from public.course_activity_attendances
-inner join public.course_activities on course_activity_attendances.course_activity_id = course_activities.id
-inner join public.course_activity_schedules on course_activity_attendances.activity_schedule_id = course_activity_schedules.id; 
 
 -- Subscriptions Stats View with course name, costs, sum of bills
 create or replace view public.course_subscriptions_stats_view as
@@ -617,6 +631,300 @@ and course_subscription_bills.paid_at is not null
 group by course_subscriptions.id, courses.name, courses.description;
 
 
+create or replace view public.notifications_view as
+select
+  notifications.id,
+  notifications.actor_id,
+  notifications.type,
+  notifications.target_roles,
+  notifications.target_id,
+  notifications.date,
+  notifications.updated_at,
+  notifications.resource_id,
+  notifications.organization_id,
+  notifications.payload,
+  users.email as actor_email,
+  users.firstname as actor_firstname,
+  users.lastname as actor_lastname,
+  users.fullname as actor_fullname,
+  notifications_read_status.read_at as read_at
+from public.notifications
+left join public.users on notifications.actor_id = users.id
+left join public.notifications_read_status on notifications.id = notifications_read_status.notification_id and notifications_read_status.user_id = auth.uid();
+
+alter view public.notifications_view set (security_invoker = true);
+
+-- Functions
+
+-- Add an attendee to schedule
+create or replace function public.add_attendee_to_schedule(
+  course_schedule_id uuid,
+  course_subscription_id uuid
+)
+returns boolean as $$
+declare
+  schedule_attendees uuid[];
+begin
+
+  select attendees into schedule_attendees from public.course_activity_schedules where id = course_schedule_id;
+
+  -- Check if the subscription is active
+  if not public.is_subscription_active(course_subscription_id) then
+    raise exception 'Subscription is not active';
+  end if;
+
+  -- Check if the course_subscription_id is already in the attendees
+  if course_subscription_id = any(schedule_attendees) then
+    raise exception 'Subscription is already in the attendees';
+  end if;
+
+  -- Check if the schedule is active
+  if not public.is_schedule_active(course_schedule_id) then
+    raise exception 'Schedule is not active';
+  end if;
+
+  update public.course_activity_schedules
+  set attendees = array_append(attendees, course_subscription_id)
+  where id = course_schedule_id;
+
+  return true;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+-- Remove an attendee from schedule
+create or replace function public.remove_attendee_from_schedule(
+  course_schedule_id uuid,
+  course_subscription_id uuid
+)
+returns boolean as $$
+declare
+  schedule_attendees uuid[];
+begin
+  select attendees into schedule_attendees from public.course_activity_schedules where id = course_schedule_id;
+
+  -- Check if the subscription is active
+  if not public.is_subscription_active(course_subscription_id) then
+    raise exception 'Subscription is not active';
+  end if;
+
+  -- Check if the course_subscription_id is already in the attendees
+  if not course_subscription_id = any(schedule_attendees) then
+    raise exception 'Subscription is not in the attendees';
+  end if;
+
+  -- Check if the schedule is active
+  if not public.is_schedule_active(course_schedule_id) then
+    raise exception 'Schedule is not active';
+  end if;
+
+  update public.course_activity_schedules
+  set attendees = array_remove(attendees, course_subscription_id)
+  where id = course_schedule_id;
+
+  return true;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+
+-- Generate Bill for Subscription
+create or replace function public.generate_bill_for_subscription(
+  subscription_id uuid
+)
+returns uuid as $$
+declare
+  org_id uuid;
+  bill_items uuid[];
+  bill_total numeric;
+  b_id uuid;
+begin
+  select organization_id into org_id from public.course_subscriptions where id = subscription_id;
+
+  select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
+
+  if array_length(bill_items, 1) > 0 then
+    select sum(price) into bill_total from public.course_subscription_bill_items where id = any(bill_items);
+
+    insert into public.course_subscription_bills (course_subscription_id, organization_id, total)
+    values (subscription_id, org_id, bill_total)
+    returning id into b_id;
+
+    update public.course_subscription_bill_items set bill_id = b_id
+    where id = any(bill_items);
+
+    return b_id;
+  end if;
+
+  return null;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+-- Generate Bill for Subscriptions
+create or replace function public.generate_bill_for_subscriptions()
+returns void as $$
+declare
+  subscriptions uuid[];
+  subscription_id uuid;
+begin
+  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
+
+  foreach subscription_id in array subscriptions loop
+    perform public.generate_bill_for_subscription(subscription_id);
+  end loop;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+-- Helpers Functions
+
+-- Authorize function
+create or replace function public.authorize(
+  requested_permission app_permission,
+  org_id uuid
+)
+returns boolean as $$
+declare
+  bind_permissions int;
+  user_role public.app_role;
+  owner uuid;
+begin
+
+  select owner_id into owner from public.organizations where id = org_id;
+
+  --check if the user is the main owner
+  if owner = auth.uid() then
+    return true;
+  end if;
+
+  -- Fetch user role once and store it to reduce number of calls
+  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+
+  if user_role is null then
+    return false;
+  end if;
+
+  select count(*)
+  into bind_permissions
+  from public.role_permissions
+  where role_permissions.permission = requested_permission
+    and role_permissions.role = user_role;
+
+  return bind_permissions > 0;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+create or replace function is_main_owner(
+  org_id uuid
+)
+returns boolean as $$
+declare
+  owner uuid;
+begin
+  select owner_id into owner from public.organizations where id = org_id;
+
+  return owner = auth.uid();
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- 2 users are in the same organization
+create or replace function public.are_users_in_same_organization(
+  user_id_1 uuid,
+  user_id_2 uuid
+)
+returns boolean as $$
+declare
+  org_id_1 uuid;
+  org_id_2 uuid;
+begin
+
+  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
+  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+-- check if a subscription is active / not archived
+create or replace function public.is_subscription_active(
+  subscription_id uuid
+)
+returns boolean as $$
+declare
+  archived_date timestamp with time zone;
+begin
+  select archived_at into archived_date from public.course_subscriptions where id = subscription_id;
+
+  if archived_date is not null then
+    return false;
+  end if;
+
+  return true;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- check if schedule is COMPLETED or CANCELED
+create or replace function public.is_schedule_active(
+  schedule_id uuid
+)
+returns boolean as $$
+declare s_status public.schedule_status;
+begin
+  select status into s_status from public.course_activity_schedules where id = schedule_id;
+  if s_status = 'COMPLETED' or s_status = 'CANCELED' then
+    return false;
+  end if;
+  return true;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+
+-- check if a bill can be updated
+create or replace function public.can_update_bill(
+  bill_id uuid
+)
+returns boolean as $$
+declare
+  is_paid boolean;
+  is_ready_to_pay boolean;
+  is_canceled boolean;
+begin
+
+  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_canceled from public.course_subscription_bills where id = bill_id;
+
+  return is_paid = false or is_ready_to_pay = false or is_canceled = false;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- check if a user is targeted by a notification
+create or replace function public.is_user_targeted_by_notification(
+  notification_id uuid,
+  org_id uuid
+)
+returns boolean as $$
+declare
+  user_role public.app_role;
+  n_target_roles public.app_role[];
+  n_target_id uuid;
+begin
+  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+  select target_roles, target_id into n_target_roles, n_target_id from public.notifications where id = notification_id;
+
+  -- Check if the user has the right role in the Organization
+  if user_role is null then
+    return false;
+  end if;
+
+  -- Check if the user is the target_id of the notification
+  if n_target_id = auth.uid() then
+    return true;
+  end if;
+
+  -- if user_role is included in the target_roles, return true
+  if user_role = any(n_target_roles) then
+    return true;
+  end if;
+
+  return false;
+end;
+$$ language plpgsql security definer set search_path = public;
 
 
 -- TRIGGERS
@@ -635,7 +943,6 @@ $$ language plpgsql security definer set search_path = auth, public;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
-
 
 
 create or replace function public.handle_new_organization() 
@@ -665,12 +972,36 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course is created
 create trigger on_course_created
   after insert on public.courses
   for each row execute procedure public.handle_new_course();
 
+
+-- handle New Registration Request
+create or replace function public.handle_new_registration_request()
+returns trigger as $$
+declare org_id uuid;
+begin
+  --   -- Send Notification to the student
+  -- perform private.send_notification(
+  --   auth.uid(),
+  --   'students_registration_requests.created',
+  --   '{owner, manager, teacher}'::public.app_role[],
+  --   null,
+  --   new.id,
+  --   to_jsonb(new),
+  --   new.organization_id
+  -- );
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public, private;
+-- trigger the function every time a registration request is created
+create trigger on_registration_request_created
+  after insert on public.students_registration_requests
+  for each row execute procedure public.handle_new_registration_request();
 
 -- handle Registration Request confirmation
 create or replace function public.handle_registration_request_confirmation()
@@ -739,6 +1070,7 @@ declare is_course_active boolean;
 declare create_bill boolean;
 declare bill_id uuid;
 declare activity public.course_activities;
+declare n_payload jsonb;
 begin
   org_id := new.organization_id;
   select is_active, create_bill_on_subscription into is_course_active, create_bill from public.courses where id = new.course_id;
@@ -769,22 +1101,25 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = public, private;
 -- trigger the function every time a course subscription is created
 create trigger on_course_subscription_created
   after insert on public.course_subscriptions
   for each row execute procedure public.handle_new_course_subscription();
 
--- handle archived course subscription
-create or replace function public.handle_archived_course_subscription()
+-- handle archive course subscription
+create or replace function public.handle_archive_course_subscription()
 returns trigger as $$
-declare org_id uuid;
 begin
-  org_id := old.organization_id;
 
+  -- check if the subscription is already archived
   if new.archived_at is not null then
-    -- cancel all open bills
-    update public.course_subscription_bills set canceled_at = timezone('utc'::text, now()) where course_subscription_id = old.id and paid_at is null;
+    raise exception 'Subscription is already archived';
+  end if;
+
+  -- find the course subscription bills that are not paid or canceled
+  if exists (select 1 from public.course_subscription_bills where course_subscription_id = new.id and (paid_at is null and canceled_at is null)) then
+    raise exception 'Subscription has unpaid bills';
   end if;
 
   return new;
@@ -793,381 +1128,117 @@ $$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription is updated
 create trigger on_course_subscription_updated
   after update of archived_at on public.course_subscriptions
-  for each row execute procedure public.handle_archived_course_subscription();
+  for each row execute procedure public.handle_archive_course_subscription();
 
 
-
--- handle new activity attendance
-create or replace function public.handle_new_activity_attendance()
+-- handle update update schedule status
+create or replace function public.handle_update_schedule_status()
 returns trigger as $$
-declare org_id uuid;
-declare bill_item public.course_subscription_bill_items;
-declare activity_price numeric;
-declare activity_name text;
+declare
+  activity_id uuid;
+  course_activity_name text;
+  course_activity_price numeric;
+  existing_bill_item uuid;
 begin
-  org_id := new.organization_id;
+  -- If Schedule ist Completed, generate Attendances for all attendees
+  if new.status = 'COMPLETED' then
+    -- get the course activity id, name and price
+    select id, name, price into activity_id, course_activity_name, course_activity_price from public.course_activities where id = new.activity_id;
+    -- loop over the attendees and insert a new bill item for each one
+    for i in 1..array_length(new.attendees, 1) loop
+      -- check if the subscription is active
+      if public.is_subscription_active(new.attendees[i]) then
+        -- check if there is a bill item with the same course activity id and course subscription id
+        select id into existing_bill_item from public.course_subscription_bill_items 
+          where course_activity_id = activity_id and course_subscription_id = new.attendees[i] and course_activity_schedule_id is null limit 1;
 
-  -- lookup for a bill item for the subscription and activity that does not have an attendance
-  select * into bill_item from public.course_subscription_bill_items 
-    where course_subscription_id = new.course_subscription_id
-    and course_activity_id = new.course_activity_id
-    and course_activity_attendance_id is null
-    order by inserted_at asc limit 1;
-
-  -- get the activity price and name
-  select name, price into activity_name, activity_price from public.course_activities where id = new.course_activity_id;
-
-  -- if no bill item exists, insert a new one
-  if bill_item is null then
-    -- insert the bill item
-    insert into public.course_subscription_bill_items (course_activity_attendance_id, course_activity_id, description, price, organization_id, course_subscription_id)
-    values (new.id, new.course_activity_id, activity_name, activity_price, org_id, new.course_subscription_id);
-  else
-    -- update the bill item
-    update public.course_subscription_bill_items set course_activity_attendance_id = new.id
-    where id = bill_item.id;
+        if existing_bill_item is not null then
+          -- if the bill item already exists, update it with the new schedule id
+          update public.course_subscription_bill_items
+          set course_activity_schedule_id = new.id
+          where id = existing_bill_item;
+        else
+          -- if the bill item does not exist, insert a new one
+          insert into public.course_subscription_bill_items (course_activity_id, course_activity_schedule_id, course_subscription_id, description, price, organization_id)
+          values (activity_id, new.id, new.attendees[i], course_activity_name, course_activity_price, new.organization_id);
+        end if;
+      end if;
+    end loop;
   end if;
-
-  -- aggregate attendees for the activity schedule
-  update public.course_activity_schedules set attendees = array_append(attendees, new.course_subscription_id)
-  where id = new.activity_schedule_id;
 
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
--- trigger the function every time a course activity attendance is created
-create trigger on_course_activity_attendance_created
-  after insert on public.course_activity_attendances
-  for each row execute procedure public.handle_new_activity_attendance();
+-- trigger the function every time a course activity schedule status is updated
+create trigger on_course_activity_schedule_updated
+  after update of status on public.course_activity_schedules
+  for each row execute procedure public.handle_update_schedule_status();
 
--- handle removed activity attendance
-create or replace function public.handle_removed_activity_attendance()
-returns trigger as $$
-declare org_id uuid;
-declare bill_item_id uuid;
-declare bill_item_bill_id uuid;
-declare bill_item_price numeric;
-begin
-  org_id := old.organization_id;
-
-  -- lookup for the bill item
-  select id, bill_id, price into bill_item_id, bill_item_bill_id, bill_item_price from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
-
-  -- if no bill item exists, do nothing
-  if bill_item_id is null then
-    return old;
-  end if;
-
-  -- if the item has a bill id, set attendance to null
-  if bill_item_bill_id is not null then
-    update public.course_subscription_bill_items set course_activity_attendance_id = null
-    where id = bill_item_id;
-  else
-    -- aggregate subscription costs
-    update public.course_subscriptions set costs = costs - bill_item_price
-    where id = old.course_subscription_id;
-
-    -- if the item has no bill id, remove the item
-    delete from public.course_subscription_bill_items where id = bill_item_id;
-    
-  end if;
-
-  return old;
-end;
-$$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course activity attendance is deleted
-create trigger on_course_activity_attendance_deleted
-  before delete on public.course_activity_attendances
-  for each row execute procedure public.handle_removed_activity_attendance();
-
-
--- handle updated bill ready to pay
-create or replace function public.handle_updated_bill()
-returns trigger as $$
-begin
-
-  --prevent set ready_to_pay to false if the bill has been paid
-  if old.ready_to_pay = true and new.ready_to_pay = false and new.paid_at is not null then
-    raise exception 'Cannot set ready_to_pay to false if the bill has been paid';
-  end if;
-
-  -- prevent set paid_at to null if the bill is ready to pay
-  if old.paid_at is not null and new.paid_at is null and new.ready_to_pay = true then
-    raise exception 'Cannot set paid_at to null if the bill is ready to pay';
-  end if;
-
-  -- prevent set canceled_at to null if the bill is paid
-  if old.canceled_at is not null and new.canceled_at is null and new.paid_at is not null then
-    raise exception 'Cannot set canceled_at to null if the bill is paid';
-  end if;
-
-  if new.ready_to_pay = true and old.ready_to_pay = false then
-    -- insert the bill history
-    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
-    values (new.id, auth.uid(), 'BILL_READY_TO_PAY', '', 0, new.organization_id);
-  end if;
-
-  -- prevent removing the stripe_payment_intent_id when bill is paid
-  if old.stripe_payment_intent_id is not null and new.stripe_payment_intent_id is null and new.paid_at is not null then
-    raise exception 'Cannot remove the stripe_payment_intent_id when the bill is paid';
-  end if;
-
-  if new.paid_at is not null then
-    -- insert the bill history
-    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
-    values (new.id, auth.uid(), 'BILL_PAID', '', 0, new.organization_id);
-  end if;
-
-  -- if bill is canceled, unlink all the bill items
-  if new.canceled_at is not null then
-    update public.course_subscription_bill_items set bill_id = null
-    where bill_id = new.id;
-  end if;
-
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course subscription bill is updated
-create trigger on_course_subscription_bill_updated
-  after update on public.course_subscription_bills
-  for each row execute procedure public.handle_updated_bill();
-
-
--- handle new Bill Item
+-- handle new bill item
 create or replace function public.handle_new_bill_item()
 returns trigger as $$
-declare org_id uuid;
-declare bill_total numeric;
 begin
-  org_id := new.organization_id;
+  -- check if a bill_id is already set
+  if new.bill_id is not null then
+    -- check if the linked bill can be updated
+    if not public.can_update_bill(new.bill_id) then
+      raise exception 'Bill cannot be updated';
+    end if;
 
-  -- aggregate subscription costs
-  update public.course_subscriptions set costs = costs + new.price
-  where id = new.course_subscription_id;
+    -- if the bill can be updated, update the bill with the new item
+    update public.course_subscription_bills
+    set total = total + new.price
+    where id = new.bill_id;
 
+    -- insert a new bill history item
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_ADDED', new.description, new.price, new.organization_id);
+  end if;
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill item is created
 create trigger on_course_subscription_bill_item_created
   after insert on public.course_subscription_bill_items
   for each row execute procedure public.handle_new_bill_item();
 
--- handle removed Bill Item
-create or replace function public.handle_removed_bill_item()
+-- public.handle remove bill item
+create or replace function public.handle_remove_bill_item()
 returns trigger as $$
-declare org_id uuid;
-declare bill_total numeric;
 begin
-  org_id := old.organization_id;
+  -- check if a bill_id is already set
+  if new.bill_id is not null then
+    -- check if the linked bill can be updated
+    if not public.can_update_bill(new.bill_id) then
+      raise exception 'Bill cannot be updated';
+    end if;
 
-  -- check if the bill still exists
-  if not exists (select 1 from public.course_subscription_bills where id = old.bill_id) then
-    return old;
+    -- if the bill can be updated, update the bill with the new item
+    update public.course_subscription_bills
+    set total = total - new.price
+    where id = new.bill_id;
+
+    -- insert a new bill history item
+    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
+    values (new.bill_id, auth.uid(), 'ITEM_REMOVED', new.description, new.price, new.organization_id);
   end if;
-
-  -- lookup for the linked bill
-  select sum(price) into bill_total from public.course_subscription_bill_items where bill_id = old.bill_id;
-
-  -- if no bill item exists, do nothing
-  if bill_total is null then
-    return old;
-  end if;
-
-  -- if the bill item exists, remove it
-  update public.course_subscription_bills set total = bill_total
-  where id = old.bill_id;
-
-  -- insert the bill history
-  insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
-  values (old.bill_id, auth.uid(), 'ITEM_REMOVED', old.description, old.price, org_id);
-
-  return old;
+  return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a course subscription bill item is deleted
 create trigger on_course_subscription_bill_item_deleted
   before delete on public.course_subscription_bill_items
-  for each row execute procedure public.handle_removed_bill_item();
-
--- handle updated Bill Item
-create or replace function public.handle_updated_bill_item()
-returns trigger as $$
-begin
-
-  if old.description <> new.description then
-    -- insert the bill history
-    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
-    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
-  end if;
-
-  if old.price <> new.price then
-    -- insert the bill history
-    insert into public.course_subscription_bill_history (bill_id, actor_id, activity, item_description, item_price, organization_id)
-    values (new.bill_id, auth.uid(), 'ITEM_UPDATED', new.description, new.price, new.organization_id);
-  end if;
-
-  return new;
-end;
-$$ language plpgsql security definer set search_path = public;
--- trigger the function every time a course subscription bill item is updated
-create trigger on_course_subscription_bill_item_updated
-  before update on public.course_subscription_bill_items
-  for each row execute procedure public.handle_updated_bill_item();
+  for each row execute procedure public.handle_remove_bill_item();
 
 
--- Functions
-
--- Generate Bill for Subscription
-create or replace function public.generate_bill_for_subscription(
-  subscription_id uuid,
-  organization_id uuid
-)
-returns uuid as $$
-declare
-  bill_items uuid[];
-  bill_total numeric;
-  b_id uuid;
-begin
-
-  select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
-
-  if array_length(bill_items, 1) > 0 then
-    select sum(price) into bill_total from public.course_subscription_bill_items where id = any(bill_items);
-
-    insert into public.course_subscription_bills (course_subscription_id, organization_id, total)
-    values (subscription_id, organization_id, bill_total)
-    returning id into b_id;
-
-    update public.course_subscription_bill_items set bill_id = b_id
-    where id = any(bill_items);
-
-    return b_id;
-  end if;
-
-  return null;
-end;
-$$ language plpgsql security invoker set search_path = public;
-
--- Generate Bill for Subscriptions
-create or replace function public.generate_bill_for_subscriptions()
-returns void as $$
-declare
-  subscriptions uuid[];
-  subscription_id uuid;
-begin
-  select array_agg(id) into subscriptions from public.course_subscriptions where archived_at is null;
-
-  foreach subscription_id in array subscriptions loop
-    perform public.generate_bill_for_subscription(subscription_id, (select organization_id from public.course_subscriptions where id = subscription_id));
-  end loop;
-end;
-$$ language plpgsql security definer set search_path = public;
-
--- Helpers Functions
-
--- Authorize function
-create or replace function public.authorize(
-  requested_permission app_permission,
-  org_id uuid
-)
-returns boolean as $$
-declare
-  bind_permissions int;
-  user_role public.app_role;
-  owner uuid;
-begin
-
-  select owner_id into owner from public.organizations where id = org_id;
-
-  --check if the user is the main owner
-  if owner = auth.uid() then
-    return true;
-  end if;
-
-  -- Fetch user role once and store it to reduce number of calls
-  select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
-
-  if user_role is null then
-    return false;
-  end if;
-
-  select count(*)
-  into bind_permissions
-  from public.role_permissions
-  where role_permissions.permission = requested_permission
-    and role_permissions.role = user_role;
-
-  return bind_permissions > 0;
-end;
-$$ language plpgsql security definer set search_path = public;
 
 
-create or replace function is_main_owner(
-  org_id uuid
-)
-returns boolean as $$
-declare
-  owner uuid;
-begin
-  select owner_id into owner from public.organizations where id = org_id;
-
-  return owner = auth.uid();
-end;
-$$ language plpgsql security definer set search_path = public;
-
--- 2 users are in the same organization
-create or replace function public.are_users_in_same_organization(
-  user_id_1 uuid,
-  user_id_2 uuid
-)
-returns boolean as $$
-declare
-  org_id_1 uuid;
-  org_id_2 uuid;
-begin
 
 
-  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
-  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
-end;
-$$ language plpgsql security definer set search_path = public;
 
 
--- check if a subscription is active / not archived
-create or replace function public.is_subscription_active(
-  subscription_id uuid
-)
-returns boolean as $$
-declare
-  archived_date timestamp with time zone;
-begin
-  select archived_at into archived_date from public.course_subscriptions where id = subscription_id;
-
-  if archived_date is not null then
-    return false;
-  end if;
-
-  return true;
-end;
-$$ language plpgsql security definer set search_path = public;
 
 
--- check if a bill can be updated
-create or replace function public.can_update_bill(
-  bill_id uuid
-)
-returns boolean as $$
-declare
-  is_paid boolean;
-  is_ready_to_pay boolean;
-  is_cancelled boolean;
-begin
-  select paid_at is not null, ready_to_pay, canceled_at is not null into is_paid, is_ready_to_pay, is_cancelled from public.course_subscription_bills where id = bill_id;
-
-  return is_paid = false or is_ready_to_pay = false or is_cancelled = false;
-end;
-$$ language plpgsql security definer set search_path = public;
 
 -- Policies
 
@@ -1255,15 +1326,8 @@ create policy "Owner can delete course_activities" on public.course_activities f
 -- Course Activity Schedules Policies
 create policy "Everyone can see course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
 create policy "Owner, Manager & Teacher can insert course_activity_schedules" on public.course_activity_schedules for insert to authenticated with check (public.authorize('course_activity_schedules.create', organization_id));
-create policy "Owner, Manager & Teacher can update course_activity_schedules" on public.course_activity_schedules for update to authenticated using (public.authorize('course_activity_schedules.update', organization_id)) with check (public.authorize('course_activity_schedules.update', organization_id));
+create policy "Owner, Manager & Teacher can update course_activity_schedules" on public.course_activity_schedules for update to authenticated using (public.authorize('course_activity_schedules.update', organization_id)) with check (public.authorize('course_activity_schedules.update', organization_id) and public.is_schedule_active(id));
 create policy "Owner, Manger % Teacher can delete course_activity_schedules" on public.course_activity_schedules for delete to authenticated using (public.authorize('course_activity_schedules.delete', organization_id));
-
-
--- Course Activity Attendances Policies
-create policy "Everyone can see course_activity_attendances" on public.course_activity_attendances for select to authenticated using (public.authorize('course_activity_attendances.read', organization_id));
-create policy "Owner, Manager can insert course_activity_attendances" on public.course_activity_attendances for insert to authenticated with check (public.authorize('course_activity_attendances.create', organization_id) and public.is_subscription_active(course_subscription_id));
-create policy "Owner & Manager can update course_activity_attendances" on public.course_activity_attendances for update to authenticated using (public.authorize('course_activity_attendances.update', organization_id)) with check (public.authorize('course_activity_attendances.update', organization_id) and public.is_subscription_active(course_subscription_id));
-create policy "Owner can delete course_activity_attendances" on public.course_activity_attendances for delete to authenticated using (public.authorize('course_activity_attendances.delete', organization_id) and public.is_subscription_active(course_subscription_id));
 
 
 -- Course Subscription Bills Policies
@@ -1274,15 +1338,20 @@ create policy "Everyone can see course_subscription_bill_history" on public.cour
 create policy "Owner, Manager can insert course_subscription_bills" on public.course_subscription_bills for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id) and public.is_subscription_active(course_subscription_id));
 create policy "Owner, Manager can insert course_subscription_bill_items" on public.course_subscription_bill_items for insert to authenticated with check (public.authorize('course_subscription_bills.create', organization_id));
 
-create policy "Owner & Manager can update course_subscription_bills" on public.course_subscription_bills for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id));
+create policy "Owner & Manager can update course_subscription_bills" on public.course_subscription_bills for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id) and public.can_update_bill(id));
 create policy "Owner & Manager can update course_subscription_bill_items" on public.course_subscription_bill_items for update to authenticated using (public.authorize('course_subscription_bills.update', organization_id)) with check (public.authorize('course_subscription_bills.update', organization_id));
 
-create policy "Owner can delete course_subscription_bills" on public.course_subscription_bills for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
+create policy "Owner can delete course_subscription_bills" on public.course_subscription_bills for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id) );
 create policy "Owner can delete course_subscription_bill_items" on public.course_subscription_bill_items for delete to authenticated using (public.authorize('course_subscription_bills.delete', organization_id));
 
 create policy "Everyone can see course_activity_types" on public.course_activity_types for select to authenticated using (true);
 
+create policy "Set Read if user_id matches the user" on public.notifications_read_status for insert to authenticated with check (auth.uid() = user_id);
+create policy "Read read status if user_id matches the user" on public.notifications_read_status for select to authenticated using (auth.uid() = user_id);
 
+
+-- Notifications Policies
+create policy "Targeted Users can see notifications" on public.notifications for select to authenticated using (public.is_user_targeted_by_notification(id, organization_id));
 
 -- Jobs
   -- Generate Bills for Subscriptions at the end of the month at 6:00 AM
@@ -1327,7 +1396,7 @@ create policy "Everyone can see course_activity_types" on public.course_activity
 -- create or replace function public.create_user(
 --     email text
 -- ) returns uuid
---     security definer
+--     security invoker
 --     set search_path = auth
 -- as $$
 --   declare
@@ -1360,7 +1429,7 @@ create policy "Everyone can see course_activity_types" on public.course_activity
   
 --   return bind_permissions > 0;
 -- end;
--- $$ language plpgsql security definer set search_path = public;
+-- $$ language plpgsql security invoker set search_path = public;
 
 -- -- Secure the tables
 -- alter table public.users enable row level security;

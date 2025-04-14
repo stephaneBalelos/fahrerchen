@@ -1,4 +1,3 @@
-import type { Database } from "~/types/app.types";
 
 
 type TutorialStepKey = 
@@ -43,7 +42,7 @@ const tutorial_steps: TutorialStep[] = [
 export const useTutorialStore = defineStore('tutorial', () => {
 
     const userStore = useUserStore();
-    const client = useSupabaseClient<Database>();
+    const client = useSupabaseClient();
 
     const steps = ref<TutorialStep[]>([]);
     const currentStep = ref<TutorialStep | null>(null);

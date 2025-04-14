@@ -39,6 +39,7 @@
             :options="COURSE_TYPES"
             :placeholder="t('form.type.placeholder')"
             :leading-icon="COURSE_ICONS[state.type]"
+            :disabled="!!props.courseId"
             :ui="{ wrapper: 'app-select' }"
             :ui-menu="{
               container: 'app-select-menu',
@@ -193,8 +194,7 @@ async function onSubmit(event: FormSubmitEvent<EditCourseFormProps>) {
   if (props.courseId) {
     updateCourse(
       props.courseId,
-      event.data,
-      userOrganizationsStore.selectedOrganization.organization_id
+      event.data
     );
   } else {
     createCourse(
@@ -255,14 +255,13 @@ const createCourse = async (d: EditCourseFormProps, org_id: string) => {
 const updateCourse = async (
   course_id: string,
   d: EditCourseFormProps,
-  org_id: string
 ) => {
   try {
     const { data, error } = await supabase
       .from("courses")
       .update({
-        ...d,
-        organization_id: org_id,
+        name: d.name,
+        description: d.description,
       })
       .eq("id", course_id)
       .select("*");

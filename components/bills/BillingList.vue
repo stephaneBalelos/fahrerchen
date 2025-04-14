@@ -1,8 +1,8 @@
 <template>
   <div>
     <UAccordion
-      v-if="bill_items"
-      :items="bill_items"
+      v-if="bill_items_grouped"
+      :items="bill_items_grouped"
       :ui="{ wrapper: 'flex flex-col w-full' }"
     >
       <template #default="{ item }">
@@ -34,10 +34,10 @@
         </UButton>
       </template>
       <template #item="{ item }">
-        <div class="italic text-gray-900 dark:text-white p-4">
-          <span class="font-semibold">{{ t('Details') }}</span>
+        <div class="italic text-gray-900 dark:text-white px-4">
+          <span class="font-semibold text-md">{{ t('Details') }}</span>
           <ul>
-            <BillAttendanceDetailsItem v-for="i in item.items" :key="i.id" :attendance-id="i.course_activity_attendance_id" :activity-price="i.price" />
+            <BillItemDetails v-for="i in item.items" :key="i.id" :bill-item="i" />
           </ul>
         </div>
       </template>
@@ -46,28 +46,29 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
-import BillAttendanceDetailsItem from "./BillAttendanceDetailsItem.vue";
+import BillItemDetails from "./BillItemDetails.vue";
+import type { CourseSubscriptionBillItemView } from "~/types/app.types";
 
 type Props = {
   billId: string;
 };
 
 const props = defineProps<Props>();
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
 const { t } = useI18n({ useScope: "local" });
 
 const {
-  data: bill_items,
+  data: bill_items_grouped,
 } = await useAsyncData(
   `${props.billId}_billing_list`,
   async () => {
+    // Bill items grouped by activity
     const { data, error } = await client
       .from("course_subscription_bill_items_view")
       .select("*")
-      .eq("bill_id", props.billId);
+      .eq("bill_id", props.billId).overrideTypes<CourseSubscriptionBillItemView[]>();
 
     if (error) {
       console.error(error);
@@ -77,12 +78,13 @@ const {
   },
   {
     transform: (data) => {
-      return data.map((item) => {
-        return {
-          label: item.activity_name ?? "",
-          total: item.total,
-          items: item.items,
+      return data.map((activity) => {
+        const group =  {
+          label: activity.activity_name,
+          total: activity.total,
+          items: activity.items,
         };
+        return group;
       });
     },
   }
