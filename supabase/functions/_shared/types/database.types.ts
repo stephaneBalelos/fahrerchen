@@ -37,6 +37,8 @@ export type Database = {
       course_activities: {
         Row: {
           activity_type: number
+          allow_requests: boolean
+          allow_self_registration: boolean
           course_id: string
           description: string
           id: string
@@ -48,6 +50,8 @@ export type Database = {
         }
         Insert: {
           activity_type: number
+          allow_requests?: boolean
+          allow_self_registration?: boolean
           course_id: string
           description: string
           id?: string
@@ -59,6 +63,8 @@ export type Database = {
         }
         Update: {
           activity_type?: number
+          allow_requests?: boolean
+          allow_self_registration?: boolean
           course_id?: string
           description?: string
           id?: string

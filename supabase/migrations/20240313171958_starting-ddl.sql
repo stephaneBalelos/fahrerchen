@@ -328,13 +328,15 @@ create table public.course_activities (
   required     integer default 0 not null check (required >= 0),
   price        numeric default 0 not null check (price >= 0),
   sorting_order  integer default 0 not null check (sorting_order >= 0),
+  allow_self_registration boolean default false not null,
+  allow_requests boolean default false not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_id, sorting_order)
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
 alter table public.course_activities enable row level security;
 revoke update on table public.course_activities from authenticated, anon;
-grant update (name, description, activity_type, required, price, sorting_order) on table public.course_activities to authenticated;
+grant update (name, description, activity_type, required, price, sorting_order, allow_self_registration, allow_requests) on table public.course_activities to authenticated;
 
 
 -- COURSE ACTIVITY SCHEDULES
