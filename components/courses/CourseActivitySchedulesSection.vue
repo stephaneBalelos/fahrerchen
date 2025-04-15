@@ -1,14 +1,14 @@
 <template>
   <UDashboardSection
-    :title="props.activityName"
-    :description="props.activityDescription"
+    :title="'Sdadas'"
+    :description="'dasdasd'"
     orientation="vertical"
     class="px-4 mt-6"
     :links="[
       {
         label: t('plan_new_schedule'),
         icon: 'i-heroicons-plus-20-solid',
-        click: () => openAddCourseScheduleForm(props.activityId),
+        click: () => {},
       },
     ]"
   >
@@ -18,17 +18,17 @@
           v-for="(s, index) in schedules"
           :key="index"
           class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-          @click.stop="() => openEditSchedule(s.id)"
+          @click.stop="() => openEditSchedule(s.id, s.activity_id)"
         >
           <div class="flex flex-1 gap-4">
             <UAvatar size="md" :icon="activityIcon" />
             <div class="flex items-start gap-2">
               <div class="text-sm flex-1">
                 <p class="text-gray-900 dark:text-white font-medium">
-                  {{ s.assigned_to ? s.assigned_to_fullname : t("unassigned") }}
+                  {{ s.activity_name }} {{ getLocalizedDateTimeString(new Date(s.start_at)) }}
                 </p>
                 <p class="text-gray-500 dark:text-gray-400 font-medium">
-                  {{ getLocalizedDateTimeString(new Date(s.start_at)) }}
+                  {{ s.assigned_to ? s.assigned_to_fullname : t("unassigned") }}
                 </p>
               </div>
               <UBadge v-if="s.status === 'COMPLETED'" color="green" variant="soft">
@@ -55,14 +55,11 @@
               </p>
             </div>
           </div>
-          <!-- <p class="text-gray-900 dark:text-white font-medium text-lg">
-            {{ s.attendees.length }}
-          </p> -->
         </div>
       </div>
       <div v-else>
         <UAlert
-          :title="t('no_schedules', { course_activity: props.activityName })"
+          :title="t('no_schedules')"
           :description="t('no_schedules_description')"
         />
       </div>
@@ -71,16 +68,13 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { ACTIVITY_ICONS } from "~/constants";
+import type { CourseActivityScheduleView } from "~/types/app.types";
 
 type Props = {
   courseId: string;
-  activityId: string;
-  activityName: string;
-  activityDescription: string;
   activityTypeId: number;
   orgId: string;
 };
@@ -107,25 +101,25 @@ const { t:g } = useI18n({
   useScope: "global",
 });
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
 const {
   data: schedules,
   error,
   refresh,
 } = await useAsyncData(
-  `course/${props.courseId}/activity/${props.activityId}/schedules`,
+  `course/${props.courseId}/activity/${props.activityTypeId}/schedules`,
   async () => {
     const { data, error } = await client
       .from("course_activity_schedules_view")
       .select("*")
-      .eq("activity_id", props.activityId)
+      .eq("activity_type", props.activityTypeId)
+      .eq("course_id", props.courseId)
       .eq("organization_id", props.orgId)
       .order("start_at", {
         ascending: false,
       })
-      .limit(10);
-
+      .limit(10).overrideTypes<CourseActivityScheduleView[]>();
     if (error) {
       throw error;
     }
@@ -137,10 +131,10 @@ if (error.value) {
   console.error(error);
 }
 
-const openEditSchedule = (schedule_id: string) => {
+const openEditSchedule = (schedule_id: string, activity_id: string) => {
   slideover.open(EditCourseActivitySchedule, {
     orgid: props.orgId,
-    activityid: props.activityId,
+    activityid: activity_id,
     scheduleId: schedule_id,
     courseid: props.courseId,
     "onActivity-saved": async () => {
@@ -154,7 +148,7 @@ const openEditSchedule = (schedule_id: string) => {
   });
 };
 
-function openAddCourseScheduleForm(
+function _openAddCourseScheduleForm(
   course_activity_id: string,
   activity_schedule_id?: string,
   date?: Date

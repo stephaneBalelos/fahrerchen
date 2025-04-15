@@ -10,13 +10,10 @@
             v-if="course_activities"
             :key="item.key"
             :course-id="props.courseid"
-            :activity-id="item.activity_id"
-            :activity-name="item.activity_name"
-            :activity-description="item.activity_description"
             :org-id="
               userOrganizationsStore.selectedOrganization.organization_id
             "
-            :activity-type-id="item.activity_type"
+            :activity-type-id="item.key"
           />
         </template>
       </UTabs>
@@ -49,9 +46,14 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t:g } = useI18n({
+  useScope: "global",
+});
+
 const props = useAttrs() as Props;
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
+const activity_types = await useCourseActivityTypes()
 
 const { data: course_activities } = useAsyncData(
   "course_activity_schedules",
@@ -75,16 +77,12 @@ const { data: course_activities } = useAsyncData(
 );
 
 const tabs = computed(() => {
-  if (!course_activities.value) {
+  if (!activity_types) {
     return [];
   }
-  return course_activities.value.map((activity) => ({
-    label: activity.name,
-    key: activity.id,
-    activity_id: activity.id,
-    activity_name: activity.name,
-    activity_description: activity.description,
-    activity_type: activity.activity_type,
+  return activity_types.map((activity_type) => ({
+    label: g(`courses.activities.types.${activity_type.type}`),
+    key: activity_type.id
   }));
 });
 </script>
