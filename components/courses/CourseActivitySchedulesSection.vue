@@ -1,17 +1,17 @@
 <template>
   <UDashboardSection
-    :title="'Sdadas'"
-    :description="'dasdasd'"
+    :title="t(`title`)"
     orientation="vertical"
     class="px-4 mt-6"
-    :links="[
-      {
-        label: t('plan_new_schedule'),
-        icon: 'i-heroicons-plus-20-solid',
-        click: () => {},
-      },
-    ]"
   >
+  <template #links>
+    <UDropdown v-if="addScheduleDropdownItems.length > 0" :items="[addScheduleDropdownItems]" :popper="{ placement: 'bottom-start' }">
+      <UButton color="white" :label="t('plan_new_schedule')" trailing-icon="i-heroicons-chevron-down-20-solid" />
+    </UDropdown>
+    <p v-else-if="activityType" class="text-gray-500 dark:text-gray-400">
+      {{ t(`no_activity_of_type_${activityType.type}`) }}
+    </p>
+  </template>
     <div>
       <div v-if="schedules && schedules.length > 0">
         <div
@@ -58,8 +58,9 @@
         </div>
       </div>
       <div v-else>
-        <UAlert
-          :title="t('no_schedules')"
+        <UAlert 
+          v-if="activityType"
+          :title="t('no_schedules', { course_type: g(`courses.activities.types.${activityType.type}`) })"
           :description="t('no_schedules_description')"
         />
       </div>
@@ -84,7 +85,33 @@ const slideover = useSlideover();
 const props = defineProps<Props>();
 
 const activity_types = await useCourseActivityTypes()
+const course_activities = await useCourseActivities(
+  props.orgId,
+  props.courseId
+);
 
+const addScheduleDropdownItems = computed(() => {
+  return course_activities
+  .filter((activity) => activity.activity_type === props.activityTypeId)
+  .map((activity) => ({
+    label: activity.name,
+    click: () => {
+      openAddCourseScheduleForm(
+        activity.id,
+        undefined,
+        new Date()
+      );
+    },
+  }));
+});
+
+const activityType = computed(() => {
+  const type = activity_types.find((t) => t.id === props.activityTypeId);
+  if (!type) {
+    return undefined
+  }
+  return type;
+});
 const activityIcon = computed(() => {
   const type = activity_types.find((t) => t.id === props.activityTypeId);
   if (!type) {
@@ -148,7 +175,7 @@ const openEditSchedule = (schedule_id: string, activity_id: string) => {
   });
 };
 
-function _openAddCourseScheduleForm(
+function openAddCourseScheduleForm(
   course_activity_id: string,
   activity_schedule_id?: string,
   date?: Date
@@ -173,18 +200,28 @@ function _openAddCourseScheduleForm(
 <i18n lang="json">
 {
   "de": {
+    "title": "Aktivitätstermine",
     "plan_new_schedule": "Neuen Termin planen",
     "attendees": "Teilnehmer:innen",
     "unassigned": "Nicht zugewiesen",
-    "no_schedules": "Keine Termine für {course_activity}",
-    "no_schedules_description": "Es wurden noch keine Termine für diese Aktivität geplant."
+    "no_schedules": "Keine Termine vom Typ {course_type}",
+    "no_schedules_description": "Es wurden noch keine Termine für diese Aktivität geplant.",
+    "no_activity_of_type_THEORY": "Keine Theorie-Aktivität Erstellt",
+    "no_activity_of_type_PRACTICE": "Keine praktische Aktivität Erstellt",
+    "no_activity_of_type_EXAM": "Keine Prüfungsaktivität Erstellt",
+    "no_activity_of_type_OTHER": "Keine andere Aktivität Erstellt",
   },
   "en": {
+    "title": "Activity schedules",
     "plan_new_schedule": "Plan new schedule",
     "attendees": "Attendees",
     "unassigned": "Unassigned",
-    "no_schedules": "No schedules for {course_activity}",
-    "no_schedules_description": "No schedules have been planned for this activity yet."
+    "no_schedules": "No schedules of type {course_type}",
+    "no_schedules_description": "No schedules have been planned for this activity yet.",
+    "no_activity_of_type_THEORY": "No theory activity created",
+    "no_activity_of_type_PRACTICE": "No practical activity created",
+    "no_activity_of_type_EXAM": "No exam activity created",
+    "no_activity_of_type_OTHER": "No other activity created",
   }
 }
 </i18n>
