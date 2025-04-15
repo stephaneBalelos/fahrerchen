@@ -602,6 +602,8 @@ select
   course_activities.name as activity_name,
   course_activities.description as activity_description,
   course_activities.activity_type,
+  course_activities.allow_self_registration as activity_allow_self_registration,
+  course_activities.allow_requests as activity_allow_requests,
   courses.name as course_name,
   courses.description as course_description,
   users.email as assigned_to_email,

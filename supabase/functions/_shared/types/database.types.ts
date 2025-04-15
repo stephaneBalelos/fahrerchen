@@ -1225,6 +1225,8 @@ export type Database = {
     Views: {
       course_activity_schedules_view: {
         Row: {
+          activity_allow_requests: boolean | null
+          activity_allow_self_registration: boolean | null
           activity_description: string | null
           activity_id: string | null
           activity_name: string | null

@@ -106,6 +106,8 @@ export type Database = MergeDeep<DatabaseGenerated, {
           activity_name: string,
           activity_description: string,
           activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"],
+          activity_allow_self_registration: boolean,
+          activity_allow_requests: boolean,
           course_name: string,
           course_description: string,
           assigned_to_email: string,
