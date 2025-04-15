@@ -30,6 +30,12 @@
     },
     "courses": {
         "activities": {
+            "types": {
+                "THEORY": "Theorie",
+                "PRACTICE": "Praxis",
+                "EXAM": "Prüfung",
+                "OTHER": "Sonstiges"
+            },
             "schedules": {
                 "schedules_status_PLANNED": "Geplant",
                 "schedules_status_CANCELED": "Abgesagt",

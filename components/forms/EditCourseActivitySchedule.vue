@@ -151,7 +151,7 @@
     </UTabs>
 
     <template #footer>
-      <UButton @click="form?.submit()">
+      <UButton v-if="data?.status === 'PLANNED'" @click="form?.submit()">
         {{ t("save") }}
       </UButton>
       <UButton

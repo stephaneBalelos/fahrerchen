@@ -1399,6 +1399,7 @@ export type Database = {
           organization_id: string | null
           student_id: string | null
           total_bills: number | null
+          total_costs: number | null
         }
         Relationships: [
           {

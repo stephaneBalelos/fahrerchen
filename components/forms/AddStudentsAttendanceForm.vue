@@ -82,6 +82,8 @@ const courseActivity = await useCourseActivities(
   props.courseActivitySchedule.activity_id
 );
 
+console.log(props.courseActivitySchedule)
+
 const { data: subscriptions } = await useAsyncData(
   `courses_${props.courseid}_subscriptions`,
   async () => {

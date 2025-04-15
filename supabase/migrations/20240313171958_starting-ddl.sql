@@ -623,11 +623,13 @@ select
   course_subscriptions.organization_id,
   courses.name as course_name,
   courses.description as course_description,
+  sum(course_subscription_bill_items.price) as total_costs,
   sum(course_subscription_bills.total) as total_bills
 from public.course_subscriptions
 inner join public.courses on course_subscriptions.course_id = courses.id
 left join public.course_subscription_bills on course_subscriptions.id = course_subscription_bills.course_subscription_id
 and course_subscription_bills.paid_at is not null
+left join public.course_subscription_bill_items on course_subscriptions.id = course_subscription_bill_items.course_subscription_id
 group by course_subscriptions.id, courses.name, courses.description;
 
 

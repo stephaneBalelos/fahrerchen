@@ -13,6 +13,26 @@
               )
             }}</UBadge
           >
+          <UBadge
+            v-else-if="props.schedule.status === 'CANCELED'"
+            color="red"
+            variant="soft"
+            >{{
+              g(
+                `courses.activities.schedules.schedules_status_${props.schedule.status}`
+              )
+            }}</UBadge
+          >
+          <UBadge
+            v-else-if="props.schedule.status === 'COMPLETED'"
+            color="green"
+            variant="soft"
+            >{{
+              g(
+                `courses.activities.schedules.schedules_status_${props.schedule.status}`
+              )
+            }}</UBadge
+          >
           <span
             :class="`text-sm ${
               isFuture(new Date(props.schedule.start_at))
@@ -45,32 +65,59 @@
       <div class="flex flex-col gap-2">
         <p class="text-sm text-gray-500">{{ t("assigned_to") }}</p>
         <FormsInputsUserSelect
+          v-if="props.schedule.status === 'PLANNED'"
           v-model="assigned_to"
           :orgid="props.schedule.organization_id"
         />
+        <div v-else class="flex">
+          <div v-if="props.schedule.assigned_to" class="flex gap-2">
+            <UAvatar
+              :src="assigned_to"
+              :alt="`${props.schedule.assigned_to_firstname} ${props.schedule.assigned_to_lastname}`"
+              size="sm"
+            />
+            <div class="flex flex-col">
+              <p class="text-sm font-semibold">
+                {{ props.schedule.assigned_to_firstname }}
+                {{ props.schedule.assigned_to_lastname }}
+              </p>
+              <p class="text-sm text-gray-500">
+                {{ props.schedule.assigned_to_email }}
+              </p>
+            </div>
+          </div>
+          <div v-else>
+            {{ t("not_assigned") }}
+          </div>
+        </div>
       </div>
-
       <div class="flex flex-col gap-2">
         <p class="text-sm text-gray-500">{{ t("attendees") }}</p>
-        <UAvatarGroup v-if="attendees && attendees?.length > 0" size="sm" :max="5">
+        <UAvatarGroup
+          v-if="attendees && attendees?.length > 0"
+          size="sm"
+          :max="5"
+        >
           <UAvatar
             v-for="attendee in attendees"
             :key="attendee.id"
-            :src="attendee.subscription?.students?.id"
-            :alt="`${attendee.subscription?.students?.firstname} ${attendee.subscription?.students?.lastname}`"
+            :src="undefined"
+            :alt="`${attendee.student_firstname} ${attendee.student_lastname}`"
           />
         </UAvatarGroup>
         <div v-else class="">
-            {{ t("no_attendees") }}
+          {{ t("no_attendees") }}
         </div>
-
       </div>
     </div>
   </UDashboardCard>
 </template>
 
 <script setup lang="ts">
-import type { Database, CourseActivityScheduleView } from "~/types/app.types";
+import type {
+  CourseSubscriptionView,
+  CourseActivityScheduleView,
+} from "~/types/app.types";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { isFuture } from "date-fns";
@@ -91,28 +138,28 @@ const { t: g } = useI18n({
 const $emits = defineEmits(["update"]);
 
 const props = defineProps<ScheduleItemProps>();
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const slideover = useSlideover();
 const modal = useModal();
 const courseActivitySchedules = useCourseActivitySchedules();
 
-
-const {
-  data: attendees
-} = useAsyncData(`schedule/${props.schedule.id}/attendees`, async () => {
-  const { data, error } = await client
-    .from("course_activity_attendances")
-    .select("*, subscription:course_subscriptions(*, students(*))")
-    .eq("activity_schedule_id", props.schedule.id);
-  if (error) {
-    console.error(error);
-    throw error;
+const { data: attendees } = useAsyncData(
+  `schedule/${props.schedule.id}/attendees`,
+  async () => {
+    const { data, error } = await client
+      .from("course_subscriptions_view")
+      .select("*")
+      .in("id", props.schedule.attendees)
+      .overrideTypes<CourseSubscriptionView[]>();
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    return data;
   }
-  return data;
-});
+);
 
 const assigned_to = ref(props.schedule.assigned_to);
-
 
 const openEditSchedule = () => {
   slideover.open(EditCourseActivitySchedule, {
@@ -122,7 +169,6 @@ const openEditSchedule = () => {
     courseid: props.schedule.course_id,
   });
 };
-
 
 watch(assigned_to, async (value) => {
   try {
@@ -170,6 +216,7 @@ async function deleteSchedule(id: string) {
     "edit_attendees": "Teilnehmer bearbeiten",
     "assigned_to": "Zugewiesen an",
     "attendees": "Teilnehmer",
+    "not_assigned": "Nicht zugewiesen",
     "no_attendees": "Keine Teilnehmer"
   },
   "en": {
@@ -177,8 +224,8 @@ async function deleteSchedule(id: string) {
     "edit_attendees": "Edit attendees",
     "assigned_to": "Assigned to",
     "attendees": "Attendees",
+    "not_assigned": "Not assigned",
     "no_attendees": "No attendees"
-
   }
 }
 </i18n>

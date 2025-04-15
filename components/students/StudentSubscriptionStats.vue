@@ -11,11 +11,11 @@
             </div>
             <div class="flex-1 px-4">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('costs') }}</div>
-                <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.costs) }}</div>
+                <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.total_costs) }}</div>
             </div>
             <div class="flex-1 px-4">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('saldo')}}</div>
-                <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.total_bills - subscription.costs) }}</div>
+                <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.total_bills - subscription.total_costs) }}</div>
             </div>
         </div>
         <div v-else-if="status == 'pending'" class="flex divide-x">
@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from '~/types/app.types';
+import type { CourseSubscriptionStatsView } from '~/types/app.types';
 import { formatCurrency } from '~/utils/formatters';
 
 
@@ -53,10 +53,10 @@ const { t } = useI18n({
 })
 
 const props = defineProps<Props>()
-const client = useSupabaseClient<Database>()
+const client = useSupabaseClient()
 
 const { data: subscription, status } = useAsyncData(async () => {
-    const { data, error } = await client.from("course_subscriptions_stats_view").select().eq("id", props.subscriptionId).single()
+    const { data, error } = await client.from("course_subscriptions_stats_view").select().eq("id", props.subscriptionId).single().overrideTypes<CourseSubscriptionStatsView>()
     
     if (error) {
         throw error

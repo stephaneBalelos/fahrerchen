@@ -173,31 +173,31 @@ INSERT INTO public.course_activity_types (type) VALUES
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('users_avatars', 'users_avatars', true, '{image/*}', 5 * 1024 * 1024); -- 5MB
+  ('users_avatars', 'users_avatars', true, '{image/*}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
 
     -- Student Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('student_documents', 'student_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024); -- 5MB
+  ('student_documents', 'student_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
 
     -- course Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('course_documents', 'course_documents', false, '{image/*, application/pdf, video/*}', 20 * 1024 * 1024); -- 20MB
+  ('course_documents', 'course_documents', false, '{image/*, application/pdf, video/*}', 20 * 1024 * 1024) on conflict (id) do nothing; -- 20MB
 
     -- Course Subscription Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('course_subscription_documents', 'course_subscription_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024); -- 5MB
+  ('course_subscription_documents', 'course_subscription_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
 
     -- Organisations Profile Pictures
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('organizations_avatars', 'organizations_avatars', true, '{image/*}', 1 * 1024 * 1024); -- 1MB
+  ('organizations_avatars', 'organizations_avatars', true, '{image/*}', 1 * 1024 * 1024) on conflict (id) do nothing; -- 1MB
 
 
 
