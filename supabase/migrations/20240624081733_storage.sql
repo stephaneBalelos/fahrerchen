@@ -186,5 +186,8 @@ when (old.bucket_id = 'course_subscription_documents')
 execute procedure public.handle_course_subscription_documents();
 
 
+-- Delete all buckects before seeding
+-- drop bucket if exists users_avatars;
+delete from storage.buckets;
 
 
