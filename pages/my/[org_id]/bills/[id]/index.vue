@@ -58,7 +58,7 @@
         </UDashboardPanel>
         <UDashboardPanel grow>
           <div class="h-full">
-            <div class="absolute inset-0 overflow-y-auto">
+            <div class="absolute inset-0 overflow-y-auto pb-24">
               <UDashboardSection
                 :title="`${bill.subscription.student?.firstname} ${bill.subscription.student?.lastname}`"
                 icon="i-heroicons-user"
