@@ -104,6 +104,20 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities.delete');
 
+    -- Course Costs
+insert into public.role_permissions (role, permission) values ('owner', 'course_costs.read');
+insert into public.role_permissions (role, permission) values ('manager', 'course_costs.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_costs.read');
+insert into public.role_permissions (role, permission) values ('student', 'course_costs.read');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_costs.create');
+insert into public.role_permissions (role, permission) values ('manager', 'course_costs.create');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_costs.update');
+insert into public.role_permissions (role, permission) values ('manager', 'course_costs.update');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_costs.delete');
+
     -- Course Activity Schedules
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.read');

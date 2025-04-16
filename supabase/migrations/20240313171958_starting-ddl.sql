@@ -51,6 +51,10 @@ create type public.app_permission as enum (
   'course_activities.create',
   'course_activities.update',
   'course_activities.delete',
+  'course_costs.read',
+  'course_costs.create',
+  'course_costs.update',
+  'course_costs.delete',
   'course_activity_schedules.read',
   'course_activity_schedules.create',
   'course_activity_schedules.update',
@@ -317,6 +321,19 @@ alter table public.course_subscription_documents enable row level security;
 revoke update on table public.course_subscription_documents from authenticated, anon;
 grant update (path) on table public.course_subscription_documents to authenticated;
 
+-- COURSE COSTS
+create table public.course_costs (
+  id            uuid default uuid_generate_v4() primary key,
+  course_id    uuid references public.courses on delete cascade not null,
+  name          text not null,
+  description   text not null,
+  price        numeric default 0 not null check (price >= 0),
+  organization_id    uuid references public.organizations on delete cascade not null
+);
+comment on table public.course_costs is 'COURSE COSTS.';
+alter table public.course_costs enable row level security;
+revoke update on table public.course_costs from authenticated, anon;
+grant update (name, description, price) on table public.course_costs to authenticated;
 
 -- COURSE ACTIVITIES
 create table public.course_activities (
@@ -383,6 +400,7 @@ create table public.course_subscription_bill_items (
   course_activity_id    uuid references public.course_activities on delete set null,
   course_activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  title        text not null,
   description   text not null,
   price       numeric default 0 not null check (price >= 0),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,

@@ -192,6 +192,55 @@ export type Database = {
         }
         Relationships: []
       }
+      course_costs: {
+        Row: {
+          course_id: string
+          description: string
+          id: string
+          name: string
+          organization_id: string
+          price: number
+        }
+        Insert: {
+          course_id: string
+          description: string
+          id?: string
+          name: string
+          organization_id: string
+          price?: number
+        }
+        Update: {
+          course_id?: string
+          description?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_costs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_documents: {
         Row: {
           course_id: string
@@ -376,6 +425,7 @@ export type Database = {
           inserted_at: string
           organization_id: string
           price: number
+          title: string
         }
         Insert: {
           bill_id?: string | null
@@ -387,6 +437,7 @@ export type Database = {
           inserted_at?: string
           organization_id: string
           price?: number
+          title: string
         }
         Update: {
           bill_id?: string | null
@@ -398,6 +449,7 @@ export type Database = {
           inserted_at?: string
           organization_id?: string
           price?: number
+          title?: string
         }
         Relationships: [
           {
@@ -1766,6 +1818,10 @@ export type Database = {
         | "course_activities.create"
         | "course_activities.update"
         | "course_activities.delete"
+        | "course_costs.read"
+        | "course_costs.create"
+        | "course_costs.update"
+        | "course_costs.delete"
         | "course_activity_schedules.read"
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
@@ -2283,6 +2339,10 @@ export const Constants = {
         "course_activities.create",
         "course_activities.update",
         "course_activities.delete",
+        "course_costs.read",
+        "course_costs.create",
+        "course_costs.update",
+        "course_costs.delete",
         "course_activity_schedules.read",
         "course_activity_schedules.create",
         "course_activity_schedules.update",
