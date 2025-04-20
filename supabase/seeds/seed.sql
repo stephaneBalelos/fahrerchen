@@ -118,6 +118,22 @@ insert into public.role_permissions (role, permission) values ('manager', 'cours
 
 insert into public.role_permissions (role, permission) values ('owner', 'course_costs.delete');
 
+    -- Course Activity Attendances
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.read');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules_attendances.read');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules_attendances.read');
+insert into public.role_permissions (role, permission) values ('student', 'course_activity_schedules_attendances.read');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.create');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules_attendances.create');
+insert into public.role_permissions (role, permission) values ('teacher', 'course_activity_schedules_attendances.create');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.update');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules_attendances.update');
+
+insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.delete');
+insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules_attendances.delete');
+
     -- Course Activity Schedules
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read');
 insert into public.role_permissions (role, permission) values ('manager', 'course_activity_schedules.read');

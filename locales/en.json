@@ -142,6 +142,16 @@
                 "description": "Driver's License Class C - Truck"
             }
         },
+        "course_costs": {
+            "base_cost": {
+                "name": "Base Costs",
+                "description": "Base costs for the course"
+            },
+            "teaching_resources": {
+                "name": "Teaching Resources",
+                "description": "Teaching resources for the course"
+            }
+        },
         "activity": {
             "theory": {
                 "name": "Theory Lesson",
