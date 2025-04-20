@@ -39,12 +39,14 @@
         variant="soft"
         :label="t('canceled')"
       />
-      <UBadge
+      <UButton
         v-if="scheduleAttendance"
         color="green"
         variant="soft"
         :label="t('attendance_confirmed')"
+        @click.stop="openAttendanceConfirmation"
       />
+
     </p>
   </div>
 </template>
@@ -52,6 +54,7 @@
 <script setup lang="ts">
 import type { AppCourseActivitySchedule } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
+import AttendanceConfirmationSlideover from "./AttendanceConfirmationSlideover.vue";
 
 type Props = {
   subscriptionId: string;
@@ -65,6 +68,8 @@ const { t } = useI18n({
   useScope: "local",
 });
 const client = useSupabaseClient();
+const slideover = useSlideover();
+
 
 const courseActivity = await useCourseActivities(
   props.activitySchedule.organization_id,
@@ -89,6 +94,19 @@ const { data: scheduleAttendance } = useAsyncData(
     return data ? data[0] : null;
   }
 );
+
+function openAttendanceConfirmation() {
+  if (!scheduleAttendance.value) {
+    return;
+  }
+  slideover.open(AttendanceConfirmationSlideover, {
+    attendanceId: scheduleAttendance.value.id,
+    onDelete: () => {
+      slideover.close();
+      console.log("Attendance deleted");
+    },
+  })
+}
 </script>
 
 <style scoped></style>

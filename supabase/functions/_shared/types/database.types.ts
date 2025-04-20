@@ -184,7 +184,7 @@ export type Database = {
           activity_name: string
           activity_price: number
           activity_start_at: string
-          activity_type: Database["public"]["Enums"]["activity_types"]
+          activity_type: number
           course_activity_id: string | null
           course_activity_schedule_id: string | null
           course_subscription_id: string
@@ -202,7 +202,7 @@ export type Database = {
           activity_name: string
           activity_price?: number
           activity_start_at: string
-          activity_type: Database["public"]["Enums"]["activity_types"]
+          activity_type: number
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
           course_subscription_id: string
@@ -220,7 +220,7 @@ export type Database = {
           activity_name?: string
           activity_price?: number
           activity_start_at?: string
-          activity_type?: Database["public"]["Enums"]["activity_types"]
+          activity_type?: number
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
           course_subscription_id?: string
@@ -273,6 +273,13 @@ export type Database = {
             columns: ["course_subscription_id"]
             isOneToOne: false
             referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_activity_type_fkey"
+            columns: ["activity_type"]
+            isOneToOne: false
+            referencedRelation: "course_activity_types"
             referencedColumns: ["id"]
           },
           {
@@ -1468,7 +1475,7 @@ export type Database = {
           activity_end_at: string | null
           activity_name: string | null
           activity_start_at: string | null
-          activity_type: Database["public"]["Enums"]["activity_types"] | null
+          activity_type: number | null
           bill_id: string | null
           cost_description: string | null
           cost_name: string | null
@@ -1485,6 +1492,13 @@ export type Database = {
             columns: ["activity_assigned_to_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_activity_type_fkey"
+            columns: ["activity_type"]
+            isOneToOne: false
+            referencedRelation: "course_activity_types"
             referencedColumns: ["id"]
           },
           {
@@ -1855,17 +1869,11 @@ export type Database = {
     }
     Functions: {
       add_attendee_to_schedule: {
-        Args: {
-          course_schedule_id: string
-          course_subscription_id: string
-        }
+        Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
       }
       are_users_in_same_organization: {
-        Args: {
-          user_id_1: string
-          user_id_2: string
-        }
+        Args: { user_id_1: string; user_id_2: string }
         Returns: boolean
       }
       authorize: {
@@ -1876,15 +1884,11 @@ export type Database = {
         Returns: boolean
       }
       can_update_bill: {
-        Args: {
-          bill_id: string
-        }
+        Args: { bill_id: string }
         Returns: boolean
       }
       generate_bill_for_subscription: {
-        Args: {
-          subscription_id: string
-        }
+        Args: { subscription_id: string }
         Returns: string
       }
       generate_bill_for_subscriptions: {
@@ -1892,35 +1896,23 @@ export type Database = {
         Returns: undefined
       }
       is_main_owner: {
-        Args: {
-          org_id: string
-        }
+        Args: { org_id: string }
         Returns: boolean
       }
       is_schedule_active: {
-        Args: {
-          schedule_id: string
-        }
+        Args: { schedule_id: string }
         Returns: boolean
       }
       is_subscription_active: {
-        Args: {
-          subscription_id: string
-        }
+        Args: { subscription_id: string }
         Returns: boolean
       }
       is_user_targeted_by_notification: {
-        Args: {
-          notification_id: string
-          org_id: string
-        }
+        Args: { notification_id: string; org_id: string }
         Returns: boolean
       }
       remove_attendee_from_schedule: {
-        Args: {
-          course_schedule_id: string
-          course_subscription_id: string
-        }
+        Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
       }
     }
@@ -2241,30 +2233,19 @@ export type Database = {
     }
     Functions: {
       can_insert_object: {
-        Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
-        }
+        Args: { bucketid: string; name: string; owner: string; metadata: Json }
         Returns: undefined
       }
       extension: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       filename: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       foldername: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string[]
       }
       get_size_by_bucket: {
