@@ -323,7 +323,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Generate Bills
-        // await client.rpc('generate_bill_for_subscriptions')
+        await client.rpc('generate_bill_for_subscriptions')
 
         return {
             status: 200,

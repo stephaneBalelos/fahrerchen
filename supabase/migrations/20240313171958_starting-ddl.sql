@@ -1171,19 +1171,6 @@ begin
     values (course_cost.id, new.id, course_cost.name, course_cost.description, course_cost.price, org_id);
   end loop;
 
-  -- if the bill should be created, create a new bill and insert default items based on the course activities and required count
-  if create_bill then
-    -- loop over the course activities and insert the required number of items
-    for activity in (select * from public.course_activities where course_id = new.course_id) loop
-      if activity.required > 0 then
-        for i in 1..activity.required loop
-          insert into public.course_subscription_bill_items (course_subscription_id, title, description, price, organization_id)
-          values (new.id, activity.name, activity.description, activity.price, org_id);
-        end loop;
-      end if;
-    end loop;
-  end if;
-
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public, private;

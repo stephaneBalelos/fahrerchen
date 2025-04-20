@@ -115,7 +115,7 @@ const groups = computed(() => {
       },
       "OTHER": {
         "name": "Other",
-        "description": "Other training"
+        "description": "Other training "
       }
     }
   }
