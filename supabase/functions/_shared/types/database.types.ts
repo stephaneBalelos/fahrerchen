@@ -1473,6 +1473,7 @@ export type Database = {
           activity_assigned_to_lastname: string | null
           activity_description: string | null
           activity_end_at: string | null
+          activity_id: string | null
           activity_name: string | null
           activity_start_at: string | null
           activity_type: number | null
@@ -1482,6 +1483,7 @@ export type Database = {
           cost_price: number | null
           course_activity_attendance_id: string | null
           course_cost_id: string | null
+          id: string | null
           item_description: string | null
           item_price: number | null
           item_title: string | null
@@ -1499,6 +1501,13 @@ export type Database = {
             columns: ["activity_type"]
             isOneToOne: false
             referencedRelation: "course_activity_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_course_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
             referencedColumns: ["id"]
           },
           {

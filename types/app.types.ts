@@ -133,11 +133,26 @@ export type Database = MergeDeep<DatabaseGenerated, {
       }
       course_subscription_bill_items_view: {
         Row: {
+          id: string,
+          bill_id: string,
+          course_cost_id: string,
+          course_activity_attendance_id: string,
+          item_title: string,
+          item_description: string,
+          item_price: number,
+          cost_name: string,
+          cost_description: string,
+          cost_price: number,
+          activity_id: string,
           activity_name: string,
           activity_description: string,
-          bill_id: string,
-          items: AppCourseSubscriptionBillItem[]
-          total: number
+          activity_type: number,
+          activity_start_at: string,
+          activity_end_at: string,
+          activity_assigned_to_id: string,
+          activity_assigned_to_email: string,
+          activity_assigned_to_firstname: string,
+          activity_assigned_to_lastname: string,
         }
       }
       user_roles_view: {

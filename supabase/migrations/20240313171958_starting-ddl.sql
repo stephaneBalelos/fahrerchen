@@ -576,6 +576,7 @@ inner join public.students on course_subscriptions.student_id = students.id;
 -- Bill Items View grouped by course_activity_id
 create or replace view public.course_subscription_bill_items_view as
 select
+  course_subscription_bill_items.id,
   course_subscription_bill_items.bill_id,
   course_subscription_bill_items.course_cost_id,
   course_subscription_bill_items.course_activity_attendance_id,
@@ -585,6 +586,7 @@ select
   course_costs.name as cost_name,
   course_costs.description as cost_description,
   course_costs.price as cost_price,
+  course_activity_schedules_attendances.course_activity_id as activity_id,
   course_activity_schedules_attendances.activity_name as activity_name,
   course_activity_schedules_attendances.activity_description as activity_description,
   course_activity_schedules_attendances.activity_type as activity_type,
@@ -1307,25 +1309,38 @@ create trigger on_course_activity_schedule_updated
 -- handle insert course activity attendance
 create or replace function public.handle_insert_course_activity_attendance()
 returns trigger as $$
+declare
+  bill_item_id uuid;
+  bill_item_bill_id uuid;
 begin
-  -- create a new bill item for the attendance
-  insert into public.course_subscription_bill_items(
-    course_activity_attendance_id,
-    course_subscription_id,
-    title,
-    description,
-    price,
-    organization_id
-  )
-  values (
-    new.id,
-    new.course_subscription_id,
-    new.activity_name,
-    new.activity_description,
-    new.activity_price,
-    new.organization_id
-  );
 
+  -- find a bill item that has no attendance or cost
+  select id, bill_id into bill_item_id, bill_item_bill_id from public.course_subscription_bill_items where course_activity_attendance_id is null and course_subscription_id = new.course_subscription_id and course_cost_id is null limit 1;
+
+  -- if bill item is found, update it with the attendance id
+  if bill_item_id is not null then
+    update public.course_subscription_bill_items
+    set course_activity_attendance_id = new.id
+    where id = bill_item_id;
+  else
+    -- if no bill item is found, create a new one
+    insert into public.course_subscription_bill_items(
+      course_activity_attendance_id,
+      course_subscription_id,
+      title,
+      description,
+      price,
+      organization_id
+    )
+    values (
+      new.id,
+      new.course_subscription_id,
+      new.activity_name,
+      new.activity_description,
+      new.activity_price,
+      new.organization_id
+    );
+  end if;
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
