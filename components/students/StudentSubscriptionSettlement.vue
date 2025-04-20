@@ -26,7 +26,7 @@
         <UDashboardCard v-for="bill_item in bill_items" :key="bill_item.id">
           <template #title>
             <div class="flex gap-2 items-center">
-              <p class="font-semibold">{{ bill_item.description }}</p>
+              <p class="font-semibold">{{ bill_item.title }}</p>
             </div>
           </template>
           <template #description>
@@ -38,13 +38,16 @@
               }}
             </p>
             <p 
-            v-if="bill_item.schedule"
+            v-if="bill_item.attendance"
             class="text-sm text-gray-500 dark:text-gray-400" >
               {{
                 t("attended_at", {
-                  date: formatDateTime(bill_item.schedule.start_at),
+                  date: formatDateTime(bill_item.attendance.activity_start_at),
                 })
               }}
+            </p>
+            <p v-if="bill_item.cost" class="text-sm text-gray-500 dark:text-gray-400">
+              {{ bill_item.cost.description }}
             </p>
           </template>
           <template #links>
@@ -103,7 +106,7 @@ const {
 } = useAsyncData(async () => {
   const { data, error } = await client
     .from("course_subscription_bill_items")
-    .select("*, schedule:course_activity_schedule_id(*)")
+    .select("*, attendance:course_activity_schedules_attendances(*), cost:course_costs(*)")
     .eq("course_subscription_id", props.subscriptionId)
     .is("bill_id", null)
     .order("inserted_at", { ascending: true });
@@ -126,8 +129,7 @@ async function generateBill() {
   try {
     isGeneratingBill.value = true;
     await client.rpc("generate_bill_for_subscription", {
-      subscription_id: props.subscriptionId,
-      organization_id: props.orgId,
+      subscription_id: props.subscriptionId
     });
     toast.add({
       title: t("bill_generated"),
@@ -163,7 +165,11 @@ async function generateBill() {
     "settlement_total": "Abrechnungssumme",
     "create_bill": "Rechnung jetzt erstellen",
     "no_bills_items": "Keine Rechnungspositionen",
-    "no_bills_items_description": "Es wurden noch keine Rechnungspositionen für diesen Abrechnungszeitraum erstellt."
+    "no_bills_items_description": "Es wurden noch keine Rechnungspositionen für diesen Abrechnungszeitraum erstellt.",
+    "bill_generated": "Rechnung erstellt",
+    "bill_generated_description": "Die Rechnung wurde erfolgreich erstellt.",
+    "bill_not_generated": "Rechnung nicht erstellt",
+    "bill_not_generated_description": "Die Rechnung konnte nicht erstellt werden. Kontaktiere bitte den Support."
   },
   "en": {
     "settlements": "Current settlement period",
@@ -174,7 +180,11 @@ async function generateBill() {
     "settlement_total": "Settlement total",
     "create_bill": "Create bill now",
     "no_bills_items": "No bill items",
-    "no_bills_items_description": "No bill items have been created for this settlement period yet."
+    "no_bills_items_description": "No bill items have been created for this settlement period yet.",
+    "bill_generated": "Bill generated",
+    "bill_generated_description": "The bill has been successfully generated.",
+    "bill_not_generated": "Bill not generated",
+    "bill_not_generated_description": "The bill could not be generated. Please contact support."
   }
 }
 </i18n>
