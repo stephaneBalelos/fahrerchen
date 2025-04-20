@@ -6,7 +6,20 @@
     @change="handleChange"
   >
     <template #label>
-      <slot />
+      <div class="flex justify-between">
+        <slot />
+        <div v-if="attendance && props.status === 'COMPLETED'">
+          <UBadge
+            color="green"
+            size="xs"
+            class="ml-2"
+            variant="soft"
+          >
+            {{ t('attendance_is_confirmed') }}
+          </UBadge>
+
+        </div>
+      </div>
     </template>
   </UCheckbox>
 </template>
@@ -36,6 +49,19 @@ const client = useSupabaseClient();
 
 const isAttending = computed(() => {
   return props.attendees.includes(props.subscriptionId);
+});
+
+const { data: attendance } = useAsyncData(`course_activity_schedule_attendance_${props.scheduleId}_${props.subscriptionId}`, async () => {
+  const { data, error } = await client
+    .from('course_activity_schedules_attendances')
+    .select('*')
+    .eq('course_activity_schedule_id', props.scheduleId)
+    .eq('course_subscription_id', props.subscriptionId)
+
+  if (error) {
+    return null;
+  }
+  return data[0];
 });
 
 async function handleChange($event: boolean) {
@@ -100,3 +126,32 @@ async function removeStudentSubscriptionFromSchedule() {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "title": "Teilnehmer hinzufügen oder entfernen",
+    "attendance_is_confirmed": "Teilnahme bestätigt",
+    "success": {
+      "student_added_to_schedule": "Teilnehmer erfolgreich hinzugefügt",
+      "student_removed_from_schedule": "Teilnehmer erfolgreich entfernt"
+    },
+    "errors": {
+      "failed_to_add_student": "Fehler beim Hinzufügen des Teilnehmers",
+      "failed_to_remove_student": "Fehler beim Entfernen des Teilnehmers"
+    }
+  },
+  "en": {
+    "title": "Add or remove participants",
+    "attendance_is_confirmed": "Attendance confirmed",
+    "success": {
+      "student_added_to_schedule": "Participant successfully added",
+      "student_removed_from_schedule": "Participant successfully removed"
+    },
+    "errors": {
+      "failed_to_add_student": "Error adding participant",
+      "failed_to_remove_student": "Error removing participant"
+    }
+  }
+}
+</i18n>
