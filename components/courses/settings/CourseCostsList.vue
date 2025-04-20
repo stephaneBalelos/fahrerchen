@@ -115,6 +115,7 @@ const openEditCourseCostForm = (id?: string) => {
 <i18n lang="json">
 { 
     "de": {
+        "edit": "Bearbeiten",
         "course_costs": "Kurskosten",
         "set_course_costs": "Setzen Sie die Kurskosten",
         "add_cost": "Kosten hinzufügen",
@@ -126,6 +127,7 @@ const openEditCourseCostForm = (id?: string) => {
         "cost_deleted_description": "Die Kosten wurden erfolgreich gelöscht."
     },
     "en": {
+        "edit": "Edit",
         "course_costs": "Course Costs",
         "set_course_costs": "Set the course costs",
         "add_cost": "Add cost",

@@ -8,6 +8,11 @@
       :courseid="props.courseid"
     />
 
+    <CourseCostsList
+      :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+      :courseid="props.courseid"
+    />
+
     <CourseActivitiesList
       :orgid="userOrganizationsStore.selectedOrganization.organization_id"
       :courseid="props.courseid"
@@ -22,6 +27,7 @@
 
 <script setup lang="ts">
 import CourseActivitiesList from "~/components/courses/settings/CourseActivitiesList.vue";
+import CourseCostsList from "~/components/courses/settings/CourseCostsList.vue";
 import CourseRequirementsList from "~/components/courses/settings/CourseRequiredDocumentsList.vue";
 import EditCourseSection from "~/components/courses/settings/EditCourseSection.vue";
 
