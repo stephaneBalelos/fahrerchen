@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            --body-color: 51, 51, 51;
+            --label-color: 102, 102, 102;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-family: "Space Grotesk", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            position: relative;
+        }
+
+        p {
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 400;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+        }
+
+        address {
+            font-size: 12px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            font-size: 24px;
+        }
+        h2 {
+            font-size: 20px;
+        }
+        h3 {
+            font-size: 16px;
+        }
+        h4 {
+            font-size: 14px;
+        }
+        h5 {
+            font-size: 12px;
+        }
+
+        .container {
+            padding: 1cm;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .bordered {
+            border: 3px solid rgba(var(--body-color), 1);
+            padding: 5px;
+        }
+
+        .col-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+
+        .col-2 .label-group {
+            margin-bottom: 0;
+        }
+        
+        .border-bottom {
+            border-bottom: 1px solid rgba(var(--body-color), 1);
+        }
+
+        .label {
+            margin-bottom: 5px;
+            font-size: 10px;
+            font-weight: 300;
+        }
+
+        .label-group {
+            margin-bottom: 8px;
+        }
+
+        .label-group .label {
+            margin-bottom: 2px;
+            font-size: 10px;
+        }
+
+        .container.bottom {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        table {
+            margin: 0;
+        }
+
+        th,
+        td {
+            display: table-cell;
+            border: 1px solid rgba(var(--body-color), 1);
+            font-size: 10px;
+            height: 16px;
+            box-sizing: border-box;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 32px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="">
+            <h1>Ausbildungsnachweis für Klasse B</h1>
+            <p>gemäß $ 18 Abs 1 Fahrlehrergesetz</p>
+        </div>
+        <div class="bordered">
+            <p class="label">Fahrschule</p>
+            <h3>Stephanes Fahrschule</h3>
+            <address>
+                18452 Daugherty Alley Apt. 725 <br>
+                29894 <br>
+            </address>
+        </div>
+        <div class="bordered col-2">
+            <div class="label-group">
+                <p class="label">Nachnamen:</p>
+                <h3>Jast</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Vorname:</p>
+                <h3>Jude</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Geburtsdatum:</p>
+                <h3>26.02.2006</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Beantragter Führerschein:</p>
+                <h3>B</h3>
+            </div>
+            <div class="label-group" style="grid-column: 1 /span 2;">
+                <p class="label">Anschrift:</p>
+                <h3>1113 Boehm Spurs, 01299-3832 West Nelle</h3>
+            </div>
+        </div>
+
+        <div class="bordered col-2">
+            <div class="label-group">
+                <p class="label">Grundkosten</p>
+                <h3>100,- €</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Lehrmaterial</p>
+                <h3>50,- €</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Theorieunterricht</p>
+                <h3>45,- €</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Fahrstunde</p>
+                <h3>55,- €</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Theorieprüfung</p>
+                <h3>30,- €</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Praktische Prüfung</p>
+                <h3>60,- €</h3>
+            </div>
+        </div>
+
+        <table class="bordered">
+            <thead>
+                <tr>
+                    <th colspan="4">Theoretischer Unterricht</th>
+                </tr>
+                <tr>
+                    <th>Datum</th>
+                    <th>Thema</th>
+                    <th>Fahrlehrer</th>
+                    <th>Minute</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>18.03.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>180</td>
+                </tr>
+                <tr>
+                    <td>11.03.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>60</td>
+                </tr>
+                <tr>
+                    <td>27.02.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>180</td>
+                </tr>
+                <tr>
+                    <td>25.02.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>120</td>
+                </tr>
+                <tr>
+                    <td>06.03.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>180</td>
+                </tr>
+                <tr>
+                    <td>10.04.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>120</td>
+                </tr>
+                <tr>
+                    <td>01.04.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>60</td>
+                </tr>
+                <tr>
+                    <td>24.04.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>180</td>
+                </tr>
+                <tr>
+                    <td>04.03.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>180</td>
+                </tr>
+                <tr>
+                    <td>03.04.2025</td>
+                    <td>Theorieunterricht</td>
+                    <td></td>
+                    <td>60</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="bordered">
+            <thead>
+                <tr>
+                    <th colspan="5">Praktischer Unterricht</th>
+                </tr>
+                <tr>
+                    <th>Datum</th>
+                    <th>Ausbildungsart</th>
+                    <th>Fahrlehrer</th>
+                    <th>Minute</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>22.04.2025</td>
+                    <td>Fahrstunde</td>
+                    <td></td>
+                    <td>120</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="bordered">
+            <thead>
+                <tr>
+                    <th colspan="4">Theoretische Prüfung</th>
+                </tr>
+                <tr>
+                    <th>Datum</th>
+                    <th>Bestanden</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+            </tbody>
+        </table>
+        <table class="bordered">
+            <thead>
+                <tr>
+                    <th colspan="4">Praktische Prüfung</th>
+                </tr>
+                <tr>
+                    <th>Datum</th>
+                    <th>Bestanden</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>Nein</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="bordered">
+            <div class="label-group">
+                <p class="label">Die erhobene Ausbildungsentgelte betrugen insgesamt:</p>
+                <h3>,- €.</h3>
+            </div>
+            <div class="label-group">
+                <p class="label">Die von der Fahrschule erhobenen Vorstellungsentgelte für alle Prüfungen betrugen insgesamt:</p>
+                <h3>,- €.</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container bottom">
+        <div>
+            <div class="placeholder"></div>
+            <div class="border-bottom"></div>
+            <p class="label">Ort, Datum</p>
+        </div>
+        <div>
+            <div class="placeholder"></div>
+            <div class="border-bottom"></div>
+            <p class="label">Unterschrift des Fahrschulinhabers / des verantwortlichen Leiters</p>
+        </div>
+
+        <div>
+            <div class="placeholder"></div>
+            <div class="border-bottom"></div>
+            <p class="label">Unterschrift des Fahrschülers</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,9 +1,16 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardNavbar v-if="subscription" :title="`${subscription.student_firstname} ${subscription.student_lastname}`"/>
-    <UDashboardToolbar
-      class="py-0 px-1.5 overflow-x-auto"
+    <UDashboardNavbar
+      v-if="subscription"
+      :title="`${subscription.student_firstname} ${subscription.student_lastname}`"
     >
+      <template #right>
+        <UButton variant="ghost" :loading="isDownloadingCertificate" @click="generateCertificate">
+          {{ t("generate_certifcate") }}
+        </UButton>
+      </template>
+    </UDashboardNavbar>
+    <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
       <UHorizontalNavigation :links="links" />
     </UDashboardToolbar>
     <UDashboardPanelContent>
@@ -13,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import { format } from "date-fns";
 import type { Database } from "~/types/app.types";
 
 definePageMeta({
@@ -23,12 +31,11 @@ const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 const client = useSupabaseClient<Database>();
-
+const isDownloadingCertificate = ref(false);
 
 const { t } = useI18n({
   useScope: "local",
 });
-
 
 const { data: subscription } = useAsyncData(
   `subscriptions_${subscription_id}`,
@@ -36,7 +43,8 @@ const { data: subscription } = useAsyncData(
     const { data, error } = await client
       .from("course_subscriptions_view")
       .select("*")
-      .eq("id", subscription_id).single()
+      .eq("id", subscription_id)
+      .single();
     if (error) {
       throw error;
     }
@@ -64,6 +72,34 @@ const links = computed(() => {
     ],
   ];
 });
+
+async function generateCertificate() {
+  if (isDownloadingCertificate.value) {
+    return;
+  }
+  isDownloadingCertificate.value = true;
+  try {
+    const res = await $fetch<Blob>(`/api/orgs/subscriptions/${subscription_id}/generate-certificate`, {
+        method: "GET",
+    });
+    const date = format(new Date(), "yyyy-MM-dd");
+    
+
+    const blob = new Blob([res], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ausbildungsnachweis-b-${subscription.value.student_firstname}-${subscription.value.student_lastname}-${date}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isDownloadingCertificate.value = false;
+  }
+}
 </script>
 
 <style scoped></style>
@@ -79,12 +115,7 @@ const links = computed(() => {
     "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
     "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements.",
-    "subscription_not_found": "Das Abonnement wurde nicht gefunden.",
-    "create_bill": "Rechnung erstellen",
-    "bill_generated": "Rechnung erstellt",
-    "bill_generated_description": "Die Rechnung wurde erfolgreich erstellt.",
-    "bill_not_generated": "Rechnung nicht erstellt",
-    "bill_not_generated_description": "Die Rechnung konnte nicht erstellt werden. Bitte versuchen Sie es später erneut."
+    "generate_certifcate": "Zertifikat generieren"
   },
   "en": {
     "title": "Student",
@@ -95,12 +126,7 @@ const links = computed(() => {
     "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",
     "student_is_inactive_description": "The student is inactive and has no active subscriptions.",
-    "subscription_not_found": "The subscription was not found.",
-    "create_bill": "Create bill",
-    "bill_generated": "Bill generated",
-    "bill_generated_description": "The bill was successfully generated.",
-    "bill_not_generated": "Bill not generated",
-    "bill_not_generated_description": "The bill could not be generated. Please try again later."
+    "generate_certifcate": "Generate certificate"
   }
 }
 </i18n>
