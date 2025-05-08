@@ -59,8 +59,14 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxtjs/turnstile',
     '@sentry/nuxt/module',
-    '@nuxt/fonts'
+    '@nuxtjs/google-fonts'
   ],
+
+  googleFonts: {
+    families: {
+      'Space Grotesk': [400, 500, 600, 700],
+    }
+  },
 
   ui: {
     global: true
