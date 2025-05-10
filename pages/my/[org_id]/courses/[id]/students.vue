@@ -20,17 +20,8 @@
     </template>
 
     <template #right>
-      <USelectMenu
-        v-model="selectedColumns"
-        icon="i-heroicons-adjustments-horizontal-solid"
-        :options="defaultColumns"
-        multiple
-        class="hidden lg:block"
-      >
-        <template #label> Display </template>
-      </USelectMenu>
       <UButton
-        label="Add Student"
+        :label="t('add_student')"
         trailing-icon="i-heroicons-plus"
         color="gray"
         @click="openAddStudentForm"
@@ -39,15 +30,12 @@
   </UDashboardToolbar>
 
     <UTable
-      v-model="selected"
       v-model:sort="sort"
       :rows="subscriptions ? subscriptions : []"
       :columns="columns"
       :loading="status === 'pending'"
-      sort-mode="manual"
       class="w-full"
       :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-      @select="onSelect"
     >
       <template #fullname-data="{ row }">
         <div class="flex items-center gap-3">
@@ -59,7 +47,7 @@
       </template>
       <template #status-data="{ row }">
         <UBadge
-          :label="row.status"
+          :label="t(`subscription_status.${row.status}`)"
           :color="
             row.status === 'subscribed'
               ? 'green'
@@ -102,32 +90,32 @@ const supabase = useSupabaseClient<Database>();
 type Props = {
   courseid: string;
 };
-
+const { t } = useI18n({
+  useScope: "local",
+})
 
 const defaultColumns = [
   {
     key: "fullname",
-    label: "name",
+    label: t("fullname"),
     sortable: true,
   },
   {
     key: "email",
-    label: "Email",
+    label: t("email"),
     sortable: true,
   },
   {
     key: "status",
-    label: "Status",
+    label: t("status"),
     sortable: true,
   },
   {
     key: "actions",
-    label: "Actions",
   },
 ];
 
 const q = ref("");
-const selected = ref<AppStudent[]>([]);
 const selectedColumns = ref(defaultColumns);
 const selectedStatuses = ref([]);
 const selectedLocations = ref([]);
@@ -202,15 +190,6 @@ const subscriptions = computed(() => {
 //   return acc
 // }, [] as string[])
 
-function onSelect(row: AppStudent) {
-  const index = selected.value.findIndex((item) => item.id === row.id);
-  if (index === -1) {
-    selected.value.push(row);
-  } else {
-    selected.value.splice(index, 1);
-  }
-}
-
 defineShortcuts({
   "/": () => {
     input.value?.input?.focus();
@@ -220,8 +199,7 @@ defineShortcuts({
 const items = (row: AppCourseSubscription & {student: AppStudent}) => [
   [
     {
-      label: "Course Profile",
-      icon: "i-heroicons-pencil-square-20-solid",
+      label: t("course_profile"),
       click: () => {
         slideover.open(StudentCourseProfileSlideover, {
           subscriptionId: row.id,
@@ -230,8 +208,7 @@ const items = (row: AppCourseSubscription & {student: AppStudent}) => [
       },
     },
     {
-      label: "Subscription",
-      icon: "i-heroicons-document-duplicate-20-solid",
+      label: t("course_subscription"),
       click: () => {
         if (!userOrganizationsStore.selectedOrganization) {
           return;
@@ -257,3 +234,32 @@ function openAddStudentForm() {
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "fullname": "Vollständiger Name",
+    "email": "E-Mail",
+    "status": "Status",
+    "add_student": "Student hinzufügen",
+    "course_profile": "Kursprofil",
+    "course_subscription": "Kursanmeldung",
+    "subscription_status": {
+      "subscribed": "Eingeschrieben",
+      "archived": "Archiviert"
+    }
+  },
+  "en": {
+    "fullname": "Full name",
+    "email": "Email",
+    "status": "Status",
+    "add_student": "Add student",
+    "course_profile": "Course profile",
+    "course_subscription": "Course subscription",
+    "subscription_status": {
+      "subscribed": "Subscribed",
+      "archived": "Archived"
+    }
+  }
+}
+</i18n>

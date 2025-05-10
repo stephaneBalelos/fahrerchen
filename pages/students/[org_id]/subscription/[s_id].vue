@@ -30,12 +30,12 @@ const links = computed(() => {
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}`,
       exact: true,
     },
-    // {
-    //   label: t("course"),
-    //   icon: "i-heroicons-home",
-    //   to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/courses`,
-    //   exact: true,
-    // },
+    {
+      label: t("course"),
+      icon: "i-heroicons-book-open",
+      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/course`,
+      exact: true,
+    },
     {
       label: t("bills"),
       icon: "i-heroicons-document",

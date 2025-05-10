@@ -32,16 +32,14 @@ const props = defineProps<Props>();
 
 const supabase = useSupabaseClient();
 
-const { data: attended_schedules } = useAsyncData(
-  'attended_schedule_' + props.subscriptionId + '_' + props.activityId,
+const { data: attended_schedules } = useAsyncData(`course_activity_schedule_attendances_${props.activityId}_${props.subscriptionId}`,
   async () => {
     const { data, error } = await supabase
-      .from("course_activity_schedules")
+      .from("course_activity_schedules_attendances")
       .select("*")
-      .eq("activity_id", props.activityId)
+      .eq("course_activity_id", props.activityId)
+      .eq("course_subscription_id", props.subscriptionId)
       .eq("organization_id", props.orgId)
-      .eq('status', 'COMPLETED')
-      .contains('attendees', [props.subscriptionId])
     if (error) {
       console.error(error);
       throw error;

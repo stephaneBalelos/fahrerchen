@@ -25,6 +25,8 @@ const _schema = z.object({
   email: z.string().email(g("form_errors.email")),
 });
 
+const loading = ref(false);
+
 type AddMemberFormProps = z.infer<typeof _schema>;
 
 const state = reactive<AddMemberFormProps>({
@@ -33,8 +35,10 @@ const state = reactive<AddMemberFormProps>({
 
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
   const orgId = props.orgid;
+  loading.value = true;
 
-  if (orgId) {
+  try {
+    if (orgId) {
     const { data, error } = await client.functions.invoke("invite-user", {
       method: "POST",
       body: {
@@ -61,6 +65,17 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
       color: "green",
     });
     emit("close");
+  }
+  } catch (error) {
+    console.error(error);
+    toasts.add({
+      id: "student-invited-error",
+      title: "Error",
+      description: "Could not invite student",
+      color: "red",
+    });
+  } finally {
+    loading.value = false;
   }
 }
 </script>
@@ -100,7 +115,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
           variant="ghost"
           @click="emit('close')"
         />
-        <UButton type="submit" :label="t('invite')" color="black" />
+        <UButton type="submit" :label="t('invite')" :loading="loading" :disabled="loading" color="black" />
       </div>
     </UForm>
   </UDashboardModal>

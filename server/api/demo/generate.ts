@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js'
 import { addWeeks, setDay, setHours } from 'date-fns'
 import { createSchedule } from '~/server/utils/demo'
 import { randomNumber } from '~/server/utils/utilities'
-import type { AppCourse, AppCourseActivity, AppStudent } from '~/types/app.types'
+import type { AppCourse, AppCourseActivity, AppCourseCost, AppStudent } from '~/types/app.types'
 
 
 export default defineEventHandler(async (event) => {
@@ -84,6 +84,36 @@ export default defineEventHandler(async (event) => {
             })
         }
 
+        // Generate Course Costs
+        const courseCosts = courses.map((course: AppCourse) => {
+            const course_costs: Omit<AppCourseCost, "id">[] = [
+                {
+                    name: event.context.$t('demo.course_costs.base_cost.name'),
+                    description: event.context.$t('demo.course_costs.base_cost.description'),
+                    course_id: course.id,
+                    organization_id: org.id,
+                    price: 100,
+                },
+                {
+                    name: event.context.$t('demo.course_costs.teaching_resources.name'),
+                    description: event.context.$t('demo.course_costs.teaching_resources.description'),
+                    course_id: course.id,
+                    organization_id: org.id,
+                    price: 50,
+                }
+            ]
+            return course_costs
+        }).flat()
+
+        const { error: errorCosts } = await client.from('course_costs').insert(courseCosts)
+
+        if (errorCosts) {
+            return createError({
+                status: 500,
+                statusMessage: 'Course Costs not created'
+            })
+        }
+
         // Generate Course Activities
         const courseActivities = courses.map((course: AppCourse) => {
             const course_activities: Omit<AppCourseActivity, "id">[] = [
@@ -95,7 +125,9 @@ export default defineEventHandler(async (event) => {
                     activity_type: 1,
                     price: 45,
                     required: 12,
-                    sorting_order: 1
+                    sorting_order: 1,
+                    allow_self_registration: true,
+                    allow_requests: false
                 },
                 {
                     name: event.context.$t('demo.activity.practice.name'),
@@ -105,7 +137,9 @@ export default defineEventHandler(async (event) => {
                     activity_type: 2,
                     price: 55,
                     required: 12,
-                    sorting_order: 2
+                    sorting_order: 2,
+                    allow_self_registration: false,
+                    allow_requests: true
                 },
                 {
                     name: event.context.$t('demo.activity.exam_theory.name'),
@@ -115,7 +149,9 @@ export default defineEventHandler(async (event) => {
                     activity_type: 3,
                     price: 30,
                     required: 1,
-                    sorting_order: 3
+                    sorting_order: 3,
+                    allow_self_registration: false,
+                    allow_requests: false
                 },
                 {
                     name: event.context.$t('demo.activity.exam_practice.name'),
@@ -125,15 +161,17 @@ export default defineEventHandler(async (event) => {
                     activity_type: 4,
                     price: 60,
                     required: 1,
-                    sorting_order: 4
+                    sorting_order: 4,
+                    allow_self_registration: false,
+                    allow_requests: false
                 }
             ]
             return course_activities
         }).flat()
 
-        const { error } = await client.from('course_activities').insert(courseActivities)
+        const { error: errorActivities } = await client.from('course_activities').insert(courseActivities)
 
-        if (error) {
+        if (errorActivities) {
             return createError({
                 status: 500,
                 statusMessage: 'Course Activities not created'

@@ -2,12 +2,12 @@
     <div class="mb-4">
         <div class="flex gap-2">
             <p class="font-bold">
-                {{ props.billItem.description }}
+                {{ props.billItem.item_title }}
             </p>
-            <p>({{ t('unit_price') }}: {{ formatCurrency(props.billItem.price) }})</p>
+            <p>({{ t('unit_price') }}: {{ formatCurrency(props.billItem.item_price) }})</p>
         </div>
-        <div v-if="schedule" class="flex gap-2">
-            <p class="font-bold text-primary">{{ t('attended_at', { data: formatDate(schedule.start_at) }) }}</p>
+        <div v-if="attendance" class="flex gap-2">
+            <p class="font-bold text-primary">{{ t('attended_at', { data: formatDate(attendance.activity_start_at) }) }}</p>
         </div>
         <div v-else>
             <p class="font-bold text-orange-200">{{ t('not_attended_yet') }}</p>
@@ -16,11 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourseSubscriptionBillItem } from '~/types/app.types';
+import type { CourseSubscriptionBillItemView } from '~/types/app.types';
 import { formatCurrency, formatDate } from '~/utils/formatters';
 
 type Props = {
-    billItem: AppCourseSubscriptionBillItem;
+    billItem: CourseSubscriptionBillItemView;
 }
 
 const props = defineProps<Props>();
@@ -31,12 +31,12 @@ const { t } = useI18n({
 
 const client = useSupabaseClient();
 
-const { data: schedule } = useAsyncData(`bill_item_details_${props.billItem.id}`, async () => {
-    if (!props.billItem.course_activity_schedule_id) return null;
+const { data: attendance } = useAsyncData(`bill_item_details_${props.billItem.id}`, async () => {
+    if (!props.billItem.course_activity_attendance_id) return null;
     const { data, error } = await client
-        .from("course_activity_schedules")
-        .select("id, start_at")
-        .eq("id", props.billItem.course_activity_schedule_id).single();
+        .from("course_activity_schedules_attendances")
+        .select("id, activity_start_at")
+        .eq("id", props.billItem.course_activity_attendance_id).single();
 
     if (error) {
         console.error(error);

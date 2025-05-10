@@ -18,28 +18,35 @@
         </p>
       </div>
     </div>
-    <p class="text-gray-900 dark:text-white font-medium text-lg">
-        <UBadge
-            v-if="props.activitySchedule.status == 'COMPLETED'"
-            color="green"
-            variant="soft"
-            :label="t('attended')"
-          />
-          <UBadge
-            v-if="props.activitySchedule.status == 'PLANNED'"
-            color="primary"
-            variant="soft"
-            :label="t('registered')"
-          />
-          <UBadge
-            v-if="props.activitySchedule.status == 'CANCELED'"
-            color="red"
-            variant="soft"
-            :label="t('canceled')"
-          />
-      <!-- <UBadge v-if="bill.status == 'PLANNED'" color="primary" variant="soft">Planned</UBadge>
-            <UBadge v-if="bill.status == 'CANCELED'" color="red" variant="soft">Canceled</UBadge>
-            <UBadge v-if="bill.status == 'COMPLETED'" color="red" variant="soft">Completed</UBadge> -->
+    <p class="text-gray-900 dark:text-white font-medium text-lg flex gap-2">
+      <UBadge
+        v-if="
+          props.activitySchedule.status == 'COMPLETED'
+        "
+        color="green"
+        variant="soft"
+        :label="t('completed')"
+      />
+      <UBadge
+        v-if="props.activitySchedule.status == 'PLANNED'"
+        color="primary"
+        variant="soft"
+        :label="t('planned')"
+      />
+      <UBadge
+        v-if="props.activitySchedule.status == 'CANCELED'"
+        color="red"
+        variant="soft"
+        :label="t('canceled')"
+      />
+      <UButton
+        v-if="scheduleAttendance"
+        color="green"
+        variant="soft"
+        :label="t('attendance_confirmed')"
+        @click.stop="openAttendanceConfirmation"
+      />
+
     </p>
   </div>
 </template>
@@ -47,9 +54,11 @@
 <script setup lang="ts">
 import type { AppCourseActivitySchedule } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
+import AttendanceConfirmationSlideover from "./AttendanceConfirmationSlideover.vue";
 
 type Props = {
-  activitySchedule: AppCourseActivitySchedule
+  subscriptionId: string;
+  activitySchedule: AppCourseActivitySchedule;
 };
 
 const $emits = defineEmits(["open-edit-schedule"]);
@@ -58,25 +67,69 @@ const props = defineProps<Props>();
 const { t } = useI18n({
   useScope: "local",
 });
+const client = useSupabaseClient();
+const slideover = useSlideover();
 
-const courseActivity = await useCourseActivities(props.activitySchedule.organization_id, props.activitySchedule.course_id, props.activitySchedule.activity_id);
+
+const courseActivity = await useCourseActivities(
+  props.activitySchedule.organization_id,
+  props.activitySchedule.course_id,
+  props.activitySchedule.activity_id
+);
+
+const { data: scheduleAttendance } = useAsyncData(
+  `course_activity_schedule_attendance_${props.activitySchedule.id}_${props.subscriptionId}`,
+  async () => {
+    const { data, error } = await client
+      .from("course_activity_schedules_attendances")
+      .select("*")
+      .eq("course_activity_schedule_id", props.activitySchedule.id)
+      .eq("course_subscription_id", props.subscriptionId)
+      
+
+    if (error) {
+      console.error(error);
+    }
+
+    return data ? data[0] : null;
+  }
+);
+
+function openAttendanceConfirmation() {
+  if (!scheduleAttendance.value) {
+    return;
+  }
+  slideover.open(AttendanceConfirmationSlideover, {
+    attendanceId: scheduleAttendance.value.id,
+    onDelete: () => {
+      slideover.close();
+      console.log("Attendance deleted");
+    },
+  })
+}
 </script>
 
 <style scoped></style>
 
 <i18n lang="json">
 {
-    "de": {
-        "attended": "Teilgenommen",
-        "registered": "Registriert",
-        "canceled": "Abgesagt",
-        "planned_for": "Geplant für"
-    },
-    "en": {
-        "attended": "Attended",
-        "registered": "Registered",
-        "canceled": "Canceled",
-        "planned_for": "Planned for"
-    }
+  "de": {
+    "planned": "Geplant",
+    "completed": "Abgeschlossen",
+    "attended": "Teilgenommen",
+    "attendance_confirmed": "Teilnahme bestätigt",
+    "registered": "Registriert",
+    "canceled": "Abgesagt",
+    "planned_for": "Geplant für"
+  },
+  "en": {
+    "planned": "Planned",
+    "completed": "Completed",
+    "attended": "Attended",
+    "attendance_confirmed": "Attendance confirmed",
+    "registered": "Registered",
+    "canceled": "Canceled",
+    "planned_for": "Planned for"
+  }
 }
 </i18n>

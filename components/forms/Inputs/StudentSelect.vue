@@ -12,14 +12,14 @@
         <UAvatar
           v-if="selected.firstname"
           :alt="`${selected.firstname} ${selected.lastname}`"
-          size="xs"
+          size="2xs"
         />
         <span class="truncate ms-3">{{
           `${selected.firstname} ${selected.lastname}`
         }}</span>
       </div>
       <div v-else>
-        <UAvatar icon="i-heroicons-user-circle" size="xs" />
+        <UAvatar icon="i-heroicons-user-circle" size="2xs" />
         <span class="truncate ms-3">{{ t("select_a_person") }}</span>
       </div>
     </template>

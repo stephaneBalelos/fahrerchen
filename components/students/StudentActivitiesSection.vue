@@ -23,6 +23,7 @@
           <StudentActivityItem
             v-for="(schedule, index) in schedules"
             :key="index"
+            :subscription-id="props.subscriptionId"
             :activity-schedule="schedule"
             @open-edit-schedule="
               () =>

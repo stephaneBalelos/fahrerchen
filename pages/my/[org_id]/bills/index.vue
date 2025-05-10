@@ -36,6 +36,11 @@
               {{ g("bills.status.unpaid") }}
             </UBadge>
           </template>
+          <template #total-data="{ row }">
+            <p class="text-gray-500 dark:text-gray-400 font-medium">
+              {{ formatCurrency(row.total) }}
+            </p>
+          </template>
           <template #action-data="{ row }">
             <UButton
               variant="link"
@@ -54,6 +59,7 @@
 import { z } from "zod";
 import StudentSelect from "~/components/forms/Inputs/StudentSelect.vue";
 import type { AppCourse } from "~/types/app.types";
+import { formatCurrency } from "~/utils/formatters";
 
 definePageMeta({
   layout: "orgs",
@@ -133,7 +139,11 @@ const { data: bills, status } = useAsyncData(
       return data?.map((bill) => {
         return {
           ...bill,
-          status: bill.paid_at ? "paid" : bill.canceled_at ? "canceled" : "unpaid",
+          status: bill.paid_at
+            ? "paid"
+            : bill.canceled_at
+            ? "canceled"
+            : "unpaid",
         };
       });
     },

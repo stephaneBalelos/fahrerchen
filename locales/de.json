@@ -142,6 +142,16 @@
                 "description": "Führerschein Klasse C - LKW"
             }
         },
+        "course_costs": {
+            "base_cost": {
+                "name": "Grundkosten",
+                "description": "Grundkosten für den Kurs"
+            },
+            "teaching_resources": {
+                "name": "Lehrmaterial",
+                "description": "Lehrmaterial für den Kurs"
+            }
+        },
         "activity": {
             "theory": {
                 "name": "Theorieunterricht",

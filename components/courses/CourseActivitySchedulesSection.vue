@@ -209,7 +209,7 @@ function openAddCourseScheduleForm(
     "no_activity_of_type_THEORY": "Keine Theorie-Aktivität Erstellt",
     "no_activity_of_type_PRACTICE": "Keine praktische Aktivität Erstellt",
     "no_activity_of_type_EXAM": "Keine Prüfungsaktivität Erstellt",
-    "no_activity_of_type_OTHER": "Keine andere Aktivität Erstellt",
+    "no_activity_of_type_OTHER": "Keine andere Aktivität Erstellt"
   },
   "en": {
     "title": "Activity schedules",
@@ -221,7 +221,7 @@ function openAddCourseScheduleForm(
     "no_activity_of_type_THEORY": "No theory activity created",
     "no_activity_of_type_PRACTICE": "No practical activity created",
     "no_activity_of_type_EXAM": "No exam activity created",
-    "no_activity_of_type_OTHER": "No other activity created",
+    "no_activity_of_type_OTHER": "No other activity created"
   }
 }
 </i18n>

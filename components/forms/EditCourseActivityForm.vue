@@ -96,6 +96,31 @@
           <UInput v-model="state.required" type="number" autocomplete="off" size="md" />
         </UFormGroup>
 
+        <UFormGroup
+          name="allow_self_registration"
+          :label="t('form.allow_self_registration')"
+          :description="t('form.allow_self_registration_desc')"
+          class="flex gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+          <UToggle
+            v-model="state.allow_self_registration"
+            :label="t('form.allow_self_registration')"
+          />
+        </UFormGroup>
+        <UFormGroup
+          name="allow_requests"
+          :label="t('form.allow_requests')"
+          :description="t('form.allow_requests_desc')"
+          class="flex gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+          <UToggle
+            v-model="state.allow_requests"
+            :label="t('form.allow_requests')"
+          />
+        </UFormGroup>
+
       </UDashboardSection>
     </UForm>
 
@@ -113,7 +138,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourseActivity, Database } from "~/types/app.types";
+import type { AppCourseActivity } from "~/types/app.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
 
 import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
@@ -149,7 +174,7 @@ const props = defineProps<Props>();
 
 const form = ref<Form<CourseActivityEdit> | null>(null);
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 
 const $emit = defineEmits<Emits>();
 
@@ -166,6 +191,8 @@ const state = reactive<CourseActivityEdit>({
   activity_type: 0,
   required: 0,
   price: 0,
+  allow_self_registration: false,
+  allow_requests: false,
 });
 
 onMounted(async () => {
@@ -192,6 +219,8 @@ onMounted(async () => {
         state.price = data.price;
         state.activity_type = data.activity_type
         state.required = data.required
+        state.allow_self_registration = data.allow_self_registration;
+        state.allow_requests = data.allow_requests;
       }
     } catch (error) {
       console.log(error);
@@ -317,7 +346,11 @@ const deleteCourseActivity = async (id: string) => {
         "price_description": "Wird auf Quittungen, Rechnungen und anderen Kommunikationen angezeigt. Geben Sie den Preis in Euro an. 0 für kostenlose Aktivitäten.",
         "is_activity_required": "Ist diese Aktivität erforderlich, um den Kurs abzuschließen?",
         "required_amount": "Anzahl der erforderlichen Teilnahmen",
-        "required_amount_description": "Geben Sie die Anzahl der erforderlichen Teilnahmen an, um die Aktivität abzuschließen."
+        "required_amount_description": "Geben Sie die Anzahl der erforderlichen Teilnahmen an, um die Aktivität abzuschließen.",
+        "allow_self_registration": "Erlaube Selbstregistrierung",
+        "allow_self_registration_desc": "Wenn aktiviert, können sich Schüler selbst für diese Aktivität registrieren.",
+        "allow_requests": "Erlaube Anfragen",
+        "allow_requests_desc": "Wenn aktiviert, können Schüler Anfragen für diese Aktivität stellen."
       }
     },
     "en": {
@@ -339,7 +372,11 @@ const deleteCourseActivity = async (id: string) => {
         "price_description": "Will be displayed on receipts, invoices, and other communications. Specify the price in Euro. 0 for free activities.",
         "is_activity_required": "Is this activity required to complete the course?",
         "required_amount": "Number of required attendances",
-        "required_amount_description": "Specify the number of required attendances to complete the activity."
+        "required_amount_description": "Specify the number of required attendances to complete the activity.",
+        "allow_self_registration": "Allow self registration",
+        "allow_self_registration_desc": "If enabled, students can register themselves for this activity.",
+        "allow_requests": "Allow requests",
+        "allow_requests_desc": "If enabled, students can make requests for this activity."
       }
     }
   }

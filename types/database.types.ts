@@ -37,6 +37,8 @@ export type Database = {
       course_activities: {
         Row: {
           activity_type: number
+          allow_requests: boolean
+          allow_self_registration: boolean
           course_id: string
           description: string
           id: string
@@ -48,6 +50,8 @@ export type Database = {
         }
         Insert: {
           activity_type: number
+          allow_requests?: boolean
+          allow_self_registration?: boolean
           course_id: string
           description: string
           id?: string
@@ -59,6 +63,8 @@ export type Database = {
         }
         Update: {
           activity_type?: number
+          allow_requests?: boolean
+          allow_self_registration?: boolean
           course_id?: string
           description?: string
           id?: string
@@ -171,6 +177,134 @@ export type Database = {
           },
         ]
       }
+      course_activity_schedules_attendances: {
+        Row: {
+          activity_description: string
+          activity_end_at: string
+          activity_name: string
+          activity_price: number
+          activity_start_at: string
+          activity_type: number
+          course_activity_id: string | null
+          course_activity_schedule_id: string | null
+          course_subscription_id: string
+          id: string
+          inserted_at: string
+          organization_id: string
+          schedule_assigned_to_email: string | null
+          schedule_assigned_to_firstname: string | null
+          schedule_assigned_to_id: string | null
+          schedule_assigned_to_lastname: string | null
+        }
+        Insert: {
+          activity_description: string
+          activity_end_at: string
+          activity_name: string
+          activity_price?: number
+          activity_start_at: string
+          activity_type: number
+          course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
+          course_subscription_id: string
+          id?: string
+          inserted_at?: string
+          organization_id: string
+          schedule_assigned_to_email?: string | null
+          schedule_assigned_to_firstname?: string | null
+          schedule_assigned_to_id?: string | null
+          schedule_assigned_to_lastname?: string | null
+        }
+        Update: {
+          activity_description?: string
+          activity_end_at?: string
+          activity_name?: string
+          activity_price?: number
+          activity_start_at?: string
+          activity_type?: number
+          course_activity_id?: string | null
+          course_activity_schedule_id?: string | null
+          course_subscription_id?: string
+          id?: string
+          inserted_at?: string
+          organization_id?: string
+          schedule_assigned_to_email?: string | null
+          schedule_assigned_to_firstname?: string | null
+          schedule_assigned_to_id?: string | null
+          schedule_assigned_to_lastname?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activity_schedules_atte_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_atte_course_activity_schedule_id_fkey"
+            columns: ["course_activity_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendan_schedule_assigned_to_id_fkey"
+            columns: ["schedule_assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendanc_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendanc_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_stats_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendanc_course_subscription_id_fkey"
+            columns: ["course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_activity_type_fkey"
+            columns: ["activity_type"]
+            isOneToOne: false
+            referencedRelation: "course_activity_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_course_activity_id_fkey"
+            columns: ["course_activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_activity_types: {
         Row: {
           id: number
@@ -185,6 +319,55 @@ export type Database = {
           type?: Database["public"]["Enums"]["activity_types"]
         }
         Relationships: []
+      }
+      course_costs: {
+        Row: {
+          course_id: string
+          description: string
+          id: string
+          name: string
+          organization_id: string
+          price: number
+        }
+        Insert: {
+          course_id: string
+          description: string
+          id?: string
+          name: string
+          organization_id: string
+          price?: number
+        }
+        Update: {
+          course_id?: string
+          description?: string
+          id?: string
+          name?: string
+          organization_id?: string
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_costs_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_documents: {
         Row: {
@@ -362,38 +545,48 @@ export type Database = {
       course_subscription_bill_items: {
         Row: {
           bill_id: string | null
-          course_activity_id: string | null
-          course_activity_schedule_id: string | null
+          course_activity_attendance_id: string | null
+          course_cost_id: string | null
           course_subscription_id: string
           description: string
           id: string
           inserted_at: string
           organization_id: string
           price: number
+          title: string
         }
         Insert: {
           bill_id?: string | null
-          course_activity_id?: string | null
-          course_activity_schedule_id?: string | null
+          course_activity_attendance_id?: string | null
+          course_cost_id?: string | null
           course_subscription_id: string
           description: string
           id?: string
           inserted_at?: string
           organization_id: string
           price?: number
+          title: string
         }
         Update: {
           bill_id?: string | null
-          course_activity_id?: string | null
-          course_activity_schedule_id?: string | null
+          course_activity_attendance_id?: string | null
+          course_cost_id?: string | null
           course_subscription_id?: string
           description?: string
           id?: string
           inserted_at?: string
           organization_id?: string
           price?: number
+          title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
+            columns: ["course_activity_attendance_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_attendances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
@@ -409,24 +602,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_subscription_bill_items_course_activity_id_fkey"
-            columns: ["course_activity_id"]
+            foreignKeyName: "course_subscription_bill_items_course_cost_id_fkey"
+            columns: ["course_cost_id"]
             isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
-            columns: ["course_activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_items_course_activity_schedule_id_fkey"
-            columns: ["course_activity_schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules_view"
+            referencedRelation: "course_costs"
             referencedColumns: ["id"]
           },
           {
@@ -1219,9 +1398,12 @@ export type Database = {
     Views: {
       course_activity_schedules_view: {
         Row: {
+          activity_allow_requests: boolean | null
+          activity_allow_self_registration: boolean | null
           activity_description: string | null
           activity_id: string | null
           activity_name: string | null
+          activity_price: number | null
           activity_type: number | null
           assigned_to: string | null
           assigned_to_email: string | null
@@ -1285,15 +1467,56 @@ export type Database = {
       }
       course_subscription_bill_items_view: {
         Row: {
+          activity_assigned_to_email: string | null
+          activity_assigned_to_firstname: string | null
+          activity_assigned_to_id: string | null
+          activity_assigned_to_lastname: string | null
           activity_description: string | null
+          activity_end_at: string | null
+          activity_id: string | null
           activity_name: string | null
+          activity_start_at: string | null
+          activity_type: number | null
           bill_id: string | null
-          items:
-            | Database["public"]["Tables"]["course_subscription_bill_items"]["Row"][]
-            | null
-          total: number | null
+          cost_description: string | null
+          cost_name: string | null
+          cost_price: number | null
+          course_activity_attendance_id: string | null
+          course_cost_id: string | null
+          id: string | null
+          item_description: string | null
+          item_price: number | null
+          item_title: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_activity_schedules_attendan_schedule_assigned_to_id_fkey"
+            columns: ["activity_assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_activity_type_fkey"
+            columns: ["activity_type"]
+            isOneToOne: false
+            referencedRelation: "course_activity_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendances_course_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
+            columns: ["course_activity_attendance_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules_attendances"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
             columns: ["bill_id"]
@@ -1306,6 +1529,13 @@ export type Database = {
             columns: ["bill_id"]
             isOneToOne: false
             referencedRelation: "course_subscription_bills_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_course_cost_id_fkey"
+            columns: ["course_cost_id"]
+            isOneToOne: false
+            referencedRelation: "course_costs"
             referencedColumns: ["id"]
           },
         ]
@@ -1648,17 +1878,11 @@ export type Database = {
     }
     Functions: {
       add_attendee_to_schedule: {
-        Args: {
-          course_schedule_id: string
-          course_subscription_id: string
-        }
+        Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
       }
       are_users_in_same_organization: {
-        Args: {
-          user_id_1: string
-          user_id_2: string
-        }
+        Args: { user_id_1: string; user_id_2: string }
         Returns: boolean
       }
       authorize: {
@@ -1669,15 +1893,11 @@ export type Database = {
         Returns: boolean
       }
       can_update_bill: {
-        Args: {
-          bill_id: string
-        }
+        Args: { bill_id: string }
         Returns: boolean
       }
       generate_bill_for_subscription: {
-        Args: {
-          subscription_id: string
-        }
+        Args: { subscription_id: string }
         Returns: string
       }
       generate_bill_for_subscriptions: {
@@ -1685,35 +1905,23 @@ export type Database = {
         Returns: undefined
       }
       is_main_owner: {
-        Args: {
-          org_id: string
-        }
+        Args: { org_id: string }
         Returns: boolean
       }
       is_schedule_active: {
-        Args: {
-          schedule_id: string
-        }
+        Args: { schedule_id: string }
         Returns: boolean
       }
       is_subscription_active: {
-        Args: {
-          subscription_id: string
-        }
+        Args: { subscription_id: string }
         Returns: boolean
       }
       is_user_targeted_by_notification: {
-        Args: {
-          notification_id: string
-          org_id: string
-        }
+        Args: { notification_id: string; org_id: string }
         Returns: boolean
       }
       remove_attendee_from_schedule: {
-        Args: {
-          course_schedule_id: string
-          course_subscription_id: string
-        }
+        Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
       }
     }
@@ -1758,6 +1966,14 @@ export type Database = {
         | "course_activities.create"
         | "course_activities.update"
         | "course_activities.delete"
+        | "course_activity_schedules_attendances.read"
+        | "course_activity_schedules_attendances.create"
+        | "course_activity_schedules_attendances.update"
+        | "course_activity_schedules_attendances.delete"
+        | "course_costs.read"
+        | "course_costs.create"
+        | "course_costs.update"
+        | "course_costs.delete"
         | "course_activity_schedules.read"
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
@@ -2026,30 +2242,19 @@ export type Database = {
     }
     Functions: {
       can_insert_object: {
-        Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
-        }
+        Args: { bucketid: string; name: string; owner: string; metadata: Json }
         Returns: undefined
       }
       extension: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       filename: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       foldername: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string[]
       }
       get_size_by_bucket: {
@@ -2275,6 +2480,14 @@ export const Constants = {
         "course_activities.create",
         "course_activities.update",
         "course_activities.delete",
+        "course_activity_schedules_attendances.read",
+        "course_activity_schedules_attendances.create",
+        "course_activity_schedules_attendances.update",
+        "course_activity_schedules_attendances.delete",
+        "course_costs.read",
+        "course_costs.create",
+        "course_costs.update",
+        "course_costs.delete",
         "course_activity_schedules.read",
         "course_activity_schedules.create",
         "course_activity_schedules.update",
