@@ -9,7 +9,7 @@ revoke all on table public.course_activity_types from authenticated, anon;
 grant select on table public.course_activity_types to authenticated, anon;
 insert into public.course_activity_types (type) values
 ('THEORY'), -- 0
-('PRACTICAL'), -- 1
+('PRACTICE'), -- 1
 ('EXAM'), -- 2
 ('OTHER'); -- 3
 

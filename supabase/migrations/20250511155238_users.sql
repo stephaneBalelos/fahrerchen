@@ -53,4 +53,9 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
+insert into storage.buckets
+  (id, name, public, allowed_mime_types, file_size_limit)
+values
+  ('users_avatars', 'users_avatars', true, '{image/*}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
+
 

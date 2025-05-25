@@ -145,6 +145,11 @@ $$ language plpgsql security invoker set search_path = public;
 -- When a subscription is inserted, create a bill item for every costs
 create or replace function public.insert_bill_items_for_new_subscription()
 returns trigger as $$
+declare
+  cost_id uuid;
+  cost_name text;
+  cost_description text;
+  cost_price numeric;
 begin
   -- Check if the subscription is active
   if not public.is_subscription_active(new.id) then

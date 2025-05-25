@@ -2,8 +2,7 @@
 
 create or replace view public.course_subscriptions_view as
     select
-        cs.id
-        cs.course_id as course_id,
+        cs.id,
         cs.student_id as student_id,
         cs.inserted_at as inserted_at,
         cs.archived_at as archived_at,

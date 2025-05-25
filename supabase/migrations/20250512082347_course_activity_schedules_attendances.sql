@@ -9,7 +9,7 @@ create table public.course_activity_schedules_attendances (
   schedule_start_at     timestamp with time zone not null,
   schedule_end_at       timestamp with time zone not null,
   schedule_assigned_to_email  text not null,
-  schedule_assigned_to_firstname text not null
+  schedule_assigned_to_firstname text not null,
   schedule_assigned_to_lastname text not null,
   -- activity schedule data ends
   successfully_completed boolean default false not null, -- if the activity was an EXAM, this field is set to true if the student passed the exam
@@ -19,20 +19,20 @@ create table public.course_activity_schedules_attendances (
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_activity_schedule_id, course_subscription_id),
+  unique (course_activity_schedule_id, course_subscription_id)
 );
 comment on table public.course_activity_schedules_attendances is 'COURSE ACTIVITY SCHEDULES ATTENDEES.';
 alter table public.course_activity_schedules_attendances enable row level security;
 revoke update on table public.course_activity_schedules_attendances from authenticated, anon;
-grant update (schedule_successfully_completed) on table public.course_activity_schedules_attendances to authenticated;
+grant update (successfully_completed) on table public.course_activity_schedules_attendances to authenticated;
 
 create policy "owner_manager_teacher_can_see_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for select to authenticated using (public.authorize('course_activity_schedules_attendances.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.read'), ('manager', 'course_activity_schedules_attendances.read'), ('teacher', 'course_activity_schedules_attendances.read');
 
-create policy "owner_manager_teacher_can_create_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for insert to authenticated with check (public.authorize('course_activity_schedules_attendances.create', organization_id)) and (public.is_subscription_active(course_subscription_id));
+create policy "owner_manager_teacher_can_create_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for insert to authenticated with check (public.authorize('course_activity_schedules_attendances.create', organization_id) and (public.is_subscription_active(course_subscription_id)));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.create'), ('manager', 'course_activity_schedules_attendances.create'), ('teacher', 'course_activity_schedules_attendances.create');
 
-create policy "owner_manager_teacher_can_update_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for update to authenticated using (public.authorize('course_activity_schedules_attendances.update', organization_id)) and (public.is_schedule_active(course_activity_schedule_id));
+create policy "owner_manager_teacher_can_update_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for update to authenticated using (public.authorize('course_activity_schedules_attendances.update', organization_id) and (public.is_schedule_active(course_activity_schedule_id)));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendances.update'), ('manager', 'course_activity_schedules_attendances.update'), ('teacher', 'course_activity_schedules_attendances.update');
 
 create policy "owner_manager_teacher_can_delete_course_activity_schedules_attendances" on public.course_activity_schedules_attendances for delete to authenticated using (public.authorize('course_activity_schedules_attendances.delete', organization_id));

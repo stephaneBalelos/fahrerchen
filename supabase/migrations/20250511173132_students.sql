@@ -42,3 +42,9 @@ insert into public.role_permissions (role, permission) values ('owner', 'student
 
 create policy "owner_can_delete_students" on public.students for delete to authenticated using (public.authorize('students.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.delete');
+
+    -- Student Documents
+insert into storage.buckets
+  (id, name, public, allowed_mime_types, file_size_limit)
+values
+  ('student_documents', 'student_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB

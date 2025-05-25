@@ -149,6 +149,8 @@ $$ language plpgsql security definer set search_path = public;
 
 
 -- Organizations Policies
+create policy "Everyone can see organizations avatars" on storage.objects for select to authenticated, anon using (true);
+
 create policy "members_can_read_their_organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id));
 insert into public.role_permissions
     (role, permission) 
@@ -224,7 +226,7 @@ values
 create policy "owners_can_insert_organizations_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.create');
 
-create polificy "owners_and_manager_can_delete_organizations_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
+create policy "owners_and_manager_can_delete_organizations_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
 insert into public.role_permissions
     (role, permission)
 values 
@@ -274,3 +276,46 @@ $$ language plpgsql security invoker set search_path = public;
 create or replace trigger new_invitation_webhook
   after insert on public.organizations_invitations
   for each row execute function public.handle_new_invitation();
+
+
+    -- Organisations Profile Pictures
+insert into storage.buckets
+  (id, name, public, allowed_mime_types, file_size_limit)
+values
+  ('organizations_avatars', 'organizations_avatars', true, '{image/*}', 1 * 1024 * 1024) on conflict (id) do nothing; -- 1MB
+
+-- Add, Update or clear avatar_path in public.organizations when a new avatar is uploaded or deleted
+create or replace function public.handle_organization_avatar()
+returns trigger as $$
+begin
+  if (TG_OP = 'DELETE') then
+    update public.organizations set avatar_path = null where avatar_path = array_to_string(old.path_tokens, '/');
+    return old;
+  end if;
+  
+  if (TG_OP = 'INSERT') then
+    update public.organizations set avatar_path = array_to_string(new.path_tokens, '/') where id = ((storage.foldername(new.name))[1])::uuid;
+    return new;
+  end if;
+  
+  if (TG_OP = 'UPDATE') then
+    update public.organizations set avatar_path = array_to_string(new.path_tokens, '/') where id = ((storage.foldername(new.name))[1])::uuid;
+    return new;
+  end if;
+end;
+$$ language plpgsql security invoker;
+
+create trigger "handle_organization_avatar_create" after insert on storage.objects
+for each row
+when (new.bucket_id = 'organizations_avatars')
+execute procedure public.handle_organization_avatar();
+
+create trigger "handle_organization_avatar_update" after update on storage.objects
+for each row
+when (new.bucket_id = 'organizations_avatars')
+execute procedure public.handle_organization_avatar();
+
+create trigger "handle_organization_avatar_delete" after delete on storage.objects
+for each row
+when (old.bucket_id = 'organizations_avatars')
+execute procedure public.handle_organization_avatar();

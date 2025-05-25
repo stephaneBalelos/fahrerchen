@@ -17,26 +17,26 @@ grant update (name, description) on table public.course_documents to authenticat
 
 -- Course Documents Policies
 create policy "owner_manager_teacher_student_can_see_course_documents" on public.course_documents for select to authenticated using (public.authorize('course_documents.read', organization_id));
-create policy "owner_manager_teacher_student_can_see_course_documents_storage" on storage.objects for select to authenticated using (public.authorize('courses_documents.read', ((storage.foldername(name))[1])::uuid));
+create policy "owner_manager_teacher_student_can_see_course_documents_storage" on storage.objects for select to authenticated using (public.authorize('course_documents.read', ((storage.foldername(name))[1])::uuid));
 insert into public.role_permissions (role, permission) values ('owner', 'course_documents.read'), ('manager', 'course_documents.read'), ('teacher', 'course_documents.read'), ('student', 'course_documents.read');
 
 create policy "owner_manager_teacher_can_create_course_documents" on public.course_documents for insert to authenticated with check (public.authorize('course_documents.create', organization_id));
-create policy "owner_manager_teacher_can_create_course_documents_storage" on storage.objects for insert to authenticated with check (public.authorize('courses_documents.create', ((storage.foldername(name))[1])::uuid));
+create policy "owner_manager_teacher_can_create_course_documents_storage" on storage.objects for insert to authenticated with check (public.authorize('course_documents.create', ((storage.foldername(name))[1])::uuid));
 insert into public.role_permissions (role, permission) values ('owner', 'course_documents.create'), ('manager', 'course_documents.create'), ('teacher', 'course_documents.create');
 
 create policy "owner_manager_teacher_can_update_course_documents" on public.course_documents for update to authenticated using (public.authorize('course_documents.update', organization_id));
-create policy "owner_manager_teacher_can_update_course_documents_storage" on storage.objects for update to authenticated using (public.authorize('courses_documents.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('courses_documents.update', ((storage.foldername(name))[1])::uuid));
+create policy "owner_manager_teacher_can_update_course_documents_storage" on storage.objects for update to authenticated using (public.authorize('course_documents.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('course_documents.update', ((storage.foldername(name))[1])::uuid));
 insert into public.role_permissions (role, permission) values ('owner', 'course_documents.update'), ('manager', 'course_documents.update'), ('teacher', 'course_documents.update');
 
 create policy "owner_manager_can_delete_course_documents_storage" on storage.objects for delete to authenticated using (public.authorize('courses.delete', ((storage.foldername(name))[1])::uuid));
 
 
 -- Create bucket for course documents
-    -- Student Documents
+    -- course Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('student_documents', 'student_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
+  ('course_documents', 'course_documents', false, '{image/*, application/pdf, video/*}', 20 * 1024 * 1024) on conflict (id) do nothing; -- 20MB
 
 
 -- Handle course documents changes

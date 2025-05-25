@@ -30,10 +30,22 @@ create type public.app_permission as enum (
   'courses.create',
   'courses.update',
   'courses.delete',
+  'course_documents.read',
+  'course_documents.create',
+  'course_documents.update',
+  'course_documents.delete',
+  'course_required_documents.read',
+  'course_required_documents.create',
+  'course_required_documents.update',
+  'course_required_documents.delete',
   'course_subscriptions.read',
   'course_subscriptions.create',
   'course_subscriptions.update',
   'course_subscriptions.delete',
+  'course_subscription_documents.read',
+  'course_subscription_documents.create',
+  'course_subscription_documents.update',
+  'course_subscription_documents.delete',
   'course_activities.read',
   'course_activities.create',
   'course_activities.update',
@@ -53,7 +65,11 @@ create type public.app_permission as enum (
   'course_subscription_bills.read',
   'course_subscription_bills.create',
   'course_subscription_bills.update',
-  'course_subscription_bills.delete'
+  'course_subscription_bills.delete',
+  'course_subscription_bill_items.read',
+  'course_subscription_bill_items.create',
+  'course_subscription_bill_items.update',
+  'course_subscription_bill_items.delete'
 );
 create type public.app_role as enum ('owner','manager', 'teacher', 'student' );
 create type public.user_status as enum ('ONLINE', 'OFFLINE');

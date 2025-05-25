@@ -5,10 +5,9 @@ create or replace view public.users_organizations as
     select
         u.id as user_id,
         u.email as user_email,
-        u.first_name as user_first_name,
-        u.last_name as user_last_name,
-        u.full_name as user_full_name,
-        u.email as user_email,
+        u.firstname as user_firstname,
+        u.lastname as user_lastname,
+        u.fullname as user_fullname,
         o.id as organization_id,
         o.name as organization_name,
         o.description as organization_description,
@@ -19,7 +18,7 @@ create or replace view public.users_organizations as
     from
         public.users u
     join
-        public.organization_memberships om on u.id = om.user_id
+        public.organization_members om on u.id = om.user_id
     join
         public.organizations o on om.organization_id = o.id;
 
@@ -41,7 +40,7 @@ create or replace view public.organizations_schedules as
         a.activity_type as activity_type,
         c.id as course_id,
         c.name as course_name,
-        c.description as course_description,
+        c.description as course_description
     from
         public.course_activity_schedules s
     join

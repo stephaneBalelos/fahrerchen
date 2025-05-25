@@ -41,10 +41,11 @@ create policy "student_can_delete_their_own_course_subscription_documents_storag
 
 
 -- create bucket for course subscription documents
+    -- Course Subscription Documents
 insert into storage.buckets
   (id, name, public, allowed_mime_types, file_size_limit)
 values
-  ('student_documents', 'student_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
+  ('course_subscription_documents', 'course_subscription_documents', false, '{image/*, application/pdf}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
 
 -- Handle course subscription documents changes
 create or replace function public.handle_course_subscription_documents_storage_ops()
