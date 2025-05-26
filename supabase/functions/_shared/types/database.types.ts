@@ -1391,6 +1391,10 @@ export type Database = {
           activity_id: string | null
           activity_name: string | null
           activity_type: number | null
+          assigned_to_email: string | null
+          assigned_to_firstname: string | null
+          assigned_to_fullname: string | null
+          assigned_to_lastname: string | null
           course_description: string | null
           course_id: string | null
           course_name: string | null
@@ -1475,7 +1479,7 @@ export type Database = {
         Returns: boolean
       }
       check_subscription_organization: {
-        Args: { organization_id: string; student_id: string; course_id: string }
+        Args: { org_id: string; student_id: string; course_id: string }
         Returns: boolean
       }
       course_allows_self_registration: {

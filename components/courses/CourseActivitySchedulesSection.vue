@@ -18,32 +18,32 @@
           v-for="(s, index) in schedules"
           :key="index"
           class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-          @click.stop="() => openEditSchedule(s.id, s.activity_id)"
+          @click.stop="() => openEditSchedule(s.schedule_id, s.activity_id)"
         >
           <div class="flex flex-1 gap-4">
             <UAvatar size="md" :icon="activityIcon" />
             <div class="flex items-start gap-2">
               <div class="text-sm flex-1">
                 <p class="text-gray-900 dark:text-white font-medium">
-                  {{ s.activity_name }} {{ getLocalizedDateTimeString(new Date(s.start_at)) }}
+                  {{ s.activity_name }} {{ getLocalizedDateTimeString(new Date(s.schedule_start_at)) }}
                 </p>
                 <p class="text-gray-500 dark:text-gray-400 font-medium">
-                  {{ s.assigned_to ? s.assigned_to_fullname : t("unassigned") }}
+                  {{ s.schedule_assigned_to ? s.assigned_to_fullname : t("unassigned") }}
                 </p>
               </div>
-              <UBadge v-if="s.status === 'COMPLETED'" color="green" variant="soft">
+              <UBadge v-if="s.schedule_status === 'COMPLETED'" color="green" variant="soft">
               {{
-                g(`courses.activities.schedules.schedules_status_${s.status}`)
+                g(`courses.activities.schedules.schedules_status_${s.schedule_status}`)
               }}
             </UBadge>
-            <UBadge v-else-if="s.status === 'CANCELED'" color="red" variant="soft">
+            <UBadge v-else-if="s.schedule_status === 'CANCELED'" color="red" variant="soft">
               {{
-                g(`courses.activities.schedules.schedules_status_${s.status}`)
+                g(`courses.activities.schedules.schedules_status_${s.schedule_status}`)
               }}
             </UBadge>
             <UBadge v-else color="primary" variant="soft">
               {{
-                g(`courses.activities.schedules.schedules_status_${s.status}`)
+                g(`courses.activities.schedules.schedules_status_${s.schedule_status}`)
               }}
             </UBadge>
             </div>
@@ -51,7 +51,7 @@
           <div class="flex items-center gap-2">
             <div class="flex flex-col gap-1">
               <p class="text-gray-500 dark:text-gray-400">
-                {{ s.attendees.length }} {{ t("attendees") }}
+                {{ s.schedule_attendees.length }} {{ t("attendees") }}
               </p>
             </div>
           </div>
@@ -72,7 +72,7 @@
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { ACTIVITY_ICONS } from "~/constants";
-import type { CourseActivityScheduleView } from "~/types/app.types";
+import type { AppOrganizationSchedulesView } from "~/types/app.types";
 
 type Props = {
   courseId: string;
@@ -138,15 +138,15 @@ const {
   `course/${props.courseId}/activity/${props.activityTypeId}/schedules`,
   async () => {
     const { data, error } = await client
-      .from("course_activity_schedules_view")
+      .from("organizations_schedules_view")
       .select("*")
       .eq("activity_type", props.activityTypeId)
       .eq("course_id", props.courseId)
-      .eq("organization_id", props.orgId)
-      .order("start_at", {
+      .eq("schedule_organization_id", props.orgId)
+      .order("schedule_start_at", {
         ascending: false,
       })
-      .limit(10).overrideTypes<CourseActivityScheduleView[]>();
+      .limit(10).overrideTypes<AppOrganizationSchedulesView[]>();
     if (error) {
       throw error;
     }

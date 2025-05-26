@@ -34,6 +34,10 @@ create or replace view public.organizations_schedules_view as
         s.attendees as schedule_attendees,
         s.status as schedule_status,
         s.assigned_to as schedule_assigned_to,
+        u.firstname as assigned_to_firstname,
+        u.lastname as assigned_to_lastname,
+        u.email as assigned_to_email,
+        u.fullname as assigned_to_fullname,
         a.id as activity_id,
         a.name as activity_name,
         a.description as activity_description,
@@ -45,6 +49,8 @@ create or replace view public.organizations_schedules_view as
         public.course_activity_schedules s
     join
         public.course_activities a on s.activity_id = a.id
+    join
+        public.users u on s.assigned_to = u.id
     join
         public.courses c on a.course_id = c.id;
 

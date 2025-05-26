@@ -203,7 +203,7 @@ begin
 
   -- Insert the bill item
   insert into public.course_subscription_bill_items (course_subscription_id, course_activity_attendance_id, activity_type, title, description, price, organization_id)
-  values (new.course_subscription_id, new.id, new.activity_type, new.title, new.description, new.price, new.organization_id);
+  values (new.course_subscription_id, new.id, new.activity_type, new.activity_name, new.activity_description, new.activity_price, new.organization_id);
 
   return new;
 end;

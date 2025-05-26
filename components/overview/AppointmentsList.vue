@@ -105,6 +105,7 @@ const { data: schedules } = useAsyncData(async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     throw new Error("No active organization");
   }
+
   const { data, error } = await client
     .from("organizations_schedules_view")
     .select("*")
@@ -120,6 +121,8 @@ const { data: schedules } = useAsyncData(async () => {
   if (error) {
     throw error;
   }
+
+  console.log("schedules", data);
 
   return data;
 });

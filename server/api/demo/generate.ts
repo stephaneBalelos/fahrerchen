@@ -317,6 +317,8 @@ export default defineEventHandler(async (event) => {
                 statusMessage: 'Schedules not found'
             })
         }
+        // Assign these schedules to the user
+        await client.from('course_activity_schedules').update({ assigned_to: user.id }).eq('organization_id', org.id).in('id', schedules.map(s => s.id))
         for (let i = 0; i < schedules.length; i++) {
             const schedule = schedules[i]
             await client.from('course_activity_schedules').update({ status: randomNumber(1, 2) == 2 ? 'CANCELED': 'COMPLETED' }).eq('id', schedule.id)

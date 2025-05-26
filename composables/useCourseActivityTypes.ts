@@ -10,7 +10,6 @@ export async function useCourseActivityTypes() {
         if (error) {
             throw error
         }
-        console.log('useCourseActivityTypes', data)
         return data ?? []
     } catch (error) {
         console.log(error)

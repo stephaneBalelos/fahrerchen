@@ -50,7 +50,7 @@ const links = computed(() => [
 ]);
 
 onUnmounted(() => {
-  courseStore.$reset();
+  courseStore.course = null;
 });
 </script>
 
