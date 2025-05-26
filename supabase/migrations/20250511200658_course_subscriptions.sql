@@ -20,7 +20,7 @@ create unique index unique_active_subscription on public.course_subscriptions(co
 -- check subscription is coherent with organization
 -- the referenced course and student must belong to the same organization
 create or replace function public.check_subscription_organization(
-    organization_id uuid,
+    org_id uuid,
     student_id uuid,
     course_id uuid
 )
@@ -36,7 +36,7 @@ begin
         return false;
     end if;
 
-    return course_organization_id = organization_id and student_organization_id = organization_id;
+    return course_organization_id = org_id and student_organization_id = org_id;
 end;
 $$ language plpgsql security definer;
 

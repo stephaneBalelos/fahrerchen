@@ -267,7 +267,7 @@ export default defineEventHandler(async (event) => {
 
         // Generate Students
         const studentsWithOrgId = students.data.map((student: any) => {
-            const s: Omit<AppStudent, "id" | "user_id" | "created_at"> = {
+            const s: Omit<AppStudent, "id" | "user_id" | "created_at" | "full_name"> = {
                 firstname: student.firstname,
                 lastname: student.lastname,
                 email: student.email,
@@ -323,7 +323,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Generate Bills
-        await client.rpc('generate_bill_for_subscriptions')
+        // await client.rpc('generate_bill_for_subscription')
 
         return {
             status: 200,

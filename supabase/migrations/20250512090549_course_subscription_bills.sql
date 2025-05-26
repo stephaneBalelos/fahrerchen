@@ -181,7 +181,7 @@ declare
 begin
   select sum(price) into total_cost from public.course_subscription_bill_items where course_subscription_id = new.id;
 
-  update public.course_subscriptions set total_cost = total_cost where id = new.id;
+  update public.course_subscriptions set costs = total_cost where id = new.id;
 
   return new;
 end;
