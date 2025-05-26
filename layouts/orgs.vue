@@ -5,7 +5,7 @@
       :resizable="{ min: 200, max: 300 }"
       collapsible
     >
-      <UDashboardNavbar class="!border-transparent" :ui="{ left: 'flex-1' }">
+      <UDashboardNavbar class="border-transparent" :ui="{ left: 'flex-1' }">
         <template #left>
           <ClientOnly>
             <TeamsDropdown />
@@ -14,7 +14,7 @@
         </template>
         <template #right>
           <ClientOnly>
-            <NotificationsButton />
+            <!-- <NotificationsButton /> -->
           </ClientOnly>
         </template>
       </UDashboardNavbar>
@@ -35,7 +35,7 @@
           /> -->
 
         <div class="flex-1">
-          <TutorialNavigation v-if="runtimeConfig.public.show_tutorial" />
+          <!-- <TutorialNavigation v-if="runtimeConfig.public.show_tutorial" /> -->
         </div>
 
         <UDivider class="sticky bottom-0" />
@@ -56,9 +56,6 @@
 import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
-import NotificationsButton from "~/components/sidebar/NotificationsButton.vue";
-
-const runtimeConfig = useRuntimeConfig();
 
 
 // const { t } = useI18n({

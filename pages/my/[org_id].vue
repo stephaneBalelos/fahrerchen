@@ -25,6 +25,10 @@ await useAsyncData('permissions', async () => {
   await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.organization_role);
   return true;
 });
+
+onUnmounted(() => {
+    userOrganizationsStore.clearSelectedOrganization();
+});
 </script>
 
 <style scoped>

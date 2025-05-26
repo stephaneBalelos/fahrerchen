@@ -58,7 +58,6 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/eslint',
     '@nuxtjs/turnstile',
-    '@sentry/nuxt/module',
     '@nuxtjs/google-fonts'
   ],
 
@@ -103,13 +102,13 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2025-01-15',
 
-  sentry: {
-    sourceMapsUploadOptions: {
-      org: 'balelos',
-      project: 'javascript-nuxt'
-    },
-    autoInjectServerSentry: 'top-level-import'
-  },
+  // sentry: {
+  //   sourceMapsUploadOptions: {
+  //     org: 'balelos',
+  //     project: 'javascript-nuxt'
+  //   },
+  //   autoInjectServerSentry: 'top-level-import'
+  // },
 
   sourcemap: {
     client: 'hidden'
