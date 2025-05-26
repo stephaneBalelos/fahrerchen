@@ -26,10 +26,6 @@ export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['c
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
 
-export type AppNotification = MergeDeep<DatabaseGenerated['public']['Tables']['notifications']['Row'], {
-  target_roles: UserRole[]
-}>
-
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
     payment_method_id: Stripe.PaymentMethod.Type
@@ -55,43 +51,63 @@ export type StripeConnectLinkAccountPostBody = {
   org_id: string
 }
 
-export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
-export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
-export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
-export type CourseSubscriptionBillItemView = Database["public"]["Views"]["course_subscription_bill_items_view"]["Row"]
-export type NotificationView = Database["public"]["Views"]["notifications_view"]["Row"]
+export type AppUserOrganizationsView = Database["public"]["Views"]["users_organizations_view"]["Row"]
+export type OrganizationSchedulesView = Database["public"]["Views"]["organizations_schedules_view"]["Row"]
+export type CourseSubscriptionsView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
     Views: {
-      organization_members_view: {
+      users_organizations_view: {
         Row: {
-          id: string
-          inserted_at: Date
-          organization_id: string
           user_id: string
-          role: UserRole
           user_email: string
           user_firstname: string | null
           user_lastname: string | null
           user_fullname: string | null
-          user_avatar_path: string | null
+          organization_id: string
+          organization_name: string
+          organization_description: string | null
+          organization_avatar_path: string | null
+          organization_preferred_language: string
+          organization_role: UserRole
+          organization_membership_inserted_at: string
+        }
+      },
+      organizations_schedules_view: {
+        Row: {
+          schedule_id: string
+          schedule_organization_id: string
+          schedule_start_at: string
+          schedule_end_at: string
+          schedule_attendees: string[]
+          schedule_status: DatabaseGenerated["public"]["Enums"]["schedule_status"]
+          schedule_assigned_to: string
+          activity_id: string
+          activity_name: string
+          activity_description: string
+          activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"]
+          course_id: string
+          course_name: string
+          course_description: string
         }
       },
       course_subscriptions_view: {
         Row: {
-          id: string,
-          course_id: string,
-          student_id: string,
-          archived_at: Date | null,
-          costs: string,
-          organization_id: string,
-          course_name: string,
-          course_description: string,
-          student_email: string,
-          student_firstname: string,
-          student_lastname: string,
-          student_user_id: string,
+          id: string
+          student_id: string
+          inserted_at: string
+          archived_at: string | null
+          costs: number
+          organization_id: string
+          student_firstname: string
+          student_lastname: string
+          student_email: string
+          student_full_name: string
+          student_avatar_path: string | null
+          course_name: string
+          course_description: string
+          course_id: string
         }
       },
       course_activity_schedules_view: {
@@ -115,7 +131,7 @@ export type Database = MergeDeep<DatabaseGenerated, {
           assigned_to_firstname: string | null,
           assigned_to_lastname: string | null,
           attendees: string[]
-        } 
+        }
       },
       course_subscriptions_stats_view: {
         Row: {

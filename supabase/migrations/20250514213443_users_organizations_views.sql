@@ -1,7 +1,7 @@
 -- User's Organizations View
 -- This view provides a list of organizations that a user is a member of, along with their roles.
 
-create or replace view public.users_organizations as
+create or replace view public.users_organizations_view as
     select
         u.id as user_id,
         u.email as user_email,
@@ -25,7 +25,7 @@ create or replace view public.users_organizations as
 
 -- Get All schedules for the given organization joining the course, course_activity and course activityschedules
 -- This view provides a list of schedules for each organization, including their details.
-create or replace view public.organizations_schedules as
+create or replace view public.organizations_schedules_view as
     select
         s.id as schedule_id,
         s.organization_id as schedule_organization_id,
