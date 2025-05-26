@@ -5,8 +5,7 @@ create table if not exists public.course_activity_types (
 );
 comment on table public.course_activity_types is 'COURSE ACTIVITY TYPES.';
 alter table public.course_activity_types enable row level security;
-revoke all on table public.course_activity_types from authenticated, anon;
-grant select on table public.course_activity_types to authenticated, anon;
+create policy "everyone_can_read_course_activity_types" on public.course_activity_types for select to authenticated using (true);
 insert into public.course_activity_types (type) values
 ('THEORY'), -- 0
 ('PRACTICE'), -- 1
