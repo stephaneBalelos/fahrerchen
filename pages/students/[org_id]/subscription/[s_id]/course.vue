@@ -26,7 +26,7 @@
                     </p>
                     <p class="text-gray-500 dark:text-gray-400 text-sm">
                       {{ t("planned_for") }}
-                      {{ formatDate(schedule.start_at) }}
+                      {{ formatDate(schedule.schedule_start_at) }}
                     </p>
                   </div>
                 </div>
@@ -34,27 +34,27 @@
                   class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg"
                 >
                   <UBadge
-                    v-if="schedule.attendees.includes(subscriptionId) && schedule.status == 'COMPLETED'"
+                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'COMPLETED'"
                     color="green"
                     variant="soft"
                     :label="t('attended')"
                   />
                   <UBadge
-                    v-if="schedule.attendees.includes(subscriptionId) && schedule.status == 'PLANNED'"
+                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'PLANNED'"
                     color="primary"
                     variant="soft"
                     :label="t('registered')"
                   />
                   <UBadge
-                    v-if="schedule.attendees.includes(subscriptionId) && schedule.status == 'CANCELED'"
+                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'CANCELED'"
                     color="red"
                     variant="soft"
                     :label="t('canceled')"
                   />
                   <UTooltip
                     v-if="
-                      schedule.status == 'PLANNED' &&
-                      schedule.attendees.includes(subscriptionId)
+                      schedule.schedule_status == 'PLANNED' &&
+                      schedule.schedule_attendees.includes(subscriptionId)
                     "
                     :text="t('cancel_registration')"
                   >
@@ -67,8 +67,8 @@
                   </UTooltip>
                   <UButton
                     v-if="
-                      schedule.status == 'PLANNED' &&
-                      !schedule.attendees.includes(subscriptionId)
+                      schedule.schedule_status == 'PLANNED' &&
+                      !schedule.schedule_attendees.includes(subscriptionId)
                     "
                     color="primary"
                     size="2xs"
@@ -90,8 +90,7 @@
 
 <script setup lang="ts">
 import type {
-  CourseActivityScheduleView,
-  CourseSubscriptionView,
+  AppOrganizationSchedulesView
 } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 
@@ -112,7 +111,7 @@ const { data: subscription } = useAsyncData(
       .select("*")
       .eq("id", subscriptionId)
       .single()
-      .overrideTypes<CourseSubscriptionView>();
+      .overrideTypes<AppOrganizationSchedulesView>();
     if (error) {
       console.error(error);
       return null;
@@ -127,9 +126,9 @@ const { data: schedules } = useAsyncData(
   `subscription_schedules_${subscriptionId}`,
   async () => {
     const q = client
-      .from("course_activity_schedules_view")
+      .from("organizations_schedules_view")
       .select("*")
-      .eq("organization_id", orgId);
+      .eq("schedule_organization_id", orgId);
 
     if (subscription.value) {
       q.eq("course_id", subscription.value.course_id);
@@ -141,7 +140,7 @@ const { data: schedules } = useAsyncData(
 
     const { data, error } = await q
       .order("start_at", { ascending: false })
-      .overrideTypes<CourseActivityScheduleView[]>();
+      .overrideTypes<AppOrganizationSchedulesView[]>();
     if (error) {
       throw error;
     }

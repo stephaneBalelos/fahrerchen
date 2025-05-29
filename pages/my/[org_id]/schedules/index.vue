@@ -18,7 +18,7 @@
               expanded
               is-required
               :mode="'date'"
-              :dates-highlighted="schedulesForMonth ? schedulesForMonth.map((schedule) => new Date(schedule.start_at)) : []"
+              :dates-highlighted="schedulesForMonth ? schedulesForMonth.map((schedule) => new Date(schedule.schedule_start_at)) : []"
             />
           </UDashboardCard>
           <UDashboardCard>
@@ -147,7 +147,7 @@
             >
               <SchedulesScheduleItem
                 v-for="schedule in schedules"
-                :key="schedule.id"
+                :key="schedule.schedule_id"
                 :schedule="schedule"
                 @update="refresh"
               />
@@ -164,10 +164,10 @@
               :events="
                 schedules.map((schedule) => ({
                   label: `${schedule.course_name} | ${schedule.activity_name}`,
-                  id: schedule.id,
-                  date: new Date(schedule.start_at),
-                  start: new Date(schedule.start_at),
-                  end: new Date(schedule.end_at),
+                  id: schedule.schedule_id,
+                  date: new Date(schedule.schedule_start_at),
+                  start: new Date(schedule.schedule_start_at),
+                  end: new Date(schedule.schedule_end_at),
                   schedule,
                 }))
               "
@@ -191,7 +191,6 @@ import {
 import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import { SCHEDULES_STATUS } from "~/constants";
-import type { Database } from "~/types/app.types";
 
 const { t } = useI18n({
   useScope: "local",
@@ -207,7 +206,7 @@ const views = computed(() => [
   { label: t("calendar_view"), value: "calendar" },
 ]);
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const userOrganizationsStore = useUserOrganizationsStore();
 const courseActivitySchedules = useCourseActivitySchedules();
 const selectedDate = ref(new Date());
@@ -260,13 +259,16 @@ const { data: schedulesForMonth } = useAsyncData(
     const dateEnd = endOfMonth(selectedDate.value);
 
     const { data, error } = await client
-      .from("course_activity_schedules_view")
-      .select("start_at")
-      .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
-      .gte("start_at", dateStart.toISOString())
-      .lte("end_at", dateEnd.toISOString());
+      .from("organizations_schedules_view")
+      .select("schedule_start_at")
+      .eq('schedule_organization_id', userOrganizationsStore.selectedOrganization.organization_id)
+      .gte("schedule_start_at", dateStart.toISOString())
+      .lte("schedule_end_at", dateEnd.toISOString()).overrideTypes<
+        { schedule_start_at: string }[]
+      >();
 
     if (error) {
+      console.error(error);
       throw error;
     }
     return data;
@@ -277,7 +279,7 @@ const { data: schedulesForMonth } = useAsyncData(
       // reduce duplicate dates
       const datesString: string[] = [];
       return data.filter((schedule) => {
-        const date = format(new Date(schedule.start_at), "yyyy-MM-dd");
+        const date = format(new Date(schedule.schedule_start_at), "yyyy-MM-dd");
         if (datesString.includes(date)) {
           return false;
         }
