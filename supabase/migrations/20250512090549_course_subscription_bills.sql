@@ -63,8 +63,8 @@ begin
   if bill_canceled_at is not null then
     return false; -- Bill is canceled, not active
   end if;
-  if not bill_ready_to_pay then
-    return false; -- Bill is not ready to pay, not active
+  if bill_ready_to_pay then
+    return false; -- Bill is ready to pay, not active
   end if;
   return true; -- Bill is active
 end;
@@ -179,16 +179,16 @@ returns trigger as $$
 declare
   total_cost numeric;
 begin
-  select sum(price) into total_cost from public.course_subscription_bill_items where course_subscription_id = new.id;
+  select sum(price) into total_cost from public.course_subscription_bill_items where course_subscription_id = new.course_subscription_id;
 
-  update public.course_subscriptions set costs = total_cost where id = new.id;
+  update public.course_subscriptions set costs = total_cost where id = new.course_subscription_id;
 
   return new;
 end;
 $$ language plpgsql security invoker set search_path = public;
 -- trigger the function every time a bill item is inserted or updated
-create trigger on_bill_item_inserted_or_updated
-after insert or update on public.course_subscription_bill_items
+create trigger on_bill_item_inserted
+after insert on public.course_subscription_bill_items
 for each row
 execute procedure public.aggregate_subscription_cost();
 

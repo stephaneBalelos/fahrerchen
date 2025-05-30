@@ -179,7 +179,6 @@ const {
       }
 
     const { data } = await query;
-    console.log("students data", data);
     return data;
   },
   {
