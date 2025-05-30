@@ -97,7 +97,6 @@ const groups = computed(() => {
 
 const itemRefs = ref([] as HTMLDivElement[]);
 
-onMounted(() => console.log(itemRefs.value));
 
 const toggleCollapsible = (index: number) => {
   const group = itemRefs.value[index];
