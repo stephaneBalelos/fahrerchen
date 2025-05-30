@@ -30,7 +30,7 @@
           <span class="text-lg font-bold">{{
             formatCurrency(
               group.items
-                .map((i) => i.item_price)
+                .map((i) => i.price)
                 .reduce((acc, curr) => acc + curr, 0)
             )
           }}</span>
@@ -62,11 +62,11 @@
 </template>
 
 <script setup lang="ts">
-import type { CourseSubscriptionBillItemView } from "~/types/app.types";
+import type { AppCourseSubscriptionBillItem } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 
 type Props = {
-  billItems: CourseSubscriptionBillItemView[];
+  billItems: AppCourseSubscriptionBillItem[];
 };
 
 const props = defineProps<Props>();
@@ -87,7 +87,7 @@ const groups = computed(() => {
     }
     acc[activityTypeName].push(item);
     return acc;
-  }, {} as Record<string, CourseSubscriptionBillItemView[]>);
+  }, {} as Record<string, AppCourseSubscriptionBillItem[]>);
 
   return Object.entries(grouped).map(([key, items]) => ({
     activityType: key,
