@@ -1,22 +1,35 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar
-      v-if="subscription"
-      :title="`${subscription.student_firstname} ${subscription.student_lastname}`"
-    >
-      <template #right>
-        <UButton variant="ghost" :loading="isDownloadingCertificate" @click="generateCertificate">
-          {{ t("generate_certifcate") }}
-        </UButton>
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardNavbar
+        v-if="subscription"
+      >
+      <template #title>
+        <div class="flex items-center gap-2">
+          <UAvatar
+            :alt="`${subscription.student_firstname} ${subscription.student_lastname}`"
+            size="sm"
+          />
+          <span>{{ subscription.student_full_name }}</span> |
+          <span>
+            {{  subscription.course_name }}
+          </span>
+          <UBadge
+            v-if="subscription.archived_at"
+            color="red"
+            size="sm"
+          >
+            {{ t("archive") }}
+          </UBadge>
+        </div>
       </template>
-    </UDashboardNavbar>
-    <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
-      <UHorizontalNavigation :links="links" />
-    </UDashboardToolbar>
-    <UDashboardPanelContent>
+        <template #right>
+          <UHorizontalNavigation :links="links" />
+        </template>
+      </UDashboardNavbar>
       <NuxtPage />
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
@@ -62,6 +75,10 @@ const links = computed(() => {
         exact: true,
       },
       {
+        label: t("activity"),
+        to: `/my/${org_id}/students/${subscription_id}/activity`,
+      },
+      {
         label: t("bills"),
         to: `/my/${org_id}/students/${subscription_id}/bills`,
       },
@@ -73,7 +90,10 @@ const links = computed(() => {
   ];
 });
 
-async function generateCertificate() {
+async function _generateCertificate() {
+  if (!subscription.value) {
+    return;
+  }
   if (isDownloadingCertificate.value) {
     return;
   }
@@ -111,6 +131,7 @@ async function generateCertificate() {
     "active": "Aktiv",
     "archive": "Archiv",
     "overview": "Überblick",
+    "activity": "Aktivität",
     "bills": "Rechnungen",
     "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
@@ -122,6 +143,7 @@ async function generateCertificate() {
     "active": "Active",
     "archive": "Archive",
     "overview": "Overview",
+    "activity": "Activity",
     "bills": "Bills",
     "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",

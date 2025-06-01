@@ -1,55 +1,57 @@
 <template>
-  <UDashboardSection
-    :title="data?.course?.name"
-    :description="data?.course?.description"
-  >
-    <template #links>
-      <UButton
-        :to="`/my/${data?.organization_id}/courses/${data?.course_id}`"
-        variant="ghost"
-      >
-        {{ t("view_course") }}
-      </UButton>
-    </template>
-    <div class="grid grid-cols-1 gap-4">
-      <UDashboardCard
-        v-if="data && data.course?.course_required_documents"
-        class="mb-4"
-        :title="t('course_required_documents')"
-        :description="t('course_required_documents_description')"
-      >
-        <CourseRequiredDocumentItem
-          v-for="doc in data.course.course_required_documents"
-          :key="doc.id"
-          :doc="doc"
-          :bucket-id="'course_subscription_documents'"
-          :path="`${doc.organization_id}/${data.id}/${doc.id}`"
-        />
-      </UDashboardCard>
-      <UDivider />
-      <UDashboardCard
-        v-if="!data?.archived_at"
-        :title="t('archive_subscription_label')"
-        :description="t('archive_subscription_description')"
-      >
-        <template #links>
-          <UButton variant="ghost" color="primary" @click="archiveSubscription">
-            {{ t("archive_subscription") }}
-          </UButton>
-        </template>
-      </UDashboardCard>
-      <UDashboardCard
-        :title="t('delete_subscription_label')"
-        :description="t('delete_subscription_description')"
-      >
-        <template #links>
-          <UButton variant="ghost" color="red" @click="deleteSubscription">
-            {{ t("delete_subscription") }}
-          </UButton>
-        </template>
-      </UDashboardCard>
-    </div>
-  </UDashboardSection>
+  <UDashboardPanelContent>
+    <UDashboardSection
+      :title="data?.course?.name"
+      :description="data?.course?.description"
+    >
+      <template #links>
+        <UButton
+          :to="`/my/${data?.organization_id}/courses/${data?.course_id}`"
+          variant="ghost"
+        >
+          {{ t("view_course") }}
+        </UButton>
+      </template>
+      <div class="grid grid-cols-1 gap-4">
+        <UDashboardCard
+          v-if="data && data.course?.course_required_documents"
+          class="mb-4"
+          :title="t('course_required_documents')"
+          :description="t('course_required_documents_description')"
+        >
+          <CourseRequiredDocumentItem
+            v-for="doc in data.course.course_required_documents"
+            :key="doc.id"
+            :doc="doc"
+            :bucket-id="'course_subscription_documents'"
+            :path="`${doc.organization_id}/${data.id}/${doc.id}`"
+          />
+        </UDashboardCard>
+        <UDivider />
+        <UDashboardCard
+          v-if="!data?.archived_at"
+          :title="t('archive_subscription_label')"
+          :description="t('archive_subscription_description')"
+        >
+          <template #links>
+            <UButton variant="ghost" color="primary" @click="archiveSubscription">
+              {{ t("archive_subscription") }}
+            </UButton>
+          </template>
+        </UDashboardCard>
+        <UDashboardCard
+          :title="t('delete_subscription_label')"
+          :description="t('delete_subscription_description')"
+        >
+          <template #links>
+            <UButton variant="ghost" color="red" @click="deleteSubscription">
+              {{ t("delete_subscription") }}
+            </UButton>
+          </template>
+        </UDashboardCard>
+      </div>
+    </UDashboardSection>
+  </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
