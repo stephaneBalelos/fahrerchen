@@ -1435,6 +1435,7 @@ export type Database = {
           course_description: string | null
           course_id: string | null
           course_name: string | null
+          course_type: Database["public"]["Enums"]["course_type"] | null
           id: string | null
           inserted_at: string | null
           organization_id: string | null

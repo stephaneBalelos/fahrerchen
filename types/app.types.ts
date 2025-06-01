@@ -109,6 +109,7 @@ export type Database = MergeDeep<DatabaseGenerated, {
           course_name: string
           course_description: string
           course_id: string
+          course_type: AppCourseType
         }
       },
       course_subscription_bills_view: {

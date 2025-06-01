@@ -102,13 +102,13 @@
               color="gray"
               variant="solid"
               icon="i-heroicons-pencil"
-              @click="(e) => openStudentForm(row.id)"
+              @click="() => openStudentForm(row.id)"
             />
             <UButton
               color="gray"
               variant="solid"
               icon="i-heroicons-eye"
-              @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
+              @click="() => openStudentSubscriptionsSlideOver(row.id)"
             />
           </div>
         </template>

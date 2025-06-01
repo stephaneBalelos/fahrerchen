@@ -15,7 +15,8 @@ create or replace view public.course_subscriptions_view as
         s.avatar_path as student_avatar_path,
         c.name as course_name,
         c.description as course_description,
-        c.id as course_id
+        c.id as course_id,
+        c.type as course_type
     from
         public.course_subscriptions cs
     join

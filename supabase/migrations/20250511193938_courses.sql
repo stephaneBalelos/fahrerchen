@@ -4,7 +4,7 @@ create table public.courses (
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   name          text not null,
   description       text not null,
-  type         course_type not null,
+  type         public.course_type not null,
   is_active     boolean default true not null,
   create_bill_on_subscription  boolean default true not null,
   allow_self_registration  boolean default true not null,

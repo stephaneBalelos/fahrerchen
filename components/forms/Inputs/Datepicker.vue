@@ -2,7 +2,7 @@
 import { DatePicker as VCalendarDatePicker } from 'v-calendar'
 import 'v-calendar/dist/style.css'
 import type { PropType } from 'vue';
-import type { DatePickerModel } from 'v-calendar/dist/types/src/use/datePicker.js';
+import type { DatePickerModel, DatePickerRangeObject } from 'v-calendar/dist/types/src/use/datePicker.js';
 
 const props = defineProps({
   modelValue: {
@@ -46,7 +46,7 @@ const attrs = {
 
 <template>
   <VCalendarDatePicker 
-  v-if="date && (typeof date === 'object')" v-model="date"
+  v-if="date && (date as DatePickerRangeObject)?.start && (date as DatePickerRangeObject)?.end" v-model.range="date"
   :mode="props.mode"
   :locale="locale" :expanded="props.expanded" :columns="1"
   v-bind="{ ...attrs, ...$attrs }"
@@ -58,6 +58,21 @@ const attrs = {
   }"
   is24hr
   />
+  <VCalendarDatePicker
+   v-else
+   v-model="date"
+   :mode="props.mode"
+   :locale="locale" :expanded="props.expanded" :columns="1"
+   v-bind="{ ...attrs, ...$attrs }"
+   :attributes="[
+     { dot: true, dates: [...props.datesHighlighted] }
+   ]"
+   :rules="{
+     minutes: [0, 15, 30, 45],
+   }"
+   is24hr
+  />
+   
 </template>
 
 <style>
