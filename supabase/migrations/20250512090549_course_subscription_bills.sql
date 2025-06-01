@@ -63,9 +63,6 @@ begin
   if bill_canceled_at is not null then
     return false; -- Bill is canceled, not active
   end if;
-  if bill_ready_to_pay then
-    return false; -- Bill is ready to pay, not active
-  end if;
   return true; -- Bill is active
 end;
 $$ language plpgsql security definer set search_path = public;
