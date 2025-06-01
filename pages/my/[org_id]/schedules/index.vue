@@ -263,9 +263,7 @@ const { data: schedulesForMonth } = useAsyncData(
       .select("schedule_start_at")
       .eq('schedule_organization_id', userOrganizationsStore.selectedOrganization.organization_id)
       .gte("schedule_start_at", dateStart.toISOString())
-      .lte("schedule_end_at", dateEnd.toISOString()).overrideTypes<
-        { schedule_start_at: string }[]
-      >();
+      .lte("schedule_end_at", dateEnd.toISOString()).overrideTypes<{ schedule_start_at: string }[]>();
 
     if (error) {
       console.error(error);

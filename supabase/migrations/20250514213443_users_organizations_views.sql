@@ -49,7 +49,7 @@ create or replace view public.organizations_schedules_view as
         public.course_activity_schedules s
     join
         public.course_activities a on s.activity_id = a.id
-    join
+    left join
         public.users u on s.assigned_to = u.id
     join
         public.courses c on a.course_id = c.id;
