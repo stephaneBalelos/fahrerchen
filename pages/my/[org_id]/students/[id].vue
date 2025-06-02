@@ -2,20 +2,20 @@
   <UDashboardPage>
     <UDashboardPanel grow>
       <UDashboardNavbar
-        v-if="subscription"
+        v-if="subscriptionStore.subscription"
       >
       <template #title>
         <div class="flex items-center gap-2">
           <UAvatar
-            :alt="`${subscription.student_firstname} ${subscription.student_lastname}`"
+            :alt="`${subscriptionStore.subscription.student_firstname} ${subscriptionStore.subscription.student_lastname}`"
             size="sm"
           />
-          <span>{{ subscription.student_full_name }}</span> |
+          <span>{{ subscriptionStore.subscription.student_full_name }}</span> |
           <span>
-            {{  subscription.course_name }}
+            {{  subscriptionStore.subscription.course_name }}
           </span>
           <UBadge
-            v-if="subscription.archived_at"
+            v-if="subscriptionStore.subscription.archived_at"
             color="red"
             size="sm"
           >
@@ -34,7 +34,6 @@
 
 <script setup lang="ts">
 import { format } from "date-fns";
-import type { Database } from "~/types/app.types";
 
 definePageMeta({
   layout: "orgs",
@@ -43,28 +42,19 @@ definePageMeta({
 const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
-const client = useSupabaseClient<Database>();
 const isDownloadingCertificate = ref(false);
+const subscriptionStore = useSubscriptionStore();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const { data: subscription } = useAsyncData(
-  `subscriptions_${subscription_id}`,
-  async () => {
-    const { data, error } = await client
-      .from("course_subscriptions_view")
-      .select("*")
-      .eq("id", subscription_id)
-      .single();
-    if (error) {
-      throw error;
-    }
+await useAsyncData(async() => {
+  return await subscriptionStore.loadSubscription(subscription_id);
+})
 
-    return data;
-  }
-);
+
+
 
 const links = computed(() => {
   return [
@@ -91,7 +81,7 @@ const links = computed(() => {
 });
 
 async function _generateCertificate() {
-  if (!subscription.value) {
+  if (!subscriptionStore.subscription) {
     return;
   }
   if (isDownloadingCertificate.value) {
@@ -109,7 +99,7 @@ async function _generateCertificate() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ausbildungsnachweis-b-${subscription.value.student_firstname}-${subscription.value.student_lastname}-${date}.pdf`;
+    a.download = `ausbildungsnachweis-b-${subscriptionStore.subscription.student_firstname}-${subscriptionStore.subscription.student_lastname}-${date}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -120,6 +110,11 @@ async function _generateCertificate() {
     isDownloadingCertificate.value = false;
   }
 }
+
+onUnmounted(() => {
+  subscriptionStore.reset()
+  console.log(subscriptionStore.subscription)
+});
 </script>
 
 <style scoped></style>

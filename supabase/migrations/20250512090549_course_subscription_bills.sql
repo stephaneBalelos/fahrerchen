@@ -116,7 +116,7 @@ begin
   select public.is_subscription_active(subscription_id) into is_subscription_active;
 
   if not is_subscription_active then
-    raise exception 'subscription_is_not_active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   select array_agg(id) into bill_items from public.course_subscription_bill_items where course_subscription_id = subscription_id and bill_id is null;
@@ -150,7 +150,7 @@ declare
 begin
   -- Check if the subscription is active
   if not public.is_subscription_active(new.id) then
-    raise exception 'Subscription is not active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   -- Loop through all the costs and create a bill item for each one
@@ -195,7 +195,7 @@ returns trigger as $$
 begin
   --Check if the subscription is active
   if not public.is_subscription_active(new.course_subscription_id) then
-    raise exception 'Subscription is not active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   -- Insert the bill item

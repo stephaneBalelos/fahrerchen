@@ -1,12 +1,14 @@
 <template>
   <UDashboardPanelContent>
     <UDashboardSection
-      :title="data?.course?.name"
-      :description="data?.course?.description"
+      v-if="subscriptionStore.subscription"
+      :title="subscriptionStore.subscription.course_name"
+      :description="subscriptionStore.subscription.course_description"
     >
       <template #links>
         <UButton
-          :to="`/my/${data?.organization_id}/courses/${data?.course_id}`"
+          v-if="subscriptionStore.subscription"
+          :to="userOrganizationsStore.relativePath(`/courses/${subscriptionStore.subscription.course_id}`)"
           variant="ghost"
         >
           {{ t("view_course") }}
@@ -14,22 +16,23 @@
       </template>
       <div class="grid grid-cols-1 gap-4">
         <UDashboardCard
-          v-if="data && data.course?.course_required_documents"
+          v-if="course_required_documents"
           class="mb-4"
           :title="t('course_required_documents')"
           :description="t('course_required_documents_description')"
         >
           <CourseRequiredDocumentItem
-            v-for="doc in data.course.course_required_documents"
+            v-for="doc in course_required_documents"
             :key="doc.id"
             :doc="doc"
             :bucket-id="'course_subscription_documents'"
-            :path="`${doc.organization_id}/${data.id}/${doc.id}`"
+            :path="`${doc.organization_id}/${subscriptionStore.subscription.id}/${doc.id}`"
+            :disabled="subscriptionStore.subscription?.archived_at !== null"
           />
         </UDashboardCard>
         <UDivider />
         <UDashboardCard
-          v-if="!data?.archived_at"
+          v-if="!subscriptionStore.subscription.archived_at"
           :title="t('archive_subscription_label')"
           :description="t('archive_subscription_description')"
         >
@@ -65,24 +68,29 @@ const route = useRoute();
 const subscription_id = route.params.id as string;
 
 const client = useSupabaseClient();
+const subscriptionStore = useSubscriptionStore();
+const userOrganizationsStore = useUserOrganizationsStore();
 
 const toast = useToast();
 
-const { data, refresh } = useAsyncData(async () => {
-  const { data, error } = await client
-    .from("course_subscriptions")
-    .select(
-      "*, course:courses(id, name, description, course_required_documents(*))"
-    )
-    .eq("id", subscription_id)
+const { data: course_required_documents } = useAsyncData(
+  `course/${subscription_id}/required_documents`,
+  async () => {
+    if (!subscriptionStore.subscription) {
+      return null;
+    }
+    const { data, error } = await client
+      .from("course_required_documents")
+      .select("*")
+      .eq("course_id", subscriptionStore.subscription.course_id)
 
-    .single();
-
-  if (error) {
-    throw error;
+    if (error) {
+      console.error(error);
+      return null;
+    }
+    return data;
   }
-  return data;
-});
+);
 
 async function archiveSubscription() {
   try {
@@ -110,12 +118,12 @@ async function archiveSubscription() {
       color: "red",
     });
   } finally {
-    refresh();
+    subscriptionStore.loadSubscription(subscription_id);
   }
 }
 
 async function deleteSubscription() {
-  if (!data.value) {
+  if (!subscriptionStore.subscription) {
     return;
   }
   try {
@@ -133,7 +141,7 @@ async function deleteSubscription() {
       description: t("subscription_deleted_description"),
       color: "green",
     });
-    navigateTo(`/my/${data.value.organization_id}/students`);
+    navigateTo(`/my/${subscriptionStore.subscription.organization_id}/students`);
   } catch (error) {
     console.error(error);
     toast.add({

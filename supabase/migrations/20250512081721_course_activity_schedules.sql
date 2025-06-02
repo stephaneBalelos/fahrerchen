@@ -59,17 +59,17 @@ begin
 
   -- Check if the subscription is active
   if not public.is_subscription_active(course_subscription_id) then
-    raise exception 'Subscription is not active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   -- Check if the course_subscription_id is already in the attendees
   if course_subscription_id = any(schedule_attendees) then
-    raise exception 'Subscription is already in the attendees';
+    raise exception 'course_subscription_already_in_attendees';
   end if;
 
   -- Check if the schedule is active
   if not public.is_schedule_active(course_schedule_id) then
-    raise exception 'Schedule is not active';
+    raise exception 'activity_schedule_is_not_active';
   end if;
 
   update public.course_activity_schedules
@@ -93,17 +93,17 @@ begin
 
   -- Check if the subscription is active
   if not public.is_subscription_active(course_subscription_id) then
-    raise exception 'Subscription is not active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   -- Check if the course_subscription_id is already in the attendees
   if not course_subscription_id = any(schedule_attendees) then
-    raise exception 'Subscription is not in the attendees';
+    raise exception 'course_subscription_not_in_attendees';
   end if;
 
   -- Check if the schedule is active
   if not public.is_schedule_active(course_schedule_id) then
-    raise exception 'Schedule is not active';
+    raise exception 'activity_schedule_is_not_active';
   end if;
 
   update public.course_activity_schedules

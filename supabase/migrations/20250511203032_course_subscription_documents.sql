@@ -54,7 +54,7 @@ begin
 
   -- Check if subscription is active
   if not public.is_subscription_active(((storage.foldername(new.name))[2])::uuid) then
-    raise exception 'Subscription is not active';
+    raise exception 'course_subscription_is_not_active';
   end if;
 
   if (TG_OP = 'DELETE') then
