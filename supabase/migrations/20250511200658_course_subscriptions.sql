@@ -91,7 +91,7 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 create policy "owner_manager_can_update_course_subscriptions" on public.course_subscriptions for update to authenticated using (public.authorize('course_subscriptions.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.update'), ('manager', 'course_subscriptions.update');
 
-create policy "owner_can_delete_course_subscriptions" on public.course_subscriptions for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id));
+create policy "owner_can_delete_course_subscriptions" on public.course_subscriptions for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id) and (not public.is_subscription_active(id)));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
 create policy "user_can_see_their_own_course_subscriptions" on public.course_subscriptions for select to authenticated using (auth.uid() = student_id);

@@ -255,4 +255,62 @@ create trigger on_course_activity_attendance_deleted
   before delete on public.course_activity_schedules_attendances
   for each row execute procedure public.handle_delete_course_activity_attendance();
 
-  
+-- Before Archiving a course_subscription, check if:
+-- 1. There is no active bill for the subscription
+-- 2. There are no active schedules for the subscription
+-- 3. There are no active bill items for the subscription
+create or replace function public.validate_course_subscription_before_archiving(
+  cs_id uuid
+)
+returns boolean as $$
+declare
+  active_bill_count integer;
+  active_schedule_count integer;
+  active_bill_item_count integer;
+begin
+  -- Check if there are any active bills for the subscription
+  select count(*) into active_bill_count from public.course_subscription_bills
+  where course_subscription_id = cs_id and public.is_bill_active(id);
+
+  if active_bill_count > 0 then
+    raise exception 'subscription_has_active_bills';
+  end if;
+
+  -- Check if there are any active bill items for the subscription
+  select count(*) into active_bill_item_count from public.course_subscription_bill_items
+  where course_subscription_id = cs_id and bill_id is null;
+
+  if active_bill_item_count > 0 then
+    raise exception 'subscription_has_active_bill_items';
+  end if;
+
+  -- Check if there are any active schedules for the subscription
+  select count(*) into active_schedule_count from public.course_activity_schedules
+  where cs_id = any(attendees) and public.is_schedule_active(id);
+
+  if active_schedule_count > 0 then
+    -- Remove the subscription from the attendees of the active schedules
+    perform remove_subscription_from_active_schedules(cs_id);
+  end if;
+
+  return true;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
+-- Before Archiving a course_subscription, validate the subscription
+create or replace function public.validate_course_subscription_before_archiving_trigger()
+returns trigger as $$
+begin
+  if not public.validate_course_subscription_before_archiving(new.id) then
+    raise exception 'course_subscription_validation_failed';
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function before archiving a course subscription
+create trigger validate_course_subscription_before_archiving
+before update on public.course_subscriptions
+for each row
+when (new.archived_at is not null and old.archived_at is null)
+execute procedure public.validate_course_subscription_before_archiving_trigger();

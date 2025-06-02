@@ -8,7 +8,11 @@
       <template #links>
         <UButton
           v-if="subscriptionStore.subscription"
-          :to="userOrganizationsStore.relativePath(`/courses/${subscriptionStore.subscription.course_id}`)"
+          :to="
+            userOrganizationsStore.relativePath(
+              `/courses/${subscriptionStore.subscription.course_id}`
+            )
+          "
           variant="ghost"
         >
           {{ t("view_course") }}
@@ -37,12 +41,17 @@
           :description="t('archive_subscription_description')"
         >
           <template #links>
-            <UButton variant="ghost" color="primary" @click="archiveSubscription">
+            <UButton
+              variant="ghost"
+              color="primary"
+              @click="archiveSubscription"
+            >
               {{ t("archive_subscription") }}
             </UButton>
           </template>
         </UDashboardCard>
         <UDashboardCard
+          v-if="subscriptionStore.subscription.archived_at"
           :title="t('delete_subscription_label')"
           :description="t('delete_subscription_description')"
         >
@@ -82,7 +91,7 @@ const { data: course_required_documents } = useAsyncData(
     const { data, error } = await client
       .from("course_required_documents")
       .select("*")
-      .eq("course_id", subscriptionStore.subscription.course_id)
+      .eq("course_id", subscriptionStore.subscription.course_id);
 
     if (error) {
       console.error(error);
@@ -135,13 +144,16 @@ async function deleteSubscription() {
     if (error) {
       console.error(error);
       throw error;
+    } else {
+      toast.add({
+        title: t("subscription_deleted"),
+        description: t("subscription_deleted_description"),
+        color: "green",
+      });
+      navigateTo(
+        `/my/${subscriptionStore.subscription.organization_id}/students`
+      );
     }
-    toast.add({
-      title: t("subscription_deleted"),
-      description: t("subscription_deleted_description"),
-      color: "green",
-    });
-    navigateTo(`/my/${subscriptionStore.subscription.organization_id}/students`);
   } catch (error) {
     console.error(error);
     toast.add({

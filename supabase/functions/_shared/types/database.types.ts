@@ -1599,8 +1599,16 @@ export type Database = {
         Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
       }
+      remove_subscription_from_active_schedules: {
+        Args: { course_subscription_id: string }
+        Returns: undefined
+      }
       should_course_create_bill_on_subscription: {
         Args: { course_id: string }
+        Returns: boolean
+      }
+      validate_course_subscription_before_archiving: {
+        Args: { cs_id: string }
         Returns: boolean
       }
     }

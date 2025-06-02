@@ -114,4 +114,30 @@ begin
 end;
 $$ language plpgsql security invoker set search_path = public;
 
+-- When a Course Subscription is Archived, remove it from all active schedules
+create or replace function public.remove_subscription_from_active_schedules(
+  course_subscription_id uuid
+)
+returns void as $$
+declare
+  active_schedules uuid[];
+  schedule_id uuid;
+begin
+  -- Get all active schedules that have the subscription as an attendee
+  select array_agg(id) into active_schedules
+  from public.course_activity_schedules
+  where course_subscription_id = any(attendees)
+    and public.is_schedule_active(id);
+  -- If no active schedules found, exit
+  if active_schedules is null then
+    return;
+  end if;
+
+  -- Remove the subscription from all active schedules
+  foreach schedule_id in array active_schedules loop
+    perform public.remove_attendee_from_schedule(schedule_id, course_subscription_id);
+  end loop;
+end;
+$$ language plpgsql security invoker set search_path = public;
+
 
