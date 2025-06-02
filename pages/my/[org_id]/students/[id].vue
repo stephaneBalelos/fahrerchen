@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { format } from "date-fns";
 
 definePageMeta({
   layout: "orgs",
@@ -42,7 +41,6 @@ definePageMeta({
 const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
-const isDownloadingCertificate = ref(false);
 const subscriptionStore = useSubscriptionStore();
 
 const { t } = useI18n({
@@ -79,37 +77,6 @@ const links = computed(() => {
     ],
   ];
 });
-
-async function _generateCertificate() {
-  if (!subscriptionStore.subscription) {
-    return;
-  }
-  if (isDownloadingCertificate.value) {
-    return;
-  }
-  isDownloadingCertificate.value = true;
-  try {
-    const res = await $fetch<Blob>(`/api/orgs/subscriptions/${subscription_id}/generate-certificate`, {
-        method: "GET",
-    });
-    const date = format(new Date(), "yyyy-MM-dd");
-    
-
-    const blob = new Blob([res], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ausbildungsnachweis-b-${subscriptionStore.subscription.student_firstname}-${subscriptionStore.subscription.student_lastname}-${date}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isDownloadingCertificate.value = false;
-  }
-}
 
 onUnmounted(() => {
   subscriptionStore.reset()

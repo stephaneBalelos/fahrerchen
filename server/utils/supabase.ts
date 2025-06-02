@@ -48,12 +48,12 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
 
     const attendanceDataFormatted = attendancesData.map((a) => {
         return {
-            date: new Date(a.activity_start_at).toLocaleDateString('de-DE', {
+            date: new Date(a.schedule_start_at).toLocaleDateString('de-DE', {
                 year: 'numeric',
                 month: '2-digit',
                 day: '2-digit'
             }),
-            minutes: (new Date(a.activity_end_at).getTime() - new Date(a.activity_start_at).getTime()) / 1000 / 60,
+            minutes: (new Date(a.schedule_end_at).getTime() - new Date(a.schedule_start_at).getTime()) / 1000 / 60,
             supervisor: a.schedule_assigned_to_id ? a.schedule_assigned_to_firstname + ' ' + a.schedule_assigned_to_lastname : null,
             ...a
         }

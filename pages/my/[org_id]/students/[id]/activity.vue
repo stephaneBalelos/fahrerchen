@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col flex-1 overflow-y-auto">
+  <div v-if="subscriptionStore.subscription" class="flex flex-col flex-1 overflow-y-auto">
     <UDashboardToolbar>
       <template #left>
         <UButtonGroup size="sm" orientation="horizontal">
@@ -65,10 +65,10 @@
 
         <UButtonGroup size="sm" orientation="horizontal">
           <FormsInputsCourseActivitySelect
-            v-if="subscription?.course_id"
+            v-if="subscriptionStore.subscription.course_id"
             v-model="filterForm.activityId"
             :org-id="org_id"
-            :course-id="subscription?.course_id"
+            :course-id="subscriptionStore.subscription.course_id"
           />
           <UButton
             v-if="filterForm.activityId"
@@ -78,6 +78,17 @@
             @click="filterForm.activityId = ''"
           />
         </UButtonGroup>
+      </template>
+      <template #right>
+        <UButton
+          v-if="subscriptionStore.subscription"
+          :loading="isDownloadingCertificate"
+          variant="soft"
+          color="primary"
+          @click="generateCertificate"
+        >
+          {{ t("download_certificate") }}
+        </UButton>
       </template>
     </UDashboardToolbar>
     <UDashboardPanelContent class="relative">
@@ -91,6 +102,7 @@
 </template>
 
 <script setup lang="ts">
+import { format } from "date-fns";
 import { SCHEDULES_STATUS } from "~/constants";
 import type { Database } from "~/types/app.types";
 
@@ -115,23 +127,41 @@ const filterForm = ref({
     | undefined,
 });
 
-const client = useSupabaseClient();
+const subscriptionStore = useSubscriptionStore();
+const isDownloadingCertificate = ref(false);
 
-const { data: subscription } = useAsyncData(
-  `subscriptions_${subscription_id}`,
-  async () => {
-    const { data, error } = await client
-      .from("course_subscriptions_view")
-      .select("*")
-      .eq("id", subscription_id)
-      .single();
-    if (error) {
-      throw error;
-    }
-
-    return data;
+async function generateCertificate() {
+  if (!subscriptionStore.subscription) {
+    return;
   }
-);
+  if (isDownloadingCertificate.value) {
+    return;
+  }
+  isDownloadingCertificate.value = true;
+  try {
+    const res = await $fetch<Blob>(
+      `/api/orgs/subscriptions/${subscription_id}/generate-certificate`,
+      {
+        method: "GET",
+      }
+    );
+    const date = format(new Date(), "yyyy-MM-dd");
+
+    const blob = new Blob([res], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ausbildungsnachweis-b-${subscriptionStore.subscription.student_firstname}-${subscriptionStore.subscription.student_lastname}-${date}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isDownloadingCertificate.value = false;
+  }
+}
 </script>
 
 <style scoped></style>
@@ -139,12 +169,22 @@ const { data: subscription } = useAsyncData(
 <i18n lang="json">
 {
   "de": {
+    "download_certificate": "Ausbildungsnachweis herunterladen",
     "form": {
       "status": {
         "placeholder": "Status auswählen"
       }
     },
     "no_activities_found": "Keine Aktivitäten gefunden"
+  },
+  "en": {
+    "download_certificate": "Download Certificate",
+    "form": {
+      "status": {
+        "placeholder": "Select Status"
+      }
+    },
+    "no_activities_found": "No activities found"
   }
 }
 </i18n>
