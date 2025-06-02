@@ -68,6 +68,7 @@
 
 <script setup lang="ts">
 import CourseRequiredDocumentItem from "~/components/files/CourseDocuments/CourseRequiredDocumentItem.vue";
+import ConfirmArchiveSubscriptionModal from "~/components/ui/Modals/ConfirmArchiveSubscriptionModal.vue";
 
 const { t } = useI18n({
   useScope: "local",
@@ -81,6 +82,7 @@ const subscriptionStore = useSubscriptionStore();
 const userOrganizationsStore = useUserOrganizationsStore();
 
 const toast = useToast();
+const modal = useModal();
 
 const { data: course_required_documents } = useAsyncData(
   `course/${subscription_id}/required_documents`,
@@ -102,33 +104,20 @@ const { data: course_required_documents } = useAsyncData(
 );
 
 async function archiveSubscription() {
-  try {
-    const { error } = await client
-      .from("course_subscriptions")
-      .update({
-        archived_at: new Date().toISOString(),
-      })
-      .eq("id", subscription_id);
-
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    toast.add({
-      title: t("subscription_archived"),
-      description: t("subscription_archived_description"),
-      color: "green",
-    });
-  } catch (error) {
-    console.error(error);
-    toast.add({
-      title: "Error",
-      description: "An error occurred while archiving the subscription.",
-      color: "red",
-    });
-  } finally {
-    subscriptionStore.loadSubscription(subscription_id);
+  if (!subscriptionStore.subscription) {
+    return;
   }
+  modal.open(ConfirmArchiveSubscriptionModal, {
+    subscriptionId: subscriptionStore.subscription.id,
+    onArchived: (subId) => {
+      toast.add({
+        title: t("subscription_archived"),
+        description: t("subscription_archived_description"),
+        color: "green",
+      });
+      subscriptionStore.loadSubscription(subId);
+    },
+  })
 }
 
 async function deleteSubscription() {
@@ -176,11 +165,11 @@ async function deleteSubscription() {
     "course_required_documents": "Anmeldeunterlagen",
     "course_required_documents_description": "Alle Dokumente, die für den Kurs benötigt werden.",
     "archive_subscription_label": "Subscription archivieren",
-    "archive_subscription_description": "Tragen Sie den Studenten aus dem Kurs aus, ohne ihn zu löschen.",
+    "archive_subscription_description": "Tragen Sie den Studenten aus dem Kurs aus, ohne ihn zu löschen. Dies ist nützlich, wenn der Student den Kurs abgeschlossen hat, aber Sie seine Daten für zukünftige Referenzen aufbewahren möchten. Diese Aktion kann nicht rückgängig gemacht werden.",
     "archive_subscription": "Archivieren",
     "delete_subscription_label": "Subscription löschen",
-    "delete_subscription_description": "Löschen dieses Student dauerhaft aus dem Kurs.",
-    "delete_subscription": "Aus dem Kurs austragen",
+    "delete_subscription_description": "Vergewissen Sie sich, dass sie alle relevanten Daten gesichert haben, bevor removing this archive.",
+    "delete_subscription": "Daten löschen",
     "subscription_archived": "Subscription archiviert",
     "subscription_archived_description": "Der Student wurde erfolgreich aus dem Kurs archiviert.",
     "subscription_deleted": "Subscription gelöscht",
@@ -193,11 +182,11 @@ async function deleteSubscription() {
     "course_required_documents": "Course Required Documents",
     "course_required_documents_description": "All documents required for the course.",
     "archive_subscription_label": "Archive Subscription",
-    "archive_subscription_description": "Archive the student from the course without deleting them.",
+    "archive_subscription_description": "Archive the student from the course without deleting them. This is useful when the student has completed the course, but you want to keep their data for future reference. This action cannot be undone.",
     "archive_subscription": "Archive Subscription",
     "delete_subscription_label": "Delete Subscription",
-    "delete_subscription_description": "Unsubscribe this student from the course permanently.",
-    "delete_subscription": "Unsubscribe from course",
+    "delete_subscription_description": "Make sure you have backed up all relevant data before deleting this archive.",
+    "delete_subscription": "Delete Data",
     "subscription_archived": "Subscription archived",
     "subscription_archived_description": "The student has been successfully archived from the course.",
     "subscription_deleted": "Subscription deleted",
