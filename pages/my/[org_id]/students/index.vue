@@ -172,7 +172,8 @@ const {
       .eq(
         "organization_id",
         userOrganizationsStore.selectedOrganization.organization_id
-      );
+      )
+      .is("course_subscriptions.archived_at", null)
 
       if (q.value) {
         query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);

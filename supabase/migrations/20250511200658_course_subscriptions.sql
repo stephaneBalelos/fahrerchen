@@ -14,7 +14,7 @@ alter table public.course_subscriptions enable row level security;
 revoke update on table public.course_subscriptions from authenticated, anon;
 grant update (archived_at, costs) on table public.course_subscriptions to authenticated;
 -- unique constraint to prevent multiple active subscriptions for the same course and student
-create unique index unique_active_subscription on public.course_subscriptions(course_id, student_id) where archived_at is null;
+create unique index unique_active_subscription on public.course_subscriptions(student_id) where archived_at is null;
 
 
 -- check subscription is coherent with organization
