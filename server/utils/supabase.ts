@@ -1,6 +1,7 @@
 import { serverSupabaseClient } from '#supabase/server'
 import type { AppOrganization, Database } from "~/types/app.types";
 import type { H3Event } from 'h3';
+import { arrayFillWithNullValues } from './utilities';
 
 export const getOrganisationById = async (event: H3Event, id: string): Promise<AppOrganization | null> => {
     const client = await serverSupabaseClient<Database>(event)
@@ -122,15 +123,4 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         organization: subData.organization,
 
     }
-}
-
-const arrayFillWithNullValues = <T>(array: T[], length: number) => {
-    const newArray : T[] = [...array]
-    if (newArray.length >= length) {
-        return newArray
-    }
-    for (let i = newArray.length; i < length; i++) {
-        newArray.push(null as unknown as T)
-    }
-    return newArray
 }
