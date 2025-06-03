@@ -37,6 +37,16 @@
             square
             :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
           />
+          <UButton
+            :label="t('download_pdf')"
+            icon="i-heroicons-document-arrow-down"
+            size="sm"
+            color="gray"
+            square
+            :to="`/api/orgs/bills/${bill.data.id}/generate-bill-pdf`"
+            target="_blank"
+            rel="noopener noreferrer"
+          />
         </template>
       </UDashboardNavbar>
       <div v-if="bill.data && bill.subscription" class="flex h-full">
