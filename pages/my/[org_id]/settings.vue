@@ -24,6 +24,11 @@ const links = computed(() => {
         to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
       },
       {
+        label: t("billing"),
+        icon: "i-heroicons-document-text",
+        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/billing`,
+      },
+      {
         label: t("payments"),
         icon: "i-heroicons-credit-card",
         to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
@@ -56,6 +61,7 @@ const links = computed(() => {
   "de": {
     "settings": "Einstellungen",
     "members": "Mitglieder",
+    "billing": "Abrechnung",
     "payments": "Zahlungen",
     "documentation": "Dokumentation",
     "subscription": "Abonnement"
@@ -63,6 +69,7 @@ const links = computed(() => {
   "en": {
     "settings": "Settings",
     "members": "Members",
+    "billing": "Billing",
     "payments": "Payments",
     "documentation": "Documentation",
     "subscription": "Subscription"
