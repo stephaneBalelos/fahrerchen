@@ -5,7 +5,8 @@
         <template #left>
           <ULink :to="`/students/${organization.id}`">
             <div class="flex items-center gap-2">
-              <UAvatar
+              <UAvatar 
+                v-if="organization.avatar_path"
                 :src="$publicStorageUrl(
                     'organizations_avatars',
                     organization.avatar_path
@@ -13,9 +14,15 @@
                 :size="'sm'"
                 :alt="organization.name"
               />
-              <p>
+              <UAvatar 
+                v-else
+                :icon="'i-heroicons-building-office-20-solid'"
+                :size="'sm'"
+                :alt="organization.name"
+              />
+              <span class="text-lg font-semibold">
                 {{ organization.name }}
-              </p>
+              </span>
             </div>
           </ULink>
         </template>
@@ -25,7 +32,6 @@
 
           <UButton :label="t('logout')" color="gray" @click="logout" />
 
-          <NotificationsButton />
         </template>
 
         <template #panel>
@@ -41,7 +47,6 @@
 
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core";
-import NotificationsButton from "~/components/sidebar/NotificationsButton.vue";
 import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();

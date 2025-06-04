@@ -22,7 +22,9 @@
             v-for="subscription in studentStore.subscriptions"
             :key="subscription.id"
           >
-            <UButton :to="`/students/${org_id}/subscription/${subscription.id}`">
+            <UButton
+              :to="`/students/${org_id}/subscription/${subscription.id}`"
+            >
               {{ subscription.course_name }}
             </UButton>
           </div>
@@ -36,22 +38,36 @@
       </UDashboardSection>
 
       <UDashboardSection
-        v-if="org"
+        v-if="organizationData"
         :title="t('my_driving_school')"
         :description="t('my_driving_school_description')"
       >
         <div class="flex flex-col space-y-4">
           <div class="flex flex-col space-y-4">
             <div class="flex flex-col space-y-2">
-              <div class="text-lg font-semibold">{{ org.name }}</div>
-              <div class="text-sm">{{ org.description }}</div>
+              <div class="text-lg font-semibold">
+                {{
+                  organizationData.name
+                }}
+              </div>
+              <div class="text-sm">
+                {{
+                  organizationData.description ??
+                  t("not_specified")
+                }}
+              </div>
             </div>
             <div class="flex flex-col space-y-2">
               <div class="text-lg font-semibold">{{ t("org_address") }}</div>
-              <div class="text-sm">{{ org.address_street }}</div>
               <div class="text-sm">
-                {{ org.address_zip }} {{ org.address_city }},
-                {{ org.address_country }}
+                {{ organizationData.address_street }}
+              </div>
+              <div class="text-sm">
+                {{ organizationData.address_zip }}
+                {{ organizationData.address_city }},
+                {{
+                  organizationData.address_country
+                }}
               </div>
             </div>
           </div>
@@ -64,28 +80,42 @@
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t("contact_email") }}
                 </div>
-                <div class="text-sm">{{ org.email ?? t('not_specified') }}</div>
+                <div class="text-sm">
+                  {{
+                    organizationData.email ??
+                    t("not_specified")
+                  }}
+                </div>
               </div>
               <div class="flex flex-col">
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t("contact_phone") }}
                 </div>
-                <div class="text-sm">{{ org.phone_number ?? t('not_specified') }}</div>
+                <div class="text-sm">
+                  {{
+                    organizationData.phone_number ??
+                    t("not_specified")
+                  }}
+                </div>
               </div>
               <div class="flex flex-col">
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t("contact_website") }}
                 </div>
-                <div class="text-sm">{{ org.website ?? t('not_specified') }}</div>
+                <div class="text-sm">
+                  {{
+                    organizationData.website ??
+                    t("not_specified")
+                  }}
+                </div>
               </div>
-              
             </div>
           </div>
-          <div class="pt-8">
+          <div v-if="coursesData" class="pt-8">
             <div class="text-lg font-semibold">{{ t("org_courses") }}</div>
             <div class="grid grid-cols-2 gap-4 mt-4">
               <UCard
-                v-for="course in org.organization_courses"
+                v-for="course in coursesData"
                 :key="course.id"
               >
                 <div class="flex flex-col space-y-2">
@@ -103,7 +133,6 @@
 
 <script setup lang="ts">
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
-import type { AppCourse, Database } from "~/types/app.types";
 
 const studentStore = useStudentStore();
 
@@ -111,35 +140,43 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const route = useRoute();
 const org_id = route.params.org_id as string;
 const toast = useToast();
-
 const slideover = useSlideover();
 
-const { data: org } = useAsyncData(
+
+const { data: organizationData } = await useAsyncData(
+  "organization/" + org_id,
   async () => {
+    if (!org_id) return false;
     const { data, error } = await client
-      .from("organizations_view")
+      .from("organizations")
       .select("*")
       .eq("id", org_id)
       .single();
     if (error) {
-      console.log(error);
-      return null;
+      console.error("Error fetching organization:", error);
+      return false;
     }
-
     return data;
-  },
-  {
-    transform: (data) => {
-      const courses = data?.organization_courses as AppCourse[];
-      return {
-        ...data,
-        organization_courses: courses,
-      };
-    },
+  }
+);
+
+const { data: coursesData } = await useAsyncData(
+  "organization_courses/" + org_id,
+  async () => {
+    if (!org_id) return false;
+    const { data, error } = await client
+      .from("courses")
+      .select("*")
+      .eq("organization_id", org_id);
+    if (error) {
+      console.error("Error fetching organization courses:", error);
+      return false;
+    }
+    return data;
   }
 );
 

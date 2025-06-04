@@ -25,7 +25,7 @@ await useAsyncData('userOrganizations', async () => {
 
 await useAsyncData('permissions', async () => {
   if (!userOrganizationsStore.selectedOrganization) return false;
-  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.role);
+  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.organization_role);
   return true;
 });
 

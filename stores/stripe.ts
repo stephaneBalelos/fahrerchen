@@ -38,17 +38,17 @@ export const useStripeStore = defineStore('stripe', () => {
         }
     }
 
-    async function getStripeAppSettings() {
+    async function getStripeAppSettings(): Promise<void> {
         if (!userOrganizationsStore.selectedOrganization) {
             throw new Error('No organization selected');
         }
         try {
-            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", userOrganizationsStore.selectedOrganization.organization_id).single();
+            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", userOrganizationsStore.selectedOrganization.organization_id)
             if (error) {
                 throw error;
             }
             if (data) {
-                stripeAppSettings.value = data;
+                stripeAppSettings.value = data[0];
             } else {
                 stripeAppSettings.value = null;
             }
@@ -58,19 +58,19 @@ export const useStripeStore = defineStore('stripe', () => {
         }
     }
 
-    async function loadStripeAccount(orgid?: string) {
+    async function loadStripeAccount(orgid?: string): Promise<AppOrganizationsStripeAccount | null> {
         const org = orgid || userOrganizationsStore.selectedOrganization?.organization_id;
         try {
             if (!org) {
                 throw new Error('No organization selected');
             }
     
-            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", org).single();
+            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", org)
             if (error) {
                 throw error;
             }
             if (data) {
-                return data;
+                return data[0];
             } else {
                 return null;
             }
