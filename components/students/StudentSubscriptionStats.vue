@@ -1,19 +1,19 @@
 <template>
     <UCard class="mb-4">
-        <div v-if="subscription && status == 'success'" class="flex divide-x divide-gray-200 dark:divide-gray-700">
-            <div class="flex-1 pr-4">
+        <div v-if="subscription && status == 'success'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 lg:divide-x divide-gray-200 dark:divide-gray-700">
+            <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('course') }}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ subscription.course.name }}</div>
             </div>
-            <div class="flex-1 px-4">
+            <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('progression') }}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">0</div>
             </div>
-            <div class="flex-1 px-4">
+            <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('costs') }}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.costs) }}</div>
             </div>
-            <div class="flex-1 px-4">
+            <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('saldo')}}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.total_bills - subscription.costs) }}</div>
             </div>
