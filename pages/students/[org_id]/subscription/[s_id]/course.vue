@@ -1,97 +1,109 @@
 <template>
-  <UDashboardPanelContent>
-    <UContainer
-      v-if="subscription && studentStore.student"
-      class="w-full grid grid-cols-1 gap-4"
-    >
-      <UCard class="p-0">
-        <UDashboardSection
-          :title="t('schedules')"
-          :description="t('schedules_desc')"
-        >
-          <div v-if="schedules && schedules.length > 0">
-            <div
-              v-for="(schedule, index) in schedules"
-              :key="index"
-              @open-edit-schedule="() => {}"
-            >
+  <UDashboardPanelContent class="p-0">
+    <UDashboardToolbar>
+      dalksd
+    </UDashboardToolbar>
+    <UDashboardPanelContent>
+      <UContainer
+        v-if="subscription && studentStore.student"
+        class="w-full grid grid-cols-1 gap-4"
+      >
+        <UCard class="p-0">
+          <UDashboardSection
+            :title="t('schedules')"
+            :description="t('schedules_desc')"
+          >
+            <div v-if="schedules && schedules.length > 0">
               <div
-                class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-                @click="() => {}"
+                v-for="(schedule, index) in schedules"
+                :key="index"
+                @open-edit-schedule="() => {}"
               >
-                <div class="text-sm flex-1">
-                  <div>
-                    <p class="text-gray-900 dark:text-white font-medium">
-                      {{ schedule.activity_name }}
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">
-                      {{ t("planned_for") }}
-                      {{ formatDate(schedule.schedule_start_at) }}
-                    </p>
-                  </div>
-                </div>
-                <p
-                  class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg"
+                <div
+                  class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
+                  @click="() => {}"
                 >
-                  <UBadge
-                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'COMPLETED'"
-                    color="green"
-                    variant="soft"
-                    :label="t('attended')"
-                  />
-                  <UBadge
-                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'PLANNED'"
-                    color="primary"
-                    variant="soft"
-                    :label="t('registered')"
-                  />
-                  <UBadge
-                    v-if="schedule.schedule_attendees.includes(subscriptionId) && schedule.schedule_status == 'CANCELED'"
-                    color="red"
-                    variant="soft"
-                    :label="t('canceled')"
-                  />
-                  <UTooltip
-                    v-if="
-                      schedule.schedule_status == 'PLANNED' &&
-                      schedule.schedule_attendees.includes(subscriptionId)
-                    "
-                    :text="t('cancel_registration')"
+                  <div class="text-sm flex-1">
+                    <div>
+                      <p class="text-gray-900 dark:text-white font-medium">
+                        {{ schedule.activity_name }}
+                      </p>
+                      <p class="text-gray-500 dark:text-gray-400 text-sm">
+                        {{ t("planned_for") }}
+                        {{ formatDate(schedule.schedule_start_at) }}
+                      </p>
+                    </div>
+                  </div>
+                  <p
+                    class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg"
                   >
-                    <UButton
+                    <UBadge
+                      v-if="
+                        schedule.schedule_attendees.includes(subscriptionId) &&
+                        schedule.schedule_status == 'COMPLETED'
+                      "
+                      color="green"
+                      variant="soft"
+                      :label="t('attended')"
+                    />
+                    <UBadge
+                      v-if="
+                        schedule.schedule_attendees.includes(subscriptionId) &&
+                        schedule.schedule_status == 'PLANNED'
+                      "
+                      color="primary"
+                      variant="soft"
+                      :label="t('registered')"
+                    />
+                    <UBadge
+                      v-if="
+                        schedule.schedule_attendees.includes(subscriptionId) &&
+                        schedule.schedule_status == 'CANCELED'
+                      "
                       color="red"
                       variant="soft"
-                      icon="i-heroicons-x-circle"
-                      size="2xs"
+                      :label="t('canceled')"
                     />
-                  </UTooltip>
-                  <UButton
-                    v-if="
-                      schedule.schedule_status == 'PLANNED' &&
-                      !schedule.schedule_attendees.includes(subscriptionId)
-                    "
-                    color="primary"
-                    size="2xs"
-                  >
-                    {{ t("attend") }}
-                  </UButton>
-                </p>
+                    <UTooltip
+                      v-if="
+                        schedule.schedule_status == 'PLANNED' &&
+                        schedule.schedule_attendees.includes(subscriptionId)
+                      "
+                      :text="t('cancel_registration')"
+                    >
+                      <UButton
+                        color="red"
+                        variant="soft"
+                        icon="i-heroicons-x-circle"
+                        size="2xs"
+                      />
+                    </UTooltip>
+                    <UButton
+                      v-if="
+                        schedule.schedule_status == 'PLANNED' &&
+                        !schedule.schedule_attendees.includes(subscriptionId)
+                      "
+                      color="primary"
+                      size="2xs"
+                    >
+                      {{ t("attend") }}
+                    </UButton>
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div v-else>
-            <UAlert :title="t('no_activities_found')" />
-          </div>
-        </UDashboardSection>
-      </UCard>
-    </UContainer>
+            <div v-else>
+              <UAlert :title="t('no_activities_found')" />
+            </div>
+          </UDashboardSection>
+        </UCard>
+      </UContainer>
+    </UDashboardPanelContent>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import type {
-  AppOrganizationSchedulesView
-} from "~/types/app.types";
+import type { AppOrganizationSchedulesView } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 
 const { t } = useI18n({

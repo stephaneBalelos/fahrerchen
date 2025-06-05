@@ -105,8 +105,6 @@ const links = computedAsync(async () => {
     },
   ];
 
-  console.log("links", l);
-
   return l;
 });
 

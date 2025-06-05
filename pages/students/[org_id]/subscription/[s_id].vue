@@ -1,10 +1,5 @@
 <template>
-  <UDashboardPanelContent class="p-0">
-    <UDashboardToolbar class="p-0">
-      dsa
-    </UDashboardToolbar>
-    <NuxtPage />
-  </UDashboardPanelContent>
+  <NuxtPage />
 </template>
 
 <script setup lang="ts">

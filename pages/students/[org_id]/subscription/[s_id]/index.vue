@@ -1,16 +1,21 @@
 <template>
-  <UDashboardPanelContent>
-    <UContainer v-if="subscription && studentStore.student" class="w-full">
-      <StudentsStudentSubscriptionStats :subscription-id="subscription.id" />
-    </UContainer>
-    <UContainer v-if="subscription && studentStore.student" class="w-full pt-8">
-      <StudentCourseProfile
-        :title="t('progression')"
-        :description="t('progression_desc')"
-        :subscription-id="subscription.id"
-        :student="studentStore.student"
-      />
-    </UContainer>
+  <UDashboardPanelContent class="p-0">
+    <UDashboardPanelContent>
+      <UContainer v-if="subscription && studentStore.student" class="w-full">
+        <StudentsStudentSubscriptionStats :subscription-id="subscription.id" />
+      </UContainer>
+      <UContainer
+        v-if="subscription && studentStore.student"
+        class="w-full pt-8"
+      >
+        <StudentCourseProfile
+          :title="t('progression')"
+          :description="t('progression_desc')"
+          :subscription-id="subscription.id"
+          :student="studentStore.student"
+        />
+      </UContainer>
+    </UDashboardPanelContent>
   </UDashboardPanelContent>
 </template>
 
