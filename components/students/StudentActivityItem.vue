@@ -6,8 +6,7 @@
 </UDashboardToolbar> 
   <div
     v-if="courseActivity"
-    class="py-2 px-4 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-    @click="() => $emits('open-edit-schedule')"
+    class="py-2 px-4 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-3 relative"
   >
     <div
       class="relative flex flex-col items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-md px-2 w-20 h-20"
@@ -62,6 +61,12 @@
         :label="t('attendance_confirmation')"
         @click.stop="openAttendanceConfirmation"
       />
+      <UButton
+      v-if="permissions.hasPermission('course_activity_schedules.update')"
+        color="white"
+        :label="t('view_schedule')"
+        @click="() => $emits('open-edit-schedule')"
+      />
     </p>
   </div>
 </template>
@@ -85,6 +90,7 @@ const { t } = useI18n({
 });
 const client = useSupabaseClient();
 const slideover = useSlideover();
+const permissions = useUserPermissionsStore();
 
 const courseActivity = await useCourseActivities(
   props.activitySchedule.organization_id,
@@ -133,6 +139,7 @@ function openAttendanceConfirmation() {
     "attended": "Teilgenommen",
     "attendance_confirmed": "Teilnahme bestätigt",
     "attendance_confirmation": "Teilnahmebestätigung",
+    "view_schedule": "Termin ansehen",
     "registered": "Registriert",
     "canceled": "Abgesagt",
     "planned_for": "Geplant für"
@@ -143,6 +150,7 @@ function openAttendanceConfirmation() {
     "attended": "Attended",
     "attendance_confirmed": "Attendance confirmed",
     "attendance_confirmation": "Attendance confirmation",
+    "view_schedule": "View Schedule",
     "registered": "Registered",
     "canceled": "Canceled",
     "planned_for": "Planned for"

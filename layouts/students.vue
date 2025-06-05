@@ -98,6 +98,12 @@ const links = computedAsync(async () => {
       exact: true,
     },
     {
+      label: t("activity"),
+      icon: "i-heroicons-calendar",
+      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/activity`,
+      exact: true,
+    },
+    {
       label: t("bills"),
       icon: "i-heroicons-document",
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/bills`,
@@ -121,12 +127,14 @@ async function logout() {
   "de": {
     "overview": "Übersicht",
     "course": "Kurs",
+    "activity": "Aktivitäten",
     "bills": "Rechnungen",
     "logout": "Abmelden"
   },
   "en": {
     "overview": "Overview",
     "course": "Course",
+    "activity": "Activities",
     "bills": "Bills",
     "logout": "Logout"
   }
