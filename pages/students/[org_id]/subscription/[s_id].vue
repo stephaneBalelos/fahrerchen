@@ -1,66 +1,27 @@
 <template>
   <UDashboardPanelContent class="p-0">
     <UDashboardToolbar class="p-0">
-      <UContainer class="w-full p-0">
-          <UHorizontalNavigation :links="links" />
-      </UContainer>
+      dsa
     </UDashboardToolbar>
     <NuxtPage />
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-const userOrganizationsStore = useUserOrganizationsStore();
 
-const { t } = useI18n({
-  useScope: "local",
-});
 const route = useRoute();
+const subscriptionStore = useSubscriptionStore();
 const subscription_id = route.params.s_id as string;
 
-const links = computed(() => {
-  if (!userOrganizationsStore.selectedOrganization) {
-    return [];
-  }
+await useAsyncData(async () => {
+  return await subscriptionStore.loadSubscription(subscription_id);
+})
 
-  const l = [
-    {
-      label: t("overview"),
-      icon: "i-heroicons-home",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}`,
-      exact: true,
-    },
-    {
-      label: t("course"),
-      icon: "i-heroicons-book-open",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/course`,
-      exact: true,
-    },
-    {
-      label: t("bills"),
-      icon: "i-heroicons-document",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/bills`,
-      exact: true,
-    },
-  ];
-
-  return l;
+onUnmounted(() => {
+  subscriptionStore.reset();
 });
+
 </script>
 
 <style scoped></style>
 
-<i18n lang="json">
-{
-  "de": {
-    "overview": "Übersicht",
-    "course": "Kurs",
-    "bills": "Rechnungen"
-  },
-  "en": {
-    "overview": "Overview",
-    "course": "Course",
-    "bills": "Bills"
-  }
-}
-</i18n>

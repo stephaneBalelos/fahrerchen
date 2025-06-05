@@ -1,9 +1,9 @@
-import type { CourseSubscriptionView, AppStudent, Database } from "~/types/app.types";
+import type { AppCourseSubscriptionsView, AppStudent } from "~/types/app.types";
 
 export const useStudentStore = defineStore('student', () => {
-    const client = useSupabaseClient<Database>()
+    const client = useSupabaseClient()
     const student = ref<AppStudent | null>(null);
-    const subscriptions = ref<CourseSubscriptionView[]>([]);
+    const subscriptions = ref<AppCourseSubscriptionsView[]>([]);
     const userOrganizationsStore = useUserOrganizationsStore();
 
     async function loadStudent(org_id: string, user_id: string) {
@@ -23,7 +23,7 @@ export const useStudentStore = defineStore('student', () => {
 
     async function loadSubscriptions(org_id: string, student_id: string) {
         const { data, error } = await client.from('course_subscriptions_view').select('*').eq('organization_id', org_id)
-        .eq('student_id', student_id);
+        .eq('student_id', student_id).overrideTypes<AppCourseSubscriptionsView[]>();
         if (error) {
             console.error(error)
             return
