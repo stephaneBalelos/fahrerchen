@@ -19,6 +19,10 @@
         </div>
         <div class="flex flex-col gap-2">
           <div class="flex gap-2">
+            <UBadge color="white" variant="solid">{{
+              props.schedule.course_name
+            }}</UBadge>
+
             <UBadge
               v-if="props.schedule.schedule_status === 'PLANNED'"
               color="primary"
@@ -49,27 +53,21 @@
                 )
               }}</UBadge
             >
-            <span
-              :class="`text-sm ${
-                isFuture(new Date(props.schedule.schedule_start_at))
-                  ? 'text-primary-400'
-                  : 'text-gray-400'
-              }`"
-              >{{
-                getLocalizedDateTimeString(
-                  new Date(props.schedule.schedule_start_at)
-                )
-              }}</span
-            >
           </div>
           <h3 class="text-2xl font-semibold">
-            {{ props.schedule.course_name }} | {{ props.schedule.activity_name }}
+            {{ props.schedule.activity_name }}
           </h3>
         </div>
       </div>
     </template>
     <template #links>
-      <UButton v-if="canAttendSchedule" size="sm" color="gray" variant="solid" @click="attendSchedule">
+      <UButton
+        v-if="canAttendSchedule"
+        size="sm"
+        color="gray"
+        variant="solid"
+        @click="attendSchedule"
+      >
         {{ t("attend_schedule") }}
       </UButton>
     </template>
@@ -101,9 +99,8 @@
 
 <script setup lang="ts">
 import type { AppOrganizationSchedulesView } from "~/types/app.types";
-import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { isFuture, format } from "date-fns";
-
+import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type ScheduleItemProps = {
   schedule: AppOrganizationSchedulesView;
@@ -119,23 +116,54 @@ const { t: g } = useI18n({
 
 const subscriptionStore = useSubscriptionStore();
 
-// const $emits = defineEmits(["update"]);
+const $emits = defineEmits(["update"]);
+const client = useSupabaseClient();
 
 const props = defineProps<ScheduleItemProps>();
-// const modal = useModal();
+const modal = useModal();
 
 const canAttendSchedule = computed(() => {
   if (!subscriptionStore.subscription) {
     return false;
   }
-  const isPlanned = props.schedule.schedule_status === 'PLANNED'
+  const isPlanned = props.schedule.schedule_status === "PLANNED";
   const inTheFuture = isFuture(new Date(props.schedule.schedule_start_at));
-  const isAttending = props.schedule.schedule_attendees.includes(subscriptionStore.subscription.id);
+  const isAttending = props.schedule.schedule_attendees.includes(
+    subscriptionStore.subscription.id
+  );
   return isPlanned && inTheFuture && !isAttending;
-})
+});
 
 async function attendSchedule() {
-  console.log("attendSchedule", props.schedule);
+  if (!canAttendSchedule.value) {
+    return;
+  }
+  modal.open(ConfirmModal, {
+    title: t("confirm_attend_schedule"),
+    description: t("confirm_attend_schedule_description"),
+    confirmLabel: t("confirm_attend"),
+    cancelLabel: t("confirm_cancel"),
+    action: async () => {
+      try {
+        if (!subscriptionStore.subscription) {
+          console.warn("No subscription found in store");
+          return;
+        }
+        const { data, error } = await client.rpc("add_attendee_to_schedule", {
+          course_schedule_id: props.schedule.schedule_id,
+          course_subscription_id: subscriptionStore.subscription.id,
+        });
+        if (error) {
+          throw error;
+        }
+        console.log("Attended schedule successfully:", data);
+        $emits("update");
+        modal.close();
+      } catch (error) {
+        console.error("Error attending schedule:", error);
+      }
+    },
+  });
 }
 </script>
 
@@ -145,12 +173,20 @@ async function attendSchedule() {
 {
   "de": {
     "attend_schedule": "Teilnehmen",
-    "assigned_to": "Zugewiesen an",
+    "confirm_attend_schedule": "Möchten Sie an dieser Aktivität teilnehmen?",
+    "confirm_attend_schedule_description": "Sie werden zu dieser Aktivität hinzugefügt.",
+    "confirm_attend": "Teilnehmen",
+    "confirm_cancel": "Abbrechen",
+    "assigned_to": "Fahrlehrer:in",
     "not_assigned": "Nicht zugewiesen"
   },
   "en": {
     "attend_schedule": "Attend",
-    "assigned_to": "Assigned to",
+    "confirm_attend_schedule": "Do you want to attend this activity?",
+    "confirm_attend_schedule_description": "You will be added to this activity.",
+    "confirm_attend": "Attend",
+    "confirm_cancel": "Cancel",
+    "assigned_to": "Teacher",
     "not_assigned": "Not assigned"
   }
 }

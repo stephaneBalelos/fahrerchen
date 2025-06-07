@@ -1,7 +1,11 @@
 <template>
   <UDashboardPanelContent class="p-0">
     <UDashboardToolbar>
-      dalksd
+      <UContainer class="w-full">
+        <span class="text-lg font-semibold">
+          {{ t("schedules") }}
+        </span>
+      </UContainer>
     </UDashboardToolbar>
     <UDashboardPanelContent>
       <UContainer
@@ -12,6 +16,7 @@
             v-for="schedule in schedules"
             :key="schedule.schedule_id"
             :schedule="schedule"
+            @update="refresh"
           />
       </UContainer>
     </UDashboardPanelContent>
@@ -26,10 +31,14 @@ const route = useRoute();
 const subscriptionId = route.params.s_id as string;
 const orgId = route.params.org_id as string;
 
+const { t } = useI18n({
+  useScope: "local",
+});
+
 const client = useSupabaseClient();
 const subscriptionStore = useSubscriptionStore();
 
-const { data: schedules } = useAsyncData(
+const { data: schedules, refresh } = useAsyncData(
   `subscription_schedules_${subscriptionId}`,
   async () => {
     if (!subscriptionStore.subscription) {
@@ -62,7 +71,7 @@ const { data: schedules } = useAsyncData(
 <i18n lang="json">
 {
   "de": {
-    "schedules": "Aktivitäten",
+    "schedules": "Termine",
     "schedules_desc": "Hier können Sie die Aktivitäten sehen, die Sie in diesem Kurs haben.",
     "no_activities_found": "Keine Aktivitäten gefunden",
     "planned_for": "Geplant für den ",
@@ -73,7 +82,7 @@ const { data: schedules } = useAsyncData(
     "cancel_registration": "Termin absagen"
   },
   "en": {
-    "schedules": "Activities",
+    "schedules": "Schedules",
     "schedules_desc": "Here you can see the activities you have in this course.",
     "no_activities_found": "No activities found",
     "planned_for": "Planned for ",
