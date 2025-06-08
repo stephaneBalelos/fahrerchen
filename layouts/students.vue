@@ -95,7 +95,6 @@ const links = computedAsync(async () => {
       label: t("course"),
       icon: "i-heroicons-book-open",
       to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/course`,
-      exact: true,
     },
     {
       label: t("activity"),
@@ -106,8 +105,7 @@ const links = computedAsync(async () => {
     {
       label: t("bills"),
       icon: "i-heroicons-document",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/bills`,
-      exact: true,
+      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/billing`,
     },
   ];
 

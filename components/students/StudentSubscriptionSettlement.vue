@@ -192,7 +192,7 @@ async function generateBill() {
     "bill_generated": "Rechnung erstellt",
     "bill_generated_description": "Die Rechnung wurde erfolgreich erstellt.",
     "bill_not_generated": "Rechnung nicht erstellt",
-    "bill_not_generated_description": "Die Rechnung konnte nicht erstellt werden. Kontaktiere bitte den Support.",
+    "bill_not_generated_description": "Die Rechnung konnte nicht erstellt werden. Kontaktiere bitte den Support."
   },
   "en": {
     "settlements": "Current settlement period",
@@ -207,7 +207,7 @@ async function generateBill() {
     "bill_generated": "Bill generated",
     "bill_generated_description": "The bill has been successfully generated.",
     "bill_not_generated": "Bill not generated",
-    "bill_not_generated_description": "The bill could not be generated. Please contact support.",
+    "bill_not_generated_description": "The bill could not be generated. Please contact support."
   }
 }
 </i18n>
