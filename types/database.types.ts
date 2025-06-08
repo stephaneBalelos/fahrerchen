@@ -675,6 +675,7 @@ export type Database = {
       }
       course_subscription_bills: {
         Row: {
+          bill_number: string
           canceled_at: string | null
           course_subscription_id: string
           created_at: string
@@ -686,6 +687,7 @@ export type Database = {
           total: number
         }
         Insert: {
+          bill_number: string
           canceled_at?: string | null
           course_subscription_id: string
           created_at?: string
@@ -697,6 +699,7 @@ export type Database = {
           total?: number
         }
         Update: {
+          bill_number?: string
           canceled_at?: string | null
           course_subscription_id?: string
           created_at?: string
@@ -988,6 +991,7 @@ export type Database = {
           avatar_path: string | null
           description: string | null
           email: string | null
+          handle: string
           id: string
           inserted_at: string
           name: string
@@ -1005,6 +1009,7 @@ export type Database = {
           avatar_path?: string | null
           description?: string | null
           email?: string | null
+          handle: string
           id?: string
           inserted_at?: string
           name: string
@@ -1022,6 +1027,7 @@ export type Database = {
           avatar_path?: string | null
           description?: string | null
           email?: string | null
+          handle?: string
           id?: string
           inserted_at?: string
           name?: string
@@ -1353,6 +1359,7 @@ export type Database = {
     Views: {
       course_subscription_bills_view: {
         Row: {
+          bill_number: string | null
           canceled_at: string | null
           course_description: string | null
           course_id: string | null
@@ -1533,6 +1540,7 @@ export type Database = {
         Row: {
           organization_avatar_path: string | null
           organization_description: string | null
+          organization_handle: string | null
           organization_id: string | null
           organization_membership_inserted_at: string | null
           organization_name: string | null
@@ -1606,6 +1614,18 @@ export type Database = {
       should_course_create_bill_on_subscription: {
         Args: { course_id: string }
         Returns: boolean
+      }
+      slugify: {
+        Args: { value: string }
+        Returns: string
+      }
+      unaccent: {
+        Args: { "": string }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       validate_course_subscription_before_archiving: {
         Args: { cs_id: string }

@@ -10,6 +10,7 @@ create or replace view public.users_organizations_view as
         u.fullname as user_fullname,
         o.id as organization_id,
         o.name as organization_name,
+        o.handle as organization_handle,
         o.description as organization_description,
         o.avatar_path as organization_avatar_path,
         o.preferred_language as organization_preferred_language,

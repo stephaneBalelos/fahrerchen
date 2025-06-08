@@ -2,7 +2,7 @@
   <UContainer class="w-full">
     <UDashboardSection
       icon="i-heroicons-document-text"
-      :title="t('bill_id', { id: bill?.id })"
+      :title="t('bill_number', { id: bill?.bill_number })"
       :description="t('bill_description')"
       class="px-4 mt-6"
     >
@@ -52,7 +52,7 @@ import type { Database } from "~/types/app.types";
 import { formatDateTime, formatCurrency, formatDate } from "~/utils/formatters";
 
 const route = useRoute();
-const bill_id = route.params.id as string;
+const bill_id = route.params.b_id as string;
 const modal = useModal();
 const stripeStore = useStripeStore();
 
@@ -97,7 +97,7 @@ async function openCheckoutModal() {
 <i18n lang="json">
 {
   "de": {
-    "bill_id": "Rechnung #{id}",
+    "bill_number": "Rechnungsnummer #{id}",
     "bill_description": "Details zur Rechnung",
     "paid_at": "Bezahlt am {date}",
     "ready_to_pay": "Zahlungsbereit",
@@ -107,7 +107,7 @@ async function openCheckoutModal() {
     "total": "Gesamt"
   },
   "en": {
-    "bill_id": "Bill {id}",
+    "bill_number": "Bill number {id}",
     "bill_description": "Details of the bill",
     "paid_at": "Paid at {date}",
     "ready_to_pay": "Ready to pay",

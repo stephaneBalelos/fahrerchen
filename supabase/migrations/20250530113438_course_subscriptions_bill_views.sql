@@ -3,6 +3,7 @@
 create or replace view public.course_subscription_bills_view as
     select
         csb.id,
+        csb.bill_number,
         csb.organization_id,
         csb.total,
         csb.paid_at,

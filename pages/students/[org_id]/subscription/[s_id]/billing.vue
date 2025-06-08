@@ -31,7 +31,6 @@ const links = computed(() => {
     {
       label: t("subscription_bills"),
       to: `/students/${org_id}/subscription/${subscription_id}/billing/bills`,
-        exact: true,
     },
   ];
 

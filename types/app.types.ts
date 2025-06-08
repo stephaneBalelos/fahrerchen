@@ -66,7 +66,8 @@ export type Database = MergeDeep<DatabaseGenerated, {
           user_firstname: string | null
           user_lastname: string | null
           user_fullname: string | null
-          organization_id: string
+          organization_id: string,
+          organization_handle: string
           organization_name: string
           organization_description: string | null
           organization_avatar_path: string | null
@@ -115,6 +116,7 @@ export type Database = MergeDeep<DatabaseGenerated, {
       course_subscription_bills_view: {
         Row: {
           id: string,
+          bill_number: string,
           organization_id: string,
           total: number,
           paid_at: string | null,
