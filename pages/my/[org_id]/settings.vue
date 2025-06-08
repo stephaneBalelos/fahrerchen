@@ -59,7 +59,7 @@ const links = computed(() => {
 <i18n lang="json">
 {
   "de": {
-    "settings": "Einstellungen",
+    "settings": "Allgemein",
     "members": "Mitglieder",
     "billing": "Abrechnung",
     "payments": "Zahlungen",
@@ -67,7 +67,7 @@ const links = computed(() => {
     "subscription": "Abonnement"
   },
   "en": {
-    "settings": "Settings",
+    "settings": "General",
     "members": "Members",
     "billing": "Billing",
     "payments": "Payments",

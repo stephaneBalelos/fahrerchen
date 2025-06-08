@@ -94,6 +94,11 @@ const links = computed(() => {
           exact: true,
         },
         {
+          label: t("billing"),
+          to: `/my/${selectedOrganization.organization_id}/settings/billing`,
+          exact: true,
+        },
+        {
           label: t("members"),
           to: `/my/${selectedOrganization.organization_id}/settings/members`,
         },
@@ -124,6 +129,7 @@ const links = computed(() => {
     "students": "Schüler",
     "bills": "Rechnungen",
     "settings": "Einstellungen",
+    "billing": "Abrechnungen",
     "general": "Allgemein",
     "members": "Mitglieder",
     "payments": "Zahlungen"
@@ -135,6 +141,7 @@ const links = computed(() => {
     "students": "Students",
     "bills": "Bills",
     "settings": "Settings",
+    "billing": "Billing",
     "general": "General",
     "members": "Members",
     "payments": "Payments"
