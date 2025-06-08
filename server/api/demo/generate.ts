@@ -32,6 +32,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (!user_data.firstname || !user_data.lastname) {
+        return createError({
+            status: 400,
+            statusMessage: 'User name is not set'
+        })
+    }
+
+
     try {
         // Get Some fake Addresses
         const address = await $fetch(`${faker_base_url}/addresses?_quantity=1&_country_code=DE`) as any

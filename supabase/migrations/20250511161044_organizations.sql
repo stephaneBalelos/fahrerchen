@@ -2,7 +2,9 @@
 create table if not exists public.organizations(
   id            uuid default uuid_generate_v4() primary key,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
-  -- handle        text not null unique check (handle ~ '^[a-z0-9_]+$'),
+  -- handle is a slugified version of the name, unique and formmatted like a subdomain
+  -- e.g. "my-organization" or "my-organization-2"
+  handle        text not null unique check (handle ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
   avatar_path    text,
   name          text not null,
   description       text,
@@ -233,6 +235,33 @@ values
     ('owner', 'organization_invitations.delete'),
     ('manager', 'organization_invitations.delete');
 
+
+-- Genrate handle for organizations
+create or replace function public.generate_organization_handle()
+returns trigger as $$
+declare
+  base_handle text;
+  new_handle text;
+  counter integer := 1;
+begin
+  -- Generate the base handle
+  base_handle := public.slugify(new.name);
+  new_handle := base_handle;
+
+  -- Check if the handle already exists
+  while exists (select 1 from public.organizations where handle = new_handle) loop
+    -- If it exists, append a number and increment
+    new_handle := base_handle || '-' || counter;
+    counter := counter + 1;
+  end loop;
+  new.handle := new_handle;
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- Trigger to generate handle for organizations
+create trigger generate_handle_before_insert
+  before insert on public.organizations
+  for each row execute procedure public.generate_organization_handle();
 
 -- When a new organization is created, we want to automatically add the owner as a member with the role 'owner'.
 create or replace function public.handle_new_organization() 
