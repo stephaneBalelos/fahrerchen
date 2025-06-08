@@ -35,6 +35,7 @@ create or replace view public.organizations_schedules_view as
         s.attendees as schedule_attendees,
         s.status as schedule_status,
         s.assigned_to as schedule_assigned_to,
+        u.avatar_path as assigned_to_avatar_path,
         u.firstname as assigned_to_firstname,
         u.lastname as assigned_to_lastname,
         u.email as assigned_to_email,

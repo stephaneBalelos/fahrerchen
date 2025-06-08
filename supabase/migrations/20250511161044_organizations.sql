@@ -221,7 +221,9 @@ values
 
 -- Update User's Policies
 create policy "users_can_see_other_users_in_their_organizations" on public.users for select to authenticated using (public.are_users_in_same_organization(auth.uid(), id));
-
+create policy "allow_users_to_see_other_members_profile_picture" on storage.objects for select to authenticated using (
+  bucket_id = 'users_avatars' and public.are_users_in_same_organization(auth.uid(), owner_id::uuid)
+);
 
 -- Genrate handle for organizations
 create or replace function public.generate_organization_handle()

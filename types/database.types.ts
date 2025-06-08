@@ -1483,6 +1483,7 @@ export type Database = {
           activity_id: string | null
           activity_name: string | null
           activity_type: number | null
+          assigned_to_avatar_path: string | null
           assigned_to_email: string | null
           assigned_to_firstname: string | null
           assigned_to_fullname: string | null

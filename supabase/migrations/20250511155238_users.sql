@@ -58,4 +58,52 @@ insert into storage.buckets
 values
   ('users_avatars', 'users_avatars', true, '{image/*}', 5 * 1024 * 1024) on conflict (id) do nothing; -- 5MB
 
+-- Users Storage Policies
+create policy "allow_users_to_see_their_profile_pictures" on storage.objects for select to authenticated using (
+  bucket_id = 'users_avatars'
+);
+create policy "allow_users_to_insert_their_profile_pictures" on storage.objects for insert to authenticated with check (
+  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+);
+create policy "allow_users_to_update_their_profile_pictures" on storage.objects for update to authenticated with check (
+  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+);
+create policy "allow_users_to_delete_their_profile_pictures" on storage.objects for delete to authenticated using (
+  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+);
 
+-- Add, Update or clear avatar_path in public.users when a new avatar is uploaded or deleted
+create or replace function public.handle_user_avatar()
+returns trigger as $$
+begin
+  if (TG_OP = 'DELETE') then
+    update public.users set avatar_path = null where avatar_path = array_to_string(old.path_tokens, '/');
+    return old;
+  end if;
+  
+  if (TG_OP = 'INSERT') then
+    update public.users set avatar_path = array_to_string(new.path_tokens, '/') where id = ((storage.foldername(new.name))[1])::uuid;
+    return new;
+  end if;
+  
+  if (TG_OP = 'UPDATE') then
+    update public.users set avatar_path = array_to_string(new.path_tokens, '/') where id = ((storage.foldername(new.name))[1])::uuid;
+    return new;
+  end if;
+end;
+$$ language plpgsql security definer;
+
+create trigger "handle_user_avatar_create" after insert on storage.objects
+for each row
+when (new.bucket_id = 'users_avatars')
+execute procedure public.handle_user_avatar();
+
+create trigger "handle_user_avatar_update" after update on storage.objects
+for each row
+when (new.bucket_id = 'users_avatars')
+execute procedure public.handle_user_avatar();
+
+create trigger "handle_user_avatar_delete" after delete on storage.objects
+for each row
+when (old.bucket_id = 'users_avatars')
+execute procedure public.handle_user_avatar();

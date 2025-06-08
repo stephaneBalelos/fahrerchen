@@ -76,6 +76,10 @@
         <p class="text-sm text-gray-500">{{ t("assigned_to") }}</p>
         <div v-if="props.schedule.schedule_assigned_to" class="flex gap-2">
           <UAvatar
+            :src="
+              $publicStorageUrl('users_avatars', props.schedule.assigned_to_avatar_path ?? '') ??
+              ''
+            "
             :alt="`${props.schedule.assigned_to_firstname} ${props.schedule.assigned_to_lastname}`"
             size="sm"
           />
