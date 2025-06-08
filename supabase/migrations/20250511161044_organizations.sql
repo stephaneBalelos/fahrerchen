@@ -79,22 +79,6 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public;
 
--- 2 users are in the same organization
-create or replace function public.are_users_in_same_organization(
-  user_id_1 uuid,
-  user_id_2 uuid
-)
-returns boolean as $$
-declare
-  org_id_1 uuid;
-  org_id_2 uuid;
-begin
-
-  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
-  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
-end;
-$$ language plpgsql security definer set search_path = public;
-
 -- Check if the user has the requested permission
 -- This function checks if the user has the requested permission for the given organization.
 create or replace function public.authorize(
@@ -234,6 +218,9 @@ insert into public.role_permissions
 values 
     ('owner', 'organization_invitations.delete'),
     ('manager', 'organization_invitations.delete');
+
+-- Update User's Policies
+create policy "users_can_see_other_users_in_their_organizations" on public.users for select to authenticated using (public.are_users_in_same_organization(auth.uid(), id));
 
 
 -- Genrate handle for organizations

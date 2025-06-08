@@ -47,7 +47,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = auth, public;
+$$ language plpgsql security definer set search_path = auth, public;
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
