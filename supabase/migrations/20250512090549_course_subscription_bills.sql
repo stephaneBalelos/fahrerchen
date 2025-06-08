@@ -2,6 +2,9 @@
 create table public.course_subscription_bills (
   id            uuid default uuid_generate_v4() primary key,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  -- The bill number is generated based on prefix "organization handle" + "year" + "month" and auto-incrementing number
+  -- Example: organization-123-2024-01-1
+  bill_number text not null unique check (bill_number ~ '^[a-z0-9\-]+-[0-9]{4}-[0-9]{2}-[0-9]+$'),
   total        numeric default 0 not null check (total >= 0),
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
@@ -138,6 +141,39 @@ begin
 end;
 $$ language plpgsql security invoker set search_path = public;
 
+
+-- generate bill number for the created bill
+create or replace function public.generate_bill_number()
+returns trigger as $$
+declare
+  org_handle text;
+  year text;
+  month text;
+  bill_number text;
+  bill_count integer;
+begin
+  -- Get the organization handle
+  select handle into org_handle from public.organizations where id = new.organization_id;
+  -- Get the current year and month
+  year := to_char(new.created_at, 'YYYY');
+  month := to_char(new.created_at, 'MM');
+  -- Get the count of bills for the organization in the current year and month
+  select count(*) into bill_count from public.course_subscription_bills
+  where organization_id = new.organization_id and
+        to_char(created_at, 'YYYY') = year and
+        to_char(created_at, 'MM') = month;
+  -- Generate the bill number
+  bill_number := format('%s-%s-%s-%s', org_handle, year, month, bill_count + 1);
+  -- Set the bill number
+  new.bill_number := bill_number;
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = public;
+-- trigger the function every time a bill is inserted
+create trigger generate_bill_number_trigger
+before insert on public.course_subscription_bills
+for each row
+execute procedure public.generate_bill_number();
 
 -- When a subscription is inserted, create a bill item for every costs
 create or replace function public.insert_bill_items_for_new_subscription()
