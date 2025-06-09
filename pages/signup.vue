@@ -56,7 +56,7 @@ definePageMeta({
   layout: "auth",
 });
 
-const { t } = useI18n({
+const { t, locale } = useI18n({
   useScope: "local",
 });
 
@@ -106,6 +106,7 @@ async function onSubmit(credentials: Schema) {
       emailRedirectTo: `${window.location.origin}/account`,
       data: {
         name: credentials.name,
+        preferred_language: locale.value,
       },
     },
   });
