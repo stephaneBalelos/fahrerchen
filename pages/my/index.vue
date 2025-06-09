@@ -30,7 +30,8 @@ async function generateDemoData() {
 
   try {
     const _res = await $fetch("/api/demo/generate", {
-      retry: 0
+      retry: 0,
+      timeout: 60000, // 60 seconds timeout
     });
     organizationsStore.loadOrganizationsMemberships();
   } catch (error) {
