@@ -104,7 +104,6 @@ Deno.serve(async (req) => {
       user_email: invite.email,
       organization_name: organization.name,
       lang: organization.preferred_language,
-      url_base: Deno.env.get('BASE_URL') ?? '',
       role: invite.role,
       call_to_action_url: url,
     })
