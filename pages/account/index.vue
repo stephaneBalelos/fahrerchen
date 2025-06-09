@@ -62,7 +62,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
           lastname: event.data.lastname,
         })
         .eq("id", userStore.user.id);
-      if (update.error) {
+        const updateMetadata = await client.auth.updateUser({
+          data: {
+            name: `${event.data.firstname} ${event.data.lastname}`,
+          },
+        });
+      if (update.error || updateMetadata.error) {
         toast.add({
           title: t("update_error"),
           color: "red",
