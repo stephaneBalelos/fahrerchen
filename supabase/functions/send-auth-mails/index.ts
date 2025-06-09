@@ -3,8 +3,6 @@ import { Webhook } from 'https://esm.sh/standardwebhooks@1.0.0'
 import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import SignupMail from '../_shared/_templates/SignupMail.tsx'
 import PasswordResetMail from '../_shared/_templates/PasswordResetMail.tsx'
-import InvitationMail from '../_shared/_templates/InvitationMail.tsx'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail } from '../_shared/utils.ts';
 
 
@@ -17,7 +15,7 @@ Deno.serve(async (req) => {
         return new Response('not allowed', { status: 400 })
     }
 
-    const url_base = Deno.env.get('MAILER_VERIFY_URL') as string
+    const verify_url = Deno.env.get('MAILER_VERIFY_URL') as string
 
     const payload = await req.text()
     const headers = Object.fromEntries(req.headers)
@@ -28,8 +26,10 @@ Deno.serve(async (req) => {
             user: {
                 email: string
                 user_metadata: {
+                    name: string
                     organization_id: string
                     role: string
+                    preferred_language?: 'en' | 'de'
                 }
             }
             email_data: {
@@ -45,66 +45,33 @@ Deno.serve(async (req) => {
 
         const {
             user,
-            email_data: { token, token_hash, redirect_to, email_action_type },
+            email_data: { token_hash, redirect_to, email_action_type },
         } = verifiedPayload
 
-        const supabaseClient = createClient(
-            Deno.env.get('SUPABASE_URL') ?? '',
-            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-            {
-                auth: {
-                    autoRefreshToken: false,
-                    persistSession: false
-                }
-            }
-        )
-
         let html: string = ''
+        let subject: string = ''
         if (email_action_type === 'magiclink') {
             throw new Error('Magic link is not supported')
         } else if (email_action_type === 'recovery') {
+            subject = user.user_metadata.preferred_language === 'en'
+                ? 'Password Reset Request'
+                : 'Passwort zurücksetzen Anfrage'
             html = await renderAsync(
                 React.createElement(PasswordResetMail, {
-                    username: user.email,
-                    lang: 'en',
-                    token,
-                    supabase_url: url_base,
-                    email_action_type,
-                    redirect_to,
-                    token_hash,
+                    lang: user.user_metadata.preferred_language || 'de',
+                    username: user.user_metadata.name || user.email,
+                    call_to_action_url: `${verify_url}?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`,
                 })
             )
-        } else if (email_action_type === 'invite') {
-            const { data, error } = await supabaseClient.from('organizations').select('*').eq('id', user.user_metadata.organization_id).single()
-            if (error) {
-                throw new Error('Organization not found')
-            }
-            if (!data) {
-                throw new Error('Organization not found')
-            }
-            html = await renderAsync(
-                React.createElement(InvitationMail, {
-                    username: user.email,
-                    org_name: data.name,
-                    lang: 'en',
-                    token,
-                    supabase_url: url_base,
-                    email_action_type,
-                    redirect_to,
-                    token_hash,
-                })
-            )
-
         } else if (email_action_type === 'signup') {
+            subject = user.user_metadata.preferred_language === 'en'
+                ? 'Welcome to Karjolen App'
+                : 'Willkommen bei der Karjolen App'
             html = await renderAsync(
                 React.createElement(SignupMail, {
-                    username: user.email,
-                    lang: 'en',
-                    token,
-                    supabase_url: url_base,
-                    email_action_type,
-                    redirect_to,
-                    token_hash,
+                    lang: user.user_metadata.preferred_language || 'de',
+                    username: user.user_metadata.name || user.email,
+                    call_to_action_url: `${verify_url}?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`,
                 })
             )
         } else if (email_action_type === 'email_change_current') {
@@ -120,7 +87,7 @@ Deno.serve(async (req) => {
 
         // TODO: Get email subect from the template
 
-        await sendEmail(user.email, "Welcome to Fahrerchen", html)
+        await sendEmail(user.email, subject, html)
 
     } catch (error) {
         console.log(error)
