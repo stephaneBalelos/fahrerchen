@@ -23,5 +23,8 @@ jobs:
         with:
           version: latest
 
+      - run: supabase login --token $SUPABASE_ACCESS_TOKEN    
+      - run: supabase start
       - run: supabase link --project-ref $SUPABASE_PROJECT_ID
       - run: supabase db push
+      - run: supabase functions deploy --project-ref $SUPABASE_PROJECT_ID

@@ -4,43 +4,43 @@
       <div class="flex flex-col gap-2">
         <div class="flex gap-2">
           <UBadge
-            v-if="props.schedule.status === 'PLANNED'"
+            v-if="props.schedule.schedule_status === 'PLANNED'"
             color="primary"
             variant="soft"
             >{{
               g(
-                `courses.activities.schedules.schedules_status_${props.schedule.status}`
+                `courses.activities.schedules.schedules_status_${props.schedule.schedule_status}`
               )
             }}</UBadge
           >
           <UBadge
-            v-else-if="props.schedule.status === 'CANCELED'"
+            v-else-if="props.schedule.schedule_status === 'CANCELED'"
             color="red"
             variant="soft"
             >{{
               g(
-                `courses.activities.schedules.schedules_status_${props.schedule.status}`
+                `courses.activities.schedules.schedules_status_${props.schedule.schedule_status}`
               )
             }}</UBadge
           >
           <UBadge
-            v-else-if="props.schedule.status === 'COMPLETED'"
+            v-else-if="props.schedule.schedule_status === 'COMPLETED'"
             color="green"
             variant="soft"
             >{{
               g(
-                `courses.activities.schedules.schedules_status_${props.schedule.status}`
+                `courses.activities.schedules.schedules_status_${props.schedule.schedule_status}`
               )
             }}</UBadge
           >
           <span
             :class="`text-sm ${
-              isFuture(new Date(props.schedule.start_at))
+              isFuture(new Date(props.schedule.schedule_start_at))
                 ? 'text-primary-400'
                 : 'text-gray-400'
             }`"
             >{{
-              getLocalizedDateTimeString(new Date(props.schedule.start_at))
+              getLocalizedDateTimeString(new Date(props.schedule.schedule_start_at))
             }}</span
           >
         </div>
@@ -58,19 +58,19 @@
         color="red"
         variant="soft"
         icon="i-heroicons-trash"
-        @click="() => deleteSchedule(props.schedule.id)"
+        @click="() => deleteSchedule(props.schedule.schedule_id)"
       />
     </template>
     <div class="flex justify-between">
       <div class="flex flex-col gap-2">
         <p class="text-sm text-gray-500">{{ t("assigned_to") }}</p>
         <FormsInputsUserSelect
-          v-if="props.schedule.status === 'PLANNED'"
+          v-if="props.schedule.schedule_status === 'PLANNED'"
           v-model="assigned_to"
-          :orgid="props.schedule.organization_id"
+          :orgid="props.schedule.schedule_organization_id"
         />
         <div v-else class="flex">
-          <div v-if="props.schedule.assigned_to" class="flex gap-2">
+          <div v-if="props.schedule.schedule_assigned_to" class="flex gap-2">
             <UAvatar
               :src="assigned_to"
               :alt="`${props.schedule.assigned_to_firstname} ${props.schedule.assigned_to_lastname}`"
@@ -115,8 +115,8 @@
 
 <script setup lang="ts">
 import type {
-  CourseSubscriptionView,
-  CourseActivityScheduleView,
+  AppOrganizationSchedulesView,
+  AppCourseSubscriptionsView
 } from "~/types/app.types";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
@@ -124,7 +124,7 @@ import { isFuture } from "date-fns";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
 type ScheduleItemProps = {
-  schedule: CourseActivityScheduleView;
+  schedule: AppOrganizationSchedulesView
 };
 
 const { t } = useI18n({
@@ -144,13 +144,13 @@ const modal = useModal();
 const courseActivitySchedules = useCourseActivitySchedules();
 
 const { data: attendees } = useAsyncData(
-  `schedule/${props.schedule.id}/attendees`,
+  `schedule/${props.schedule.schedule_id}/attendees`,
   async () => {
     const { data, error } = await client
       .from("course_subscriptions_view")
       .select("*")
-      .in("id", props.schedule.attendees)
-      .overrideTypes<CourseSubscriptionView[]>();
+      .in("id", props.schedule.schedule_attendees)
+      .overrideTypes<AppCourseSubscriptionsView[]>();
     if (error) {
       console.error(error);
       throw error;
@@ -159,13 +159,13 @@ const { data: attendees } = useAsyncData(
   }
 );
 
-const assigned_to = ref(props.schedule.assigned_to);
+const assigned_to = ref(props.schedule.schedule_assigned_to);
 
 const openEditSchedule = () => {
   slideover.open(EditCourseActivitySchedule, {
-    orgid: props.schedule.organization_id,
+    orgid: props.schedule.schedule_organization_id,
     activityid: props.schedule.activity_id,
-    scheduleId: props.schedule.id,
+    scheduleId: props.schedule.schedule_id,
     courseid: props.schedule.course_id,
   });
 };
@@ -175,7 +175,7 @@ watch(assigned_to, async (value) => {
     const { error } = await client
       .from("course_activity_schedules")
       .update({ assigned_to: value })
-      .eq("id", props.schedule.id);
+      .eq("id", props.schedule.schedule_id);
     if (error) {
       throw error;
     }

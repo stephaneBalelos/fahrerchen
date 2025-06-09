@@ -1,12 +1,20 @@
-import type { AppOrganization, AppOrganizationMember, Database } from "~/types/app.types"
+import type { Database, AppOrganization, AppUserOrganizationsView } from "~/types/app.types"
 import { useUserStore } from "./user"
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
-    const organizations = ref<AppOrganizationMember[]>([])
-    const selectedOrganization = ref<AppOrganizationMember | null>(null)
+    const organizations = ref<AppUserOrganizationsView[]>([])
     const isLoading = ref(true)
+    const selectedOrganizationId = ref<string | null>(null)
+
+    const selectedOrganization = computed(() => {
+        if (!selectedOrganizationId.value) {
+            return null
+        }
+        return organizations.value.find(org => org.organization_id === selectedOrganizationId.value) || null
+    })
+
 
     async function createOrganization(organization: AppOrganization) {
         if (!userStore.user) {
@@ -32,7 +40,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             return
         }
         isLoading.value = true
-        const { data, error } = await supabase.from('organization_members').select('*').eq('user_id', userStore.user.id)
+        const { data, error } = await supabase.from('users_organizations_view').select('*').eq('user_id', userStore.user.id).order('organization_name', { ascending: true })
         if (error) {
             console.error(error)
             return
@@ -42,29 +50,24 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     }
 
     function relativePath(path: string) {
-        return `/my/${selectedOrganization.value?.organization_id}${path}`
+        if (!selectedOrganizationId.value) {
+            return '/my'
+        }
+        return `/my/${selectedOrganizationId.value}${path}`
     }
 
     async function selectOrganization(org_id: string) {
         await loadOrganizationsMemberships()
-        selectedOrganization.value = organizations.value.find(org => org.organization_id === org_id) ?? null
-    }
-
-    async function fetchOrganizationData() {
-        if (!selectedOrganization.value) {
+        const organization = organizations.value.find(org => org.organization_id === org_id)
+        if (!organization) {
+            console.error(`Organization with id ${org_id} not found`)
             return
         }
-        const { data, error } = await supabase.from('organizations').select('*').eq('id', selectedOrganization.value.organization_id).single()
-        if (error) {
-            console.error(error)
-            throw error
-        }
-        return data
-        
+        selectedOrganizationId.value = organization.organization_id
     }
 
     function clearSelectedOrganization() {
-        selectedOrganization.value = null
+        selectedOrganizationId.value = null
     }
 
     watch(() => userStore.user, async () => {
@@ -75,7 +78,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, fetchOrganizationData, createOrganization, selectOrganization, clearSelectedOrganization }
+    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
 
     
 })

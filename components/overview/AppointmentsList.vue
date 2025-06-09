@@ -4,7 +4,7 @@
     :description="t('incoming_appointments_description')"
     icon="i-heroicons-calendar"
   >
-  <template #links>
+    <template #links>
       <UButton
         color="gray"
         variant="solid"
@@ -13,12 +13,13 @@
         {{ t("view_all") }}
       </UButton>
     </template>
-    <div v-if="schedules && schedules.length > 0">
+    <NuxtErrorBoundary>
+      <div v-if="schedules && schedules.length > 0">
         <NuxtLink
           v-for="(schedule, index) in schedules"
           :key="index"
           class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-            @click="openScheduleModal(schedule)"
+          @click="openScheduleModal(schedule)"
         >
           <div class="text-sm flex-1">
             <div>
@@ -26,90 +27,131 @@
                 {{ schedule.activity_name }} | {{ schedule.course_name }}
               </p>
               <p class="text-gray-500 dark:text-gray-400">
-                {{ formatDate(schedule.start_at ?? '') }}
+                {{ formatDate(schedule.schedule_start_at ?? "") }}
               </p>
             </div>
           </div>
           <p class="text-gray-900 dark:text-white font-medium text-lg">
-            <UBadge v-if="schedule.status == 'PLANNED'" color="primary" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
-            <UBadge v-if="schedule.status == 'CANCELED'" color="red" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
-            <UBadge v-if="schedule.status == 'COMPLETED'" color="green" variant="soft">{{ g(`courses.activities.schedules.schedules_status_${schedule.status}`) }}</UBadge>
+            <UBadge
+              v-if="schedule.schedule_status == 'PLANNED'"
+              color="primary"
+              variant="soft"
+              >{{
+                g(
+                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
+                )
+              }}</UBadge
+            >
+            <UBadge
+              v-if="schedule.schedule_status == 'CANCELED'"
+              color="red"
+              variant="soft"
+              >{{
+                g(
+                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
+                )
+              }}</UBadge
+            >
+            <UBadge
+              v-if="schedule.schedule_status == 'COMPLETED'"
+              color="green"
+              variant="soft"
+              >{{
+                g(
+                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
+                )
+              }}</UBadge
+            >
           </p>
         </NuxtLink>
-    </div>
-    <div v-else class="min-h-96 flex flex-col items-center justify-center">
+      </div>
+      <div v-else class="min-h-96 flex flex-col items-center justify-center">
         <UIcon name="i-heroicons-circle-stack" class="w-5 h-5" />
         <p class="text-gray-500 dark:text-gray-400">
-            {{ t('no_appointments') }}
+          {{ t("no_appointments") }}
         </p>
-    </div>
+      </div>
+      <template #error="{ error: e, clearError }">
+        <p>An error occurred: {{ e }}</p>
+
+        <button @click="clearError">Clear error</button>
+      </template>
+    </NuxtErrorBoundary>
   </UDashboardCard>
 </template>
 
 <script setup lang="ts">
-import type { CourseActivityScheduleView, Database } from '~/types/app.types';
-import { formatDate } from '~/utils/formatters';
-import EditCourseActivitySchedule from '../forms/EditCourseActivitySchedule.vue';
+import type { AppOrganizationSchedulesView } from "~/types/app.types";
+import { formatDate } from "~/utils/formatters";
+import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 
 const { t } = useI18n({
-    useScope: 'local'
-})
+  useScope: "local",
+});
 
-const { t:g } = useI18n({
-    useScope: 'global'
-})
+const { t: g } = useI18n({
+  useScope: "global",
+});
 
-const client = useSupabaseClient<Database>()
-const userOrganizationsStore = useUserOrganizationsStore()
-const slideover = useSlideover()
+const client = useSupabaseClient();
+const userOrganizationsStore = useUserOrganizationsStore();
+const slideover = useSlideover();
 
 if (!userOrganizationsStore.selectedOrganization) {
-    throw new Error('No active organization')
+  throw new Error("No active organization");
 }
 
-const { data:schedules } = useAsyncData(async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
-        throw new Error('No active organization')
-    }
-    const { data, error } = await client.from('course_activity_schedules_view').select('*')
-    .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
-    .gte('start_at', new Date().toISOString()).order('start_at', { ascending: true }).limit(10)
+const { data: schedules } = useAsyncData(async () => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    throw new Error("No active organization");
+  }
 
-    if (error) {
-        throw error
-    }
+  const { data, error } = await client
+    .from("organizations_schedules_view")
+    .select("*")
+    .eq(
+      "schedule_organization_id",
+      userOrganizationsStore.selectedOrganization.organization_id
+    )
+    .gte("schedule_start_at", new Date().toISOString())
+    .order("schedule_start_at", { ascending: true })
+    .limit(10)
+    .overrideTypes<AppOrganizationSchedulesView[]>();
 
-    return data
-})
+  if (error) {
+    throw error;
+  }
 
-async function openScheduleModal(schedule: CourseActivityScheduleView) {
-    slideover.open(EditCourseActivitySchedule, {
-        orgid: schedule.organization_id,
-        courseid: schedule.course_id,
-        activityid: schedule.activity_id,
-        scheduleId: schedule.id
-    })
+  console.log("schedules", data);
+
+  return data;
+});
+
+async function openScheduleModal(schedule: AppOrganizationSchedulesView) {
+  slideover.open(EditCourseActivitySchedule, {
+    orgid: schedule.schedule_organization_id,
+    courseid: schedule.course_id,
+    activityid: schedule.activity_id,
+    scheduleId: schedule.schedule_id,
+  });
 }
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
 
 <i18n lang="json">
 {
-    "de": {
-        "incoming_appointments": "Kommende Termine",
-        "incoming_appointments_description": "Hier sind die nächsten Termine, die Sie haben.",
-        "no_appointments": "Keine Termine",
-        "view_all": "Alle anzeigen"
-    },
-    "en": {
-        "incoming_appointments": "Incoming Appointments",
-        "incoming_appointments_description": "Here are the next appointments you have.",
-        "no_appointments": "No appointments",
-        "view_all": "View all"
-    }
+  "de": {
+    "incoming_appointments": "Kommende Termine",
+    "incoming_appointments_description": "Hier sind die nächsten Termine, die Sie haben.",
+    "no_appointments": "Keine Termine",
+    "view_all": "Alle anzeigen"
+  },
+  "en": {
+    "incoming_appointments": "Incoming Appointments",
+    "incoming_appointments_description": "Here are the next appointments you have.",
+    "no_appointments": "No appointments",
+    "view_all": "View all"
+  }
 }
 </i18n>

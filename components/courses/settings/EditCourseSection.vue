@@ -68,6 +68,7 @@ const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
 const createBillOnSubscription = ref(false);
 const allowSelfRegistration = ref(false);
+const courseStore = useCourseStore();
 
 const { data:course, refresh } = useAsyncData(async () => {
   const { data, error } = await client
@@ -80,6 +81,11 @@ const { data:course, refresh } = useAsyncData(async () => {
       throw error;
     }
 
+    if (!data) {
+      throw new Error("Course not found");
+    }
+
+    courseStore.course = data;
     createBillOnSubscription.value = data.create_bill_on_subscription;
     allowSelfRegistration.value = data.allow_self_registration;
 

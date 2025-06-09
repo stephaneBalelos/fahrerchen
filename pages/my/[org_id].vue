@@ -1,11 +1,10 @@
 <template>
-    <NuxtPage></NuxtPage>
+    <NuxtPage />
 </template>
 
 <script setup lang="ts">
 import organizations from '~/middleware/organizations';
 import staffMember from '~/middleware/staff-member';
-import studentProfile from '~/middleware/student-profile';
 definePageMeta({
     layout: 'orgs',
     middleware: [organizations, staffMember],
@@ -23,8 +22,12 @@ await useAsyncData('userOrganizations', async () => {
 
 await useAsyncData('permissions', async () => {
   if (!userOrganizationsStore.selectedOrganization) return false;
-  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.role);
+  await userPermissionStore.loadPermissions(userOrganizationsStore.selectedOrganization.organization_role);
   return true;
+});
+
+onUnmounted(() => {
+    userOrganizationsStore.clearSelectedOrganization();
 });
 </script>
 

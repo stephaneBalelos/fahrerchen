@@ -9,6 +9,16 @@
       <div v-if="data.subscription.student" class="flex flex-col gap-6">
         <div class="flex flex-col gap-2">
           <p class="text-gray-900 dark:text-white font-medium">
+            {{ t("activity_course") }}
+          </p>
+          <div class="flex items-center gap-2">
+            <p class="text-gray-500 dark:text-gray-400 text-md">
+              {{ data.subscription.course.name }}
+            </p>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <p class="text-gray-900 dark:text-white font-medium">
             {{ t("activity_attendee") }}
           </p>
           <div class="flex items-center gap-2">
@@ -44,21 +54,12 @@
           </div>
         </div>
 
-        <div v-if="data.schedule_assigned_to_id" class="flex flex-col">
-          <p class="text-gray-900 dark:text-white font-medium">
-            {{ t("activity_responsible") }}
-          </p>
-          <p class="text-gray-500 dark:text-gray-400 text-md">
-            {{ data.schedule_assigned_to_firstname }}
-            {{ data.schedule_assigned_to_lastname }}
-          </p>
-        </div>
         <div class="flex flex-col">
           <p class="text-gray-900 dark:text-white font-medium">
             {{ t("activity_date") }}
           </p>
           <p class="text-gray-500 dark:text-gray-400 text-md">
-            {{ formatDateTime(data.activity_start_at) }}
+            {{ formatDateTime(data.schedule_start_at) }}
           </p>
         </div>
         <div class="flex flex-col">
@@ -68,8 +69,8 @@
           <p class="text-gray-500 dark:text-gray-400 text-md">
             {{
               formatDistance(
-                new Date(data.activity_end_at),
-                new Date(data.activity_start_at)
+                new Date(data.schedule_end_at),
+                new Date(data.schedule_start_at)
               )
             }}
           </p>
@@ -109,7 +110,7 @@ const { data } = useAsyncData(
   async () => {
     const { data, error } = await client
       .from("course_activity_schedules_attendances")
-      .select("*, subscription:course_subscriptions(*, student:students(*))")
+      .select("*, subscription:course_subscriptions(*, course:courses(*), student:students(*))")
       .eq("id", props.attendanceId)
       .single();
 
@@ -128,7 +129,22 @@ const activityIcon = computed(() => {
 });
 
 const deleteAttendance = async () => {
-  $emits("delete");
+  if (!data.value) {
+    return;
+  }
+
+  const { error } = await client
+    .from("course_activity_schedules_attendances")
+    .delete()
+    .eq("id", data.value.id);
+
+  if (error) {
+    console.error("Error deleting attendance:", error);
+    return;
+  }
+
+  $emits("delete", data.value.id);
+  $emits("close");
 };
 </script>
 
@@ -138,6 +154,7 @@ const deleteAttendance = async () => {
 {
   "de": {
     "attendance_confirmation": "Teilnahmebestätigung",
+    "activity_course": "Kurs",
     "activity_attendee": "Teilnehmer",
     "activity_responsible": "Verantwortlich",
     "activity_date": "Datum",
@@ -147,6 +164,7 @@ const deleteAttendance = async () => {
   },
   "en": {
     "attendance_confirmation": "Attendance confirmation",
+    "activity_course": "Course",
     "activity_attendee": "Attendee",
     "activity_responsible": "Responsible",
     "activity_date": "Date",

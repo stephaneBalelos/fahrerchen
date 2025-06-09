@@ -12,7 +12,11 @@
           autofocus
         />
       </template>
-      <ul v-if="filteredStudents.length > 0" role="list" class="divide-y divide-gray-200 dark:divide-gray-800">
+      <ul
+        v-if="filteredStudents.length > 0"
+        role="list"
+        class="divide-y divide-gray-200 dark:divide-gray-800"
+      >
         <li
           v-for="(student, index) in filteredStudents"
           :key="index"
@@ -53,14 +57,13 @@
         <UAlert
           v-if="selected.length > 0"
           class="my-4"
-          icon="i-heroicons-command-line"
           color="primary"
-          variant="solid"
+          variant="soft"
           :title="t('student_to_add', { count: selected.length })"
         />
-        <UButton v-if="selected.length > 0" block @click="addStudents"
-          >{{ t('add_students') }}</UButton
-        >
+        <UButton v-if="selected.length > 0" block @click="addStudents">{{
+          t("add_students")
+        }}</UButton>
       </div>
     </template>
   </UDashboardSlideover>
@@ -78,7 +81,6 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const tutorialStore = useTutorialStore();
 
 const props = defineProps<Props>();
 
@@ -92,9 +94,7 @@ const toast = useToast();
 
 const selected = ref<string[]>([]);
 
-const {
-  data: students,
-} = await useAsyncData(
+const { data: students } = await useAsyncData(
   `students_${props.courseid}`,
   async () => {
     const { data, error } = await supabase
@@ -130,22 +130,32 @@ function addStudents() {
       organization_id: props.orgid,
     });
     if (error) {
+      if (error.code === "23505") {
+        toast.add({
+          title: t("errors.stundent_is_already_enrolled_in_a_course.title"),
+          description: t('errors.stundent_is_already_enrolled_in_a_course.description'),
+          color: "red",
+          timeout: 3000,
+        });
+        return;
+      } else {
+        toast.add({
+          title: t("errors.default.title"),
+          description: t("errors.default.description"),
+          color: "red",
+          timeout: 3000,
+        });
+        throw error;
+      }
+    } else {
       toast.add({
-        title: "Error",
-        description: "An error occurred while adding the student.",
-        color: "red",
+        title: t("student_added"),
+        description: t("student_added_description"),
+        color: "green",
         timeout: 3000,
       });
-      throw error;
+      emits("student-added");
     }
-    toast.add({
-      title: "Student added",
-      description: "The student has been added to the course.",
-      color: "green",
-      timeout: 3000,
-    });
-    emits("student-added");
-    tutorialStore.completeStep('course_student_enroll')
   });
 }
 </script>
@@ -161,8 +171,18 @@ function addStudents() {
     "no_students_found_description": "Keine Studenten gefunden, die dem Kurs hinzugefügt werden können",
     "add_students": "Studenten hinzufügen",
     "student_added": "Student hinzugefügt",
-    "student_added_description": "Der Student wurde dem Kurs hinzugefügt.",
-    "student_to_add": "{count} Student(innen) hinzufügen"
+    "student_added_description": "Der Student / Die Studentin wurde dem Kurs hinzugefügt.",
+    "student_to_add": "{count} Student(innen) hinzufügen",
+    "errors": {
+      "stundent_is_already_enrolled_in_a_course": {
+        "title": "Dieser Student ist bereits in einem Kurs eingeschrieben.",
+        "description": "Student dürfen nicht mehrfach in eine Fahrschule eingeschrieben werden."
+      },
+      "default": {
+        "title": "Ein Fehler ist aufgetreten",
+        "description": "Bitte kontaktieren Sie den Support."
+      }
+    }
   },
   "en": {
     "title": "Subscribe Student",
@@ -172,7 +192,11 @@ function addStudents() {
     "add_students": "Add Students",
     "student_added": "Student added",
     "student_added_description": "The student has been added to the course.",
-    "student_to_add": "Add {count} Student(s)"
+    "student_to_add": "Add {count} Student(s)",
+    "errors": {
+      "stundent_is_already_enrolled_in_a_course": "This student is already enrolled in a course.",
+      "default": "An error occurred, please contact support."
+    }
   }
 }
 </i18n>

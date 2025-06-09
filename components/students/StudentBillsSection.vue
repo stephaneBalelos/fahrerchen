@@ -4,7 +4,6 @@
     :title="t('your_bills')"
     :description="t('your_bills_description')"
     orientation="vertical"
-    class="px-4 mt-6"
   >
     <div v-if="bills && bills.length > 0" class="grid grid-cols-1 gap-2">
       <UDashboardCard
@@ -35,7 +34,7 @@
               size="sm"
               color="gray"
               square
-              :to="`/students/${bill.organization_id}/subscription/${props.subscriptionId}/bills/${bill.id}`"
+              :to="`/students/${bill.organization_id}/subscription/${props.subscriptionId}/billing/${bill.id}`"
             />
           </div>
         </template>

@@ -1,27 +1,38 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar
-      v-if="subscription"
-      :title="`${subscription.student_firstname} ${subscription.student_lastname}`"
-    >
-      <template #right>
-        <UButton variant="ghost" :loading="isDownloadingCertificate" @click="generateCertificate">
-          {{ t("generate_certifcate") }}
-        </UButton>
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <UDashboardNavbar
+        v-if="subscriptionStore.subscription"
+      >
+      <template #title>
+        <div class="flex items-center gap-2">
+          <UAvatar
+            :alt="`${subscriptionStore.subscription.student_firstname} ${subscriptionStore.subscription.student_lastname}`"
+            size="sm"
+          />
+          <span>{{ subscriptionStore.subscription.student_full_name }}</span> |
+          <span>
+            {{  subscriptionStore.subscription.course_name }}
+          </span>
+          <UBadge
+            v-if="subscriptionStore.subscription.archived_at"
+            color="red"
+            size="sm"
+          >
+            {{ t("archive") }}
+          </UBadge>
+        </div>
       </template>
-    </UDashboardNavbar>
-    <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
-      <UHorizontalNavigation :links="links" />
-    </UDashboardToolbar>
-    <UDashboardPanelContent>
+        <template #right>
+          <UHorizontalNavigation :links="links" />
+        </template>
+      </UDashboardNavbar>
       <NuxtPage />
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
-import { format } from "date-fns";
-import type { Database } from "~/types/app.types";
 
 definePageMeta({
   layout: "orgs",
@@ -30,28 +41,18 @@ definePageMeta({
 const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
-const client = useSupabaseClient<Database>();
-const isDownloadingCertificate = ref(false);
+const subscriptionStore = useSubscriptionStore();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const { data: subscription } = useAsyncData(
-  `subscriptions_${subscription_id}`,
-  async () => {
-    const { data, error } = await client
-      .from("course_subscriptions_view")
-      .select("*")
-      .eq("id", subscription_id)
-      .single();
-    if (error) {
-      throw error;
-    }
+await useAsyncData(async() => {
+  return await subscriptionStore.loadSubscription(subscription_id);
+})
 
-    return data;
-  }
-);
+
+
 
 const links = computed(() => {
   return [
@@ -60,6 +61,10 @@ const links = computed(() => {
         label: t("overview"),
         to: `/my/${org_id}/students/${subscription_id}`,
         exact: true,
+      },
+      {
+        label: t("activity"),
+        to: `/my/${org_id}/students/${subscription_id}/activity`,
       },
       {
         label: t("bills"),
@@ -73,33 +78,10 @@ const links = computed(() => {
   ];
 });
 
-async function generateCertificate() {
-  if (isDownloadingCertificate.value) {
-    return;
-  }
-  isDownloadingCertificate.value = true;
-  try {
-    const res = await $fetch<Blob>(`/api/orgs/subscriptions/${subscription_id}/generate-certificate`, {
-        method: "GET",
-    });
-    const date = format(new Date(), "yyyy-MM-dd");
-    
-
-    const blob = new Blob([res], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ausbildungsnachweis-b-${subscription.value.student_firstname}-${subscription.value.student_lastname}-${date}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isDownloadingCertificate.value = false;
-  }
-}
+onUnmounted(() => {
+  subscriptionStore.reset()
+  console.log(subscriptionStore.subscription)
+});
 </script>
 
 <style scoped></style>
@@ -111,6 +93,7 @@ async function generateCertificate() {
     "active": "Aktiv",
     "archive": "Archiv",
     "overview": "Überblick",
+    "activity": "Aktivität",
     "bills": "Rechnungen",
     "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
@@ -122,6 +105,7 @@ async function generateCertificate() {
     "active": "Active",
     "archive": "Archive",
     "overview": "Overview",
+    "activity": "Activity",
     "bills": "Bills",
     "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",

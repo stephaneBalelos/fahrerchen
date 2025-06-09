@@ -64,7 +64,7 @@ const signOut = async () => {
   >
     <UAvatar
       v-if="userStore.user.avatar_path"
-      :src="$publicStorageUrl('users_avatars', userStore.user.avatar_path)"
+      :src="$publicStorageUrl('users_avatars', userStore.user.avatar_path) ?? false"
     />
     <UAvatar
       v-else

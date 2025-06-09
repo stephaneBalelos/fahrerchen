@@ -22,12 +22,14 @@
         class="flex items-center gap-2 text-gray-900 dark:text-white font-medium text-lg"
       >
         <UButton
+          v-if="!disabled"
           size="sm"
           color="gray"
           square
           :label="submitted_doc ? t('change') : t('upload')"
           variant="solid"
           :loading="isUploading"
+          :disabled="props.disabled"
           @click.stop="fileRef?.click()"
         />
         <input ref="fileRef" class="hidden" type="file" @change="onChange" >
@@ -58,6 +60,7 @@ type Props = {
   doc: AppCourseRequiredDocument;
   bucketId: string;
   path: string;
+  disabled?: boolean;
 };
 
 const { t } = useI18n({

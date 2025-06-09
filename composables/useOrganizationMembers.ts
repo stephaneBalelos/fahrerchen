@@ -3,9 +3,9 @@ import type { Database, UserRole } from "~/types/app.types";
 export async function useOrganizationMembers(orgid: string, roles: UserRole[] = [], search?: string) {
     const client = useSupabaseClient<Database>()
     try {
-        const promise = client.from('organization_members_view').select().eq('organization_id', orgid)
+        const promise = client.from('users_organizations_view').select().eq('organization_id', orgid)
         if (roles.length > 0) {
-            promise.in('role', roles)
+            promise.in('organization_role', roles)
         }
         if (search) {
             promise.or(`user_email.ilike.%${search}%,user_firstname.ilike.%${search}%,user_lastname.ilike.%${search}%`)

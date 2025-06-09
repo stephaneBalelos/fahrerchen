@@ -26,10 +26,6 @@ export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['c
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
 
-export type AppNotification = MergeDeep<DatabaseGenerated['public']['Tables']['notifications']['Row'], {
-  target_roles: UserRole[]
-}>
-
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
     payment_method_id: Stripe.PaymentMethod.Type
@@ -55,132 +51,85 @@ export type StripeConnectLinkAccountPostBody = {
   org_id: string
 }
 
-export type CourseActivityScheduleView = Database["public"]["Views"]["course_activity_schedules_view"]["Row"]
-export type CourseSubscriptionStatsView = Database["public"]["Views"]["course_subscriptions_stats_view"]["Row"]
-export type CourseSubscriptionView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
-export type CourseSubscriptionBillItemView = Database["public"]["Views"]["course_subscription_bill_items_view"]["Row"]
-export type NotificationView = Database["public"]["Views"]["notifications_view"]["Row"]
+export type AppUserOrganizationsView = Database["public"]["Views"]["users_organizations_view"]["Row"]
+export type AppOrganizationSchedulesView = Database["public"]["Views"]["organizations_schedules_view"]["Row"]
+export type AppCourseSubscriptionsView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
+export type AppCourseSubscriptionBillsView = Database["public"]["Views"]["course_subscription_bills_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
   public: {
     Views: {
-      organization_members_view: {
+      users_organizations_view: {
         Row: {
-          id: string
-          inserted_at: Date
-          organization_id: string
           user_id: string
-          role: UserRole
           user_email: string
           user_firstname: string | null
           user_lastname: string | null
           user_fullname: string | null
-          user_avatar_path: string | null
+          organization_id: string,
+          organization_handle: string
+          organization_name: string
+          organization_description: string | null
+          organization_avatar_path: string | null
+          organization_preferred_language: string
+          organization_role: UserRole
+          organization_membership_inserted_at: string
+        }
+      },
+      organizations_schedules_view: {
+        Row: {
+          schedule_id: string
+          schedule_organization_id: string
+          schedule_start_at: string
+          schedule_end_at: string
+          schedule_attendees: string[]
+          schedule_status: DatabaseGenerated["public"]["Enums"]["schedule_status"]
+          schedule_assigned_to: string
+          activity_id: string
+          activity_name: string
+          activity_description: string
+          activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"]
+          course_id: string
+          course_name: string
+          course_description: string
         }
       },
       course_subscriptions_view: {
         Row: {
+          id: string
+          student_id: string
+          inserted_at: string
+          archived_at: string | null
+          costs: number
+          organization_id: string
+          student_firstname: string
+          student_lastname: string
+          student_email: string
+          student_full_name: string
+          student_avatar_path: string | null
+          course_name: string
+          course_description: string
+          course_id: string
+          course_type: AppCourseType
+        }
+      },
+      course_subscription_bills_view: {
+        Row: {
           id: string,
+          bill_number: string,
+          organization_id: string,
+          total: number,
+          paid_at: string | null,
+          canceled_at: string | null,
+          created_at: string,
+          course_subscription_id: string,
           course_id: string,
           student_id: string,
-          archived_at: Date | null,
-          costs: string,
-          organization_id: string,
-          course_name: string,
-          course_description: string,
-          student_email: string,
           student_firstname: string,
           student_lastname: string,
-          student_user_id: string,
-        }
-      },
-      course_activity_schedules_view: {
-        Row: {
-          id: string
-          course_id: string
-          activity_id: string
-          assigned_to: string
-          status: DatabaseGenerated["public"]["Enums"]["schedule_status"]
-          start_at: string
-          end_at: string
-          organization_id: string,
-          activity_name: string,
-          activity_description: string,
-          activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"],
-          activity_allow_self_registration: boolean,
-          activity_allow_requests: boolean,
+          student_email: string,
           course_name: string,
           course_description: string,
-          assigned_to_email: string,
-          assigned_to_firstname: string | null,
-          assigned_to_lastname: string | null,
-          attendees: string[]
-        } 
-      },
-      course_subscriptions_stats_view: {
-        Row: {
-          id: string,
-          course_id: string,
-          student_id: string,
-          archived_at: Date | null,
-          costs: number,
-          organization_id: string,
-          course_name: string,
-          course_description: string,
-          total_costs: number,
-          total_bills: number,
-        }
-      }
-      course_subscription_bill_items_view: {
-        Row: {
-          id: string,
-          bill_id: string,
-          course_cost_id: string,
-          course_activity_attendance_id: string,
-          item_title: string,
-          item_description: string,
-          item_price: number,
-          cost_name: string,
-          cost_description: string,
-          cost_price: number,
-          activity_id: string,
-          activity_name: string,
-          activity_description: string,
-          activity_type: number,
-          activity_start_at: string,
-          activity_end_at: string,
-          activity_assigned_to_id: string,
-          activity_assigned_to_email: string,
-          activity_assigned_to_firstname: string,
-          activity_assigned_to_lastname: string,
-        }
-      }
-      user_roles_view: {
-        Row: {
-          email: string
-          firstname: string | null
-          lastname: string | null
-          role: Database["public"]["Enums"]["app_role"]
-          user_id: string
-        };
-      }
-      notifications_view: {
-        Row: {
-          actor_email: string | null
-          actor_firstname: string | null
-          actor_lastname: string | null
-          actor_fullname: string | null
-          actor_id: string | null
-          date: string
-          id: string
-          organization_id: string
-          read_at: string | null
-          resource_id: string
-          target_roles: UserRole[]
-          target_id: string
-          type: Database["public"]["Enums"]["notification_type"]
-          payload: unknown
-          updated_at: string
         }
       }
     };

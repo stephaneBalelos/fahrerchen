@@ -2,12 +2,12 @@
     <div class="mb-4">
         <div class="flex gap-2">
             <p class="font-bold">
-                {{ props.billItem.item_title }}
+                {{ props.billItem.title }}
             </p>
-            <p>({{ t('unit_price') }}: {{ formatCurrency(props.billItem.item_price) }})</p>
+            <p>({{ t('unit_price') }}: {{ formatCurrency(props.billItem.price) }})</p>
         </div>
         <div v-if="attendance" class="flex gap-2">
-            <p class="font-bold text-primary">{{ t('attended_at', { data: formatDate(attendance.activity_start_at) }) }}</p>
+            <p class="font-bold text-primary">{{ t('attended_at', { data: formatDate(attendance.schedule_start_at) }) }}</p>
         </div>
         <div v-else>
             <p class="font-bold text-orange-200">{{ t('not_attended_yet') }}</p>
@@ -16,11 +16,11 @@
 </template>
 
 <script setup lang="ts">
-import type { CourseSubscriptionBillItemView } from '~/types/app.types';
+import type { AppCourseSubscriptionBillItem } from '~/types/app.types';
 import { formatCurrency, formatDate } from '~/utils/formatters';
 
 type Props = {
-    billItem: CourseSubscriptionBillItemView;
+    billItem: AppCourseSubscriptionBillItem;
 }
 
 const props = defineProps<Props>();
@@ -35,7 +35,7 @@ const { data: attendance } = useAsyncData(`bill_item_details_${props.billItem.id
     if (!props.billItem.course_activity_attendance_id) return null;
     const { data, error } = await client
         .from("course_activity_schedules_attendances")
-        .select("id, activity_start_at")
+        .select("*")
         .eq("id", props.billItem.course_activity_attendance_id).single();
 
     if (error) {

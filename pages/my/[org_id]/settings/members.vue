@@ -14,7 +14,9 @@ const { data, refresh } = await useAsyncData('members', async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     return null
   }
-  const { data, error } = await client.from('organization_members').select('role, users(*)').eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
+  const { data, error } = await client.from('organization_members').select('role, users(*)')
+  .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
+  .neq('role', 'student')
   if (error) {
     throw error
   }

@@ -6,23 +6,32 @@
   >
     <UTabs :items="tabs" class="w-full">
       <template #item="{ item }">
-        <UForm v-if="item.key == 'schedule'" ref="form" :state="state" :schema="schema" @submit="onSubmit">
+        <UForm
+          v-if="item.key == 'schedule'"
+          ref="form"
+          :state="state"
+          :schema="schema"
+          @submit="onSubmit"
+        >
           <UDashboardSection
-            :title="selectedActivity ? selectedActivity.name : t('activity_schedule')"
+            :title="
+              selectedActivity ? selectedActivity.name : t('activity_schedule')
+            "
             :description="
               props.scheduleId
                 ? t('edit_course_activity_schedule')
                 : t('add_course_activity_schedule')
             "
           >
-          <template #links>
-            <UButton v-if="data && data.status === 'PLANNED'" color="green" @click="updateScheduleStatus('COMPLETED')">
-              {{ t("mark_as_completed") }}
-            </UButton>
-            <UButton v-if="data && data.status === 'PLANNED'" color="red" variant="ghost" @click="updateScheduleStatus('CANCELED')">
-              {{ t("mark_as_canceled") }}
-            </UButton>
-          </template>
+            <template #links>
+              <UButton
+                v-if="data && data.status === 'PLANNED' && data.assigned_to"
+                color="green"
+                @click="markScheduleAsCompleted"
+              >
+                {{ t("mark_as_completed") }}
+              </UButton>
+            </template>
             <UFormGroup
               name="activity_id"
               :label="t('from.activity.label')"
@@ -155,12 +164,21 @@
         {{ t("save") }}
       </UButton>
       <UButton
-        v-if="props.scheduleId"
+        v-if="props.scheduleId && data && data.status === 'CANCELED'"
+        
         color="red"
         variant="ghost"
         @click="deleteCourseActivitySchedule(props.scheduleId)"
       >
         {{ t("delete") }}
+      </UButton>
+      <UButton
+        v-if="data && data.status === 'PLANNED'"
+        color="red"
+        variant="ghost"
+        @click="markScheduleAsCanceled"
+      >
+        {{ t("mark_as_canceled") }}
       </UButton>
     </template>
   </UDashboardSlideover>
@@ -287,7 +305,9 @@ const state = reactive<Schema>({
   start_at: data.value?.start_at
     ? new Date(data.value.start_at)
     : props.date ?? new Date(),
-  end_at: data.value?.end_at ? new Date(data.value.end_at) : addHours(new Date(), 1),
+  end_at: data.value?.end_at
+    ? new Date(data.value.end_at)
+    : addHours(new Date(), 1),
   activity_id: props.activityid,
   assigned_to: data.value?.assigned_to ?? undefined,
 });
@@ -402,7 +422,39 @@ async function deleteCourseActivitySchedule(id: string) {
   }
 }
 
-async function updateScheduleStatus(status: Database["public"]["Enums"]["schedule_status"]) {
+async function markScheduleAsCompleted() {
+  if (!props.scheduleId) {
+    return;
+  }
+  modal.open(ConfirmModal, {
+    title: t("confirm_mark_as_completed"),
+    description: t("confirm_mark_as_completed_description"),
+    confirmLabel: t("yes"),
+    cancelLabel: t("no"),
+    action: async () => {
+      await updateScheduleStatus("COMPLETED");
+    },
+  });
+}
+
+async function markScheduleAsCanceled() {
+  if (!props.scheduleId) {
+    return;
+  }
+  modal.open(ConfirmModal, {
+    title: t("confirm_mark_as_canceled"),
+    description: t("confirm_mark_as_canceled_description"),
+    confirmLabel: t("yes"),
+    cancelLabel: t("no"),
+    action: async () => {
+      await updateScheduleStatus("CANCELED");
+    },
+  });
+}
+
+async function updateScheduleStatus(
+  status: Database["public"]["Enums"]["schedule_status"]
+) {
   if (!props.scheduleId) {
     return;
   }
@@ -410,9 +462,10 @@ async function updateScheduleStatus(status: Database["public"]["Enums"]["schedul
     const { error } = await client
       .from("course_activity_schedules")
       .update({ status })
-      .eq("id", props.scheduleId)
+      .eq("id", props.scheduleId);
 
     if (error) {
+      console.error(error);
       throw new Error("Failed to update course activity schedule");
     }
     refresh();
@@ -445,7 +498,11 @@ function _onChangeRepeat(value: RepeatMode) {
     "activity_attendees": "Aktivitätsteilnehmer",
     "edit_course_activity_attendees": "Bearbeiten Sie die Kursaktivitätsteilnehmer",
     "mark_as_completed": "Als abgeschlossen markieren",
+    "confirm_mark_as_completed": "Termin als abgeschlossen markieren",
+    "confirm_mark_as_completed_description": "Alle Teilnehmer dieses Termins werden als anwesend markiert und die Aktivität wird abgerechnet. Möchten Sie fortfahren?",
     "mark_as_canceled": "Als storniert markieren",
+    "confirm_mark_as_canceled": "Termin als storniert markieren",
+    "confirm_mark_as_canceled_description": "Möchten Sie diesen Termin wirklich als storniert markieren?",
     "from": {
       "activity": {
         "label": "Aktivität",

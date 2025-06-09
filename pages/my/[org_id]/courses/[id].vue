@@ -1,7 +1,7 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardNavbar :title="course.name">
+      <UDashboardNavbar :title="courseStore.course?.name">
         <template #right>
           <UHorizontalNavigation :links="links" />
         </template>
@@ -19,14 +19,14 @@ definePageMeta({
 
 const route = useRoute();
 const userOrganizationsStore = useUserOrganizationsStore();
-const org_id = route.params.org_id as string;
+const courseStore = useCourseStore();
 const courseid = route.params.id as string;
+
+await courseStore.loadCourse(courseid);
 
 const { t } = useI18n({
   useScope: 'local'
 });
-
-const course = await useCourses(org_id, courseid);
 
 const links = computed(() => [
   [
@@ -48,6 +48,10 @@ const links = computed(() => [
     }
   ],
 ]);
+
+onUnmounted(() => {
+  courseStore.course = null;
+});
 </script>
 
 <style scoped></style>

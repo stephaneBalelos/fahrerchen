@@ -14,7 +14,14 @@
           {{ formatCurrency(settlement_total) }}
         </div>
       </div>
-      <UButton v-if="permissionsStore.hasPermission('course_subscription_bills.create')" color="primary" variant="soft" @click="generateBill">
+      <UButton
+        v-if="
+          permissionsStore.hasPermission('course_subscription_bills.create') && subscriptionStore.subscription?.archived_at === null
+        "
+        color="primary"
+        variant="soft"
+        @click="generateBill"
+      >
         <span>{{ t("create_bill") }}</span>
       </UButton>
     </template>
@@ -37,16 +44,20 @@
                 })
               }}
             </p>
-            <p 
-            v-if="bill_item.attendance"
-            class="text-sm text-gray-500 dark:text-gray-400" >
+            <p
+              v-if="bill_item.attendance"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
               {{
                 t("attended_at", {
-                  date: formatDateTime(bill_item.attendance.activity_start_at),
+                  date: formatDateTime(bill_item.attendance.schedule_start_at),
                 })
               }}
             </p>
-            <p v-if="bill_item.cost" class="text-sm text-gray-500 dark:text-gray-400">
+            <p
+              v-if="bill_item.cost"
+              class="text-sm text-gray-500 dark:text-gray-400"
+            >
               {{ bill_item.cost.description }}
             </p>
           </template>
@@ -89,15 +100,18 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
 const props = defineProps<Props>();
 const $emit = defineEmits(["refresh"]);
 const client = useSupabaseClient();
 const toast = useToast();
 const isGeneratingBill = ref(false);
 
-const tutorialStore = useTutorialStore();
-
 const permissionsStore = useUserPermissionsStore();
+const subscriptionStore = useSubscriptionStore();
 
 const {
   data: bill_items,
@@ -106,7 +120,9 @@ const {
 } = useAsyncData(async () => {
   const { data, error } = await client
     .from("course_subscription_bill_items")
-    .select("*, attendance:course_activity_schedules_attendances(*), cost:course_costs(*)")
+    .select(
+      "*, attendance:course_activity_schedules_attendances(*), cost:course_costs(*)"
+    )
     .eq("course_subscription_id", props.subscriptionId)
     .is("bill_id", null)
     .order("inserted_at", { ascending: true });
@@ -114,7 +130,7 @@ const {
   if (error) {
     throw error;
   }
-  
+
   return data;
 });
 
@@ -128,16 +144,23 @@ const settlement_total = computed(() => {
 async function generateBill() {
   try {
     isGeneratingBill.value = true;
-    await client.rpc("generate_bill_for_subscription", {
-      subscription_id: props.subscriptionId
+    const { error } = await client.rpc("generate_bill_for_subscription", {
+      subscription_id: props.subscriptionId,
     });
-    toast.add({
-      title: t("bill_generated"),
-      description: t("bill_generated_description"),
-      color: "green",
-    });
-    $emit("refresh");
-    tutorialStore.completeStep('invoice_create');
+    if (error) {
+      toast.add({
+        title: t("bill_not_generated"),
+        description: g(`error_messages.${error.message}`),
+        color: "red",
+      });
+    } else {
+      toast.add({
+        title: t("bill_generated"),
+        description: t("bill_generated_description"),
+        color: "green",
+      });
+      $emit("refresh");
+    }
   } catch (error) {
     console.error(error);
     toast.add({

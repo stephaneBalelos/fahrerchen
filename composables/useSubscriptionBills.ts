@@ -1,4 +1,4 @@
-import type { Database } from "~/types/app.types";
+import type { AppCourseSubscriptionBillsView } from "~/types/app.types";
 
 type CourseSubscriptionBillQuery = {
     student_id?: string;
@@ -10,7 +10,7 @@ type CourseSubscriptionBillQuery = {
 
 export const useSubscriptionBills = () => {
     const userOrganizationStore = useUserOrganizationsStore()
-    const client = useSupabaseClient<Database>()
+    const client = useSupabaseClient()
 
     const fetchSubscriptionBillById = async (id: string) => {
         if (!userOrganizationStore.selectedOrganization) {
@@ -61,7 +61,7 @@ export const useSubscriptionBills = () => {
             q.eq("ready_to_pay", query.ready_to_pay)
         }
 
-        const { data, error } = await q
+        const { data, error } = await q.overrideTypes<AppCourseSubscriptionBillsView[]>()
 
         if (error) {
             throw error

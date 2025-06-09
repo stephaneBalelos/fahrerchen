@@ -102,13 +102,13 @@
               color="gray"
               variant="solid"
               icon="i-heroicons-pencil"
-              @click="(e) => openStudentForm(row.id)"
+              @click="() => openStudentForm(row.id)"
             />
             <UButton
               color="gray"
               variant="solid"
               icon="i-heroicons-eye"
-              @click="(e) => openStudentSubscriptionsSlideOver(row.id)"
+              @click="() => openStudentSubscriptionsSlideOver(row.id)"
             />
           </div>
         </template>
@@ -118,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AppStudent, Database } from "~/types/app.types";
+import type { AppStudent } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
@@ -132,7 +132,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient<Database>();
+const client = useSupabaseClient();
 const slideover = useSlideover();
 const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -167,12 +167,13 @@ const {
       return null;
     }
     const query = client
-      .from("students_view")
-      .select("*")
+      .from("students")
+      .select("*, course_subscriptions(*)")
       .eq(
         "organization_id",
         userOrganizationsStore.selectedOrganization.organization_id
-      );
+      )
+      .is("course_subscriptions.archived_at", null)
 
       if (q.value) {
         query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);
@@ -188,6 +189,7 @@ const {
         ? data.map((item) => {       
             return {
               ...item,
+              subscriptions_count: item.course_subscriptions?.length ?? 0,
               name: `${item.firstname} ${item.lastname}`
             };
           })

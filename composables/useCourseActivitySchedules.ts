@@ -1,4 +1,4 @@
-import type { Database } from "~/types/app.types";
+import type { AppOrganizationSchedulesView, Database } from "~/types/app.types";
 
 type CourseActivityScheduleQuery = {
     course_id?: string;
@@ -13,7 +13,7 @@ type CourseActivityScheduleQuery = {
 export const useCourseActivitySchedules = () => {
 
     const userOrganizationStore = useUserOrganizationsStore()
-    const client = useSupabaseClient<Database>()
+    const client = useSupabaseClient()
 
     const fetchCourseActivitySchedulesById = async (id: string) => {
         if (!userOrganizationStore.selectedOrganization) {
@@ -21,9 +21,9 @@ export const useCourseActivitySchedules = () => {
         }
 
         const { data, error } = await client
-            .from("course_activity_schedules_view")
+            .from("organizations_schedules_view")
             .select("*")
-            .eq("id", id)
+            .eq("schedule_id", id)
             .single()
 
         if (error) {
@@ -56,10 +56,10 @@ export const useCourseActivitySchedules = () => {
         }
 
         const q = client
-            .from("course_activity_schedules_view")
+            .from("organizations_schedules_view")
             .select("*")
 
-        q.eq("organization_id", userOrganizationStore.selectedOrganization.organization_id)
+        q.eq("schedule_organization_id", userOrganizationStore.selectedOrganization.organization_id)
 
         if (query.course_id) {
             q.eq("course_id", query.course_id)
@@ -70,27 +70,26 @@ export const useCourseActivitySchedules = () => {
         }
 
         if (query.status) {
-            q.eq("status", query.status)
+            q.eq("schedule_status", query.status)
         }
 
         if (query.assigned_to) {
-            q.eq("assigned_to", query.assigned_to)
+            q.eq("schedule_assigned_to", query.assigned_to)
         }
 
         if (query.student_id) {
-            console.log(query.student_id)
-            q.contains('attendees', [query.student_id])
+            q.contains('schedule_attendees', [query.student_id])
         }
 
         if (query.start_at) {
-            q.gte("start_at", query.start_at)
+            q.gte("schedule_start_at", query.start_at)
         }
 
         if (query.end_at) {
-            q.lte("start_at", query.end_at)
+            q.lte("schedule_start_at", query.end_at)
         }
 
-        const { data, error } = await q
+        const { data, error } = await q.overrideTypes<AppOrganizationSchedulesView[]>()
 
         if (error) {
             throw error

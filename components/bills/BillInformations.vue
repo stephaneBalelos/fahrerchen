@@ -24,7 +24,7 @@
   </UDashboardSection>
   <UDivider :label="t('history')" />
   <div class="relative h-full">
-    <BillHistory :bill-id="bill.id" :bill-created-at="bill.created_at" />
+    <!-- <BillHistory :bill-id="bill.id" :bill-created-at="bill.created_at" /> -->
   </div>
 </template>
 
@@ -36,7 +36,6 @@ import type {
   AppStudent,
 } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
-import BillHistory from "./BillHistory.vue";
 
 type Props = {
   bill: AppCourseSubscriptionBill;

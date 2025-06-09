@@ -43,6 +43,12 @@
             }
         }
     },
+    "errors_messages": {
+        "course_subscription_is_not_active": "The course subscription is not active.",
+        "activity_schedule_is_not_active": "The activity schedule is not active.",
+        "course_subscription_not_in_attendees": "The student is not in the attendee list of this activity.",
+        "course_subscription_already_in_attendees": "The student is already in the attendee list of this activity."
+    },
     "course_types": {
         "AM": {
             "name": "AM",

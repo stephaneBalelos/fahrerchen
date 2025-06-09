@@ -24,6 +24,11 @@ const links = computed(() => {
         to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
       },
       {
+        label: t("billing"),
+        icon: "i-heroicons-document-text",
+        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/billing`,
+      },
+      {
         label: t("payments"),
         icon: "i-heroicons-credit-card",
         to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
@@ -54,15 +59,17 @@ const links = computed(() => {
 <i18n lang="json">
 {
   "de": {
-    "settings": "Einstellungen",
+    "settings": "Allgemein",
     "members": "Mitglieder",
+    "billing": "Abrechnung",
     "payments": "Zahlungen",
     "documentation": "Dokumentation",
     "subscription": "Abonnement"
   },
   "en": {
-    "settings": "Settings",
+    "settings": "General",
     "members": "Members",
+    "billing": "Billing",
     "payments": "Payments",
     "documentation": "Documentation",
     "subscription": "Subscription"

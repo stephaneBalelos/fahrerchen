@@ -28,7 +28,7 @@ const { data: org } = await useAsyncData(
     const { data, error } = await client
       .from("organizations")
       .select("*")
-      .eq("id", route.params.org_id)
+      .eq("id", route.params.org_id as string)
       .single();
 
     if (error) {
@@ -244,7 +244,7 @@ async function onAvatarUploadSuccess() {
 }
 
 function openDeleteOrganizationModal() {
-  if (!org.value.id) {
+  if (!org.value?.id) {
     return
   }
   modal.open(DeleteAccountModal, {

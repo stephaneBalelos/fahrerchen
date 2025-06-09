@@ -14,7 +14,7 @@ export const useUserPermissionsStore = defineStore('permissions', () => {
         if (!userOrganizationsStore.selectedOrganization) {
             return false
         }
-        return userOrganizationsStore.selectedOrganization.role !== 'student'
+        return userOrganizationsStore.selectedOrganization.organization_role !== 'student'
     }
 
     async function loadPermissions(role: UserRole) {
@@ -32,7 +32,7 @@ export const useUserPermissionsStore = defineStore('permissions', () => {
 
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         if (userOrganizationsStore.selectedOrganization) {
-            await loadPermissions(userOrganizationsStore.selectedOrganization.role)
+            await loadPermissions(userOrganizationsStore.selectedOrganization.organization_role)
         }
     }, { immediate: true })
 

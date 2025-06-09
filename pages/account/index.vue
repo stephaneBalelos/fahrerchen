@@ -173,7 +173,7 @@ function openDeleteAccountModal() {
                     $publicStorageUrl(
                       'users_avatars',
                       userStore.user.avatar_path
-                    )
+                    ) ?? ''
                   "
                   size="md"
                 />

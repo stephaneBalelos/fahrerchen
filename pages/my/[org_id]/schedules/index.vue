@@ -1,197 +1,202 @@
 <template>
   <UDashboardPanel grow>
-    <UDashboardToolbar>
-      <p class="text-lg font-semibold">{{ t("schedules") }}</p>
-      <USelectMenu
-        v-model="selectedView"
-        :options="views"
-        :option-attribute="'label'"
-        :value-attribute="'value'"
-      />
-    </UDashboardToolbar>
-    <div class="flex h-full">
-      <UDashboardPanel v-if="userOrganizationsStore.selectedOrganization" :width="400">
-        <UDashboardPanelContent class="gap-4">
-          <UDashboardCard>
-            <FormsInputsDatepicker
-              v-model="selectedDate"
-              expanded
-              is-required
-              :mode="'date'"
-              :dates-highlighted="schedulesForMonth ? schedulesForMonth.map((schedule) => new Date(schedule.start_at)) : []"
-            />
-          </UDashboardCard>
-          <UDashboardCard>
-            <UFormGroup
-              :label="t('form.assigned_to.label')"
-              :help="t('form.assigned_to.description')"
-              name="assigned_to"
-            >
-              <template #hint>
-                <UButton
-                  v-if="filterForm.assigned_to"
-                  icon="i-heroicons-x-mark-solid"
-                  size="2xs"
-                  color="gray"
-                  square
-                  variant="ghost"
-                  @click="filterForm.assigned_to = undefined"
-                />
-              </template>
-              <FormsInputsUserSelect
-                v-model="filterForm.assigned_to"
-                :orgid="userOrganizationsStore.selectedOrganization.organization_id"
-              />
-            </UFormGroup>
-          </UDashboardCard>
-          <UDashboardCard>
-            <UFormGroup
-              :label="t('form.status.label')"
-              :help="t('form.status.description')"
-              name="course_id"
-            >
-            <template #hint>
-                <UButton
-                  v-if="filterForm.status"
-                  icon="i-heroicons-x-mark-solid"
-                  size="2xs"
-                  color="gray"
-                  square
-                  variant="ghost"
-                  @click="filterForm.status = undefined"
-                />
-              </template>
-              <USelectMenu
-                v-model="filterForm.status"
-                :options="SCHEDULES_STATUS"
+    <UDashboardNavbar :title="t('schedules')">
+      <template #right>
+        <USelectMenu
+          v-model="selectedView"
+          :options="views"
+          :option-attribute="'label'"
+          :value-attribute="'value'"
+        />
+      </template>
+    </UDashboardNavbar>
+    <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
+      <template #left>
+        <DateRangePicker v-model="selectedRange" />
+      </template>
+      <template #right>
+        <UPopover overlay>
+          <UButton
+            color="white"
+            label="Filtern"
+            trailing-icon="i-heroicons-chevron-down-20-solid"
+          />
+          <template #panel>
+            <div class="flex flex-col gap-6 p-4 py-6">
+              <UFormGroup
+                :label="t('form.course.label')"
+                :help="t('form.course.description')"
+                name="course_id"
+                :ui="{
+                  wrapper: filterForm.course_id ? 'border-l-4 border-primary-500 ps-4' : '',
+                }"
               >
-                <template #label>
-                  <span v-if="filterForm.status">
+                <template #hint>
+                  <UButton
+                    v-if="filterForm.course_id"
+                    icon="i-heroicons-x-mark-solid"
+                    size="2xs"
+                    color="gray"
+                    square
+                    variant="ghost"
+                    @click="filterForm.course_id = undefined"
+                  />
+                </template>
+                <FormsInputsCourseSelect
+                  v-model="filterForm.course_id"
+                  :orgid="
+                    userOrganizationsStore.selectedOrganization.organization_id
+                  "
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="t('form.assigned_to.label')"
+                :help="t('form.assigned_to.description')"
+                name="assigned_to"
+                :ui="{
+                  wrapper: filterForm.assigned_to ? 'border-l-4 border-primary-500 ps-4' : '',
+                }"
+              >
+                <template #hint>
+                  <UButton
+                    v-if="filterForm.assigned_to"
+                    icon="i-heroicons-x-mark-solid"
+                    size="2xs"
+                    color="gray"
+                    square
+                    variant="ghost"
+                    @click="filterForm.assigned_to = undefined"
+                  />
+                </template>
+                <FormsInputsUserSelect
+                  v-model="filterForm.assigned_to"
+                  :orgid="
+                    userOrganizationsStore.selectedOrganization.organization_id
+                  "
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="t('form.status.label')"
+                :help="t('form.status.description')"
+                name="course_id"
+                :ui="{
+                  wrapper: filterForm.status ? 'border-l-4 border-primary-500 ps-4' : '',
+                }"
+              >
+                <template #hint>
+                  <UButton
+                    v-if="filterForm.status"
+                    icon="i-heroicons-x-mark-solid"
+                    size="2xs"
+                    color="gray"
+                    square
+                    variant="ghost"
+                    @click="filterForm.status = undefined"
+                  />
+                </template>
+                <USelectMenu
+                  v-model="filterForm.status"
+                  :options="SCHEDULES_STATUS"
+                >
+                  <template #label>
+                    <span v-if="filterForm.status">
+                      {{
+                        g(
+                          `courses.activities.schedules.schedules_status_${filterForm.status}`
+                        )
+                      }}
+                    </span>
+                    <span v-else class="text-gray-500">{{
+                      t("form.status.placeholder")
+                    }}</span>
+                  </template>
+                  <template #option="{ option }">
                     {{
                       g(
-                        `courses.activities.schedules.schedules_status_${filterForm.status}`
+                        `courses.activities.schedules.schedules_status_${option}`
                       )
                     }}
-                  </span>
-                  <span 
-                  v-else 
-                  class="text-gray-500"
-                  >{{ t("form.status.placeholder") }}</span>
+                  </template>
+                </USelectMenu>
+              </UFormGroup>
+              <UFormGroup
+                :label="t('form.student.label')"
+                :help="t('form.student.description')"
+                name="student_id"
+                :ui="{
+                  wrapper: filterForm.student_id ? 'border-l-4 border-primary-500 ps-4' : '',
+                }"
+              >
+                <template #hint>
+                  <UButton
+                    v-if="filterForm.student_id"
+                    icon="i-heroicons-x-mark-solid"
+                    size="2xs"
+                    color="gray"
+                    square
+                    variant="ghost"
+                    @click="filterForm.student_id = undefined"
+                  />
                 </template>
-                <template #option="{ option }">
-                  {{
-                    g(
-                      `courses.activities.schedules.schedules_status_${option}`
-                    )
-                  }}
-                </template>
-              </USelectMenu>
-            </UFormGroup>
-          </UDashboardCard>
-          <UDashboardCard>
-            <UFormGroup
-              :label="t('form.course.label')"
-              :description="t('form.course.description')"
-              name="course_id"
-            >
-            <template #hint>
-                <UButton
-                  v-if="filterForm.course_id"
-                  icon="i-heroicons-x-mark-solid"
-                  size="2xs"
-                  color="gray"
-                  square
-                  variant="ghost"
-                  @click="filterForm.course_id = undefined"
+                <FormsInputsStudentSubscriptionSelect
+                  v-model="filterForm.student_id"
+                  :orgid="
+                    userOrganizationsStore.selectedOrganization.organization_id
+                  "
                 />
-              </template>
-              <FormsInputsCourseSelect
-                v-model="filterForm.course_id"
-                :orgid="userOrganizationsStore.selectedOrganization.organization_id"
-              />
-            </UFormGroup>
-          </UDashboardCard>
-          <UDashboardCard>
-            <UFormGroup
-              :label="t('form.student.label')"
-              :description="t('form.student.description')"
-              name="student_id"
-            >
-            <template #hint>
-                <UButton
-                  v-if="filterForm.student_id"
-                  icon="i-heroicons-x-mark-solid"
-                  size="2xs"
-                  color="gray"
-                  square
-                  variant="ghost"
-                  @click="filterForm.student_id = undefined"
-                />
-              </template>
-             <FormsInputsStudentSubscriptionSelect
-              v-model="filterForm.student_id"
-              :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
-            </UFormGroup>
-          </UDashboardCard>
-        </UDashboardPanelContent>
-      </UDashboardPanel>
-      <UDashboardPanel grow>
-        <div class="h-full">
+              </UFormGroup>
+            </div>
+          </template>
+        </UPopover>
+      </template>
+    </UDashboardToolbar>
+    <UDashboardPanelContent>
+      <div>
+        <div v-if="selectedView == 'list'">
           <div
-            v-if="selectedView == 'list'"
-            class="absolute inset-0 overflow-y-auto"
+            v-if="schedules && schedules.length > 0"
+            class="flex flex-col gap-4 p-4"
           >
-            <div
-              v-if="schedules && schedules.length > 0"
-              class="flex flex-col gap-4 p-4"
-            >
-              <SchedulesScheduleItem
-                v-for="schedule in schedules"
-                :key="schedule.id"
-                :schedule="schedule"
-                @update="refresh"
-              />
-            </div>
-            <div v-else class="flex items-center justify-center h-full">
-              <p class="text-gray-500">{{ t("no_schedule_found") }}</p>
-            </div>
-          </div>
-          <div v-else>
-            <AppCalendar
-              v-if="schedules"
-              :selected-date="selectedDate"
-              :view="'week'"
-              :events="
-                schedules.map((schedule) => ({
-                  label: `${schedule.course_name} | ${schedule.activity_name}`,
-                  id: schedule.id,
-                  date: new Date(schedule.start_at),
-                  start: new Date(schedule.start_at),
-                  end: new Date(schedule.end_at),
-                  schedule,
-                }))
-              "
-              :refresh-events="refresh"
+            <SchedulesScheduleItem
+              v-for="schedule in schedules"
+              :key="schedule.schedule_id"
+              :schedule="schedule"
+              @update="refresh"
             />
           </div>
+          <div v-else class="flex items-center justify-center h-full">
+            <p class="text-gray-500">{{ t("no_schedule_found") }}</p>
+          </div>
         </div>
-      </UDashboardPanel>
-    </div>
+        <div v-else>
+          <AppCalendar
+            v-if="schedules"
+            :selected-date="selectedDate"
+            :view="'week'"
+            :events="
+              schedules.map((schedule) => ({
+                label: `${schedule.course_name} | ${schedule.activity_name}`,
+                id: schedule.schedule_id,
+                date: new Date(schedule.schedule_start_at),
+                start: new Date(schedule.schedule_start_at),
+                end: new Date(schedule.schedule_end_at),
+                schedule,
+              }))
+            "
+            :refresh-events="refresh"
+          />
+        </div>
+      </div>
+    </UDashboardPanelContent>
   </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
-import {
-  endOfDay,
-  endOfMonth,
-  format,
-  startOfDay,
-  startOfMonth,
-} from "date-fns";
+import { endOfDay, startOfDay, sub } from "date-fns";
 import * as z from "zod";
 import AppCalendar from "~/components/calendar/AppCalendar.vue";
+import DateRangePicker from "~/components/forms/Inputs/DateRangePicker.vue";
 import { SCHEDULES_STATUS } from "~/constants";
-import type { Database } from "~/types/app.types";
 
 const { t } = useI18n({
   useScope: "local",
@@ -207,10 +212,13 @@ const views = computed(() => [
   { label: t("calendar_view"), value: "calendar" },
 ]);
 
-const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const courseActivitySchedules = useCourseActivitySchedules();
 const selectedDate = ref(new Date());
+const selectedRange = ref({
+  start: sub(new Date(), { days: 14 }),
+  end: new Date(),
+});
 
 const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
@@ -230,15 +238,16 @@ const filterForm = ref<FilterForm>({
 
 const { data: schedules, refresh } = useAsyncData(
   async () => {
-    const dateStart = startOfDay(selectedDate.value);
-    const dateEnd = endOfDay(selectedDate.value);
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
 
+    const start = startOfDay(selectedRange.value.start);
+    const end = endOfDay(selectedRange.value.end);
+
     return await courseActivitySchedules.fetchCourseActivitySchedules({
-      start_at: dateStart.toISOString(),
-      end_at: dateEnd.toISOString(),
+      start_at: start.toISOString(),
+      end_at: end.toISOString(),
       assigned_to: filterForm.value.assigned_to,
       course_id: filterForm.value.course_id,
       student_id: filterForm.value.student_id,
@@ -246,45 +255,7 @@ const { data: schedules, refresh } = useAsyncData(
     });
   },
   {
-    watch: [filterForm.value, selectedDate],
-  }
-);
-
-const { data: schedulesForMonth } = useAsyncData(
-  async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
-      return [];
-    }
-
-    const dateStart = startOfMonth(selectedDate.value);
-    const dateEnd = endOfMonth(selectedDate.value);
-
-    const { data, error } = await client
-      .from("course_activity_schedules_view")
-      .select("start_at")
-      .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
-      .gte("start_at", dateStart.toISOString())
-      .lte("end_at", dateEnd.toISOString());
-
-    if (error) {
-      throw error;
-    }
-    return data;
-  },
-  {
-    watch: [selectedDate],
-    transform: (data) => {
-      // reduce duplicate dates
-      const datesString: string[] = [];
-      return data.filter((schedule) => {
-        const date = format(new Date(schedule.start_at), "yyyy-MM-dd");
-        if (datesString.includes(date)) {
-          return false;
-        }
-        datesString.push(date);
-        return true;
-      });
-    },
+    watch: [filterForm.value, selectedRange],
   }
 );
 </script>
@@ -296,7 +267,7 @@ const { data: schedulesForMonth } = useAsyncData(
   "de": {
     "list_view": "Liste Ansicht",
     "calendar_view": "Kalender Ansicht",
-    "schedules": "Termine",
+    "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
     "form": {
       "assigned_to": {
@@ -321,7 +292,7 @@ const { data: schedulesForMonth } = useAsyncData(
   "en": {
     "list_view": "List view",
     "calendar_view": "Calendar view",
-    "schedules": "Schedules",
+    "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
     "form": {
       "assigned_to": {

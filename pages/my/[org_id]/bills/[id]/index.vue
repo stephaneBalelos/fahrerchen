@@ -10,10 +10,10 @@
               trailing
               size="xs"
               color="primary"
-              :label="`#${bill.data.id}`"
+              :label="`#${bill.data.bill_number}`"
               square
               variant="link"
-              @click="copy(`${bill.data.id}`)"
+              @click="copy(`${bill.data.bill_number}`)"
             />
             <UBadge v-if="copied" color="primary" variant="soft">{{
               t("copied")
@@ -36,6 +36,16 @@
             color="gray"
             square
             :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
+          />
+          <UButton
+            :label="t('download_pdf')"
+            icon="i-heroicons-document-arrow-down"
+            size="sm"
+            color="gray"
+            square
+            :to="`/api/orgs/bills/${bill.data.id}/generate-bill-pdf`"
+            target="_blank"
+            rel="noopener noreferrer"
           />
         </template>
       </UDashboardNavbar>

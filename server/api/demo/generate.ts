@@ -32,6 +32,14 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    if (!user_data.firstname || !user_data.lastname) {
+        return createError({
+            status: 400,
+            statusMessage: 'User name is not set'
+        })
+    }
+
+
     try {
         // Get Some fake Addresses
         const address = await $fetch(`${faker_base_url}/addresses?_quantity=1&_country_code=DE`) as any
@@ -267,7 +275,7 @@ export default defineEventHandler(async (event) => {
 
         // Generate Students
         const studentsWithOrgId = students.data.map((student: any) => {
-            const s: Omit<AppStudent, "id" | "user_id" | "created_at"> = {
+            const s: Omit<AppStudent, "id" | "user_id" | "created_at" | "full_name"> = {
                 firstname: student.firstname,
                 lastname: student.lastname,
                 email: student.email,
@@ -317,13 +325,15 @@ export default defineEventHandler(async (event) => {
                 statusMessage: 'Schedules not found'
             })
         }
+        // Assign these schedules to the user
+        await client.from('course_activity_schedules').update({ assigned_to: user.id }).eq('organization_id', org.id).in('id', schedules.map(s => s.id))
         for (let i = 0; i < schedules.length; i++) {
             const schedule = schedules[i]
             await client.from('course_activity_schedules').update({ status: randomNumber(1, 2) == 2 ? 'CANCELED': 'COMPLETED' }).eq('id', schedule.id)
         }
 
         // Generate Bills
-        await client.rpc('generate_bill_for_subscriptions')
+        // await client.rpc('generate_bill_for_subscription')
 
         return {
             status: 200,

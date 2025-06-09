@@ -116,6 +116,12 @@
             "canceled": "Storniert"
         }
     },
+    "errors_messages": {
+        "course_subscription_is_not_active": "Die Einschreibung ist nicht aktiv.",
+        "activity_schedule_is_not_active": "Der Termin ist nicht aktiv.",
+        "course_subscription_not_in_attendees": "Der Schüler ist nicht in der Teilnehmerliste dieser Aktivität.",
+        "course_subscription_already_in_attendees": "Der Schüler ist bereits in der Teilnehmerliste dieser Aktivität."
+    },
     "demo": {
         "organization": {
             "name": "{name}s Fahrschule",

@@ -40,7 +40,7 @@
   </template>
   
   <script setup lang="ts">
-  import type { CourseSubscriptionView, Database } from "~/types/app.types";
+  import type { AppCourseSubscriptionsView } from "~/types/app.types";
   
   type Props = {
     orgid: string;
@@ -51,10 +51,10 @@
     useScope: "local",
   });
   
-  const client = useSupabaseClient<Database>();
+  const client = useSupabaseClient();
   
   const model = defineModel<string>({ default: null });
-  const subscriptions = ref<CourseSubscriptionView[] | null>(null);
+  const subscriptions = ref<AppCourseSubscriptionsView[] | null>(null);
   const selected = computed(() => {
     if (!subscriptions.value) {
       return null;
@@ -67,7 +67,7 @@
     if (search.length < 3) {
       q = client.from("course_subscriptions_view").select("*").eq("organization_id", props.orgid).limit(5);
     } else {
-      q = await client
+      q = client
         .from("course_subscriptions_view")
         .select("*")
         .eq("organization_id", props.orgid)
@@ -75,7 +75,7 @@
           `student_firstname.ilike.%${search}%,student_lastname.ilike.%${search}%,student_email.ilike.%${search}%`
         ).limit(5);
     }
-    const { data, error } = await q;
+    const { data, error } = await q.overrideTypes<AppCourseSubscriptionsView[]>();
     if (error) {
       throw error;
     }
