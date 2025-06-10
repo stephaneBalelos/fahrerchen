@@ -1026,14 +1026,8 @@
             <td class="c9" colspan="1" rowspan="1">
                 <p class="c5"><span class="c0">Bezeichnung</span></p>
             </td>
-            <td class="c22" colspan="1" rowspan="1">
-                <p class="c5"><span class="c0">Einheit</span></p>
-            </td>
             <td class="c32" colspan="1" rowspan="1">
                 <p class="c5"><span class="c0">Anzahl</span></p>
-            </td>
-            <td class="c14" colspan="1" rowspan="1">
-                <p class="c6"><span class="c0">Einzelpreis</span></p>
             </td>
             <td class="c4" colspan="1" rowspan="1">
                 <p class="c6"><span class="c0">Gesamtpreis</span></p>
@@ -1042,20 +1036,15 @@
         {{#each bill_items}}
         <tr class="c21">
             <td class="c34" colspan="1" rowspan="1">
-                <p class="c5"><span class="c3">{{this.name}}</span></p>
+                <p class="c1"><span class="c3"></span></p>
+                <p class="c5"><span class="c3">{{this.title}}</span></p>
                 <p class="c1"><span class="c3"></span></p>
                 <p class="c5"><span class="c3">{{this.description}}</span></p>
                 <p class="c1"><span class="c3"></span></p>
                 <p class="c1"><span class="c3"></span></p>
             </td>
-            <td class="c25" colspan="1" rowspan="1">
-                <p class="c16"><span class="c7">{{this.unit}}</span><span class="c3">.</span></p>
-            </td>
             <td class="c17" colspan="1" rowspan="1">
                 <p class="c16"><span class="c7">{{this.count}}</span></p>
-            </td>
-            <td class="c13" colspan="1" rowspan="1">
-                <p class="c6 c35"><span class="c7">{{this.unit_price}}</span><span class="c3">&nbsp;&euro;</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
                 <p class="c6 c35"><span class="c7">{{this.total}}</span><span class="c3">&nbsp;&euro;</span></p>
@@ -1064,7 +1053,7 @@
         {{/each}}
         {{#unless bill_vat_exempt}}
         <tr class="c26">
-            <td class="c41" colspan="4" rowspan="1">
+            <td class="c41" colspan="2" rowspan="1">
                 <p class="c5"><span class="c0">Gesamtsumme:</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
@@ -1072,16 +1061,16 @@
             </td>
         </tr>
         <tr class="c26">
-            <td class="c41" colspan="4" rowspan="1">
-                <p class="c5"><span class="c0">Mehrwertsteuer ({{bill_vat_rate}}):</span></p>
+            <td class="c41" colspan="2" rowspan="1">
+                <p class="c5"><span class="c0">Mehrwertsteuer ({{bill_vat_rate}}%):</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
-                <p class="c6"><span class="c31">{{bill_vat_amout}}</span><span class="c3">&nbsp;&euro;</span></p>
+                <p class="c6"><span class="c31">{{bill_vat_amount}}</span><span class="c3">&nbsp;&euro;</span></p>
             </td>
         </tr>
         {{/unless}}
         <tr class="c26">
-            <td class="c41" colspan="4" rowspan="1">
+            <td class="c41" colspan="2" rowspan="1">
                 <p class="c5"><span class="c0">Gesamtbetrag:</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">

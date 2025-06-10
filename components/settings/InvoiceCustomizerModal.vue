@@ -43,50 +43,76 @@
             >
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_title.label')"
-                :description="t('settings.invoice_customizer.invoice_title.description')"
+                :description="
+                  t('settings.invoice_customizer.invoice_title.description')
+                "
                 name="invoice_title"
-                :placeholder="t('settings.invoice_customizer.invoice_title.placeholder')"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_title.placeholder')
+                "
                 required
               >
                 <UInput
                   v-model="state.invoice_title"
-                  :placeholder="t('settings.invoice_customizer.invoice_title.placeholder')"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_title.placeholder')
+                  "
                 />
               </UFormGroup>
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_subtitle.label')"
-                :description="t('settings.invoice_customizer.invoice_subtitle.description')"
+                :description="
+                  t('settings.invoice_customizer.invoice_subtitle.description')
+                "
                 name="invoice_subtitle"
-                :placeholder="t('settings.invoice_customizer.invoice_subtitle.placeholder')"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_subtitle.placeholder')
+                "
                 required
               >
                 <UInput
                   v-model="state.invoice_subtitle"
-                  :placeholder="t('settings.invoice_customizer.invoice_subtitle.placeholder')"
+                  :placeholder="
+                    t(
+                      'settings.invoice_customizer.invoice_subtitle.placeholder'
+                    )
+                  "
                 />
               </UFormGroup>
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_message.label')"
-                :description="t('settings.invoice_customizer.invoice_message.description')"
+                :description="
+                  t('settings.invoice_customizer.invoice_message.description')
+                "
                 name="invoice_message"
-                :placeholder="t('settings.invoice_customizer.invoice_message.placeholder')"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_message.placeholder')
+                "
                 required
               >
                 <UInput
                   v-model="state.invoice_message"
-                  :placeholder="t('settings.invoice_customizer.invoice_message.placeholder')"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_message.placeholder')
+                  "
                 />
               </UFormGroup>
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_footer.label')"
-                :description="t('settings.invoice_customizer.invoice_footer.description')"
+                :description="
+                  t('settings.invoice_customizer.invoice_footer.description')
+                "
                 name="invoice_footer"
-                :placeholder="t('settings.invoice_customizer.invoice_footer.placeholder')"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_footer.placeholder')
+                "
                 required
               >
                 <UInput
                   v-model="state.invoice_footer"
-                  :placeholder="t('settings.invoice_customizer.invoice_footer.placeholder')"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_footer.placeholder')
+                  "
                 />
               </UFormGroup>
             </UForm>
@@ -122,14 +148,32 @@ const { t } = useI18n({
 const modal = useModal();
 const template = ref<string | null>(null);
 
+const selectedExamapleIndex = ref(0);
+
 const renderedTemplate = computed(() => {
   if (!template.value) return "";
 
   // Compile the template with Handlebars
   const compiledTemplate = Handlebars.compile(template.value);
 
+  const s = state;
+  // Prepare the state for rendering
+  const exampleBill = billExamples.value[selectedExamapleIndex.value];
+  if (exampleBill) {
+    s.bill_date = exampleBill.bill_date;
+    s.bill_number = exampleBill.bill_number;
+    s.bill_total = exampleBill.total.toFixed(2);
+    s.bill_vat_rate = exampleBill.vat_rate.toFixed(2);
+    s.bill_vat_amount = exampleBill.vat_amount.toFixed(2);
+    s.bill_total_with_vat =
+      (exampleBill.total + exampleBill.vat_amount).toFixed(2);
+    s.bill_items = exampleBill.bill_items
+  } else {
+    console.warn("No example bill found for index:", selectedExamapleIndex.value);
+  }
+
   // Render the template with the current state
-  return compiledTemplate(state);
+  return compiledTemplate(s);
 });
 
 onMounted(() => {
@@ -166,6 +210,12 @@ const state = reactive({
   bill_settings_bank_account_bic: "",
   bill_settings_bank_account_iban: "",
   bill_settings_tax_id: "",
+  bill_items: [] as {
+    title: string;
+    description: string;
+    count: number;
+    total: number;
+  }[],
 });
 
 const client = useSupabaseClient();
@@ -235,6 +285,41 @@ async function _onSubmit() {
   }
 }
 
+const billExamples = ref([
+  {
+    bill_date: new Date().toISOString(),
+    bill_number: "INV-0001",
+    total: 100.0,
+    vat_rate: 19.0,
+    vat_amount: 19.0,
+    bill_items: [
+      {
+        title: t("example_bill_items.base_costs.title"),
+        description: t("example_bill_items.base_costs.description"),
+        count: 1,
+        total: 100.0,
+      },
+      {
+        title: t("example_bill_items.theory.title"),
+        description: t("example_bill_items.theory.description"),
+        count: 2,
+        total: 50.0,
+      },
+      {
+        title: t("example_bill_items.practice.title"),
+        description: t("example_bill_items.practice.description"),
+        count: 3,
+        total: 150.0,
+      },
+      {
+        title: t("example_bill_items.learning_materials.title"),
+        description: t("example_bill_items.learning_materials.description"),
+        count: 1,
+        total: 30.0,
+      },
+    ],
+  },
+]);
 </script>
 
 <style scoped></style>
@@ -243,6 +328,24 @@ async function _onSubmit() {
 {
   "de": {
     "modal_title": "Rechnung anpassen",
+    "example_bill_items": {
+      "theory": {
+        "title": "Theorieunterricht",
+        "description": "Rechnungsposten für Theorieunterricht"
+      },
+      "practice": {
+        "title": "Fahrpraxis",
+        "description": "Rechnungsposten für Fahrpraxis"
+      },
+      "base_costs": {
+        "title": "Grundkosten",
+        "description": "Rechnungsposten für Grundkosten"
+      },
+      "learning_materials": {
+        "title": "Lernmaterialien",
+        "description": "Rechnungsposten für Lernmaterialien"
+      }
+    },
     "settings": {
       "invoice_customizer": {
         "title": "Rechnung anpassen",
