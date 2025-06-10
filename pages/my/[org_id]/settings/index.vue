@@ -473,7 +473,7 @@ function openDeleteOrganizationModal() {
   "de": {
     "settings": {
       "title": "Fahrschul-Einstellungen",
-      "description": "Informationen über Ihre Fahrschule. Diese Informationen werden auf Rechnungen, Rechnungen und anderen Kommunikationsmitteln angezeigt.",
+      "description": "Informationen über Ihre Fahrschule. Diese Informationen werden auf Rechnungen und anderen Kommunikationsmitteln angezeigt.",
       "delete_account": {
         "title": "Fahrschule löschen",
         "description": "Löschen Sie Ihre Fahrschule und alle damit verbundenen Daten. Diese Aktion kann nicht rückgängig gemacht werden.",
