@@ -96,15 +96,21 @@
       <UInput v-model="state.tax_id" size="md" />
     </UFormGroup>
 
-    <UButton :loading="isSaving" :disabled="isSaving" type="submit">
-      {{ t("form.save") }}
-    </UButton>
+    <div class="flex gap-4 mt-4 justify-end">
+      <UButton :loading="isSaving" :disabled="isSaving" type="submit">
+        {{ t("form.save") }}
+      </UButton>
+      <UButton v-if="data && status === 'success'" variant="soft" @click="openInvoiceCustomization">
+        {{ t("form.template.customize") }}
+      </UButton>
+    </div>
   </UForm>
 </template>
 
 <script setup lang="ts">
 import { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
+import InvoiceCustomizerModal from "../settings/InvoiceCustomizerModal.vue";
 
 type Props = {
   organizationId: string;
@@ -123,6 +129,10 @@ const { t: g } = useI18n({
 
 const client = useSupabaseClient();
 const toast = useToast();
+const modal = useModal();
+const openInvoiceCustomization = () => {
+  modal.open(InvoiceCustomizerModal);
+};
 
 const schema = z.object({
   bank_account_name: z
@@ -270,6 +280,9 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
   "de": {
     "form": {
       "save": "Speichern",
+      "template": {
+        "customize": "Rechnung Layout anpassen"
+      },
       "save_success": {
         "title": "Einstellungen gespeichert",
         "description": "Ihre Abrechnungseinstellungen wurden erfolgreich gespeichert."
@@ -317,6 +330,9 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
   "en": {
     "form": {
       "save": "Save",
+      "template": {
+        "customize": "Customize Invoice Layout"
+      },
       "save_success": {
         "title": "Settings Saved",
         "description": "Your billing settings have been successfully saved."

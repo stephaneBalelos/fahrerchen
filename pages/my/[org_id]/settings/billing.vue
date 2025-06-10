@@ -30,42 +30,18 @@
         </NuxtErrorBoundary>
       </UCard>
     </UDashboardSection>
-    <UDashboardSection
-      :title="t('template.label')"
-      :description="t('template.description')"
-      orientation="horizontal"
-      class="px-4 pt-8"
-    >
-      <UCard
-        :ui="{
-          body: {
-            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
-          },
-        }"
-      >
-        <UButton @click="openInvoiceCustomization">
-          {{ t("template.customize") }}
-        </UButton>
-      </UCard>
-    </UDashboardSection>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import InvoiceCustomizerModal from "~/components/settings/InvoiceCustomizerModal.vue";
 import EditBillSettingsForm from "~/components/forms/EditBillSettingsForm.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const modal = useModal();
 
 const userOrganizationsStore = useUserOrganizationsStore();
-
-const openInvoiceCustomization = () => {
-  modal.open(InvoiceCustomizerModal);
-};
 </script>
 
 <style scoped></style>
@@ -76,11 +52,12 @@ const openInvoiceCustomization = () => {
     "billing_settings": {
       "label": "Rechnungseinstellungen",
       "description": "Passen Sie Ihre Rechnungseinstellungen an. Diese Einstellungen werden auf alle Rechnungen angewendet, die Sie erstellen."
-    },
-    "template": {
-      "label": "Rechnungsvorlage",
-      "description": "Passen Sie das Design und die Informationen Ihrer Rechnungen an.",
-      "customize": "Rechnung anpassen"
+    }
+  },
+  "en": {
+    "billing_settings": {
+      "label": "Billing Settings",
+      "description": "Adjust your billing settings. These settings will apply to all invoices you create."
     }
   }
 }
