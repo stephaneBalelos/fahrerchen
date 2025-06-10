@@ -249,6 +249,10 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
       .from("organization_billing_settings")
       .upsert({
         id: props.organizationId,
+        invoice_title: data.value?.invoice_title || t("default_invoice_title"),
+        invoice_subtitle: data.value?.invoice_subtitle || t("default_invoice_subtitle"),
+        invoice_message: data.value?.invoice_message || t("default_invoice_message"),
+        invoice_footer: data.value?.invoice_footer || t("default_invoice_footer"),
         ...event.data,
       });
 
@@ -280,6 +284,10 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
 <i18n lang="json">
 {
   "de": {
+    "default_invoice_title": "Rechnung",
+    "default_invoice_subtitle": "Rechnung für die Fahrausbildung",
+    "default_invoice_message": "Vielen Dank für Ihren Auftrag",
+    "default_invoice_footer": "Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig.",
     "form": {
       "save": "Speichern",
       "template": {

@@ -942,6 +942,10 @@ export type Database = {
           bank_account_number: string
           created_at: string
           id: string
+          invoice_footer: string | null
+          invoice_message: string | null
+          invoice_subtitle: string | null
+          invoice_title: string
           tax_id: string
           updated_at: string
           vat_exempt: boolean
@@ -954,6 +958,10 @@ export type Database = {
           bank_account_number: string
           created_at?: string
           id: string
+          invoice_footer?: string | null
+          invoice_message?: string | null
+          invoice_subtitle?: string | null
+          invoice_title?: string
           tax_id: string
           updated_at?: string
           vat_exempt?: boolean
@@ -966,6 +974,10 @@ export type Database = {
           bank_account_number?: string
           created_at?: string
           id?: string
+          invoice_footer?: string | null
+          invoice_message?: string | null
+          invoice_subtitle?: string | null
+          invoice_title?: string
           tax_id?: string
           updated_at?: string
           vat_exempt?: boolean

@@ -18,13 +18,23 @@
           >
             {{ t("modal_title") }}
           </h3>
-          <UButton
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark-20-solid"
-            class="-my-1"
-            @click="modal.close()"
-          />
+          <div class="flex items-center space-x-2">
+            <UButton
+              color="primary"
+              variant="solid"
+              class="-my-1"
+              @click="onSubmit"
+            >
+              {{ t("settings.save_settings") }}
+            </UButton>
+            <UButton
+              color="gray"
+              variant="ghost"
+              class="-my-1"
+              :label="t('settings.close')"
+              @click="modal.close()"
+            />
+          </div>
         </div>
       </template>
 
@@ -39,7 +49,7 @@
               :ui="{
                 base: 'space-y-4',
               }"
-              @submit.prevent="_onSubmit"
+              @submit.prevent="onSubmit"
             >
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_title.label')"
@@ -135,7 +145,7 @@
 <script setup lang="ts">
 // import { z } from "zod";
 import Handlebars from "handlebars";
-
+import { format } from "date-fns";
 type Props = {
   organizationId: string;
 };
@@ -147,6 +157,7 @@ const { t } = useI18n({
 });
 const modal = useModal();
 const template = ref<string | null>(null);
+const toast = useToast();
 
 const selectedExamapleIndex = ref(0);
 
@@ -188,12 +199,12 @@ const state = reactive({
   driving_school_address_country: "",
   driving_school_email: "",
   driving_school_phone_number: "",
-  student_firstname: "",
-  student_lastname: "",
-  student_address_street: "",
-  student_address_zip: "",
-  student_address_city: "",
-  student_address_country: "",
+  student_firstname: "Max",
+  student_lastname: "Mustermann",
+  student_address_street: "Musterstraße 1",
+  student_address_zip: "12345",
+  student_address_city: "Musterstadt",
+  student_address_country: "Deutschland",
   bill_date: "",
   bill_number: "",
   invoice_title: "",
@@ -235,7 +246,6 @@ const { data, status } = await useAsyncData(async () => {
 // Initialize state with fetched data
 onMounted(() => {
   if (data.value) {
-    console.log("Fetched organization data:", data.value);
     const orgData = data.value;
     state.driving_school_name = orgData.name || "";
     state.driving_school_address_street = orgData.address_street || "";
@@ -253,6 +263,10 @@ onMounted(() => {
     state.bill_settings_bank_account_iban =
       orgData.bill_settings?.bank_account_iban || "";
     state.bill_settings_tax_id = orgData.bill_settings?.tax_id || "";
+    state.invoice_title = orgData.bill_settings?.invoice_title || "";
+    state.invoice_subtitle = orgData.bill_settings?.invoice_subtitle || "";
+    state.invoice_message = orgData.bill_settings?.invoice_message || "";
+    state.invoice_footer = orgData.bill_settings?.invoice_footer || "";
   }
 });
 
@@ -271,24 +285,41 @@ async function loadTemplate() {
   }
 }
 
-async function _onSubmit() {
+async function onSubmit() {
   try {
-    // Here you would typically send the state to your backend to save the changes
-    console.log("Form submitted with data:", state);
-    // For example:
-    // await $fetch('/api/orgs/settings/save-invoice-customization', {
-    //   method: 'POST',
-    //   body: state,
-    // });
+    const { error } = await client.from("organization_billing_settings")
+    .update({
+      invoice_title: state.invoice_title,
+      invoice_subtitle: state.invoice_subtitle,
+      invoice_message: state.invoice_message,
+      invoice_footer: state.invoice_footer,
+    })
+    .eq("id", props.organizationId);
+    if (error) {
+      console.error("Error updating billing settings:", error);
+      throw error;
+    }
+
+    toast.add({
+      title: t("settings.settings_saved"),
+      description: t("settings.settings_saved_description"),
+      color: "green",
+    });
+    
   } catch (error) {
     console.error("Error submitting form:", error);
+    toast.add({
+      title: t("settings.save_error"),
+      description: t("settings.save_error_description"),
+      color: "red",
+    });
   }
 }
 
 const billExamples = ref([
   {
-    bill_date: new Date().toISOString(),
-    bill_number: "INV-0001",
+    bill_date: format(new Date(), 'dd.MM.yyyy'),
+    bill_number: "RE-123456",
     total: 100.0,
     vat_rate: 19.0,
     vat_amount: 19.0,
@@ -347,6 +378,12 @@ const billExamples = ref([
       }
     },
     "settings": {
+      "save_settings": "Einstellungen speichern",
+      "close": "Schließen",
+      "settings_saved": "Einstellungen gespeichert",
+      "settings_saved_description": "Ihre Einstellungen wurden erfolgreich gespeichert.",
+      "settings_save_error": "Fehler beim Speichern der Einstellungen",
+      "settings_save_error_description": "Es gab einen Fehler beim Speichern Ihrer Einstellungen.",
       "invoice_customizer": {
         "title": "Rechnung anpassen",
         "description": "Passen Sie Ihre Rechnungsvorlage an.",
@@ -375,29 +412,60 @@ const billExamples = ref([
   },
   "en": {
     "modal_title": "Customize Invoice",
+    "example_bill_items": {
+      "theory": {
+        "title": "Theory Lessons",
+        "description": "Invoice item for theory lessons"
+      },
+      "practice": {
+        "title": "Driving Practice",
+        "description": "Invoice item for driving practice"
+      },
+      "base_costs": {
+        "title": "Base Costs",
+        "description": "Invoice item for base costs"
+      },
+      "learning_materials": {
+        "title": "Learning Materials",
+        "description": "Invoice item for learning materials"
+      }
+    },
     "settings": {
+      "save_settings": "Save Settings",
+      "close": "Close",
+      "settings_saved": "Settings Saved",
+      "settings_saved_description":
+        "Your settings have been successfully saved.",
+      "settings_save_error": "Error Saving Settings",
+      "settings_save_error_description":
+        "There was an error saving your settings.",
       "invoice_customizer": {
         "title": "Customize Invoice",
         "description": "Adjust your invoice template.",
         "invoice_title": {
           "label": "Invoice Title",
-          "description": "The title of the invoice displayed on the invoice.",
-          "placeholder": "Invoice"
+          "description":
+            "The title of the invoice that will be displayed on the invoice.",
+          "placeholder": "Services Rendered"
         },
         "invoice_subtitle": {
           "label": "Invoice Subtitle",
-          "description": "The subtitle of the invoice displayed on the invoice.",
-          "placeholder": "Thank you for your order"
+          "description":
+            "The subtitle of the invoice that will be displayed on the invoice.",
+          "placeholder":
+            "Invoice for services rendered so far"
         },
         "invoice_message": {
           "label": "Invoice Message",
-          "description": "A message displayed on the invoice.",
+          "description": "A message that will be displayed on the invoice",
           "placeholder": "Thank you for your order"
         },
         "invoice_footer": {
           "label": "Invoice Footer",
-          "description": "The footer of the invoice displayed on the invoice.",
-          "placeholder": "All information without guarantee"
+          "description":
+            "The footer of the invoice that will be displayed on the invoice.",
+          "placeholder":
+            "This invoice was created electronically and is valid without a signature."
         }
       }
     }
