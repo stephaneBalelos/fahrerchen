@@ -38,6 +38,7 @@
             :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
           />
           <UButton
+          v-if="billingSettingsExist"
             :label="t('download_pdf')"
             icon="i-heroicons-document-arrow-down"
             size="sm"
@@ -162,7 +163,7 @@ const slideover = useSlideover();
 
 const tutorialStore = useTutorialStore();
 
-const { data: bill, refresh } = useAsyncData(`bills_${id}`, async () => {
+const { data: bill, refresh } = await useAsyncData(`bills_${id}`, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
     .select("*")
@@ -181,6 +182,27 @@ const { data: bill, refresh } = useAsyncData(`bills_${id}`, async () => {
     subscription,
   };
 });
+
+const { data: billingSettingsExist } = useAsyncData(
+  `billing_settings_exist_${id}`,
+  async () => {
+    if (!bill.value || !bill.value.data) {
+      return false;
+    }
+    const { data, error } = await client
+      .from("organization_billing_settings")
+      .select("*")
+      .eq("id", bill.value.data.organization_id)
+      .single();
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+
+    return !!data;
+  }
+);
 
 const { copy, copied } = useClipboard();
 
