@@ -19,14 +19,34 @@
       </template>
       <div v-if="bill" class="border-none">
         <BillsBillingList :bill-id="bill_id" />
-        <div class="flex flex-col items-end justify-end py-4">
-          <span
-            class="text-sm font-semibold text-gray-500 dark:text-gray-400"
-            >{{ t("total") }}</span
-          >
-          <span v-if="bill?.total" class="text-lg font-bold">{{
-            formatCurrency(bill.total)
-          }}</span>
+        <div class="flex justify-end w-full">
+          <div class="flex flex-col items-end justify-end py-4">
+            <span
+              class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+              >{{ t("total") }}</span
+            >
+            <span v-if="bill?.total" class="text-lg font-bold">{{
+              formatCurrency(bill.total)
+            }}</span>
+          </div>
+          <div class="flex flex-col items-end justify-end py-4">
+            <span
+              class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+              >{{ t("vat") }}</span
+            >
+            <span v-if="bill?.total" class="text-lg font-bold">{{
+              bill.vat_rate.toFixed(2) + "%"
+            }}</span>
+          </div>
+          <div class="flex flex-col items-end justify-end py-4">
+            <span
+              class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+              >{{ t("total_with_vat") }}</span
+            >
+            <span v-if="bill.total_with_vat" class="text-lg font-bold">{{
+              bill.total_with_vat
+            }}</span>
+          </div>
         </div>
         <div
           v-if="

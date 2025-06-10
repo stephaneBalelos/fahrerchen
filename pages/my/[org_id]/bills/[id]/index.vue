@@ -38,6 +38,7 @@
             :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
           />
           <UButton
+          v-if="billingSettingsExist"
             :label="t('download_pdf')"
             icon="i-heroicons-document-arrow-down"
             size="sm"
@@ -116,14 +117,26 @@
             <UDashboardToolbar
               class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-24 pt-4 bg-white dark:bg-gray-900"
             >
-              <template #right>
-                <div class="flex flex-col flex-1 items-end">
-                  <span class="text-sm text-gray-500">{{ t("total") }}</span>
-                  <span class="text-xl font-bold">{{
-                    formatCurrency(bill.data.total)
-                  }}</span>
+                <div class="flex justify-end w-full gap-8">
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("total") }}</span>
+                    <span class="text-xl font-bold">{{
+                      formatCurrency(bill.data.total)
+                    }}</span>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("vat") }}</span>
+                    <span class="text-xl font-bold">{{
+                      bill.data.vat_rate.toFixed(2) + "%"
+                    }}</span>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("total_with_vat") }}</span>
+                    <span class="text-xl font-bold">{{
+                      formatCurrency(bill.data.total_with_vat || bill.data.total)
+                    }}</span>
+                  </div>
                 </div>
-              </template>
             </UDashboardToolbar>
           </div>
         </UDashboardPanel>
@@ -150,7 +163,7 @@ const slideover = useSlideover();
 
 const tutorialStore = useTutorialStore();
 
-const { data: bill, refresh } = useAsyncData(`bills_${id}`, async () => {
+const { data: bill, refresh } = await useAsyncData(`bills_${id}`, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
     .select("*")
@@ -169,6 +182,27 @@ const { data: bill, refresh } = useAsyncData(`bills_${id}`, async () => {
     subscription,
   };
 });
+
+const { data: billingSettingsExist } = useAsyncData(
+  `billing_settings_exist_${id}`,
+  async () => {
+    if (!bill.value || !bill.value.data) {
+      return false;
+    }
+    const { data, error } = await client
+      .from("organization_billing_settings")
+      .select("*")
+      .eq("id", bill.value.data.organization_id)
+      .single();
+
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+
+    return !!data;
+  }
+);
 
 const { copy, copied } = useClipboard();
 
@@ -271,6 +305,7 @@ async function markAsCanceled() {
 <i18n lang="json">
 {
   "de": {
+    "download_pdf": "PDF herunterladen",
     "open_student_profile": "Schülerprofil öffnen",
     "manage_subscription": "Abonnement verwalten",
     "bill": "Rechnung",
@@ -279,9 +314,12 @@ async function markAsCanceled() {
     "mark_as_ready_to_pay": "Als zahlungsbereit markieren",
     "cancel_bill": "Rechnung stornieren",
     "total": "Gesamtsumme",
+    "vat": "MwSt.",
+    "total_with_vat": "Gesamtsumme inkl. MwSt.",
     "copied": "Kopiert!"
   },
   "en": {
+    "download_pdf": "Download PDF",
     "open_student_profile": "Open student profile",
     "manage_subscription": "Manage subscription",
     "bill": "Bill",
@@ -290,6 +328,8 @@ async function markAsCanceled() {
     "mark_as_ready_to_pay": "Mark as ready to pay",
     "cancel_bill": "Cancel bill",
     "total": "Total",
+    "vat": "VAT",
+    "total_with_vat": "Total with VAT",
     "copied": "Copied!"
   }
 }

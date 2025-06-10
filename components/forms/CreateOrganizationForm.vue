@@ -43,6 +43,24 @@
         </UFormGroup>
 
         <UFormGroup
+          :label="t('form.email.label')"
+          :description="t('form.email.description')"
+          name="email"
+          required
+        >
+          <UInput v-model="state.email" type="email" />
+        </UFormGroup>
+
+        <UFormGroup
+          :label="t('form.phone.label')"
+          :description="t('form.phone.description')"
+          name="phone"
+          required
+        >
+          <UInput v-model="state.phone" type="tel" />
+        </UFormGroup>
+
+        <UFormGroup
           :label="t('form.address_street.label')"
           :description="t('form.address_street.description')"
           name="address_street"
@@ -112,6 +130,13 @@ const schema = z.object({
     .string()
     .min(3, g("form_errors.min", { field: t("form.name.label"), min: 3 }))
     .max(255, g("form_errors.max", { field: t("form.name.label"), max: 255 })),
+  email: z.string().email(
+    g("form_errors.email", { field: t("form.email.label") })
+  ),
+  phone: z
+    .string()
+    .min(3, g("form_errors.min", { field: t("form.phone.label"), min: 3 }))
+    .max(255, g("form_errors.max", { field: t("form.phone.label"), max: 255 })),
   address_street: z
     .string()
     .min(
@@ -158,6 +183,8 @@ type OrganizationSchema = z.infer<typeof schema>;
 
 const state = ref<OrganizationSchema>({
   name: "",
+  email: "",
+  phone: "",
   address_street: "",
   address_city: "",
   address_zip: "",
@@ -175,6 +202,10 @@ const createOrganization = async () => {
 
   const { error } = await client.from("organizations").insert({
     ...state.value,
+    handle: state.value.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, ""),
     owner_id: user.value.id,
   });
   if (error) {
@@ -197,6 +228,14 @@ const createOrganization = async () => {
         "label": "Name",
         "description": "Name deine neue Fahrschule",
         "placeholder": "Fahrschule XYZ"
+      },
+      "email": {
+        "label": "E-Mail",
+        "description": "E-Mail-Adresse der Fahrschule"
+      },
+      "phone": {
+        "label": "Telefon",
+        "description": "Telefonnummer der Fahrschule"
       },
       "address_street": {
         "label": "Straße",

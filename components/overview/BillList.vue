@@ -39,7 +39,7 @@
           </div>
         </div>
         <p class="text-gray-900 dark:text-white font-medium text-lg">
-          {{ formatCurrency(bill.total) }}
+          {{ formatCurrency(bill.total_with_vat || bill.total) }}
           <!-- <UBadge v-if="bill.status == 'PLANNED'" color="primary" variant="soft">Planned</UBadge>
             <UBadge v-if="bill.status == 'CANCELED'" color="red" variant="soft">Canceled</UBadge>
             <UBadge v-if="bill.status == 'COMPLETED'" color="red" variant="soft">Completed</UBadge> -->

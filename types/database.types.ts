@@ -685,6 +685,9 @@ export type Database = {
           ready_to_pay: boolean
           stripe_payment_intent_id: string | null
           total: number
+          total_with_vat: number | null
+          vat_amount: number
+          vat_rate: number
         }
         Insert: {
           bill_number: string
@@ -697,6 +700,9 @@ export type Database = {
           ready_to_pay?: boolean
           stripe_payment_intent_id?: string | null
           total?: number
+          total_with_vat?: number | null
+          vat_amount?: number
+          vat_rate?: number
         }
         Update: {
           bill_number?: string
@@ -709,6 +715,9 @@ export type Database = {
           ready_to_pay?: boolean
           stripe_payment_intent_id?: string | null
           total?: number
+          total_with_vat?: number | null
+          vat_amount?: number
+          vat_rate?: number
         }
         Relationships: [
           {
@@ -928,6 +937,72 @@ export type Database = {
           },
         ]
       }
+      organization_billing_settings: {
+        Row: {
+          bank_account_bic: string
+          bank_account_iban: string
+          bank_account_name: string
+          bank_account_number: string
+          created_at: string
+          id: string
+          invoice_footer: string | null
+          invoice_message: string | null
+          invoice_subtitle: string | null
+          invoice_title: string
+          tax_id: string
+          updated_at: string
+          vat_exempt: boolean
+          vat_rate: number
+        }
+        Insert: {
+          bank_account_bic: string
+          bank_account_iban: string
+          bank_account_name: string
+          bank_account_number: string
+          created_at?: string
+          id: string
+          invoice_footer?: string | null
+          invoice_message?: string | null
+          invoice_subtitle?: string | null
+          invoice_title?: string
+          tax_id: string
+          updated_at?: string
+          vat_exempt?: boolean
+          vat_rate?: number
+        }
+        Update: {
+          bank_account_bic?: string
+          bank_account_iban?: string
+          bank_account_name?: string
+          bank_account_number?: string
+          created_at?: string
+          id?: string
+          invoice_footer?: string | null
+          invoice_message?: string | null
+          invoice_subtitle?: string | null
+          invoice_title?: string
+          tax_id?: string
+          updated_at?: string
+          vat_exempt?: boolean
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_billing_settings_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_billing_settings_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           id: string
@@ -983,56 +1058,56 @@ export type Database = {
       }
       organizations: {
         Row: {
-          address_city: string | null
-          address_country: string | null
-          address_street: string | null
-          address_zip: string | null
+          address_city: string
+          address_country: string
+          address_street: string
+          address_zip: string
           allow_self_registration: boolean
           avatar_path: string | null
           description: string | null
-          email: string | null
+          email: string
           handle: string
           id: string
           inserted_at: string
           name: string
           owner_id: string
-          phone_number: string | null
+          phone_number: string
           preferred_language: string
           website: string | null
         }
         Insert: {
-          address_city?: string | null
-          address_country?: string | null
-          address_street?: string | null
-          address_zip?: string | null
+          address_city?: string
+          address_country?: string
+          address_street?: string
+          address_zip?: string
           allow_self_registration?: boolean
           avatar_path?: string | null
           description?: string | null
-          email?: string | null
+          email?: string
           handle: string
           id?: string
           inserted_at?: string
           name: string
           owner_id: string
-          phone_number?: string | null
+          phone_number?: string
           preferred_language?: string
           website?: string | null
         }
         Update: {
-          address_city?: string | null
-          address_country?: string | null
-          address_street?: string | null
-          address_zip?: string | null
+          address_city?: string
+          address_country?: string
+          address_street?: string
+          address_zip?: string
           allow_self_registration?: boolean
           avatar_path?: string | null
           description?: string | null
-          email?: string | null
+          email?: string
           handle?: string
           id?: string
           inserted_at?: string
           name?: string
           owner_id?: string
-          phone_number?: string | null
+          phone_number?: string
           preferred_language?: string
           website?: string | null
         }
@@ -1375,6 +1450,9 @@ export type Database = {
           student_id: string | null
           student_lastname: string | null
           total: number | null
+          total_with_vat: number | null
+          vat_amount: number | null
+          vat_rate: number | null
         }
         Relationships: [
           {
@@ -1706,6 +1784,10 @@ export type Database = {
         | "course_subscription_bill_items.create"
         | "course_subscription_bill_items.update"
         | "course_subscription_bill_items.delete"
+        | "organization_billing_settings.read"
+        | "organization_billing_settings.create"
+        | "organization_billing_settings.update"
+        | "organization_billing_settings.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
       course_type:
         | "AM"
@@ -2342,6 +2424,10 @@ export const Constants = {
         "course_subscription_bill_items.create",
         "course_subscription_bill_items.update",
         "course_subscription_bill_items.delete",
+        "organization_billing_settings.read",
+        "organization_billing_settings.create",
+        "organization_billing_settings.update",
+        "organization_billing_settings.delete",
       ],
       app_role: ["owner", "manager", "teacher", "student"],
       course_type: [

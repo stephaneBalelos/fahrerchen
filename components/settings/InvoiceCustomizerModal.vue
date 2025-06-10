@@ -1,6 +1,7 @@
 <template>
   <UModal fullscreen>
     <UCard
+      v-if="status === 'success' && data"
       :ui="{
         base: 'h-full flex flex-col',
         rounded: '',
@@ -17,13 +18,23 @@
           >
             {{ t("modal_title") }}
           </h3>
-          <UButton
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark-20-solid"
-            class="-my-1"
-            @click="modal.close()"
-          />
+          <div class="flex items-center space-x-2">
+            <UButton
+              color="primary"
+              variant="solid"
+              class="-my-1"
+              @click="onSubmit"
+            >
+              {{ t("settings.save_settings") }}
+            </UButton>
+            <UButton
+              color="gray"
+              variant="ghost"
+              class="-my-1"
+              :label="t('settings.close')"
+              @click="modal.close()"
+            />
+          </div>
         </div>
       </template>
 
@@ -33,366 +44,87 @@
         >
           <div class="absolute inset-0 overflow-y-auto p-4">
             <UForm
-              ref="form"
               :state="state"
-              :schema="schema"
-              @submit="onSubmit"
+              class="space-y-4"
+              :ui="{
+                base: 'space-y-4',
+              }"
+              @submit.prevent="onSubmit"
             >
-              <UDashboardSection
-                :title="t('settings.invoice_customizer.title')"
-                :description="t('settings.invoice_customizer.description')"
-                class="mb-4"
+              <UFormGroup
+                :label="t('settings.invoice_customizer.invoice_title.label')"
+                :description="
+                  t('settings.invoice_customizer.invoice_title.description')
+                "
+                name="invoice_title"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_title.placeholder')
+                "
+                required
               >
-                <UFormGroup
-                  name="driving_school_name"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_name.label')
+                <UInput
+                  v-model="state.invoice_title"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_title.placeholder')
                   "
-                  :description="
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="t('settings.invoice_customizer.invoice_subtitle.label')"
+                :description="
+                  t('settings.invoice_customizer.invoice_subtitle.description')
+                "
+                name="invoice_subtitle"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_subtitle.placeholder')
+                "
+                required
+              >
+                <UInput
+                  v-model="state.invoice_subtitle"
+                  :placeholder="
                     t(
-                      'settings.invoice_customizer.driving_school_name.description'
+                      'settings.invoice_customizer.invoice_subtitle.placeholder'
                     )
                   "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_name"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_name.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_address"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_address.label'
-                    )
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="t('settings.invoice_customizer.invoice_message.label')"
+                :description="
+                  t('settings.invoice_customizer.invoice_message.description')
+                "
+                name="invoice_message"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_message.placeholder')
+                "
+                required
+              >
+                <UInput
+                  v-model="state.invoice_message"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_message.placeholder')
                   "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_address.description'
-                    )
+                />
+              </UFormGroup>
+              <UFormGroup
+                :label="t('settings.invoice_customizer.invoice_footer.label')"
+                :description="
+                  t('settings.invoice_customizer.invoice_footer.description')
+                "
+                name="invoice_footer"
+                :placeholder="
+                  t('settings.invoice_customizer.invoice_footer.placeholder')
+                "
+                required
+              >
+                <UInput
+                  v-model="state.invoice_footer"
+                  :placeholder="
+                    t('settings.invoice_customizer.invoice_footer.placeholder')
                   "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_address"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_address.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_zip"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_zip.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_zip.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_zip"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_zip.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_city"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_city.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_city.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_city"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_city.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_country"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_country.label'
-                    )
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_country.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_country"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_country.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_email"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_email.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_email.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_email"
-                    type="email"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_email.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_phone"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_phone.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_phone.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_phone"
-                    type="tel"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_phone.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="invoice_title"
-                  :label="t('settings.invoice_customizer.invoice_title.label')"
-                  :description="
-                    t('settings.invoice_customizer.invoice_title.description')
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.invoice_title"
-                    :placeholder="
-                      t('settings.invoice_customizer.invoice_title.placeholder')
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="invoice_subtitle"
-                  :label="
-                    t('settings.invoice_customizer.invoice_subtitle.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.invoice_subtitle.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.invoice_subtitle"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.invoice_subtitle.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="invoice_footer"
-                  :label="t('settings.invoice_customizer.invoice_footer.label')"
-                  :description="
-                    t('settings.invoice_customizer.invoice_footer.description')
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.invoice_footer"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.invoice_footer.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-
-                <UFormGroup
-                  name="driving_school_bank_name"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_name.label'
-                    )
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_name.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_bank_name"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_bank_name.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_bank_iban"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_iban.label'
-                    )
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_iban.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_bank_iban"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_bank_iban.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_bank_bic"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_bic.label'
-                    )
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_bic.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_bank_bic"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_bank_bic.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_bank_account_holder"
-                  :label="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_account_holder.label'
-                    )
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_bank_account_holder.description'
-                    )
-                  "
-                  required
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_bank_account_holder"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_bank_account_holder.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-                <UFormGroup
-                  name="driving_school_vat_id"
-                  :label="
-                    t('settings.invoice_customizer.driving_school_vat_id.label')
-                  "
-                  :description="
-                    t(
-                      'settings.invoice_customizer.driving_school_vat_id.description'
-                    )
-                  "
-                  class="grid grid-cols-1 gap-4 items-center"
-                >
-                  <UInput
-                    v-model="state.driving_school_vat_id"
-                    :placeholder="
-                      t(
-                        'settings.invoice_customizer.driving_school_vat_id.placeholder'
-                      )
-                    "
-                    :ui="{ input: 'w-full' }"
-                  />
-                </UFormGroup>
-              </UDashboardSection>
+                />
+              </UFormGroup>
             </UForm>
           </div>
         </div>
@@ -411,78 +143,143 @@
 </template>
 
 <script setup lang="ts">
-import { z } from "zod";
-import Handlebars from "handlebars"
+// import { z } from "zod";
+import Handlebars from "handlebars";
+import { format } from "date-fns";
+import type { BillTemplateData } from "~/types/app.types";
+type Props = {
+  organizationId: string;
+};
+
+const props = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: "local",
 });
 const modal = useModal();
 const template = ref<string | null>(null);
+const toast = useToast();
+
+const selectedExamapleIndex = ref(0);
 
 const renderedTemplate = computed(() => {
   if (!template.value) return "";
-  
+
   // Compile the template with Handlebars
   const compiledTemplate = Handlebars.compile(template.value);
-  
+
+  const s = state;
+  // Prepare the state for rendering
+  const exampleBill = billExamples.value[selectedExamapleIndex.value];
+  if (exampleBill) {
+    s.bill_date = exampleBill.bill_date;
+    s.bill_number = exampleBill.bill_number;
+    s.bill_total = exampleBill.total.toFixed(2);
+    s.bill_vat_rate = exampleBill.vat_rate.toFixed(2);
+    s.bill_vat_amount = exampleBill.vat_amount.toFixed(2);
+    s.bill_total_with_vat = (
+      exampleBill.total + exampleBill.vat_amount
+    ).toFixed(2);
+    s.bill_items = exampleBill.bill_items;
+  } else {
+    console.warn(
+      "No example bill found for index:",
+      selectedExamapleIndex.value
+    );
+  }
+
   // Render the template with the current state
-  return compiledTemplate(state);
+  return compiledTemplate(s);
 });
 
 onMounted(() => {
   loadTemplate();
-
 });
 
-const schema = z.object({
-  driving_school_name: z.string(),
-  driving_school_address: z.string(),
-  driving_school_zip: z.string(),
-  driving_school_city: z.string(),
-  driving_school_country: z.string(),
-  driving_school_email: z.string().email(),
-  driving_school_phone: z.string(),
-  invoice_title: z.string(),
-  invoice_subtitle: z.string(),
-  invoice_footer: z.string(),
-  driving_school_bank_name: z.string(),
-  driving_school_bank_iban: z.string(),
-  driving_school_bank_bic: z.string(),
-  driving_school_bank_account_holder: z.string(),
-  driving_school_vat_id: z.string().optional(),
-});
-
-type Schema = z.infer<typeof schema>;
-
-const state = reactive<Schema>({
+const state = reactive<BillTemplateData>({
   driving_school_name: "",
-  driving_school_address: "",
-  driving_school_zip: "",
-  driving_school_city: "",
-  driving_school_country: "",
+  driving_school_address_street: "",
+  driving_school_address_zip: "",
+  driving_school_address_city: "",
+  driving_school_address_country: "",
   driving_school_email: "",
-  driving_school_phone: "",
+  driving_school_phone_number: "",
+  student_firstname: "Max",
+  student_lastname: "Mustermann",
+  student_address_street: "Musterstraße 1",
+  student_address_zip: "12345",
+  student_address_city: "Musterstadt",
+  student_address_country: "Deutschland",
+  bill_date: "",
+  bill_number: "",
   invoice_title: "",
   invoice_subtitle: "",
+  bill_total: "",
+  bill_vat_exempt: false,
+  bill_vat_rate: "",
+  bill_vat_amount: "",
+  bill_total_with_vat: "",
+  invoice_message: "",
   invoice_footer: "",
-  driving_school_bank_name: "",
-  driving_school_bank_iban: "",
-  driving_school_bank_bic: "",
-  driving_school_bank_account_holder: "",
-  driving_school_vat_id: "",
+  bill_settings_bank_account_name: "",
+  bill_settings_bank_account_number: "",
+  bill_settings_bank_account_bic: "",
+  bill_settings_bank_account_iban: "",
+  bill_settings_tax_id: "",
+  bill_items: [] 
+});
+
+const client = useSupabaseClient();
+const { data, status } = await useAsyncData(async () => {
+  const { data, error } = await client
+    .from("organizations")
+    .select("*, bill_settings:organization_billing_settings(*)")
+    .eq("id", props.organizationId);
+
+  if (error) {
+    console.error("Error fetching billing settings:", error);
+    throw error;
+  }
+  return data[0];
+});
+
+// Initialize state with fetched data
+onMounted(() => {
+  if (data.value) {
+    const orgData = data.value;
+    state.driving_school_name = orgData.name || "";
+    state.driving_school_address_street = orgData.address_street || "";
+    state.driving_school_address_zip = orgData.address_zip || "";
+    state.driving_school_address_city = orgData.address_city || "";
+    state.driving_school_address_country = orgData.address_country || "";
+    state.driving_school_email = orgData.email || "";
+    state.driving_school_phone_number = orgData.phone_number || "";
+    state.bill_settings_bank_account_name =
+      orgData.bill_settings?.bank_account_name || "";
+    state.bill_settings_bank_account_number =
+      orgData.bill_settings?.bank_account_number || "";
+    state.bill_settings_bank_account_bic =
+      orgData.bill_settings?.bank_account_bic || "";
+    state.bill_settings_bank_account_iban =
+      orgData.bill_settings?.bank_account_iban || "";
+    state.bill_settings_tax_id = orgData.bill_settings?.tax_id || "";
+    state.invoice_title = orgData.bill_settings?.invoice_title || "";
+    state.invoice_subtitle = orgData.bill_settings?.invoice_subtitle || "";
+    state.invoice_message = orgData.bill_settings?.invoice_message || "";
+    state.invoice_footer = orgData.bill_settings?.invoice_footer || "";
+  }
 });
 
 async function loadTemplate() {
   try {
-    const html = await $fetch<string>(`/api/orgs/settings/load-invoice-template`, {
-      method: "GET",
-    });
-
-    console.log("Template loaded:", html);
+    const html = await $fetch<string>(
+      `/api/orgs/settings/load-invoice-template`,
+      {
+        method: "GET",
+      }
+    );
 
     template.value = html;
-
   } catch (error) {
     console.error("Error loading template:", error);
   }
@@ -490,17 +287,76 @@ async function loadTemplate() {
 
 async function onSubmit() {
   try {
-    // Here you would typically send the state to your backend to save the changes
-    console.log("Form submitted with data:", state);
-    // For example:
-    // await $fetch('/api/orgs/settings/save-invoice-customization', {
-    //   method: 'POST',
-    //   body: state,
-    // });
+    const { error } = await client
+      .from("organization_billing_settings")
+      .update({
+        invoice_title: state.invoice_title,
+        invoice_subtitle: state.invoice_subtitle,
+        invoice_message: state.invoice_message,
+        invoice_footer: state.invoice_footer,
+      })
+      .eq("id", props.organizationId);
+    if (error) {
+      console.error("Error updating billing settings:", error);
+      throw error;
+    }
+
+    toast.add({
+      title: t("settings.settings_saved"),
+      description: t("settings.settings_saved_description"),
+      color: "green",
+    });
   } catch (error) {
     console.error("Error submitting form:", error);
+    toast.add({
+      title: t("settings.save_error"),
+      description: t("settings.save_error_description"),
+      color: "red",
+    });
   }
 }
+
+const billExamples = ref([
+  {
+    bill_date: format(new Date(), "dd.MM.yyyy"),
+    bill_number: "RE-123456",
+    total: 100.0,
+    vat_rate: 19.0,
+    vat_amount: 19.0,
+    bill_items: [
+      {
+        title: t("example_bill_items.base_costs.title"),
+        description: t("example_bill_items.base_costs.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: '100.0',
+      },
+      {
+        title: t("example_bill_items.learning_materials.title"),
+        description: t("example_bill_items.learning_materials.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: '30.0',
+      },
+      {
+        title: t("example_bill_items.theory.title"),
+        description: t("example_bill_items.theory.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: '50.0',
+      },
+      {
+        title: t("example_bill_items.theory.title"),
+        description: t("example_bill_items.theory.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: '50.0',
+      },
+      {
+        title: t("example_bill_items.practice.title"),
+        description: t("example_bill_items.practice.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: '55.0',
+      },
+    ],
+  },
+]);
 </script>
 
 <style scoped></style>
@@ -509,169 +365,106 @@ async function onSubmit() {
 {
   "de": {
     "modal_title": "Rechnung anpassen",
+    "example_bill_items": {
+      "theory": {
+        "title": "Theorieunterricht",
+        "description": "Hier wird die Aktivität des Theorieunterrichts beschrieben"
+      },
+      "practice": {
+        "title": "Fahrpraxis",
+        "description": "Hier wird die Aktivität der Fahrpraxis beschrieben"
+      },
+      "base_costs": {
+        "title": "Grundkosten",
+        "description": "Rechnungsposten für Grundkosten"
+      },
+      "learning_materials": {
+        "title": "Lernmaterialien",
+        "description": "Rechnungsposten für Lernmaterialien"
+      }
+    },
     "settings": {
+      "save_settings": "Einstellungen speichern",
+      "close": "Schließen",
+      "settings_saved": "Einstellungen gespeichert",
+      "settings_saved_description": "Ihre Einstellungen wurden erfolgreich gespeichert.",
+      "settings_save_error": "Fehler beim Speichern der Einstellungen",
+      "settings_save_error_description": "Es gab einen Fehler beim Speichern Ihrer Einstellungen.",
       "invoice_customizer": {
         "title": "Rechnung anpassen",
         "description": "Passen Sie Ihre Rechnungsvorlage an.",
-        "driving_school_name": {
-          "label": "Name der Fahrschule",
-          "description": "Der Name Ihrer Fahrschule, der auf der Rechnung angezeigt wird.",
-          "placeholder": "Fahrschule Mustermann"
-        },
-        "driving_school_address": {
-          "label": "Adresse der Fahrschule",
-          "description": "Die Adresse Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "Musterstraße 1"
-        },
-        "driving_school_zip": {
-          "label": "Postleitzahl der Fahrschule",
-          "description": "Die Postleitzahl Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "12345"
-        },
-        "driving_school_city": {
-          "label": "Stadt der Fahrschule",
-          "description": "Die Stadt Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "Musterstadt"
-        },
-        "driving_school_country": {
-          "label": "Land der Fahrschule",
-          "description": "Das Land Ihrer Fahrschule, das auf der Rechnung angezeigt wird.",
-          "placeholder": "Deutschland"
-        },
-        "driving_school_email": {
-          "label": "E-Mail-Adresse der Fahrschule",
-          "description": "Die E-Mail-Adresse Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "fahrschule(at)xyz.de"
-        },
-        "driving_school_phone": {
-          "label": "Telefonnummer der Fahrschule",
-          "description": "Die Telefonnummer Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "+49 123 4567890"
-        },
         "invoice_title": {
           "label": "Rechnungstitel",
           "description": "Der Titel der Rechnung, der auf der Rechnung angezeigt wird.",
-          "placeholder": "Rechnung"
+          "placeholder": "Erbrachte Leistungen"
         },
         "invoice_subtitle": {
           "label": "Rechnung Untertitel",
           "description": "Der Untertitel der Rechnung, der auf der Rechnung angezeigt wird.",
+          "placeholder": "Rechnung für die bisher erbrachten Leistungen"
+        },
+        "invoice_message": {
+          "label": "Rechnung Nachricht",
+          "description": "Eine Nachricht, die auf der Rechnung angezeigt wird.",
           "placeholder": "Vielen Dank für Ihren Auftrag"
         },
         "invoice_footer": {
           "label": "Rechnung Fußzeile",
           "description": "Die Fußzeile der Rechnung, die auf der Rechnung angezeigt wird.",
-          "placeholder": "Alle Angaben ohne Gewähr"
-        },
-        "driving_school_bank_name": {
-          "label": "Bankname der Fahrschule",
-          "description": "Der Name der Bank Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "Bank Mustermann"
-        },
-        "driving_school_bank_iban": {
-          "label": "IBAN der Fahrschule",
-          "description": "Die IBAN Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "DE89370400440532013000"
-        },
-        "driving_school_bank_bic": {
-          "label": "BIC der Fahrschule",
-          "description": "Die BIC Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "COBADEFFXXX"
-        },
-        "driving_school_bank_account_holder": {
-          "label": "Kontoinhaber der Fahrschule",
-          "description": "Der Kontoinhaber Ihrer Fahrschule, der auf der Rechnung angezeigt wird.",
-          "placeholder": "Max Mustermann"
-        },
-        "driving_school_vat_id": {
-          "label": "USt-IdNr. der Fahrschule",
-          "description": "Die Umsatzsteuer-Identifikationsnummer Ihrer Fahrschule, die auf der Rechnung angezeigt wird.",
-          "placeholder": "DE123456789"
+          "placeholder": "Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig."
         }
       }
     }
   },
   "en": {
     "modal_title": "Customize Invoice",
+    "example_bill_items": {
+      "theory": {
+        "title": "Theory Lessons",
+        "description": "Invoice item for theory lessons"
+      },
+      "practice": {
+        "title": "Driving Practice",
+        "description": "Invoice item for driving practice"
+      },
+      "base_costs": {
+        "title": "Base Costs",
+        "description": "Invoice item for base costs"
+      },
+      "learning_materials": {
+        "title": "Learning Materials",
+        "description": "Invoice item for learning materials"
+      }
+    },
     "settings": {
+      "save_settings": "Save Settings",
+      "close": "Close",
+      "settings_saved": "Settings Saved",
+      "settings_saved_description": "Your settings have been successfully saved.",
+      "settings_save_error": "Error Saving Settings",
+      "settings_save_error_description": "There was an error saving your settings.",
       "invoice_customizer": {
         "title": "Customize Invoice",
         "description": "Adjust your invoice template.",
-        "driving_school_name": {
-          "label": "Driving School Name",
-          "description": "The name of your driving school displayed on the invoice.",
-          "placeholder": "Driving School Example"
-        },
-        "driving_school_address": {
-          "label": "Driving School Address",
-          "description": "The address of your driving school displayed on the invoice.",
-          "placeholder": "Example Street 1"
-        },
-        "driving_school_zip": {
-          "label": "Driving School ZIP Code",
-          "description": "The ZIP code of your driving school displayed on the invoice.",
-          "placeholder": "12345"
-        },
-        "driving_school_city": {
-          "label": "Driving School City",
-          "description": "The city of your driving school displayed on the invoice.",
-          "placeholder": "Example City"
-        },
-        "driving_school_country": {
-          "label": "Driving School Country",
-          "description": "The country of your driving school displayed on the invoice.",
-          "placeholder": "Germany"
-        },
-        "driving_school_email": {
-          "label": "Driving School Email",
-          "description": "The email address of your driving school displayed on the invoice.",
-          "placeholder": "drivingschool(at)xyz.de"
-        },
-        "driving_school_phone": {
-          "label": "Driving School Phone",
-          "description": "The phone number of your driving school displayed on the invoice.",
-          "placeholder": "+49 123 4567890"
-        },
-
         "invoice_title": {
           "label": "Invoice Title",
-          "description": "The title of the invoice displayed on the invoice.",
-          "placeholder": "Invoice"
+          "description": "The title of the invoice that will be displayed on the invoice.",
+          "placeholder": "Services Rendered"
         },
         "invoice_subtitle": {
           "label": "Invoice Subtitle",
-          "description": "The subtitle of the invoice displayed on the invoice.",
+          "description": "The subtitle of the invoice that will be displayed on the invoice.",
+          "placeholder": "Invoice for services rendered so far"
+        },
+        "invoice_message": {
+          "label": "Invoice Message",
+          "description": "A message that will be displayed on the invoice",
           "placeholder": "Thank you for your order"
         },
         "invoice_footer": {
           "label": "Invoice Footer",
-          "description": "The footer of the invoice displayed on the invoice.",
-          "placeholder": "All information without guarantee"
-        },
-        "driving_school_bank_name": {
-          "label": "Driving School Bank Name",
-          "description": "The name of your driving school's bank displayed on the invoice.",
-          "placeholder": "Example Bank"
-        },
-        "driving_school_bank_iban": {
-          "label": "Driving School Bank IBAN",
-          "description": "The IBAN of your driving school displayed on the invoice.",
-          "placeholder": "DE89370400440532013000"
-        },
-        "driving_school_bank_bic": {
-          "label": "Driving School Bank BIC",
-          "description": "The BIC of your driving school displayed on the invoice.",
-          "placeholder": "COBADEFFXXX"
-        },
-        "driving_school_bank_account_holder": {
-          "label": "Driving School Bank Account Holder",
-          "description": "The account holder of your driving school displayed on the invoice.",
-          "placeholder": "Max Example"
-        },
-        "driving_school_vat_id": {
-          "label": "Driving School VAT ID",
-          "description": "The VAT ID of your driving school displayed on the invoice.",
-          "placeholder": "DE123456789"
+          "description": "The footer of the invoice that will be displayed on the invoice.",
+          "placeholder": "This invoice was created electronically and is valid without a signature."
         }
       }
     }
