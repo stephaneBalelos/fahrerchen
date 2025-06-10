@@ -176,11 +176,15 @@ const renderedTemplate = computed(() => {
     s.bill_total = exampleBill.total.toFixed(2);
     s.bill_vat_rate = exampleBill.vat_rate.toFixed(2);
     s.bill_vat_amount = exampleBill.vat_amount.toFixed(2);
-    s.bill_total_with_vat =
-      (exampleBill.total + exampleBill.vat_amount).toFixed(2);
-    s.bill_items = exampleBill.bill_items
+    s.bill_total_with_vat = (
+      exampleBill.total + exampleBill.vat_amount
+    ).toFixed(2);
+    s.bill_items = exampleBill.bill_items;
   } else {
-    console.warn("No example bill found for index:", selectedExamapleIndex.value);
+    console.warn(
+      "No example bill found for index:",
+      selectedExamapleIndex.value
+    );
   }
 
   // Render the template with the current state
@@ -224,7 +228,7 @@ const state = reactive({
   bill_items: [] as {
     title: string;
     description: string;
-    count: number;
+    date: string;
     total: number;
   }[],
 });
@@ -287,14 +291,15 @@ async function loadTemplate() {
 
 async function onSubmit() {
   try {
-    const { error } = await client.from("organization_billing_settings")
-    .update({
-      invoice_title: state.invoice_title,
-      invoice_subtitle: state.invoice_subtitle,
-      invoice_message: state.invoice_message,
-      invoice_footer: state.invoice_footer,
-    })
-    .eq("id", props.organizationId);
+    const { error } = await client
+      .from("organization_billing_settings")
+      .update({
+        invoice_title: state.invoice_title,
+        invoice_subtitle: state.invoice_subtitle,
+        invoice_message: state.invoice_message,
+        invoice_footer: state.invoice_footer,
+      })
+      .eq("id", props.organizationId);
     if (error) {
       console.error("Error updating billing settings:", error);
       throw error;
@@ -305,7 +310,6 @@ async function onSubmit() {
       description: t("settings.settings_saved_description"),
       color: "green",
     });
-    
   } catch (error) {
     console.error("Error submitting form:", error);
     toast.add({
@@ -318,7 +322,7 @@ async function onSubmit() {
 
 const billExamples = ref([
   {
-    bill_date: format(new Date(), 'dd.MM.yyyy'),
+    bill_date: format(new Date(), "dd.MM.yyyy"),
     bill_number: "RE-123456",
     total: 100.0,
     vat_rate: 19.0,
@@ -327,26 +331,32 @@ const billExamples = ref([
       {
         title: t("example_bill_items.base_costs.title"),
         description: t("example_bill_items.base_costs.description"),
-        count: 1,
+        date: format(new Date(), "dd.MM.yyyy"),
         total: 100.0,
+      },
+      {
+        title: t("example_bill_items.learning_materials.title"),
+        description: t("example_bill_items.learning_materials.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: 30.0,
       },
       {
         title: t("example_bill_items.theory.title"),
         description: t("example_bill_items.theory.description"),
-        count: 2,
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: 50.0,
+      },
+      {
+        title: t("example_bill_items.theory.title"),
+        description: t("example_bill_items.theory.description"),
+        date: format(new Date(), "dd.MM.yyyy"),
         total: 50.0,
       },
       {
         title: t("example_bill_items.practice.title"),
         description: t("example_bill_items.practice.description"),
-        count: 3,
-        total: 150.0,
-      },
-      {
-        title: t("example_bill_items.learning_materials.title"),
-        description: t("example_bill_items.learning_materials.description"),
-        count: 1,
-        total: 30.0,
+        date: format(new Date(), "dd.MM.yyyy"),
+        total: 55.0,
       },
     ],
   },
@@ -362,11 +372,11 @@ const billExamples = ref([
     "example_bill_items": {
       "theory": {
         "title": "Theorieunterricht",
-        "description": "Rechnungsposten für Theorieunterricht"
+        "description": "Hier wird die Aktivität des Theorieunterrichts beschrieben"
       },
       "practice": {
         "title": "Fahrpraxis",
-        "description": "Rechnungsposten für Fahrpraxis"
+        "description": "Hier wird die Aktivität der Fahrpraxis beschrieben"
       },
       "base_costs": {
         "title": "Grundkosten",
@@ -434,26 +444,21 @@ const billExamples = ref([
       "save_settings": "Save Settings",
       "close": "Close",
       "settings_saved": "Settings Saved",
-      "settings_saved_description":
-        "Your settings have been successfully saved.",
+      "settings_saved_description": "Your settings have been successfully saved.",
       "settings_save_error": "Error Saving Settings",
-      "settings_save_error_description":
-        "There was an error saving your settings.",
+      "settings_save_error_description": "There was an error saving your settings.",
       "invoice_customizer": {
         "title": "Customize Invoice",
         "description": "Adjust your invoice template.",
         "invoice_title": {
           "label": "Invoice Title",
-          "description":
-            "The title of the invoice that will be displayed on the invoice.",
+          "description": "The title of the invoice that will be displayed on the invoice.",
           "placeholder": "Services Rendered"
         },
         "invoice_subtitle": {
           "label": "Invoice Subtitle",
-          "description":
-            "The subtitle of the invoice that will be displayed on the invoice.",
-          "placeholder":
-            "Invoice for services rendered so far"
+          "description": "The subtitle of the invoice that will be displayed on the invoice.",
+          "placeholder": "Invoice for services rendered so far"
         },
         "invoice_message": {
           "label": "Invoice Message",
@@ -462,10 +467,8 @@ const billExamples = ref([
         },
         "invoice_footer": {
           "label": "Invoice Footer",
-          "description":
-            "The footer of the invoice that will be displayed on the invoice.",
-          "placeholder":
-            "This invoice was created electronically and is valid without a signature."
+          "description": "The footer of the invoice that will be displayed on the invoice.",
+          "placeholder": "This invoice was created electronically and is valid without a signature."
         }
       }
     }

@@ -459,7 +459,6 @@
             background-color: #ffffff;
             border-left-style: solid;
             border-bottom-width: 1pt;
-            width: 182.2pt;
             border-top-color: #000000;
             border-bottom-style: solid
         }
@@ -1025,26 +1024,27 @@
     <table class="c36">
         <tr class="c21">
             <td class="c9" colspan="1" rowspan="1">
+                <p class="c5"><span class="c0">Datum</span></p>
+            </td>
+            <td class="c9" colspan="4" rowspan="1">
                 <p class="c5"><span class="c0">Bezeichnung</span></p>
             </td>
-            <td class="c32" colspan="1" rowspan="1">
-                <p class="c5"><span class="c0">Anzahl</span></p>
-            </td>
-            <td class="c4" colspan="1" rowspan="1">
-                <p class="c6"><span class="c0">Gesamtpreis</span></p>
+            <td class="c22" colspan="1" rowspan="1">
+                <p class="c5"><span class="c0">Betrag</span></p>
             </td>
         </tr>
         {{#each bill_items}}
         <tr class="c21">
-            <td class="c34" colspan="1" rowspan="1">
+            <td class="c17" colspan="1" rowspan="1">
+                <p class="c1"><span class="c3"></span></p>
+                <p class="c16"><span class="c7">{{this.date}}</span></p>
+            </td>
+            <td class="c34" colspan="4" rowspan="1">
                 <p class="c1"><span class="c3"></span></p>
                 <p class="c5"><span class="c3">{{this.title}}</span></p>
                 <p class="c1"><span class="c3"></span></p>
                 <p class="c5"><span class="c3">{{this.description}}</span></p>
                 <p class="c1"><span class="c3"></span></p>
-            </td>
-            <td class="c17" colspan="1" rowspan="1">
-                <p class="c16"><span class="c7">{{this.count}}</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
                 <p class="c6 c35"><span class="c7">{{this.total}}</span><span class="c3">&nbsp;&euro;</span></p>
@@ -1053,7 +1053,7 @@
         {{/each}}
         {{#unless bill_vat_exempt}}
         <tr class="c26">
-            <td class="c41" colspan="2" rowspan="1">
+            <td class="c41" colspan="5" rowspan="1">
                 <p class="c5"><span class="c0">Gesamtsumme:</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
@@ -1061,7 +1061,7 @@
             </td>
         </tr>
         <tr class="c26">
-            <td class="c41" colspan="2" rowspan="1">
+            <td class="c41" colspan="5" rowspan="1">
                 <p class="c5"><span class="c0">Mehrwertsteuer ({{bill_vat_rate}}%):</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
@@ -1070,7 +1070,7 @@
         </tr>
         {{/unless}}
         <tr class="c26">
-            <td class="c41" colspan="2" rowspan="1">
+            <td class="c41" colspan="5" rowspan="1">
                 <p class="c5"><span class="c0">Gesamtbetrag:</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
@@ -1084,7 +1084,7 @@
     <p class="c1"><span class="c3"></span></p>
     {{#if bill_vat_exempt}}
     <p class="c5"><span class="c3">Gem&auml;&szlig; &sect; 19 Abs. 1 UStG wird keine Umsatzsteuer ausgewiesen.</span>
-    {{/if}}
+        {{/if}}
     </p>
     <p class="c1"><span class="c3"></span></p>
     <p class="c5"><span class="c3">{{invoice_footer}}</span></p>
@@ -1106,7 +1106,8 @@
             <tr class="c28">
                 <td class="c12" colspan="1" rowspan="1">
                     <p class="c27"><span class="c10 c7">{{bill_settings_bank_account_name}}</span></p>
-                    <p class="c27"><span class="c10 c7">BIC: {{bill_settings_bank_account_bic}} Konto-Nr.: {{bill_settings_bank_account_number}}</span></p>
+                    <p class="c27"><span class="c10 c7">BIC: {{bill_settings_bank_account_bic}} Konto-Nr.:
+                            {{bill_settings_bank_account_number}}</span></p>
                     <p class="c27"><span class="c7 c10">IBAN: {{bill_settings_bank_account_iban}}</span></p>
                 </td>
                 <td class="c12" colspan="1" rowspan="1">

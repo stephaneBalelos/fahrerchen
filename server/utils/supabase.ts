@@ -105,10 +105,6 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         return acc + a.activity_price
     }, 0)
 
-
-    
-
-
     return {
         base_costs: courseCoustsFormatted,
         activity_costs: activitiesCostsFormatted,
@@ -123,4 +119,13 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         organization: subData.organization,
 
     }
+}
+
+export const getBillItemsByBillId = async (event: H3Event, billId: string) => {
+    const client = await serverSupabaseClient(event)
+    const { data, error } = await client.from("course_subscription_bill_items").select().eq('bill_id', billId)
+    if (error) {
+        return null
+    }
+    return data
 }
