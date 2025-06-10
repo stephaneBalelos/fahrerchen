@@ -1,4 +1,5 @@
 <html>
+
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
     <style type="text/css">
@@ -996,41 +997,40 @@
 
 <body class="c8 doc-content">
     <p class="c6 c37"><span class="c38">{{driving_school_name}}</span></p>
-    <p class="c6 c40"><span class="c20">Software Entwicklung</span></p>
-    <p class="c6"><span class="c7">Weserstra&szlig;e 108</span></p>
-    <p class="c6"><span class="c7">26382</span><span class="c3">&nbsp;</span><span class="c7">Wilhelmshaven</span></p>
-    <p class="c6"><span class="c3">Tel.: 0</span><span class="c7">178 9121487</span></p>
-    <p class="c6"><span class="c3">E-Mail: </span><span class="c7">hello@stephanedondyas.dev</span></p>
+    <p class="c6"><span class="c7">{{driving_school_address_street}}</span></p>
+    <p class="c6"><span class="c7">{{driving_school_address_zip}}</span><span class="c3">&nbsp;</span><span
+            class="c7">{{driving_school_address_city}}</span></p>
+    <p class="c6"><span class="c3">Tel.: </span><span class="c7">{{driving_school_phone_number}}</span></p>
+    <p class="c6"><span class="c3">E-Mail: </span><span class="c7">{{driving_school_email}}</span></p>
     <p class="c1"><span class="c23 c7"></span></p>
-    <p class="c5"><span class="c23 c7">S</span><span class="c24 c7">t&eacute;phane Dondyas</span><span
-            class="c7 c23">&nbsp;- </span><span class="c24 c7">Weserstra&szlig;e 108</span><span class="c23 c7">&nbsp;-
-        </span><span class="c24 c7">26382</span><span class="c23 c7">&nbsp;</span><span
-            class="c7 c24">Wilhelmshaven</span></p>
+    <p class="c5"><span class="c24 c7">{{driving_school_name}}</span><span class="c7 c23">&nbsp;- </span><span
+            class="c24 c7">{{driving_school_address_street}}</span><span class="c23 c7">&nbsp;-
+        </span><span class="c24 c7">{{driving_school_address_zip}}</span><span class="c23 c7">&nbsp;</span><span
+            class="c7 c24">{{driving_school_address_city}}</span></p>
     <p class="c1"><span class="c3"></span></p>
-    <p class="c5"><span class="c3">SaunaHuus B&auml;der- und Sauna Betriebsgesellschaft</span></p>
-    <p class="c5"><span class="c3">Ganderkesee mbH</span></p>
-    <p class="c5"><span class="c3">Heideweg 2</span></p>
-    <p class="c5"><span class="c3">27777 Ganderkesee</span></p>
+    <p class="c5"><span class="c3">{{student_firstname}} {{student_lastname}}</span></p>
+    <p class="c5"><span class="c3">{{student_address_street}}</span></p>
+    <p class="c5"><span class="c3">{{student_address_zip}} {{student_address_city}}</span></p>
     <p class="c6 c30"><span class="c3"></span></p>
     <p class="c6 c30"><span class="c3"></span></p>
-    <p class="c6"><span class="c3">Datum: </span><span class="c7">10</span><span class="c3">. </span><span
-            class="c7">M&auml;rz</span><span class="c3">&nbsp;202</span><span class="c7">5</span></p>
-    <p class="c6"><span class="c3">Rechnungs-Nr.: </span><span class="c7">2025031001</span></p>
+    <p class="c6"><span class="c3">Datum: </span><span class="c7">{{bill_date}}</span></p>
+    <p class="c6"><span class="c3">Rechnungs-Nr.: </span><span class="c7">{{bill_number}}</span></p>
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
-    <p class="c5"><span class="c15">Rechnung</span><span class="c31 c33">: Erweiterung der Website
-            &ldquo;saunahuus.de&rdquo;</span></p>
+    <p class="c5"><span class="c31 c33">{{invoice_title}}</span></p>
+    <p class="c1"><span class="c3"></span>{{invoice_subtitle}}</p>
+    <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
     <table class="c36">
         <tr class="c21">
-            <td class="c32" colspan="1" rowspan="1">
-                <p class="c5"><span class="c0">Anzahl</span></p>
+            <td class="c9" colspan="1" rowspan="1">
+                <p class="c5"><span class="c0">Bezeichnung</span></p>
             </td>
             <td class="c22" colspan="1" rowspan="1">
                 <p class="c5"><span class="c0">Einheit</span></p>
             </td>
-            <td class="c9" colspan="1" rowspan="1">
-                <p class="c5"><span class="c0">Bezeichnung</span></p>
+            <td class="c32" colspan="1" rowspan="1">
+                <p class="c5"><span class="c0">Anzahl</span></p>
             </td>
             <td class="c14" colspan="1" rowspan="1">
                 <p class="c6"><span class="c0">Einzelpreis</span></p>
@@ -1039,48 +1039,66 @@
                 <p class="c6"><span class="c0">Gesamtpreis</span></p>
             </td>
         </tr>
+        {{#each bill_items}}
         <tr class="c21">
-            <td class="c17" colspan="1" rowspan="1">
-                <p class="c16"><span class="c7">10</span></p>
+            <td class="c34" colspan="1" rowspan="1">
+                <p class="c5"><span class="c3">{{this.name}}</span></p>
+                <p class="c1"><span class="c3"></span></p>
+                <p class="c5"><span class="c3">{{this.description}}</span></p>
+                <p class="c1"><span class="c3"></span></p>
+                <p class="c1"><span class="c3"></span></p>
             </td>
             <td class="c25" colspan="1" rowspan="1">
-                <p class="c16"><span class="c7">Stunden</span><span class="c3">.</span></p>
+                <p class="c16"><span class="c7">{{this.unit}}</span><span class="c3">.</span></p>
             </td>
-            <td class="c34" colspan="1" rowspan="1">
-                <p class="c5"><span class="c3">Erweiterung f&uuml;r die Website saunahuus.de </span></p>
-                <p class="c1"><span class="c3"></span></p>
-                <p class="c5"><span class="c3">Erweiterung der Calendly Integration mit Stripe f&uuml;r
-                        Online-Zahlungen</span></p>
-                <p class="c1"><span class="c3"></span></p>
-                <p class="c1"><span class="c3"></span></p>
+            <td class="c17" colspan="1" rowspan="1">
+                <p class="c16"><span class="c7">{{this.count}}</span></p>
             </td>
             <td class="c13" colspan="1" rowspan="1">
-                <p class="c6 c35"><span class="c7">55,00</span><span class="c3">&nbsp;&euro;</span></p>
+                <p class="c6 c35"><span class="c7">{{this.unit_price}}</span><span class="c3">&nbsp;&euro;</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
-                <p class="c6 c35"><span class="c7">550,00</span><span class="c3">&nbsp;&euro;</span></p>
+                <p class="c6 c35"><span class="c7">{{this.total}}</span><span class="c3">&nbsp;&euro;</span></p>
             </td>
         </tr>
+        {{/each}}
+        {{#unless bill_vat_exempt}}
+        <tr class="c26">
+            <td class="c41" colspan="4" rowspan="1">
+                <p class="c5"><span class="c0">Gesamtsumme:</span></p>
+            </td>
+            <td class="c11" colspan="1" rowspan="1">
+                <p class="c6"><span class="c31">{{bill_total}}</span><span class="c3">&nbsp;&euro;</span></p>
+            </td>
+        </tr>
+        <tr class="c26">
+            <td class="c41" colspan="4" rowspan="1">
+                <p class="c5"><span class="c0">Mehrwertsteuer ({{bill_vat_rate}}):</span></p>
+            </td>
+            <td class="c11" colspan="1" rowspan="1">
+                <p class="c6"><span class="c31">{{bill_vat_amout}}</span><span class="c3">&nbsp;&euro;</span></p>
+            </td>
+        </tr>
+        {{/unless}}
         <tr class="c26">
             <td class="c41" colspan="4" rowspan="1">
                 <p class="c5"><span class="c0">Gesamtbetrag:</span></p>
             </td>
             <td class="c11" colspan="1" rowspan="1">
-                <p class="c6"><span class="c31">550</span><span class="c0">,</span><span class="c31">00</span><span
-                        class="c0">&nbsp;&euro;</span></p>
+                <p class="c6"><span class="c31">{{bill_total_with_vat}}</span><span class="c3">&nbsp;&euro;</span></p>
             </td>
         </tr>
     </table>
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
-    <p class="c5"><span class="c3">Sofern nicht anders angegeben, entspricht das Liefer-/Leistungsdatum
-            dem Rechnungsdatum. </span></p>
+    <p class="c5"><span class="c3"> {{invoice_message}} </span></p>
     <p class="c1"><span class="c3"></span></p>
+    {{#if bill_vat_exempt}}
     <p class="c5"><span class="c3">Gem&auml;&szlig; &sect; 19 Abs. 1 UStG wird keine Umsatzsteuer ausgewiesen.</span>
+    {{/if}}
     </p>
     <p class="c1"><span class="c3"></span></p>
-    <p class="c5"><span class="c3">Wir danken f&uuml;r Ihren Auftrag und</span><span class="c7">&nbsp;stehen jederzeit
-            zur Verf&uuml;gung</span><span class="c3">.</span></p>
+    <p class="c5"><span class="c3">{{invoice_footer}}</span></p>
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
@@ -1098,12 +1116,12 @@
             </tr>
             <tr class="c28">
                 <td class="c12" colspan="1" rowspan="1">
-                    <p class="c27"><span class="c10 c7">Deutsche Bank</span></p>
-                    <p class="c27"><span class="c10 c7">BLZ: 37070024 Konto-Nr.: 0324152 00</span></p>
-                    <p class="c27"><span class="c7 c10">IBAN: DE 58370700240032415200</span></p>
+                    <p class="c27"><span class="c10 c7">{{bill_settings_bank_account_name}}</span></p>
+                    <p class="c27"><span class="c10 c7">BIC: {{bill_settings_bank_account_bic}} Konto-Nr.: {{bill_settings_bank_account_number}}</span></p>
+                    <p class="c27"><span class="c7 c10">IBAN: {{bill_settings_bank_account_iban}}</span></p>
                 </td>
                 <td class="c12" colspan="1" rowspan="1">
-                    <p class="c5"><span class="c10 c7">Steuernummer: 70/109/02411</span></p>
+                    <p class="c5"><span class="c10 c7">Steuernummer: {{bill_settings_tax_id}}</span></p>
                 </td>
             </tr>
         </table>

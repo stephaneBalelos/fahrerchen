@@ -131,7 +131,9 @@ const client = useSupabaseClient();
 const toast = useToast();
 const modal = useModal();
 const openInvoiceCustomization = () => {
-  modal.open(InvoiceCustomizerModal);
+  modal.open(InvoiceCustomizerModal, {
+    organizationId: props.organizationId,
+  });
 };
 
 const schema = z.object({
