@@ -271,6 +271,7 @@ async function markAsCanceled() {
 <i18n lang="json">
 {
   "de": {
+    "download_pdf": "PDF herunterladen",
     "open_student_profile": "Schülerprofil öffnen",
     "manage_subscription": "Abonnement verwalten",
     "bill": "Rechnung",
@@ -282,6 +283,7 @@ async function markAsCanceled() {
     "copied": "Kopiert!"
   },
   "en": {
+    "download_pdf": "Download PDF",
     "open_student_profile": "Open student profile",
     "manage_subscription": "Manage subscription",
     "bill": "Bill",

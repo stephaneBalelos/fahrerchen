@@ -146,6 +146,7 @@
 // import { z } from "zod";
 import Handlebars from "handlebars";
 import { format } from "date-fns";
+import type { BillTemplateData } from "~/types/app.types";
 type Props = {
   organizationId: string;
 };
@@ -195,7 +196,7 @@ onMounted(() => {
   loadTemplate();
 });
 
-const state = reactive({
+const state = reactive<BillTemplateData>({
   driving_school_name: "",
   driving_school_address_street: "",
   driving_school_address_zip: "",
@@ -225,12 +226,7 @@ const state = reactive({
   bill_settings_bank_account_bic: "",
   bill_settings_bank_account_iban: "",
   bill_settings_tax_id: "",
-  bill_items: [] as {
-    title: string;
-    description: string;
-    date: string;
-    total: number;
-  }[],
+  bill_items: [] 
 });
 
 const client = useSupabaseClient();
@@ -332,31 +328,31 @@ const billExamples = ref([
         title: t("example_bill_items.base_costs.title"),
         description: t("example_bill_items.base_costs.description"),
         date: format(new Date(), "dd.MM.yyyy"),
-        total: 100.0,
+        total: '100.0',
       },
       {
         title: t("example_bill_items.learning_materials.title"),
         description: t("example_bill_items.learning_materials.description"),
         date: format(new Date(), "dd.MM.yyyy"),
-        total: 30.0,
+        total: '30.0',
       },
       {
         title: t("example_bill_items.theory.title"),
         description: t("example_bill_items.theory.description"),
         date: format(new Date(), "dd.MM.yyyy"),
-        total: 50.0,
+        total: '50.0',
       },
       {
         title: t("example_bill_items.theory.title"),
         description: t("example_bill_items.theory.description"),
         date: format(new Date(), "dd.MM.yyyy"),
-        total: 50.0,
+        total: '50.0',
       },
       {
         title: t("example_bill_items.practice.title"),
         description: t("example_bill_items.practice.description"),
         date: format(new Date(), "dd.MM.yyyy"),
-        total: 55.0,
+        total: '55.0',
       },
     ],
   },

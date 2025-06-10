@@ -4,7 +4,7 @@ import type { H3Event } from 'h3';
 import { arrayFillWithNullValues } from './utilities';
 
 export const getOrganisationById = async (event: H3Event, id: string): Promise<AppOrganization | null> => {
-    const client = await serverSupabaseClient<Database>(event)
+    const client = await serverSupabaseClient(event)
     const { data, error } = await client.from('organizations').select().eq('id', id).single()
     if (error) {
         return null
@@ -13,7 +13,7 @@ export const getOrganisationById = async (event: H3Event, id: string): Promise<A
 }
 
 export const getOrganizationStripeAccount = async (event: H3Event, orgid: string) => {
-    const client = await serverSupabaseClient<Database>(event)
+    const client = await serverSupabaseClient(event)
     const { data, error } = await client.from("organizations_stripe_accounts").select().eq('id', orgid).single()
     if (error) {
         return null
@@ -22,7 +22,7 @@ export const getOrganizationStripeAccount = async (event: H3Event, orgid: string
 }
 
 export const getBillById = async (event: H3Event, id: string) => {
-    const client = await serverSupabaseClient<Database>(event)
+    const client = await serverSupabaseClient(event)
     const { data, error } = await client.from('course_subscription_bills').select().eq('id', id).single()
     if (error) {
         return null
@@ -121,9 +121,36 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
     }
 }
 
+export const getBillDataById = async (event: H3Event, id: string) => {
+    const client = await serverSupabaseClient<Database>(event)
+    const { data, error } = await client.from('course_subscription_bills_view').select().eq('id', id).single()
+    if (error) {
+        return null
+    }
+    return data
+}
+
 export const getBillItemsByBillId = async (event: H3Event, billId: string) => {
     const client = await serverSupabaseClient(event)
     const { data, error } = await client.from("course_subscription_bill_items").select().eq('bill_id', billId)
+    if (error) {
+        return null
+    }
+    return data
+}
+
+export const getOrganisationBilllingSettings = async (event: H3Event, orgId: string) => {
+    const client = await serverSupabaseClient<Database>(event)
+    const { data, error } = await client.from('organization_billing_settings').select().eq('id', orgId).single()
+    if (error) {
+        return null
+    }
+    return data
+}
+
+export const getStudentById = async (event: H3Event, id: string) => {
+    const client = await serverSupabaseClient<Database>(event)
+    const { data, error } = await client.from('students').select().eq('id', id).single()
     if (error) {
         return null
     }

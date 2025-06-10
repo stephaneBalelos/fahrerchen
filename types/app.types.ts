@@ -155,3 +155,42 @@ export type Database = MergeDeep<DatabaseGenerated, {
 }>;
 
 export type AppFileObject = Omit<Database["storage"]["Tables"]["objects"]["Row"], "path_tokens" | "owner_id" | "version" | "object_id">
+
+
+export type BillTemplateData = {
+  driving_school_name: string
+  driving_school_address_street: string
+  driving_school_address_zip: string
+  driving_school_address_city: string
+  driving_school_address_country: string
+  driving_school_email: string
+  driving_school_phone_number: string
+  student_firstname: string
+  student_lastname: string
+  student_address_street: string
+  student_address_zip: string
+  student_address_city: string
+  student_address_country: string
+  bill_date: string
+  bill_number: string
+  invoice_title: string
+  invoice_subtitle: string
+  bill_total: string
+  bill_vat_exempt: boolean
+  bill_vat_rate: string
+  bill_vat_amount: string
+  bill_total_with_vat: string
+  invoice_message: string
+  invoice_footer: string
+  bill_settings_bank_account_name: string
+  bill_settings_bank_account_number: string
+  bill_settings_bank_account_bic: string
+  bill_settings_bank_account_iban: string
+  bill_settings_tax_id: string
+  bill_items: {
+    title: string;
+    description: string;
+    date: string;
+    total: string;
+  }[]
+}
