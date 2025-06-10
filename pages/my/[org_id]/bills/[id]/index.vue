@@ -116,14 +116,26 @@
             <UDashboardToolbar
               class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-24 pt-4 bg-white dark:bg-gray-900"
             >
-              <template #right>
-                <div class="flex flex-col flex-1 items-end">
-                  <span class="text-sm text-gray-500">{{ t("total") }}</span>
-                  <span class="text-xl font-bold">{{
-                    formatCurrency(bill.data.total)
-                  }}</span>
+                <div class="flex justify-end w-full gap-8">
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("total") }}</span>
+                    <span class="text-xl font-bold">{{
+                      formatCurrency(bill.data.total)
+                    }}</span>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("vat") }}</span>
+                    <span class="text-xl font-bold">{{
+                      bill.data.vat_rate.toFixed(2) + "%"
+                    }}</span>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-sm text-gray-500">{{ t("total_with_vat") }}</span>
+                    <span class="text-xl font-bold">{{
+                      formatCurrency(bill.data.total_with_vat || bill.data.total)
+                    }}</span>
+                  </div>
                 </div>
-              </template>
             </UDashboardToolbar>
           </div>
         </UDashboardPanel>
@@ -280,6 +292,8 @@ async function markAsCanceled() {
     "mark_as_ready_to_pay": "Als zahlungsbereit markieren",
     "cancel_bill": "Rechnung stornieren",
     "total": "Gesamtsumme",
+    "vat": "MwSt.",
+    "total_with_vat": "Gesamtsumme inkl. MwSt.",
     "copied": "Kopiert!"
   },
   "en": {
@@ -292,6 +306,8 @@ async function markAsCanceled() {
     "mark_as_ready_to_pay": "Mark as ready to pay",
     "cancel_bill": "Cancel bill",
     "total": "Total",
+    "vat": "VAT",
+    "total_with_vat": "Total with VAT",
     "copied": "Copied!"
   }
 }

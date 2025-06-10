@@ -38,7 +38,7 @@
           </template>
           <template #total-data="{ row }">
             <p class="text-gray-500 dark:text-gray-400 font-medium">
-              {{ formatCurrency(row.total) }}
+              {{ formatCurrency(row.total_with_vat) }}
             </p>
           </template>
           <template #action-data="{ row }">

@@ -55,7 +55,7 @@ const props = defineProps<Props>()
 const client = useSupabaseClient()
 
 const { data: subscription, status } = useAsyncData(async () => {
-    const { data, error } = await client.from("course_subscriptions").select("*, course:course_id(name), course_subscription_bills(total, paid_at)").eq("id", props.subscriptionId)
+    const { data, error } = await client.from("course_subscriptions").select("*, course:course_id(name), course_subscription_bills(total, total_with_vat, paid_at)").eq("id", props.subscriptionId)
     .not("course_subscription_bills.paid_at", "is", null).single()
     
     if (error) {
@@ -66,9 +66,9 @@ const { data: subscription, status } = useAsyncData(async () => {
 }, {
     transform: (data) => {
         if (!data) return null
-
+        console.log('Subscription data:', data)
         // Calculate total costs from bills
-        const totalBills = data.course_subscription_bills.reduce((acc, bill) => acc + bill.total, 0)
+        const totalBills = data.course_subscription_bills.reduce((acc, bill) => acc + (bill.total_with_vat || bill.total), 0)
 
         return {
             ...data,

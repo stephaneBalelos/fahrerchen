@@ -40,8 +40,8 @@
             </template>
             <template #links>
               <div class="flex items-center gap-4">
-                <span v-if="bill.total" class="text-lg font-bold">{{
-                  formatCurrency(bill.total)
+                <span v-if="bill.total_with_vat" class="text-lg font-bold">{{
+                  formatCurrency(bill.total_with_vat)
                 }}</span>
                 <UButton
                   icon="i-heroicons-arrow-right"
@@ -108,7 +108,7 @@ const { data: bills, refresh } = useAsyncData(``, async () => {
   const { data, error } = await client
     .from("course_subscription_bills")
     .select(
-      "id, created_at, total, organization_id, paid_at, ready_to_pay, canceled_at"
+      "id, created_at, total, total_with_vat, organization_id, paid_at, ready_to_pay, canceled_at"
     )
     .eq("course_subscription_id", subscription_id)
     .order("created_at", { ascending: false });

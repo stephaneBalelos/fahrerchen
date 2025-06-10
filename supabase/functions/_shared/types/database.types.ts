@@ -685,6 +685,7 @@ export type Database = {
           ready_to_pay: boolean
           stripe_payment_intent_id: string | null
           total: number
+          total_with_vat: number | null
           vat_amount: number
           vat_rate: number
         }
@@ -699,6 +700,7 @@ export type Database = {
           ready_to_pay?: boolean
           stripe_payment_intent_id?: string | null
           total?: number
+          total_with_vat?: number | null
           vat_amount?: number
           vat_rate?: number
         }
@@ -713,6 +715,7 @@ export type Database = {
           ready_to_pay?: boolean
           stripe_payment_intent_id?: string | null
           total?: number
+          total_with_vat?: number | null
           vat_amount?: number
           vat_rate?: number
         }
@@ -1447,6 +1450,7 @@ export type Database = {
           student_id: string | null
           student_lastname: string | null
           total: number | null
+          total_with_vat: number | null
           vat_amount: number | null
           vat_rate: number | null
         }

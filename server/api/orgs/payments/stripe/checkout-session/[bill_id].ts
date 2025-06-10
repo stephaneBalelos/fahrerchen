@@ -74,9 +74,9 @@ export default defineEventHandler(async (event) => {
         });
 
         // update the payment intent amount
-        if (intent.amount !== bill.total * 100) {
+        if (intent.amount !== (bill.total_with_vat || bill.total) * 100) {
             intent = await stripe.paymentIntents.update(bill.stripe_payment_intent_id, {
-                amount: bill.total * 100
+                amount: (bill.total_with_vat || bill.total) * 100
             }, { stripeAccount: orgStripeAccount.stripe_account_id });
         }
 
@@ -99,7 +99,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const intent = await stripe.paymentIntents.create({
-            amount: bill.total * 100,
+            amount: (bill.total_with_vat || bill.total) * 100,
             currency: 'eur',
             payment_method_types: enabledPaymentMethods,
             metadata: {

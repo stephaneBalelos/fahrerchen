@@ -98,7 +98,7 @@ export default defineEventHandler(async (event) => {
         bill_vat_exempt: billingSettings.vat_exempt,
         bill_vat_rate: billData.vat_rate ? `${billData.vat_rate}` : '0',
         bill_vat_amount: billData.vat_amount ? `${billData.vat_amount.toFixed(2)}` : '0.00',
-        bill_total_with_vat: (billData.total + (billData.vat_amount ? billData.vat_amount : 0)).toFixed(2), // TODO: Generate this from the total and vat_amount
+        bill_total_with_vat: billData.total_with_vat ? `${billData.total_with_vat.toFixed(2)}` : '0.00',
         bill_settings_bank_account_name: billingSettings.bank_account_name || '',
         bill_settings_bank_account_number: billingSettings.bank_account_number || '',
         bill_settings_bank_account_bic: billingSettings.bank_account_bic || '',
