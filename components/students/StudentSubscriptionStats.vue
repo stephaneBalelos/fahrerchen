@@ -12,10 +12,12 @@
             <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('costs') }}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.costs) }}</div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('without_vat') }}</span>
             </div>
             <div class="p-2">
                 <div class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ t('saldo')}}</div>
                 <div class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ formatCurrency(subscription.total_bills - subscription.costs) }}</div>
+                <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('without_vat') }}</span>
             </div>
         </div>
         <div v-else-if="status == 'pending'" class="flex divide-x">
@@ -68,7 +70,7 @@ const { data: subscription, status } = useAsyncData(async () => {
         if (!data) return null
         console.log('Subscription data:', data)
         // Calculate total costs from bills
-        const totalBills = data.course_subscription_bills.reduce((acc, bill) => acc + (bill.total_with_vat || bill.total), 0)
+        const totalBills = data.course_subscription_bills.reduce((acc, bill) => acc + (bill.total), 0)
 
         return {
             ...data,
@@ -92,7 +94,8 @@ const { data: subscription, status } = useAsyncData(async () => {
         "progression": "Fortschritt",
         "is_active": "Ist aktiv",
         "status_active": "Aktiv",
-        "status_archived": "Archiviert"
+        "status_archived": "Archiviert",
+        "without_vat": "ohne MwSt."
     },
     "en": {
         "course": "Course",
@@ -101,7 +104,8 @@ const { data: subscription, status } = useAsyncData(async () => {
         "progression": "Progression",
         "is_active": "Is active",
         "status_active": "Active",
-        "status_archived": "Archived"
+        "status_archived": "Archived",
+        "without_vat": "without VAT"
     }
 }
 </i18n>
