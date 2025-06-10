@@ -25,6 +25,7 @@ export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_do
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {

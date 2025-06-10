@@ -1,28 +1,59 @@
 <template>
-  <UDashboardPanelContent>
+  <UDashboardPanelContent
+    class="p-0 pb-24 divide-y divide-gray-200 dark:divide-gray-800"
+  >
     <UDashboardSection
-      :title="t('billing')"
-      :description="t('billing_description')"
+      :title="t('billing_settings.label')"
+      :description="t('billing_settings.description')"
+      orientation="horizontal"
+      class="px-4 pt-8"
     >
-      <UFormGroup
-        :label="t('settings.template.label')"
-        class="grid grid-cols-2 gap-2"
-        :description="t('settings.template.description')"
+      <UCard
         :ui="{
-          container: 'flex flex-wrap items-center gap-3',
-          help: 'mt-0',
+          body: {
+            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
+          },
+        }"
+      >
+        <NuxtErrorBoundary>
+          <EditBillSettingsForm
+            v-if="userOrganizationsStore.selectedOrganization"
+            :organization-id="
+              userOrganizationsStore.selectedOrganization.organization_id
+            "
+          />
+          <template #error="{ error, clearError }">
+            <p>An error occurred: {{ error }}</p>
+
+            <button @click="clearError">Clear error</button>
+          </template>
+        </NuxtErrorBoundary>
+      </UCard>
+    </UDashboardSection>
+    <UDashboardSection
+      :title="t('template.label')"
+      :description="t('template.description')"
+      orientation="horizontal"
+      class="px-4 pt-8"
+    >
+      <UCard
+        :ui="{
+          body: {
+            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
+          },
         }"
       >
         <UButton @click="openInvoiceCustomization">
-          {{ t("settings.template.customize") }}
+          {{ t("template.customize") }}
         </UButton>
-      </UFormGroup>
+      </UCard>
     </UDashboardSection>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import InvoiceCustomizerModal from '~/components/settings/InvoiceCustomizerModal.vue';
+import InvoiceCustomizerModal from "~/components/settings/InvoiceCustomizerModal.vue";
+import EditBillSettingsForm from "~/components/forms/EditBillSettingsForm.vue";
 
 const { t } = useI18n({
   useScope: "local",
@@ -30,8 +61,10 @@ const { t } = useI18n({
 
 const modal = useModal();
 
+const userOrganizationsStore = useUserOrganizationsStore();
+
 const openInvoiceCustomization = () => {
-  modal.open(InvoiceCustomizerModal)
+  modal.open(InvoiceCustomizerModal);
 };
 </script>
 
@@ -40,18 +73,15 @@ const openInvoiceCustomization = () => {
 <i18n lang="json">
 {
   "de": {
-    "billing": "Abrechnung",
-    "billing_description": "Hier können Sie Ihre Abrechnungseinstellungen verwalten.",
-    "settings.template.label": "Rechnungsvorlage",
-    "settings.template.description": "Passen Sie das Design und die Informationen Ihrer Rechnungen an.",
-    "settings.template.customize": "Rechnung anpassen"
-  },
-    "en": {
-        "billing": "Billing",
-        "billing_description": "Manage your billing settings here.",
-        "settings.template.label": "Invoice Template",
-        "settings.template.description": "Customize the design and information of your invoices.",
-        "settings.template.customize": "Customize Invoice"
+    "billing_settings": {
+      "label": "Rechnungseinstellungen",
+      "description": "Passen Sie Ihre Rechnungseinstellungen an. Diese Einstellungen werden auf alle Rechnungen angewendet, die Sie erstellen."
+    },
+    "template": {
+      "label": "Rechnungsvorlage",
+      "description": "Passen Sie das Design und die Informationen Ihrer Rechnungen an.",
+      "customize": "Rechnung anpassen"
     }
+  }
 }
 </i18n>
