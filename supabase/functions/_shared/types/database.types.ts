@@ -1043,56 +1043,56 @@ export type Database = {
       }
       organizations: {
         Row: {
-          address_city: string | null
-          address_country: string | null
-          address_street: string | null
-          address_zip: string | null
+          address_city: string
+          address_country: string
+          address_street: string
+          address_zip: string
           allow_self_registration: boolean
           avatar_path: string | null
           description: string | null
-          email: string | null
+          email: string
           handle: string
           id: string
           inserted_at: string
           name: string
           owner_id: string
-          phone_number: string | null
+          phone_number: string
           preferred_language: string
           website: string | null
         }
         Insert: {
-          address_city?: string | null
-          address_country?: string | null
-          address_street?: string | null
-          address_zip?: string | null
+          address_city?: string
+          address_country?: string
+          address_street?: string
+          address_zip?: string
           allow_self_registration?: boolean
           avatar_path?: string | null
           description?: string | null
-          email?: string | null
+          email?: string
           handle: string
           id?: string
           inserted_at?: string
           name: string
           owner_id: string
-          phone_number?: string | null
+          phone_number?: string
           preferred_language?: string
           website?: string | null
         }
         Update: {
-          address_city?: string | null
-          address_country?: string | null
-          address_street?: string | null
-          address_zip?: string | null
+          address_city?: string
+          address_country?: string
+          address_street?: string
+          address_zip?: string
           allow_self_registration?: boolean
           avatar_path?: string | null
           description?: string | null
-          email?: string | null
+          email?: string
           handle?: string
           id?: string
           inserted_at?: string
           name?: string
           owner_id?: string
-          phone_number?: string | null
+          phone_number?: string
           preferred_language?: string
           website?: string | null
         }

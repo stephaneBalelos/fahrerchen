@@ -47,6 +47,10 @@ export default defineEventHandler(async (event) => {
         // Generate Organisation
         const { data: org } = await client.from('organizations').insert({
             name: event.context.$t('demo.organization.name', { name: user_data.firstname }),
+            email: user.email,
+            handle: 'ds',
+            phone_number: '0301234567',
+            website: 'https://example.com',
             owner_id: user.id,
             preferred_language: locale === 'de' ? 'de' : 'en',
             address_city: address.data[0].city,
