@@ -19,8 +19,7 @@ export const generatePDF = async (html: string) => {
             landscape: false,
         })
 
-        await browser.close()
-
+        await page.close()
         return pdf
     } catch (error) {
         console.error('Error generating PDF:', error)
