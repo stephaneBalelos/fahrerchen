@@ -29,18 +29,29 @@
         </template>
         <div ref="contentPreview" class="grid place-items-center h-full">
           <object
-            v-if="data"
+            v-if="data && data.metadata.mimetype.startsWith('application/pdf')"
             :data="data?.url + '#toolbar=0&navpanes=0'"
             :type="data.metadata.mimetype"
             :width="width"
             :height="height"
-          ></object>
+          />
+          <img
+            v-else-if="data && data.metadata.mimetype.startsWith('image/')"
+            :src="data?.url"
+            :alt="data?.name"
+            class="max-w-full max-h-full object-contain"
+          >
+          <div v-else class="text-gray-500">
+            <p class="text-sm">
+              Unsupported file type: {{ data?.metadata.mimetype }}
+            </p>
+          </div>
         </div>
       </UCard>
-      <template #error="{ error }">
+      <template #error="{ error: err }">
         <UAlert
-          title="Error"
-          description="An error occurred while loading the document"
+          :title="err.name || 'Error'"
+          :description="err.message || 'An error occurred while loading the document preview.'"
           color="red"
           variant="soft"
         />
@@ -50,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { useElementBounding, useParentElement } from "@vueuse/core";
+import { useElementBounding } from "@vueuse/core";
 import type { Database } from "~/types/app.types";
 
 type Props = {

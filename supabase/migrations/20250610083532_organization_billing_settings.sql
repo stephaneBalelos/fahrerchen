@@ -15,8 +15,8 @@ create table if not exists public.organization_billing_settings (
 );
 comment on table public.organization_billing_settings is 'Stores billing settings for each organization, including VAT rates and bank account details.';
 alter table public.organization_billing_settings enable row level security;
-revoke update on table public.organizations from authenticated, anon;
-grant update (vat_rate, vat_exempt, bank_account_name, bank_account_number, bank_account_iban, bank_account_bic, tax_id) on table public.organization_billing_settings to authenticated;
+revoke update on table public.organization_billing_settings from authenticated, anon;
+grant update (id, vat_rate, vat_exempt, bank_account_name, bank_account_number, bank_account_iban, bank_account_bic, tax_id) on table public.organization_billing_settings to authenticated;
 
 alter type public.app_permission add value if not exists 'organization_billing_settings.read';
 alter type public.app_permission add value if not exists 'organization_billing_settings.create';
