@@ -95,7 +95,6 @@ const { data, error } = useAsyncData(
     if (fileDataError || blobError) {
       throw new Error("Error while fetching file data");
     }
-    console.log("File data:", fileData);
     return {
         name: fileData.name.split("/").pop(),
       metadata: fileData.metadata as { mimetype: string },
