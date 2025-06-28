@@ -1701,14 +1701,6 @@ export type Database = {
         Args: { value: string }
         Returns: string
       }
-      unaccent: {
-        Args: { "": string }
-        Returns: string
-      }
-      unaccent_init: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
       validate_course_subscription_before_archiving: {
         Args: { cs_id: string }
         Returns: boolean

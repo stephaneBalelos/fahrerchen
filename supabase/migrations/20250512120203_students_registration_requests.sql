@@ -58,7 +58,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a registration request is updated
 create trigger on_registration_request_updated
   after update of status on public.students_registration_requests

@@ -97,7 +97,7 @@ begin
 
     return course_allows_self_registration;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 -- check if the the course should create a bill on subscription
 create or replace function public.should_course_create_bill_on_subscription(course_id uuid)
@@ -112,5 +112,5 @@ begin
 
     return course_create_bill_on_subscription;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 

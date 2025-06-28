@@ -38,7 +38,7 @@ begin
 
     return course_organization_id = org_id and student_organization_id = org_id;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 
 -- Check if the subscription belongs to the student user
@@ -51,15 +51,15 @@ declare
 begin
     select user_id into student_user_id from public.students
     where id = (select student_id from public.course_subscriptions where id = course_subscription_id);
-    return student_user_id = auth.uid();
+    return student_user_id = (select auth.uid());
     
     if student_user_id is null then
         return false;
     end if;
 
-    return student_user_id = auth.uid();
+    return student_user_id = (select auth.uid());
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 create policy "student_can_see_their_own_course_subscriptions" on public.course_subscriptions for select to authenticated using (public.course_subscription_belongs_to_student_user(id));
 
@@ -79,7 +79,7 @@ begin
 
   return true;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 -- Course Subscriptions Policies
 create policy "owner_manager_teacher_can_see_course_subscriptions" on public.course_subscriptions for select to authenticated using (public.authorize('course_subscriptions.read', organization_id));
@@ -94,4 +94,4 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 create policy "owner_can_delete_course_subscriptions" on public.course_subscriptions for delete to authenticated using (public.authorize('course_subscriptions.delete', organization_id) and (not public.is_subscription_active(id)));
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
-create policy "user_can_see_their_own_course_subscriptions" on public.course_subscriptions for select to authenticated using (auth.uid() = student_id);
+create policy "user_can_see_their_own_course_subscriptions" on public.course_subscriptions for select to authenticated using ((select auth.uid()) = student_id);

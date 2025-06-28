@@ -4,13 +4,13 @@ grant usage on schema private to anon, authenticated, service_role, postgres;
 alter database postgres
 set timezone to 'europe/berlin';
 
-create extension if not exists "unaccent";
+create extension if not exists "unaccent" with schema private;
 
 create or replace function public.slugify("value" text)
 returns text as $$
 -- removes accents (diacritic signs) from a given string --
     with "unaccented" as (
-        select unaccent("value") as "value"
+        select private.unaccent("value") as "value"
     ),
 -- lowercases the string
     "lowercase" as (
@@ -33,4 +33,4 @@ returns text as $$
         from "hyphenated"
     )
     select "value" from "trimmed";
-$$ language sql strict immutable;
+$$ language sql strict immutable set search_path = '';

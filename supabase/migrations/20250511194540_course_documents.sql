@@ -59,7 +59,7 @@ begin
     return new;
   end if;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 create trigger "handle_course_documents_changes" after insert on storage.objects
 for each row

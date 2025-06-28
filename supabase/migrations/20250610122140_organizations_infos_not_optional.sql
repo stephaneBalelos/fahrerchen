@@ -6,7 +6,7 @@
 -- - organizations.address_zip
 -- - organizations.address_city
 -- - organizations.address_country
-alter table organizations
+alter table public.organizations
   alter column email set not null,
   alter column phone_number set not null,
   alter column address_street set not null,
@@ -15,7 +15,7 @@ alter table organizations
   alter column address_country set not null;
 
 -- Add a default value to the columns
-alter table organizations
+alter table public.organizations
   alter column email set default '',
   alter column phone_number set default '',
   alter column address_street set default '',

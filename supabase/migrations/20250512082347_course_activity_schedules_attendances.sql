@@ -120,7 +120,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 create trigger create_attendance_record_for_schedule
 after update on public.course_activity_schedules
 for each row
