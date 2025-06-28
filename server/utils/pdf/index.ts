@@ -15,7 +15,6 @@ export const generatePDF = async (html: string) => {
         const page = await browser.newPage()
         const footerTemplate = getFooterTemplate(html)
         await page.setContent(html, { waitUntil: 'networkidle2' })
-        console.log(footerTemplate)
         const pdf = await page.pdf({
             format: 'A4',
             landscape: false,
