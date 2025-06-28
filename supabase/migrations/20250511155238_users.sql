@@ -24,17 +24,17 @@ begin
   new.updated_at = now();
   return new;
 end;
-$$;
+$$ security definer set search_path = '';
 create trigger on_user_data_update
 before update on public.users
 for each row
 execute procedure public.update_user_updated_at();
 
 -- Users Policies
-create policy "user_can_see_their_own_data" on public.users for select to authenticated using (auth.uid() = id);
-create policy "user_can_updated_their_own_data" on public.users for update to authenticated using (auth.uid() = id);
-create policy "user_can_insert_their_own_data" on public.users for insert to authenticated with check (auth.uid() = id);
-create policy "user_can_delete_their_own_data" on public.users for delete to authenticated using (auth.uid() = id);
+create policy "user_can_see_their_own_data" on public.users for select to authenticated using ((select auth.uid()) = id);
+create policy "user_can_updated_their_own_data" on public.users for update to authenticated using ((select auth.uid()) = id);
+create policy "user_can_insert_their_own_data" on public.users for insert to authenticated with check ((select auth.uid()) = id);
+create policy "user_can_delete_their_own_data" on public.users for delete to authenticated using ((select auth.uid()) = id);
 
 -- Handle new user creation
 create function public.handle_new_user() 
@@ -47,7 +47,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = auth, public;
+$$ language plpgsql security definer set search_path = '';
 -- trigger the function every time a user is created
 create trigger on_auth_user_created
   after insert on auth.users
@@ -63,13 +63,13 @@ create policy "allow_users_to_see_their_profile_pictures" on storage.objects for
   bucket_id = 'users_avatars'
 );
 create policy "allow_users_to_insert_their_profile_pictures" on storage.objects for insert to authenticated with check (
-  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+  bucket_id = 'users_avatars' and (select auth.uid())::text = owner_id
 );
 create policy "allow_users_to_update_their_profile_pictures" on storage.objects for update to authenticated with check (
-  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+  bucket_id = 'users_avatars' and (select auth.uid())::text = owner_id
 );
 create policy "allow_users_to_delete_their_profile_pictures" on storage.objects for delete to authenticated using (
-  bucket_id = 'users_avatars' and auth.uid()::text = owner_id
+  bucket_id = 'users_avatars' and (select auth.uid())::text = owner_id
 );
 
 -- Add, Update or clear avatar_path in public.users when a new avatar is uploaded or deleted
@@ -91,7 +91,7 @@ begin
     return new;
   end if;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = '';
 
 create trigger "handle_user_avatar_create" after insert on storage.objects
 for each row

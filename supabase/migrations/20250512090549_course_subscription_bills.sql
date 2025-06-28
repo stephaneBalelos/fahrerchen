@@ -69,7 +69,7 @@ begin
   end if;
   return true; -- Bill is active
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 
 
@@ -140,8 +140,7 @@ begin
 
   return null;
 end;
-$$ language plpgsql security invoker set search_path = public;
-
+$$ language plpgsql security invoker set search_path = '';
 
 -- generate bill number for the created bill
 create or replace function public.generate_bill_number()
@@ -169,7 +168,7 @@ begin
   new.bill_number := bill_number;
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a bill is inserted
 create trigger generate_bill_number_trigger
 before insert on public.course_subscription_bills
@@ -200,7 +199,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a subscription is inserted
 create trigger on_subscription_inserted
 after insert on public.course_subscriptions
@@ -219,7 +218,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a bill item is inserted or updated
 create trigger on_bill_item_inserted
 after insert on public.course_subscription_bill_items
@@ -241,7 +240,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a course activity attendance is inserted
 create trigger on_course_activity_attendance_inserted
 after insert on public.course_activity_schedules_attendances
@@ -286,7 +285,7 @@ begin
 
   return old;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a course activity attendance is deleted
 create trigger on_course_activity_attendance_deleted
   before delete on public.course_activity_schedules_attendances
@@ -332,7 +331,7 @@ begin
 
   return true;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 
 -- Before Archiving a course_subscription, validate the subscription
 create or replace function public.validate_course_subscription_before_archiving_trigger()
@@ -344,7 +343,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function before archiving a course subscription
 create trigger validate_course_subscription_before_archiving
 before update on public.course_subscriptions

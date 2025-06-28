@@ -11,10 +11,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-
+    const templateName = getQuery(event).template || 'default'
     
     // Get the template
-    const templateHTML = await useStorage('assets:server').getItem('templates/invoices/template-1.html')
+    const templateHTML = await useStorage('assets:server').getItem(`templates/invoices/${templateName}.html`)
     if (!templateHTML) {
         return createError({
             status: 404,

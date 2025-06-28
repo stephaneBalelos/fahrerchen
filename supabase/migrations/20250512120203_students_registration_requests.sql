@@ -22,6 +22,10 @@ alter table public.students_registration_requests enable row level security;
 revoke update on table public.students_registration_requests from authenticated, anon;
 grant update (status) on table public.students_registration_requests to authenticated;
 
+-- Indexes for faster lookups
+create index idx_students_registration_requests_organization_id on public.students_registration_requests(organization_id);
+create index idx_students_registration_requests_course_id on public.students_registration_requests(requested_course_id);
+
 -- Students Registration Requests Policies
 create policy "owner_manager_can_see_students_registration_requests" on public.students_registration_requests for select to authenticated using (public.authorize('students_registration_requests.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.read'), ('manager', 'students_registration_requests.read');
@@ -58,7 +62,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a registration request is updated
 create trigger on_registration_request_updated
   after update of status on public.students_registration_requests

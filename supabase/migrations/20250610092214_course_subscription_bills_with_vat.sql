@@ -69,7 +69,7 @@ begin
 
     return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- Create the trigger to set VAT rate and amount before inserting a new bill
 create trigger before_insert_course_subscription_bills
 before insert on public.course_subscription_bills

@@ -950,6 +950,7 @@ export type Database = {
           invoice_subtitle: string | null
           invoice_title: string
           tax_id: string
+          template_name: string
           updated_at: string
           vat_exempt: boolean
           vat_rate: number
@@ -966,6 +967,7 @@ export type Database = {
           invoice_subtitle?: string | null
           invoice_title?: string
           tax_id: string
+          template_name?: string
           updated_at?: string
           vat_exempt?: boolean
           vat_rate?: number
@@ -982,6 +984,7 @@ export type Database = {
           invoice_subtitle?: string | null
           invoice_title?: string
           tax_id?: string
+          template_name?: string
           updated_at?: string
           vat_exempt?: boolean
           vat_rate?: number
@@ -1697,14 +1700,6 @@ export type Database = {
       slugify: {
         Args: { value: string }
         Returns: string
-      }
-      unaccent: {
-        Args: { "": string }
-        Returns: string
-      }
-      unaccent_init: {
-        Args: { "": unknown }
-        Returns: unknown
       }
       validate_course_subscription_before_archiving: {
         Args: { cs_id: string }

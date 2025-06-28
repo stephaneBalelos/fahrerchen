@@ -29,7 +29,7 @@ begin
   end if;
   return true;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 -- COURSE ACTIVITY SCHEDULES POLICIES
 create policy "owner_manager_teacher_student_can_see_course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
@@ -78,7 +78,7 @@ begin
 
   return true;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 
 -- Remove an attendee from schedule
 create or replace function public.remove_attendee_from_schedule(
@@ -112,7 +112,7 @@ begin
 
   return true;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 
 -- When a Course Subscription is Archived, remove it from all active schedules
 create or replace function public.remove_subscription_from_active_schedules(
@@ -138,6 +138,6 @@ begin
     perform public.remove_attendee_from_schedule(schedule_id, course_subscription_id);
   end loop;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 
 

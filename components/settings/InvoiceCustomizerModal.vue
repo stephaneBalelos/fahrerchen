@@ -51,6 +51,14 @@
               }"
               @submit.prevent="onSubmit"
             >
+            <UFormGroup
+                :label="t('settings.invoice_customizer.template.label')"
+                :description="t('settings.invoice_customizer.template.description')"
+                name="template_name"
+                required
+              >
+                  <USelectMenu v-model="selectedTemplateName" :options="templates" :value-attribute="'value'" />
+            </UFormGroup>
               <UFormGroup
                 :label="t('settings.invoice_customizer.invoice_title.label')"
                 :description="
@@ -128,15 +136,12 @@
             </UForm>
           </div>
         </div>
-        <div class="col-span-3 overflow-y-auto h-full">
-          <iframe
-            class="w-full mx-auto"
-            style="aspect-ratio: 1 / 1.4142; max-width: 800px"
-            :srcdoc="renderedTemplate"
-            frameborder="0"
-            sandbox="allow-scripts"
-          />
-        </div>
+        <SettingsInvoiceCustomizerModalInvoicePreview
+          v-if="selectedTemplateName"
+          :state="state"
+          :selected-examaple-index="0"
+          :template-name="selectedTemplateName"
+        />
       </div>
     </UCard>
   </UModal>
@@ -144,8 +149,7 @@
 
 <script setup lang="ts">
 // import { z } from "zod";
-import Handlebars from "handlebars";
-import { format } from "date-fns";
+
 import type { BillTemplateData } from "~/types/app.types";
 type Props = {
   organizationId: string;
@@ -157,46 +161,11 @@ const { t } = useI18n({
   useScope: "local",
 });
 const modal = useModal();
-const template = ref<string | null>(null);
 const toast = useToast();
-
-const selectedExamapleIndex = ref(0);
-
-const renderedTemplate = computed(() => {
-  if (!template.value) return "";
-
-  // Compile the template with Handlebars
-  const compiledTemplate = Handlebars.compile(template.value);
-
-  const s = state;
-  // Prepare the state for rendering
-  const exampleBill = billExamples.value[selectedExamapleIndex.value];
-  if (exampleBill) {
-    s.bill_date = exampleBill.bill_date;
-    s.bill_number = exampleBill.bill_number;
-    s.bill_total = exampleBill.total.toFixed(2);
-    s.bill_vat_rate = exampleBill.vat_rate.toFixed(2);
-    s.bill_vat_amount = exampleBill.vat_amount.toFixed(2);
-    s.bill_total_with_vat = (
-      exampleBill.total + exampleBill.vat_amount
-    ).toFixed(2);
-    s.bill_items = exampleBill.bill_items;
-  } else {
-    console.warn(
-      "No example bill found for index:",
-      selectedExamapleIndex.value
-    );
-  }
-
-  // Render the template with the current state
-  return compiledTemplate(s);
-});
-
-onMounted(() => {
-  loadTemplate();
-});
+const publicStorageUrl = useNuxtApp().$publicStorageUrl;
 
 const state = reactive<BillTemplateData>({
+  driving_school_logo: "",
   driving_school_name: "",
   driving_school_address_street: "",
   driving_school_address_zip: "",
@@ -226,7 +195,7 @@ const state = reactive<BillTemplateData>({
   bill_settings_bank_account_bic: "",
   bill_settings_bank_account_iban: "",
   bill_settings_tax_id: "",
-  bill_items: [] 
+  bill_items: [],
 });
 
 const client = useSupabaseClient();
@@ -267,23 +236,13 @@ onMounted(() => {
     state.invoice_subtitle = orgData.bill_settings?.invoice_subtitle || "";
     state.invoice_message = orgData.bill_settings?.invoice_message || "";
     state.invoice_footer = orgData.bill_settings?.invoice_footer || "";
+    state.driving_school_logo =
+      publicStorageUrl("organizations_avatars", orgData.avatar_path ?? "") ||
+      "";
+    selectedTemplateName.value =
+      orgData.bill_settings?.template_name || "default";
   }
 });
-
-async function loadTemplate() {
-  try {
-    const html = await $fetch<string>(
-      `/api/orgs/settings/load-invoice-template`,
-      {
-        method: "GET",
-      }
-    );
-
-    template.value = html;
-  } catch (error) {
-    console.error("Error loading template:", error);
-  }
-}
 
 async function onSubmit() {
   try {
@@ -294,6 +253,7 @@ async function onSubmit() {
         invoice_subtitle: state.invoice_subtitle,
         invoice_message: state.invoice_message,
         invoice_footer: state.invoice_footer,
+        template_name: selectedTemplateName.value,
       })
       .eq("id", props.organizationId);
     if (error) {
@@ -316,47 +276,11 @@ async function onSubmit() {
   }
 }
 
-const billExamples = ref([
-  {
-    bill_date: format(new Date(), "dd.MM.yyyy"),
-    bill_number: "RE-123456",
-    total: 100.0,
-    vat_rate: 19.0,
-    vat_amount: 19.0,
-    bill_items: [
-      {
-        title: t("example_bill_items.base_costs.title"),
-        description: t("example_bill_items.base_costs.description"),
-        date: format(new Date(), "dd.MM.yyyy"),
-        total: '100.0',
-      },
-      {
-        title: t("example_bill_items.learning_materials.title"),
-        description: t("example_bill_items.learning_materials.description"),
-        date: format(new Date(), "dd.MM.yyyy"),
-        total: '30.0',
-      },
-      {
-        title: t("example_bill_items.theory.title"),
-        description: t("example_bill_items.theory.description"),
-        date: format(new Date(), "dd.MM.yyyy"),
-        total: '50.0',
-      },
-      {
-        title: t("example_bill_items.theory.title"),
-        description: t("example_bill_items.theory.description"),
-        date: format(new Date(), "dd.MM.yyyy"),
-        total: '50.0',
-      },
-      {
-        title: t("example_bill_items.practice.title"),
-        description: t("example_bill_items.practice.description"),
-        date: format(new Date(), "dd.MM.yyyy"),
-        total: '55.0',
-      },
-    ],
-  },
+const templates = ref([
+  { label: "Default Template", value: "default" },
+  { label: "Simple Template", value: "simple" }
 ]);
+const selectedTemplateName = ref<string>();
 </script>
 
 <style scoped></style>
@@ -393,6 +317,11 @@ const billExamples = ref([
       "invoice_customizer": {
         "title": "Rechnung anpassen",
         "description": "Passen Sie Ihre Rechnungsvorlage an.",
+        "template": {
+          "label": "Rechnungsvorlage",
+          "description": "Wählen Sie die Vorlage für Ihre Rechnung aus.",
+          "placeholder": "Standardvorlage"
+        },
         "invoice_title": {
           "label": "Rechnungstitel",
           "description": "Der Titel der Rechnung, der auf der Rechnung angezeigt wird.",
@@ -446,6 +375,11 @@ const billExamples = ref([
       "invoice_customizer": {
         "title": "Customize Invoice",
         "description": "Adjust your invoice template.",
+        "template": {
+          "label": "Invoice Template",
+          "description": "Select the template for your invoice.",
+          "placeholder": "Default Template"
+        },
         "invoice_title": {
           "label": "Invoice Title",
           "description": "The title of the invoice that will be displayed on the invoice.",

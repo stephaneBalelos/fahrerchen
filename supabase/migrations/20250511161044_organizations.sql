@@ -24,6 +24,10 @@ alter table public.organizations enable row level security;
 revoke update on table public.organizations from authenticated, anon;
 grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
 
+-- Indexes for faster lookups
+create index idx_organizations_owner_id on public.organizations(owner_id);
+create index idx_organizations_handle on public.organizations(handle);
+
 -- ORGANIZATIONS STRIPE ACCOUNTS
 create table if not exists public.organizations_stripe_accounts (
   id            uuid references public.organizations on delete restrict not null primary key,
@@ -49,6 +53,10 @@ comment on table public.organizations_invitations is 'Invitations to join an org
 alter table public.organizations_invitations enable row level security;
 revoke update on table public.organizations_invitations from authenticated, anon;
 
+-- Indexes for faster lookups
+create index idx_organizations_invitations_organization_id on public.organizations_invitations(organization_id);
+
+
 -- ORGANIZATION MEMBERS
 create table if not exists public.organization_members (
   id            uuid default uuid_generate_v4() primary key,
@@ -63,6 +71,11 @@ alter table public.organization_members enable row level security;
 revoke update on table public.organization_members from authenticated, anon;
 grant update (role) on table public.organization_members to authenticated;
 
+-- Indexes for faster lookups
+create index idx_organization_members_organization_id on public.organization_members(organization_id);
+create index idx_organization_members_user_id on public.organization_members(user_id);
+
+
 
 -- Helpers Functions
 -- Check if the user is the main owner of the organization
@@ -75,9 +88,9 @@ declare
 begin
   select owner_id into owner from public.organizations where id = org_id;
 
-  return owner = auth.uid();
+  return owner = (select auth.uid());
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 -- Check if the user has the requested permission
 -- This function checks if the user has the requested permission for the given organization.
@@ -100,7 +113,7 @@ begin
     end if;
 
     -- Fetch user role once and store it to reduce number of calls
-    select role into user_role from public.organization_members where organization_id = org_id and user_id = auth.uid() limit 1;
+    select role into user_role from public.organization_members where organization_id = org_id and user_id = (select auth.uid()) limit 1;
 
     if user_role is null then
         return false;
@@ -114,7 +127,7 @@ begin
 
     return bind_permissions > 0;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 -- 2 users are in the same organization
 create or replace function public.are_users_in_same_organization(
@@ -127,10 +140,15 @@ declare
   org_id_2 uuid;
 begin
 
-  return exists (select 1 from organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
+  -- chech if user_id are the same
+  if user_id_1 = user_id_2 then
+    return true;
+  end if;
+
+  return exists (select 1 from public.organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
   where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = '';
 
 
 
@@ -153,7 +171,7 @@ values
     ('owner', 'organizations.update'),
     ('manager', 'organizations.update');
 
-create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check (auth.uid() = owner_id);
+create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check ((select auth.uid()) = owner_id);
 
 create policy "main_owner_can_delete_organizations" on public.organizations for delete to authenticated using (public.is_main_owner(id));
 
@@ -195,11 +213,11 @@ insert into public.role_permissions (role, permission) values ('owner', 'organiz
 create policy "owner_can_delete_organizations_memberships" on public.organization_members for delete to authenticated using (public.authorize('organization_members.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.delete');
 
-create policy "users_can_insert_their_own_membership" on public.organization_members for insert to authenticated with check (user_id = auth.uid());
+create policy "users_can_insert_their_own_membership" on public.organization_members for insert to authenticated with check (user_id = (select auth.uid()));
 
-create policy "users_can_update_their_own_membership" on public.organization_members for update to authenticated using (user_id = auth.uid());
+create policy "users_can_update_their_own_membership" on public.organization_members for update to authenticated using (user_id = (select auth.uid()));
 
-create policy "users_can_delete_their_own_membership" on public.organization_members for delete to authenticated using (user_id = auth.uid());
+create policy "users_can_delete_their_own_membership" on public.organization_members for delete to authenticated using (user_id = (select auth.uid()));
 
 -- Organizations Invitations Policies
 create policy "owners_and_manager_can_read_organizations_invitations" on public.organizations_invitations for select to authenticated using (public.authorize('organization_invitations.read', organization_id));
@@ -220,9 +238,9 @@ values
     ('manager', 'organization_invitations.delete');
 
 -- Update User's Policies
-create policy "users_can_see_other_users_in_their_organizations" on public.users for select to authenticated using (public.are_users_in_same_organization(auth.uid(), id));
+create policy "users_can_see_other_users_in_their_organizations" on public.users for select to authenticated using (public.are_users_in_same_organization((select auth.uid()), id));
 create policy "allow_users_to_see_other_members_profile_picture" on storage.objects for select to authenticated using (
-  bucket_id = 'users_avatars' and public.are_users_in_same_organization(auth.uid(), owner_id::uuid)
+  bucket_id = 'users_avatars' and public.are_users_in_same_organization((select auth.uid()), owner_id::uuid)
 );
 
 -- Genrate handle for organizations
@@ -246,7 +264,7 @@ begin
   new.handle := new_handle;
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- Trigger to generate handle for organizations
 create trigger generate_handle_before_insert
   before insert on public.organizations
@@ -263,7 +281,7 @@ begin
 
   return new;
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 -- trigger the function every time a Org is created
 create trigger on_org_created
   after insert on public.organizations
@@ -290,7 +308,7 @@ begin
   return new;
 
 end;
-$$ language plpgsql security invoker set search_path = public;
+$$ language plpgsql security invoker set search_path = '';
 create or replace trigger new_invitation_webhook
   after insert on public.organizations_invitations
   for each row execute function public.handle_new_invitation();
@@ -321,7 +339,7 @@ begin
     return new;
   end if;
 end;
-$$ language plpgsql security invoker;
+$$ language plpgsql security invoker set search_path = '';
 
 create trigger "handle_organization_avatar_create" after insert on storage.objects
 for each row

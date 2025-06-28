@@ -161,6 +161,7 @@ export type AppFileObject = Omit<Database["storage"]["Tables"]["objects"]["Row"]
 
 
 export type BillTemplateData = {
+  driving_school_logo: string
   driving_school_name: string
   driving_school_address_street: string
   driving_school_address_zip: string

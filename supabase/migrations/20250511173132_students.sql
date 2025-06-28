@@ -24,17 +24,21 @@ alter table public.students enable row level security;
 revoke update on table public.students from authenticated, anon;
 grant update (email, firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
 
+-- Indexes for faster lookups
+create index idx_students_organization_id on public.students(organization_id);
+create index idx_students_user_id on public.students(user_id);
+
 
 -- Students Policies
-create policy "students_can_see_their_own_data" on public.students for select to authenticated using (auth.uid() = user_id);
+create policy "students_can_see_their_own_data" on public.students for select to authenticated using ((select auth.uid()) = user_id);
 
 create policy "owner_manager_teacher_can_see_students" on public.students for select to authenticated using (public.authorize('students.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students.read'), ('manager', 'students.read'), ('teacher', 'students.read');
 
-create policy "student_can_update_their_own_data" on public.students for update to authenticated using (auth.uid() = user_id) with check (public.authorize('students.update', organization_id));
+create policy "student_can_update_their_own_data" on public.students for update to authenticated using ((select auth.uid()) = user_id) with check (public.authorize('students.update', organization_id));
 insert into public.role_permissions (role, permission) values ('student', 'students.update');
 
-create policy "students_can_create_their_own_data" on public.students for insert to authenticated with check (public.authorize('students.create', organization_id) and auth.uid() = user_id);
+create policy "students_can_create_their_own_data" on public.students for insert to authenticated with check (public.authorize('students.create', organization_id) and (select auth.uid()) = user_id);
 insert into public.role_permissions (role, permission) values ('student', 'students.create');
 
 create policy "owner_manager_can_create_students" on public.students for insert to authenticated with check (public.authorize('students.create', organization_id));
