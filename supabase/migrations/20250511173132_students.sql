@@ -24,6 +24,10 @@ alter table public.students enable row level security;
 revoke update on table public.students from authenticated, anon;
 grant update (email, firstname, lastname, avatar_path, birth_date, phone_number, address_street, address_zip, address_city, address_country, has_a_license) on table public.students to authenticated;
 
+-- Indexes for faster lookups
+create index idx_students_organization_id on public.students(organization_id);
+create index idx_students_user_id on public.students(user_id);
+
 
 -- Students Policies
 create policy "students_can_see_their_own_data" on public.students for select to authenticated using ((select auth.uid()) = user_id);

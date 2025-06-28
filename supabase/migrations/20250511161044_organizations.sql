@@ -24,6 +24,10 @@ alter table public.organizations enable row level security;
 revoke update on table public.organizations from authenticated, anon;
 grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
 
+-- Indexes for faster lookups
+create index idx_organizations_owner_id on public.organizations(owner_id);
+create index idx_organizations_handle on public.organizations(handle);
+
 -- ORGANIZATIONS STRIPE ACCOUNTS
 create table if not exists public.organizations_stripe_accounts (
   id            uuid references public.organizations on delete restrict not null primary key,
@@ -49,6 +53,10 @@ comment on table public.organizations_invitations is 'Invitations to join an org
 alter table public.organizations_invitations enable row level security;
 revoke update on table public.organizations_invitations from authenticated, anon;
 
+-- Indexes for faster lookups
+create index idx_organizations_invitations_organization_id on public.organizations_invitations(organization_id);
+
+
 -- ORGANIZATION MEMBERS
 create table if not exists public.organization_members (
   id            uuid default uuid_generate_v4() primary key,
@@ -62,6 +70,11 @@ comment on table public.organization_members is 'Members of each organization, u
 alter table public.organization_members enable row level security;
 revoke update on table public.organization_members from authenticated, anon;
 grant update (role) on table public.organization_members to authenticated;
+
+-- Indexes for faster lookups
+create index idx_organization_members_organization_id on public.organization_members(organization_id);
+create index idx_organization_members_user_id on public.organization_members(user_id);
+
 
 
 -- Helpers Functions

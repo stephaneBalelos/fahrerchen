@@ -15,6 +15,11 @@ alter table public.course_documents enable row level security;
 revoke update on table public.course_documents from authenticated, anon;
 grant update (name, description) on table public.course_documents to authenticated;
 
+-- Indexes for faster lookups
+create index idx_course_documents_organization_id on public.course_documents(organization_id);
+create index idx_course_documents_course_id on public.course_documents(course_id);
+create index idx_course_documents_path on public.course_documents(path);
+
 -- Course Documents Policies
 create policy "owner_manager_teacher_student_can_see_course_documents" on public.course_documents for select to authenticated using (public.authorize('course_documents.read', organization_id));
 create policy "owner_manager_teacher_student_can_see_course_documents_storage" on storage.objects for select to authenticated using (public.authorize('course_documents.read', ((storage.foldername(name))[1])::uuid));

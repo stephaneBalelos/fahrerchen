@@ -22,6 +22,10 @@ alter table public.students_registration_requests enable row level security;
 revoke update on table public.students_registration_requests from authenticated, anon;
 grant update (status) on table public.students_registration_requests to authenticated;
 
+-- Indexes for faster lookups
+create index idx_students_registration_requests_organization_id on public.students_registration_requests(organization_id);
+create index idx_students_registration_requests_course_id on public.students_registration_requests(requested_course_id);
+
 -- Students Registration Requests Policies
 create policy "owner_manager_can_see_students_registration_requests" on public.students_registration_requests for select to authenticated using (public.authorize('students_registration_requests.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'students_registration_requests.read'), ('manager', 'students_registration_requests.read');

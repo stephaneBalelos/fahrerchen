@@ -16,6 +16,10 @@ alter table public.courses enable row level security;
 revoke update on table public.courses from authenticated, anon;
 grant update (name, description, is_active, create_bill_on_subscription, allow_self_registration) on table public.courses to authenticated;
 
+-- Indexes for faster lookups
+create index idx_courses_organization_id on public.courses(organization_id);
+create index idx_courses_type on public.courses(type);
+
 -- COURSE REQUIRED DOCUMENTS
 create table public.course_required_documents (
   id            uuid default uuid_generate_v4() primary key,
