@@ -13,10 +13,19 @@ export const generatePDF = async (html: string) => {
             throw new Error('Browser not launched')
         }
         const page = await browser.newPage()
+        const footerTemplate = getFooterTemplate(html)
         await page.setContent(html, { waitUntil: 'networkidle2' })
+        console.log(footerTemplate)
         const pdf = await page.pdf({
             format: 'A4',
             landscape: false,
+            displayHeaderFooter: true,
+            footerTemplate: `${footerTemplate}`,
+            margin: {
+                bottom: 200,
+                top: 100,
+                
+            }
         })
 
         await page.close()
@@ -51,4 +60,28 @@ const getBrowser = async () => {
         console.error('Error launching browser:', error)
         throw new Error('Failed to launch browser')
     }
+}
+
+const getFooterTemplate = (html: string) => {
+    // Extract the footer from the HTML content
+    const styles = `
+            <style>
+            .footer {
+                padding: 0 70.9pt 0 70.9pt;
+            }
+            p {
+                margin: 0;
+            }
+        </style>`
+    const footerMatch = html.match(/<footer>([\s\S]*?)<\/footer>/i);
+    if (footerMatch && footerMatch[1] && styles && styles[1]) {
+        return `${styles}<div class="footer" style="width: 100%;" >${footerMatch[1]}</div>`;
+    }
+    // If no footer found, return a default one
+    return `${styles ? `<style>${styles[1]}</style>` : ''}
+        <div class="footer" style="width: 100%; text-align: center; font-size: 10px; color: #999;">
+            <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+    `;
+
 }
