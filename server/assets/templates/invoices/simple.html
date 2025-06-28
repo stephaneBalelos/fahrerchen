@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Karjolen Rechnung Template</title>
+
+    <style>
+        .invoice-box {
+            max-width: 800px;
+            margin: auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            font-size: 16px;
+            line-height: 24px;
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: #555;
+        }
+
+        .invoice-box table {
+            width: 100%;
+            line-height: inherit;
+            text-align: left;
+        }
+
+        .invoice-box table td {
+            padding: 5px;
+            vertical-align: top;
+        }
+
+        .invoice-box table tr td:nth-child(3) {
+            text-align: right;
+        }
+
+        .invoice-box table tr.top table td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.top table td.title {
+            font-size: 45px;
+            line-height: 45px;
+            color: #333;
+        }
+
+        .invoice-box table tr.top table td.address {
+            text-align: right;
+        }
+
+        .invoice-box table tr.bottom {
+            width: 100%;
+            text-align: center;
+            font-size: 10pt;
+            color: #777;
+            padding-top: 20px;
+        }
+
+        .invoice-box table tr.information table td {
+            padding-bottom: 40px;
+        }
+
+        .invoice-box table tr.information table td .address-inline {
+            display: inline-block;
+            font-size: 10pt;
+            line-height: 10pt;
+            text-decoration: underline;
+        }
+
+        .invoice-box table tr.information table td.bill-information {
+            text-align: right;
+        }
+
+        .invoice-box table tr.bill-title td p {
+            margin: 0;
+            font-weight: 700;
+            font-size: 16pt;
+            margin-bottom: 2pt;
+        }
+
+        .invoice-box table tr.bill-title td span {
+            font-size: 10pt;
+            line-height: 10pt;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .invoice-box table tr.heading td {
+            background: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+
+        .invoice-box table tr.heading td:nth-child(2) {
+            width: 100%;
+        }
+
+        .invoice-box table tr.details td {
+            padding-bottom: 20px;
+        }
+
+        .invoice-box table tr.item td {
+            border-bottom: 1px solid #eee;
+        }
+
+        .invoice-box table tr.total td {
+            font-weight: bold;
+            text-align: right;
+            font-size: 14pt;
+        }
+
+        .invoice-box table tr.total-sum td {
+            text-align: right;
+        }
+
+        .invoice-box table tr.total-vat td {
+            text-align: right;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .invoice-box table tr.top table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+
+            .invoice-box table tr.information table td {
+                width: 100%;
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-box">
+        <table cellpadding="0" cellspacing="0">
+            <tr class="top">
+                <td colspan="3">
+                    <table>
+                        <tr>
+                            <td class="title">
+                                {{#if driving_school_logo}}
+                                <img src="{{driving_school_logo}}"
+                                    style="width: 100%; max-width: 150px" />
+                                {{else}}
+                                <img src="https://www.karjolen.de/images/favicon.svg"
+                                    style="width: 100%; max-width: 100px" />
+                                {{/if}}
+                            </td>
+
+                            <td colspan="2" class="address">
+                                {{driving_school_name}}<br />
+                                {{driving_school_address_street}}<br />
+                                {{driving_school_address_zip}} {{driving_school_address_city}} <br>
+
+                                Tel: {{driving_school_phone_number}}<br />
+                                E-Mail: {{driving_school_email}}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="information">
+                <td colspan="3">
+                    <table>
+                        <tr>
+                            <td>
+                                <span class="address-inline">{{driving_school_name}} - {{driving_school_address_street}}
+                                    {{driving_school_address_zip}} {{driving_school_address_city}}
+                                </span>
+                                <br><br>
+                                {{student_firstname}} {{student_lastname}}<br />
+                                {{student_address_street}}<br />
+                                {{student_address_zip}} {{student_address_city}}<br />
+
+                            </td>
+                            <td class="bill-information">
+                                Datum: {{bill_date}}<br />
+                                Rechnungs-Nr.: {{bill_number}}<br />
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr class="bill-title">
+                <td colspan="3">
+                    <p>{{invoice_title}}</p>
+                    <span>{{invoice_subtitle}}</span>
+                    <br>
+                    <br>
+                </td>
+            </tr>
+
+            <tr class="heading">
+                <td>Datum</td>
+                <td>Bezeichnung</td>
+                <td>Betrag</td>
+            </tr>
+            {{#each bill_items}}
+            <tr class="item">
+                <td>{{this.date}}</td>
+                <td>{{this.title}}</td>
+                <td>{{this.total}}&nbsp;&euro;</td>
+            </tr>
+            {{/each}}
+
+            {{#unless bill_vat_exempt}}
+            <tr class="total-sum">
+                <td></td>
+
+                <td colspan="2">Gesamtsumme: {{bill_total}}&nbsp;&euro;</td>
+            </tr>
+            <tr class="total-vat">
+                <td></td>
+
+                <td colspan="2">Mehrwertsteuer ({{bill_vat_rate}}%): {{bill_vat_amount}}&nbsp;&euro;</td>
+            </tr>
+            {{/unless}}
+
+
+            <tr class="total">
+                <td></td>
+
+                <td colspan="2">Gesamtbetrag: {{bill_total_with_vat}}&nbsp;&euro;</td>
+            </tr>
+
+            <tr>
+                <td>
+                    <br>
+                    <br>
+                </td>
+            </tr>
+            {{#if bill_vat_exempt}}
+            <tr>
+                <td colspan="3">
+                    Gem&auml;&szlig; &sect; 19 Abs. 1 UStG wird keine Umsatzsteuer ausgewiesen.
+                </td>
+            </tr>
+            {{/if}}
+            <tr>
+                <td colspan="3">
+                    {{invoice_footer}}
+                </td>
+            </tr>
+
+            <tr class="bottom">
+                <td colspan="3">
+                    <table>
+                        <tr>
+                            <td colspan="2">
+                                Bankverbindung:
+                                <br>
+                                {{bill_settings_bank_account_name}} 
+                                <br>
+                                BIC: {{bill_settings_bank_account_bic}} | Konto-Nr.: {{bill_settings_bank_account_number}}
+                                <br>
+                                IBAN: {{bill_settings_bank_account_iban}}
+                            </td>
+                            <td>
+                                Steuernummer: {{bill_settings_tax_id}}
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>

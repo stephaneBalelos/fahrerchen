@@ -222,7 +222,7 @@ const state = reactive<Schema>({
   tax_id: "",
 });
 
-const { data, status } = await useAsyncData(
+const { data, status, refresh } = await useAsyncData(
   `organization/billing-settings`,
   async () => {
     const { data, error } = await client
@@ -275,6 +275,8 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
     });
     console.error("An error occurred while saving billing settings:", error);
     isSaving.value = false;
+  } finally {
+    await refresh();
   }
 }
 </script>

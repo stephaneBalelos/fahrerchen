@@ -950,6 +950,7 @@ export type Database = {
           invoice_subtitle: string | null
           invoice_title: string
           tax_id: string
+          template_name: string
           updated_at: string
           vat_exempt: boolean
           vat_rate: number
@@ -966,6 +967,7 @@ export type Database = {
           invoice_subtitle?: string | null
           invoice_title?: string
           tax_id: string
+          template_name?: string
           updated_at?: string
           vat_exempt?: boolean
           vat_rate?: number
@@ -982,6 +984,7 @@ export type Database = {
           invoice_subtitle?: string | null
           invoice_title?: string
           tax_id?: string
+          template_name?: string
           updated_at?: string
           vat_exempt?: boolean
           vat_rate?: number

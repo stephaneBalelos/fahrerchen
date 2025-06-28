@@ -23,17 +23,6 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Bad Request'
         })
     }
-    
-    // Get the template
-    const templateHTML = await useStorage('assets:server').getItem('templates/invoices/template-1.html')
-    if (!templateHTML) {
-        return createError({
-            status: 404,
-            statusMessage: 'Template not found'
-        })
-    }
-    const template = Handlebars.compile(templateHTML)
-
 
     // Get the data
     const billData = await getBillDataById(event, id)
@@ -75,6 +64,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const data: BillTemplateData = {
+        driving_school_logo: organization.avatar_path || '',
         driving_school_name: organization.name,
         driving_school_address_street: organization.address_street,
         driving_school_address_zip: organization.address_zip,
@@ -112,7 +102,16 @@ export default defineEventHandler(async (event) => {
         }))
     }
 
-    
+    // Get the template
+    const templateHTML = await useStorage('assets:server').getItem(`templates/invoices/${billingSettings.template_name}.html`)
+    if (!templateHTML) {
+        return createError({
+            status: 404,
+            statusMessage: 'Template not found'
+        })
+    }
+    const template = Handlebars.compile(templateHTML)
+
     // Build the pdf
     const html = template(data)
 
