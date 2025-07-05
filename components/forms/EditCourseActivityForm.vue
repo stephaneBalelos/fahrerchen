@@ -243,7 +243,7 @@ const validate = (state: CourseActivityEdit) => {
     errors.push({ path: "name", message: "Please enter a name" });
   if (!state.description)
     errors.push({ path: "description", message: "Please enter a description" });
-  if (!state.price)
+  if (!(state.price >= 0))
     errors.push({ path: "price", message: "Please enter a price" });
   return errors;
 };
