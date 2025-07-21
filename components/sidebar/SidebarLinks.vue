@@ -94,13 +94,13 @@ const links = computed(() => {
           exact: true,
         },
         {
+          label: t("members"),
+          to: `/my/${selectedOrganization.organization_id}/settings/members`,
+        },
+        {
           label: t("billing"),
           to: `/my/${selectedOrganization.organization_id}/settings/billing`,
           exact: true,
-        },
-        {
-          label: t("members"),
-          to: `/my/${selectedOrganization.organization_id}/settings/members`,
         },
         {
           label: t("payments"),
