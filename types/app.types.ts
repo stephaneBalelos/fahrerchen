@@ -198,3 +198,5 @@ export type BillTemplateData = {
     total: string;
   }[]
 }
+
+export type NotificationType = DatabaseGenerated['public']['Enums']['notification_type']

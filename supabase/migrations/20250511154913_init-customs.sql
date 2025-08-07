@@ -1,9 +1,6 @@
 create schema if not exists private;
 grant usage on schema private to anon, authenticated, service_role, postgres;
 
-alter database postgres
-set timezone to 'europe/berlin';
-
 create extension if not exists "unaccent" with schema private;
 
 create or replace function public.slugify("value" text)

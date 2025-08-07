@@ -17,12 +17,52 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
+          extensions?: Json
           operationName?: string
           query?: string
           variables?: Json
-          extensions?: Json
         }
         Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  pgmq_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      archive: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      delete: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      pop: {
+        Args: { queue_name: string }
+        Returns: unknown[]
+      }
+      read: {
+        Args: { n: number; queue_name: string; sleep_seconds: number }
+        Returns: unknown[]
+      }
+      send: {
+        Args: { message: Json; queue_name: string; sleep_seconds?: number }
+        Returns: number[]
+      }
+      send_batch: {
+        Args: { messages: Json[]; queue_name: string; sleep_seconds?: number }
+        Returns: number[]
       }
     }
     Enums: {
@@ -1059,6 +1099,85 @@ export type Database = {
           },
         ]
       }
+      organization_notifications: {
+        Row: {
+          created_at: string
+          created_by_user_fullname: string
+          created_by_user_id: string | null
+          id: string
+          organization_id: string
+          payload: Json
+          read: boolean
+          target_user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_fullname: string
+          created_by_user_id?: string | null
+          id?: string
+          organization_id: string
+          payload: Json
+          read?: boolean
+          target_user_id: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by_user_fullname?: string
+          created_by_user_id?: string | null
+          id?: string
+          organization_id?: string
+          payload?: Json
+          read?: boolean
+          target_user_id?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_notifications_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_created_by_user_id_fkey"
+            columns: ["created_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address_city: string
@@ -1648,13 +1767,13 @@ export type Database = {
       }
       authorize: {
         Args: {
-          requested_permission: Database["public"]["Enums"]["app_permission"]
           org_id: string
+          requested_permission: Database["public"]["Enums"]["app_permission"]
         }
         Returns: boolean
       }
       check_subscription_organization: {
-        Args: { org_id: string; student_id: string; course_id: string }
+        Args: { course_id: string; org_id: string; student_id: string }
         Returns: boolean
       }
       course_allows_self_registration: {
@@ -1664,6 +1783,15 @@ export type Database = {
       course_subscription_belongs_to_student_user: {
         Args: { course_subscription_id: string }
         Returns: boolean
+      }
+      create_organization_notification: {
+        Args: {
+          org_id: string
+          payload_new: Json
+          payload_old: Json
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Returns: undefined
       }
       generate_bill_for_subscription: {
         Args: { subscription_id: string }
@@ -1802,14 +1930,28 @@ export type Database = {
         | "L"
         | "T"
       notification_type:
-        | "students_registration_requests.created"
-        | "course_subscriptions.created"
-        | "course_activity_schedules.updated"
-        | "course_activity_schedules.assigned"
-        | "course_subscription_bills.ready_to_pay"
-        | "course_subscription_bills.updated"
-        | "course_subscription_bills.paid"
-        | "course_subscription_bills.canceled"
+        | "organization_members.inserted"
+        | "students.inserted"
+        | "course_documents.inserted"
+        | "course_documents.updated"
+        | "course_subscriptions.inserted"
+        | "course_activities.inserted"
+        | "course_activities.price.updated"
+        | "course_activity_schedules.inserted"
+        | "course_activity_schedules.assigned_to.updated"
+        | "course_activity_schedules.attendees.updated"
+        | "course_activity_schedules.status.updated"
+        | "course_activity_schedules.start_at.updated"
+        | "course_activity_schedules.end_at.updated"
+        | "course_activity_schedules.deleted"
+        | "course_activity_schedules_attendances.inserted"
+        | "course_activity_schedules_attendances.completed.updated"
+        | "course_activity_schedules_attendances.deleted"
+        | "course_subscription_bills.inserted"
+        | "course_subscription_bills.paid_at.updated"
+        | "course_subscription_bills.ready_to_pay.updated"
+        | "course_subscription_bills.canceled_at.updated"
+        | "students_registration_requests.inserted"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
@@ -1831,6 +1973,7 @@ export type Database = {
           owner: string | null
           owner_id: string | null
           public: boolean | null
+          type: Database["storage"]["Enums"]["buckettype"]
           updated_at: string | null
         }
         Insert: {
@@ -1843,6 +1986,7 @@ export type Database = {
           owner?: string | null
           owner_id?: string | null
           public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
           updated_at?: string | null
         }
         Update: {
@@ -1855,9 +1999,111 @@ export type Database = {
           owner?: string | null
           owner_id?: string | null
           public?: boolean | null
+          type?: Database["storage"]["Enums"]["buckettype"]
           updated_at?: string | null
         }
         Relationships: []
+      }
+      buckets_analytics: {
+        Row: {
+          created_at: string
+          format: string
+          id: string
+          type: Database["storage"]["Enums"]["buckettype"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          format?: string
+          id: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          format?: string
+          id?: string
+          type?: Database["storage"]["Enums"]["buckettype"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      iceberg_namespaces: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iceberg_namespaces_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets_analytics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iceberg_tables: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          location: string
+          name: string
+          namespace_id: string
+          updated_at: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id?: string
+          location: string
+          name: string
+          namespace_id: string
+          updated_at?: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          location?: string
+          name?: string
+          namespace_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iceberg_tables_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets_analytics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iceberg_tables_namespace_id_fkey"
+            columns: ["namespace_id"]
+            isOneToOne: false
+            referencedRelation: "iceberg_namespaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       migrations: {
         Row: {
@@ -2076,7 +2322,7 @@ export type Database = {
         Returns: undefined
       }
       can_insert_object: {
-        Args: { bucketid: string; name: string; owner: string; metadata: Json }
+        Args: { bucketid: string; metadata: Json; name: string; owner: string }
         Returns: undefined
       }
       delete_prefix: {
@@ -2117,11 +2363,11 @@ export type Database = {
       list_multipart_uploads_with_delimiter: {
         Args: {
           bucket_id: string
-          prefix_param: string
           delimiter_param: string
           max_keys?: number
           next_key_token?: string
           next_upload_token?: string
+          prefix_param: string
         }
         Returns: {
           key: string
@@ -2132,11 +2378,11 @@ export type Database = {
       list_objects_with_delimiter: {
         Args: {
           bucket_id: string
-          prefix_param: string
           delimiter_param: string
           max_keys?: number
-          start_after?: string
           next_token?: string
+          prefix_param: string
+          start_after?: string
         }
         Returns: {
           name: string
@@ -2151,11 +2397,11 @@ export type Database = {
       }
       search: {
         Args: {
-          prefix: string
           bucketname: string
-          limits?: number
           levels?: number
+          limits?: number
           offsets?: number
+          prefix: string
           search?: string
           sortcolumn?: string
           sortorder?: string
@@ -2171,11 +2417,11 @@ export type Database = {
       }
       search_legacy_v1: {
         Args: {
-          prefix: string
           bucketname: string
-          limits?: number
           levels?: number
+          limits?: number
           offsets?: number
+          prefix: string
           search?: string
           sortcolumn?: string
           sortorder?: string
@@ -2191,11 +2437,11 @@ export type Database = {
       }
       search_v1_optimised: {
         Args: {
-          prefix: string
           bucketname: string
-          limits?: number
           levels?: number
+          limits?: number
           offsets?: number
+          prefix: string
           search?: string
           sortcolumn?: string
           sortorder?: string
@@ -2211,10 +2457,10 @@ export type Database = {
       }
       search_v2: {
         Args: {
-          prefix: string
           bucket_name: string
-          limits?: number
           levels?: number
+          limits?: number
+          prefix: string
           start_after?: string
         }
         Returns: {
@@ -2228,7 +2474,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      buckettype: "STANDARD" | "ANALYTICS"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2236,21 +2482,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -2268,14 +2518,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -2291,14 +2543,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -2314,14 +2568,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -2329,20 +2585,25 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
 export const Constants = {
   graphql_public: {
+    Enums: {},
+  },
+  pgmq_public: {
     Enums: {},
   },
   public: {
@@ -2444,14 +2705,28 @@ export const Constants = {
         "T",
       ],
       notification_type: [
-        "students_registration_requests.created",
-        "course_subscriptions.created",
-        "course_activity_schedules.updated",
-        "course_activity_schedules.assigned",
-        "course_subscription_bills.ready_to_pay",
-        "course_subscription_bills.updated",
-        "course_subscription_bills.paid",
-        "course_subscription_bills.canceled",
+        "organization_members.inserted",
+        "students.inserted",
+        "course_documents.inserted",
+        "course_documents.updated",
+        "course_subscriptions.inserted",
+        "course_activities.inserted",
+        "course_activities.price.updated",
+        "course_activity_schedules.inserted",
+        "course_activity_schedules.assigned_to.updated",
+        "course_activity_schedules.attendees.updated",
+        "course_activity_schedules.status.updated",
+        "course_activity_schedules.start_at.updated",
+        "course_activity_schedules.end_at.updated",
+        "course_activity_schedules.deleted",
+        "course_activity_schedules_attendances.inserted",
+        "course_activity_schedules_attendances.completed.updated",
+        "course_activity_schedules_attendances.deleted",
+        "course_subscription_bills.inserted",
+        "course_subscription_bills.paid_at.updated",
+        "course_subscription_bills.ready_to_pay.updated",
+        "course_subscription_bills.canceled_at.updated",
+        "students_registration_requests.inserted",
       ],
       schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],
       schedule_type: ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
@@ -2459,7 +2734,9 @@ export const Constants = {
     },
   },
   storage: {
-    Enums: {},
+    Enums: {
+      buckettype: ["STANDARD", "ANALYTICS"],
+    },
   },
 } as const
 
