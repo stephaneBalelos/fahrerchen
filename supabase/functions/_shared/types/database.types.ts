@@ -212,6 +212,13 @@ export type Database = {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -331,6 +338,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations_schedules_view"
             referencedColumns: ["schedule_id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_attendan_schedule_assigned_to_id_fkey"
+            columns: ["schedule_assigned_to_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
           },
           {
             foreignKeyName: "course_activity_schedules_attendan_schedule_assigned_to_id_fkey"
@@ -1087,6 +1101,13 @@ export type Database = {
             foreignKeyName: "organization_members_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
+          },
+          {
+            foreignKeyName: "organization_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1101,9 +1122,8 @@ export type Database = {
       }
       organization_notifications: {
         Row: {
+          author_id: string | null
           created_at: string
-          created_by_user_fullname: string
-          created_by_user_id: string | null
           id: string
           organization_id: string
           payload: Json
@@ -1112,9 +1132,8 @@ export type Database = {
           type: Database["public"]["Enums"]["notification_type"]
         }
         Insert: {
+          author_id?: string | null
           created_at?: string
-          created_by_user_fullname: string
-          created_by_user_id?: string | null
           id?: string
           organization_id: string
           payload: Json
@@ -1123,9 +1142,8 @@ export type Database = {
           type: Database["public"]["Enums"]["notification_type"]
         }
         Update: {
+          author_id?: string | null
           created_at?: string
-          created_by_user_fullname?: string
-          created_by_user_id?: string | null
           id?: string
           organization_id?: string
           payload?: Json
@@ -1135,15 +1153,22 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "organization_notifications_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: "organization_notifications_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "organization_notifications_created_by_user_id_fkey"
-            columns: ["created_by_user_id"]
+            foreignKeyName: "organization_notifications_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "users_organizations_view"
             referencedColumns: ["user_id"]
@@ -1161,6 +1186,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users_organizations_view"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
           },
           {
             foreignKeyName: "organization_notifications_target_user_id_fkey"
@@ -1234,6 +1266,13 @@ export type Database = {
           website?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "organizations_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
+          },
           {
             foreignKeyName: "organizations_owner_id_fkey"
             columns: ["owner_id"]
@@ -1412,6 +1451,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users_organizations_view"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "students_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
           },
           {
             foreignKeyName: "students_user_id_fkey"
@@ -1652,6 +1698,8 @@ export type Database = {
           student_full_name: string | null
           student_id: string | null
           student_lastname: string | null
+          student_user_id: string | null
+          student_user_status: Database["public"]["Enums"]["user_status"] | null
         }
         Relationships: [
           {
@@ -1706,6 +1754,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "course_activity_types"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_assigned_to_fkey"
+            columns: ["schedule_assigned_to"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
           },
           {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
@@ -1786,9 +1841,11 @@ export type Database = {
       }
       create_organization_notification: {
         Args: {
+          author_id: string
           org_id: string
           payload_new: Json
           payload_old: Json
+          resource_id: string
           type: Database["public"]["Enums"]["notification_type"]
         }
         Returns: undefined

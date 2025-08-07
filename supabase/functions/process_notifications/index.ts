@@ -10,7 +10,8 @@ type OrganizationNotificationJob<T = JSON
         type: Database["public"]["Enums"]["notification_type"];
         old: T | null;
         new: U | null;
-        created_by_user_id: string | null;
+        author_id: string | null;
+        resource_id: string;
         enqueued_at: Date;
     };
 
@@ -69,7 +70,8 @@ Deno.serve(async (req) => {
             type: message.type,
             old: message.old,
             new: message.new,
-            created_by_user_id: message.created_by_user_id,
+            author_id: message.author_id,
+            resource_id: message.resource_id,
             enqueued_at: enqueued_at
         };
     })
@@ -115,13 +117,12 @@ const handleNotification = async (supabase: SupabaseClient<Database>, notificati
                 console.warn(`Unhandled notification type: ${notification.type}`);
                 return false; // Skip unhandled types
         }
-    }).filter(member => member.user_id !== notification.created_by_user_id);
+    }).filter(member => member.user_id !== notification.author_id);
 
     return targets.map(member => {
         const notificationData: OrganizationNotification = {
             organization_id: notification.org_id,
-            created_by_user_id: notification.created_by_user_id,
-            created_by_user_fullname: '<fullname>', // This can be fetched if needed
+            author_id: notification.author_id ?? null,
             target_user_id: member.user_id,
             type: notification.type,
             payload: {
