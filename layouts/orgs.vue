@@ -41,7 +41,14 @@
         <UDivider class="sticky bottom-0" />
 
         <template #footer>
-          <LocaleSwitcher />
+            <UButton
+              icon="i-heroicons-bell"
+              size="sm"
+              color="primary"
+              square
+              variant="ghost"
+              @click="openNotificationsSlideover"
+            />
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
@@ -53,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
+import NotificationsSlideover from "~/components/account/NotificationsSlideover.vue";
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 
@@ -62,6 +69,11 @@ import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 //   useScope: "local",
 // });
 
+const slideover = useSlideover();
+
+const openNotificationsSlideover = () => {
+  slideover.open(NotificationsSlideover)
+};
 
 
 // const footerLinks = [
