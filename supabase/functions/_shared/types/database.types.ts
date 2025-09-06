@@ -32,46 +32,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-  pgmq_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      archive: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      delete: {
-        Args: { message_id: number; queue_name: string }
-        Returns: boolean
-      }
-      pop: {
-        Args: { queue_name: string }
-        Returns: unknown[]
-      }
-      read: {
-        Args: { n: number; queue_name: string; sleep_seconds: number }
-        Returns: unknown[]
-      }
-      send: {
-        Args: { message: Json; queue_name: string; sleep_seconds?: number }
-        Returns: number[]
-      }
-      send_batch: {
-        Args: { messages: Json[]; queue_name: string; sleep_seconds?: number }
-        Returns: number[]
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       course_activities: {
@@ -991,6 +951,75 @@ export type Database = {
           },
         ]
       }
+      notifications_jobs: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: number
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          status: Database["public"]["Enums"]["notification_job_status"]
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: number
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          status: Database["public"]["Enums"]["notification_job_status"]
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: number
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          organization_id?: string
+          payload?: Json
+          status?: Database["public"]["Enums"]["notification_job_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_jobs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["student_user_id"]
+          },
+          {
+            foreignKeyName: "notifications_jobs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_jobs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "notifications_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       organization_billing_settings: {
         Row: {
           bank_account_bic: string
@@ -1839,17 +1868,6 @@ export type Database = {
         Args: { course_subscription_id: string }
         Returns: boolean
       }
-      create_organization_notification: {
-        Args: {
-          author_id: string
-          org_id: string
-          payload_new: Json
-          payload_old: Json
-          resource_id: string
-          type: Database["public"]["Enums"]["notification_type"]
-        }
-        Returns: undefined
-      }
       generate_bill_for_subscription: {
         Args: { subscription_id: string }
         Returns: string
@@ -1986,25 +2004,15 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
+      notification_job_status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
       notification_type:
-        | "organization_members.inserted"
-        | "students.inserted"
-        | "course_documents.inserted"
-        | "course_documents.updated"
         | "course_subscriptions.inserted"
-        | "course_activities.inserted"
-        | "course_activities.price.updated"
-        | "course_activity_schedules.inserted"
         | "course_activity_schedules.assigned_to.updated"
         | "course_activity_schedules.attendees.updated"
         | "course_activity_schedules.status.updated"
-        | "course_activity_schedules.start_at.updated"
-        | "course_activity_schedules.end_at.updated"
+        | "course_activity_schedules.date.updated"
         | "course_activity_schedules.deleted"
         | "course_activity_schedules_attendances.inserted"
-        | "course_activity_schedules_attendances.completed.updated"
-        | "course_activity_schedules_attendances.deleted"
-        | "course_subscription_bills.inserted"
         | "course_subscription_bills.paid_at.updated"
         | "course_subscription_bills.ready_to_pay.updated"
         | "course_subscription_bills.canceled_at.updated"
@@ -2413,8 +2421,8 @@ export type Database = {
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
         Returns: {
-          size: number
           bucket_id: string
+          size: number
         }[]
       }
       list_multipart_uploads_with_delimiter: {
@@ -2427,9 +2435,9 @@ export type Database = {
           prefix_param: string
         }
         Returns: {
-          key: string
-          id: string
           created_at: string
+          id: string
+          key: string
         }[]
       }
       list_objects_with_delimiter: {
@@ -2442,9 +2450,9 @@ export type Database = {
           start_after?: string
         }
         Returns: {
-          name: string
           id: string
           metadata: Json
+          name: string
           updated_at: string
         }[]
       }
@@ -2464,12 +2472,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_legacy_v1: {
@@ -2484,12 +2492,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_v1_optimised: {
@@ -2504,12 +2512,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_v2: {
@@ -2521,12 +2529,12 @@ export type Database = {
           start_after?: string
         }
         Returns: {
-          key: string
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
+          key: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
     }
@@ -2660,9 +2668,6 @@ export const Constants = {
   graphql_public: {
     Enums: {},
   },
-  pgmq_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       activity_types: ["THEORY", "PRACTICE", "EXAM", "OTHER"],
@@ -2761,25 +2766,15 @@ export const Constants = {
         "L",
         "T",
       ],
+      notification_job_status: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
       notification_type: [
-        "organization_members.inserted",
-        "students.inserted",
-        "course_documents.inserted",
-        "course_documents.updated",
         "course_subscriptions.inserted",
-        "course_activities.inserted",
-        "course_activities.price.updated",
-        "course_activity_schedules.inserted",
         "course_activity_schedules.assigned_to.updated",
         "course_activity_schedules.attendees.updated",
         "course_activity_schedules.status.updated",
-        "course_activity_schedules.start_at.updated",
-        "course_activity_schedules.end_at.updated",
+        "course_activity_schedules.date.updated",
         "course_activity_schedules.deleted",
         "course_activity_schedules_attendances.inserted",
-        "course_activity_schedules_attendances.completed.updated",
-        "course_activity_schedules_attendances.deleted",
-        "course_subscription_bills.inserted",
         "course_subscription_bills.paid_at.updated",
         "course_subscription_bills.ready_to_pay.updated",
         "course_subscription_bills.canceled_at.updated",

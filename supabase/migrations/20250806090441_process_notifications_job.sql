@@ -1,7 +1,7 @@
 select
   cron.schedule(
     'process_notifications_job',
-    '* * * * *', -- Every minute
+    '30 seconds', -- Every 30 seconds
     $$
     select
       net.http_post(

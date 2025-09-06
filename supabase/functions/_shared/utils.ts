@@ -85,3 +85,11 @@ export const translator = (translationsEn: Record<string, string>, translationsD
 
     return translation
 }
+
+export const getStudentById = async (supabase: SupabaseClient<Database>, studentId: string) => {
+    const { data, error } = await supabase.from('students').select('*').eq('id', studentId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
