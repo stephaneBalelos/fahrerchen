@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database } from "../_shared/types/database.types.ts"
 import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
+import NewSubscriptionEmail, { NewSubscriptionEmailSubject } from "./_templates/NewSubscriptionMail.tsx";
 
 export async function hasUserOrganisationMembership(supabase: SupabaseClient<Database>, user_id: string, orgid: string): Promise<Database['public']['Tables']['organization_members']['Row'] | null> {
     const { data, error } = await supabase.from('organization_members').select('*').eq('organization_id', orgid).eq('user_id', user_id).single()
@@ -20,6 +21,30 @@ export async function getUserByEmail(supabase: SupabaseClient<Database>, email: 
 
 export async function getOrganization(supabase: SupabaseClient<Database>, orgid: string): Promise<Database['public']['Tables']['organizations']['Row'] | null> {
     const { data, error } = await supabase.from('organizations').select('*').eq('id', orgid).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getOrganizationMembers(supabase: SupabaseClient<Database>, orgid: string): Promise<Database['public']['Views']['users_organizations_view']['Row'][] | null> {
+    const { data, error } = await supabase.from('users_organizations_view').select('*').eq('organization_id', orgid)
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getCourseById(supabase: SupabaseClient<Database>, courseId: string): Promise<Database['public']['Tables']['courses']['Row'] | null> {
+    const { data, error } = await supabase.from('courses').select('*').eq('id', courseId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getCourseActivityById(supabase: SupabaseClient<Database>, activityId: string): Promise<Database['public']['Tables']['course_activities']['Row'] | null> {
+    const { data, error } = await supabase.from('course_activities').select('*').eq('id', activityId).single()
     if (error || !data) {
         return null
     }
@@ -92,4 +117,24 @@ export const getStudentById = async (supabase: SupabaseClient<Database>, student
         return null
     }
     return data
+}
+
+export const getNotificationEmailData = (notification_type: Database['public']['Enums']['notification_type']) => {
+    switch (notification_type) {
+        case 'course_subscriptions.inserted':
+            return {
+                getSubject: NewSubscriptionEmailSubject,
+                template: NewSubscriptionEmail
+            }
+        default:
+            throw new Error(`Unknown notification type: ${notification_type}`)
+    }
+}
+
+export const sendNotificationEmail = async (to: string, subject: string, html: string): Promise<void> => {
+    if (Deno.env.get("IS_PRODUCTION") === "true") {
+        await sendEmail(to, subject, html)
+    } else {
+        console.log(`Sending email to: ${to}, subject: ${subject}`)
+    }
 }

@@ -30,6 +30,7 @@ create table public.notifications_jobs (
     actor_id uuid references public.users on delete set null,
     notification_type public.notification_type not null,
     payload jsonb not null,
+    batch_key text, -- Used to group related jobs
     status public.notification_job_status not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -46,8 +47,8 @@ create policy "Allow actors to insert notifications"
 
 create table public.organization_notifications (
     id            uuid default extensions.uuid_generate_v4() primary key,
-    type          public.notification_type not null,
-    target_user_id uuid references public.users(id) on delete cascade not null,
+    notification_type public.notification_type not null,
+    target_user_ids uuid[] not null, -- Array of user IDs to whom the notification is targeted
     author_id     uuid references public.users(id) on delete set null,
     payload jsonb not null,
     read boolean default false not null,
@@ -63,15 +64,15 @@ grant update (read) on public.organization_notifications to authenticated;
 create policy "Allow all users to read their own notifications"
     on public.organization_notifications
     for select to authenticated
-    using (target_user_id = auth.uid());
+    using (target_user_ids @> array[auth.uid()]);
 
 create policy "Allow users to update their own notifications"
     on public.organization_notifications
     for update to authenticated
-    using (target_user_id = auth.uid());
+    using (target_user_ids @> array[auth.uid()]);
 
 -- Indexes for performance
-create index idx_organization_notifications_target_user_id on public.organization_notifications(target_user_id);
+create index idx_organization_notifications_target_user_ids on public.organization_notifications(target_user_ids);
 create index idx_organization_notifications_organization_id on public.organization_notifications(organization_id);
 create index idx_organization_notifications_created_at on public.organization_notifications(created_at);
 
@@ -81,15 +82,19 @@ create or replace function public.enqueue_notification_job()
 returns trigger as $$
 declare
     actor_id uuid;
+    batch_key text;
 begin
     actor_id := (select auth.uid());
 
+    -- Set the batch key as <organization_id>.<notification_type>.<resource_id>
+    batch_key := new.organization_id::text || '.' || TG_ARGV[0] || '.' || new.id::text;
 
     insert into public.notifications_jobs (
         organization_id,
         actor_id,
         notification_type,
         payload,
+        batch_key,
         status
     ) values (
         new.organization_id,
@@ -97,9 +102,10 @@ begin
         TG_ARGV[0]::public.notification_type,
         jsonb_build_object(
             'resource_id', new.id,
-            'payload_old', to_jsonb(old),
-            'payload_new', to_jsonb(new)
+            'old', to_jsonb(old),
+            'new', to_jsonb(new)
         ),
+        batch_key,
         'PENDING'
     );
     return new;
@@ -108,124 +114,17 @@ $$ language plpgsql security invoker set search_path = '';
 
 
 
-
--- -- Trigger for organization_members table to create notifications when a new member is inserted
--- create or replace function public.organization_members_insert_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'organization_members.inserted',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := null,
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger organization_members_insert_trigger
---     after insert on public.organization_members
---     for each row execute procedure public.organization_members_insert_trigger_function();
-
-
 -- Trigger for course_subscriptions table to create notifications when a new subscription is inserted
 create trigger course_subscriptions_insert_trigger
     after insert on public.course_subscriptions
     for each row execute procedure public.enqueue_notification_job('course_subscriptions.inserted');
 
 
--- -- Trigger for course_activities table to create notifications when a new activity is inserted
--- create or replace function public.course_activities_insert_trigger_function()
---     returns trigger as $$
--- begin
-
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activities.inserted',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := null,
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activities_insert_trigger
---     after insert on public.course_activities
---     for each row execute procedure public.course_activities_insert_trigger_function();
-
-
--- -- Trigger for course_activities table to create notifications when an activity's price is updated
--- create or replace function public.course_activities_price_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activities.price.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activities_price_update_trigger
---     after update on public.course_activities
---     for each row when (old.price <> new.price)
---     execute procedure public.course_activities_price_update_trigger_function();
-
-
-
--- -- Trigger for course_activity_schedules table to create notifications when a new schedule is inserted
--- create or replace function public.course_activity_schedules_insert_trigger_function()
---     returns trigger as $$
--- declare
---     should_notify_students boolean;
--- begin
---     select allow_self_registration into should_notify_students
---     from public.course_activities
---     where id = new.activity_id;
-
---     if should_notify_students then
---         perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.inserted',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := null,
---         payload_new := to_jsonb(new)
---     );
---     end if;
-
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_insert_trigger
---     after insert on public.course_activity_schedules
---     for each row execute procedure public.course_activity_schedules_insert_trigger_function();
-
-
--- -- Trigger for course_activity_schedules table to create notifications when a schedule is updated
--- create or replace function public.course_activity_schedules_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.assigned_to.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_update_trigger
---     after update on public.course_activity_schedules
---     for each row when (old.assigned_to <> new.assigned_to)
---     execute procedure public.course_activity_schedules_update_trigger_function();
+-- -- Trigger for course_activity_schedules table to create notifications when a schedule assigned_to is updated
+create trigger course_activity_schedules_assigned_to_update_trigger
+    after update on public.course_activity_schedules
+    for each row when ((old.assigned_to is null and new.assigned_to is not null) or (old.assigned_to <> new.assigned_to))
+    execute procedure public.enqueue_notification_job('course_activity_schedules.assigned_to.updated');
 
 
 -- -- Trigger for course_activity_schedules table to create notifications when a schedule is assigned to a user

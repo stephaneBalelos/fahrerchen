@@ -3,188 +3,39 @@
     :title="t('notifications')"
   >
   <NotificationsNotificationItem
-    v-for="notification in testNotificationsData"
+    v-for="notification in notifications"
     :key="notification.id"
     :icon="'i-heroicons-user-plus'"
     :read="notification.read"
-    :title="t(`notifications_items.${notification.type}.title`)"
-    :description="t(`notifications_items.${notification.type}.description`)"
+    :title="t(`notifications_items.${notification.notification_type.replaceAll('.', '_')}.title`, formatPayload(notification.payload))"
+    :description="t(`notifications_items.${notification.notification_type.replaceAll('.', '_')}.description`, formatPayload(notification.payload))"
     :inserted-at="new Date(notification.created_at).toISOString()"
   />
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import type { AppOrganizationNotification } from '~/types/app.types';
+import { formatDate, formatTime } from '~/utils/formatters'
 
 
 const { t } = useI18n({
   useScope: 'local'
 })
 
-const testNotificationsData = ref<AppOrganizationNotification[]>([
-  {
-    id: '1',
-    type: 'course_activities.inserted',
-    target_user_id: 'user_1',
-    author_id: 'user_2',
-    read: false,
-    payload: {
-      activity_name: 'Aktivität 1',
-      activity_id: 'activity_1',
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '2',
-    type: 'course_activities.price.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_3',
-    read: true,
-    payload: {
-      activity_id: 'activity_2',
-      activity_name: 'Aktivität 2',
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '3',
-    type: 'course_activity_schedules.assigned_to.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_4',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 4',
-      activity_name: 'Aktivität 3',
-      activity_id: 'activity_3',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '4',
-    type: 'course_activity_schedules.attendees.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-    {
-    id: '5',
-    type: 'course_activity_schedules.deleted',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-    {
-    id: '6',
-    type: 'course_activity_schedules.inserted',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '7',
-    type: 'course_activity_schedules.start_at.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '8',
-    type: 'course_activity_schedules.status.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '9',
-    type: 'course_activity_schedules_attendances.completed.updated',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '10',
-    type: 'course_activity_schedules_attendances.deleted',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-  {
-    id: '11',
-    type: 'course_activity_schedules_attendances.inserted',
-    target_user_id: 'user_1',
-    author_id: 'user_5',
-    read: false,
-    payload: {
-      author_name: 'Benutzer 5',
-      activity_name: 'Aktivität 4',
-      activity_id: 'activity_4',
-      date: new Date().toISOString(),
-    },
-    created_at: new Date().toISOString(),
-    organization_id: 'org_1',
-  },
-])
+const notificationsStore = useNotificationsStore()
+
+const { data: notifications } = useAsyncData('notifications', async() => {
+  await notificationsStore.loadNotifications()
+  return notificationsStore.notifications
+})
+
+const formatPayload = (payload: Record<string, string>) => {
+  return {
+    ...payload,
+    date: payload.date ? formatDate(payload.date) : '',
+    time: payload.time ? formatTime(payload.time) : ''
+  }
+}
 
 </script>
 
@@ -202,7 +53,7 @@ const testNotificationsData = ref<AppOrganizationNotification[]>([
         "title": "Preis aktualisiert für {activity_name}",
         "description": "Der Preis für die Kursaktivität {activity_name} wurde aktualisiert."
       },
-      "course_activity_schedules.assigned_to.updated": {
+      "course_activity_schedules_assigned_to_updated": {
         "title": "{author_name} hat dir eine Kursaktivität zugewiesen",
         "description": "{author_name} hat dir {activity_name} am {date} zugewiesen."
       },

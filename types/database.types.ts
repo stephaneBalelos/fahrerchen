@@ -954,6 +954,7 @@ export type Database = {
       notifications_jobs: {
         Row: {
           actor_id: string | null
+          batch_key: string | null
           created_at: string
           id: number
           notification_type: Database["public"]["Enums"]["notification_type"]
@@ -964,6 +965,7 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          batch_key?: string | null
           created_at?: string
           id?: number
           notification_type: Database["public"]["Enums"]["notification_type"]
@@ -974,6 +976,7 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          batch_key?: string | null
           created_at?: string
           id?: number
           notification_type?: Database["public"]["Enums"]["notification_type"]
@@ -1154,31 +1157,31 @@ export type Database = {
           author_id: string | null
           created_at: string
           id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
           organization_id: string
           payload: Json
           read: boolean
-          target_user_id: string
-          type: Database["public"]["Enums"]["notification_type"]
+          target_user_ids: string[]
         }
         Insert: {
           author_id?: string | null
           created_at?: string
           id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
           organization_id: string
           payload: Json
           read?: boolean
-          target_user_id: string
-          type: Database["public"]["Enums"]["notification_type"]
+          target_user_ids: string[]
         }
         Update: {
           author_id?: string | null
           created_at?: string
           id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
           organization_id?: string
           payload?: Json
           read?: boolean
-          target_user_id?: string
-          type?: Database["public"]["Enums"]["notification_type"]
+          target_user_ids?: string[]
         }
         Relationships: [
           {
@@ -1215,27 +1218,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users_organizations_view"
             referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["student_user_id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_target_user_id_fkey"
-            columns: ["target_user_id"]
-            isOneToOne: false
-            referencedRelation: "users_organizations_view"
-            referencedColumns: ["user_id"]
           },
         ]
       }

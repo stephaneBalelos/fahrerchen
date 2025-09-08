@@ -7,6 +7,13 @@ export const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString(locale.value)
 };
 
+export const formatTime = (date: string) => {
+    const { locale } = useI18n({
+        useScope: 'global',
+    })
+    return new Date(date).toLocaleTimeString(locale.value)
+};
+
 export const formatDateTime = (date: string) => {
     return new Date(date).toLocaleString()
 };
