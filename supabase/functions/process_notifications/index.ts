@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database, Json } from "../_shared/types/database.types.ts";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
-import { getCourseActivityById, getNotificationEmailData, getOrganization, getOrganizationMembers, sendNotificationEmail } from "../_shared/utils.ts";
+import { getCourseActivityById, getCourseSubscriptionViewById, getNotificationEmailData, getOrganization, getOrganizationMembers, sendNotificationEmail } from "../_shared/utils.ts";
 import * as React from 'npm:react@18.3.1'
 
 const BATCH_SIZE = 10
@@ -61,9 +61,11 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
             if (!members) {
                 throw new Error(`No members to notify for organization: ${organization.id}`)
             }
-            console.log('Processing job:', job.notification_type)
+            const author = members.find(member => member.user_id === job.actor_id)
+            if (!author) {
+                throw new Error(`Author not found: ${job.actor_id}`)
+            }
             if (job.notification_type === 'course_subscriptions.inserted') {
-                console.log('Processing course_subscriptions.inserted notification')
                 // Notifify the student per email
                 const payloadNew = payload.new as Database['public']['Tables']['course_subscriptions']['Row']
                 const student = await client.from('students').select('*').eq('id', payloadNew["student_id"]).single()
@@ -82,22 +84,18 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                     })
                 )
                 await sendNotificationEmail(student.data.email, emailData.getSubject(organization.name), html)
-                // Mark Job as completed
-                await client.from('notifications_jobs').update({ status: 'COMPLETED' }).eq('id', job.id)
-
             } else if (job.notification_type === 'course_activity_schedules.assigned_to.updated') {
                 // Notify the new Assigned to user if he is not the actor
                 const payloadNew = payload.new as Database['public']['Tables']['course_activity_schedules']['Row']
                 if (payloadNew.assigned_to && payloadNew.assigned_to !== job.actor_id) {
                     const newAssignedUser = members.find(member => member.user_id === payloadNew.assigned_to)
                     const activity = await getCourseActivityById(client, payloadNew.activity_id)
-                    const author = members.find(member => member.user_id === job.actor_id)
 
                     // Insert Notification
                     if (newAssignedUser && newAssignedUser?.user_id && newAssignedUser?.user_fullname) {
                         await client.from('organization_notifications').insert({
                             notification_type: job.notification_type,
-                            author_id: job.actor_id,
+                            author_id: author.user_id,
                             target_user_ids: [newAssignedUser.user_id],
                             payload: {
                                 id: payloadNew.id,
@@ -109,43 +107,220 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                         })
                     }
                 }
-                await client.from('notifications_jobs').update({ status: 'COMPLETED' }).eq('id', job.id)
-
             } else if (job.notification_type === 'course_activity_schedules.date.updated') {
                 // Notify the students about the date change
-                // Notify the assigned to user if he is not the actor
-
-            } else if (job.notification_type === 'course_activity_schedules.deleted') {
-                // Notify the students about the schedule deletion
-                // Notify the assigned to user if he is not the actor
+                const target_user_ids= new Set<string>()
+                const payloadNew = payload.new as Database['public']['Tables']['course_activity_schedules']['Row']
+                const attendees = payloadNew.attendees || []
+                const $studentsToNotify = await Promise.all(attendees.map(id => getCourseSubscriptionViewById(client, id)))
+                for (const student of $studentsToNotify) {
+                    if (!student?.student_user_id) continue
+                    target_user_ids.add(student.student_user_id)
+                }
+                const activity = await getCourseActivityById(client, payloadNew.activity_id)
+                if (payloadNew.assigned_to && payloadNew.assigned_to !== job.actor_id) {
+                    target_user_ids.add(payloadNew.assigned_to)
+                }
+                // Insert Notification
+                if (target_user_ids.size > 0) {
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids: Array.from(target_user_ids),
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            activity_name: activity?.name,
+                            date: payloadNew.start_at
+                        },
+                        organization_id: organization.id
+                    })
+                }
 
             } else if (job.notification_type === 'course_activity_schedules.attendees.updated') {
                 // Notify the students that have been added or removed from the schedule
+                const target_user_ids: string[] = []
+                const payloadOld = payload.old as Database['public']['Tables']['course_activity_schedules']['Row']
+                const payloadNew = payload.new as Database['public']['Tables']['course_activity_schedules']['Row']
+                const oldAttendees = payloadOld.attendees || []
+                const newAttendees = payloadNew.attendees || []
+                const addedAttendees = newAttendees.filter(id => !oldAttendees.includes(id))
+                const _removedAttendees = oldAttendees.filter(id => !newAttendees.includes(id))
+                const activity = await getCourseActivityById(client, payloadNew.activity_id)
+                const $studentsToNotify = await Promise.all(addedAttendees.map(id => getCourseSubscriptionViewById(client, id)))
+                for (const student of $studentsToNotify) {
+                    if (!student?.student_user_id) continue
+                    target_user_ids.push(student.student_user_id)
+                }
+                // Notify also the assigned_to user if exists and is not the actor
+                if (payloadNew.assigned_to && payloadNew.assigned_to !== job.actor_id) {
+                    target_user_ids.push(payloadNew.assigned_to)
+                }
+                // Insert Notification
+                if (target_user_ids.length > 0) {
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids,
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            activity_name: activity?.name,
+                            addedAttendees: addedAttendees,
+                            date: payloadNew.start_at
+                        },
+                        organization_id: organization.id
+                    })
+                }
 
             } else if (job.notification_type === 'course_activity_schedules.status.updated') {
+                const target_user_ids: string[] = []
                 // Notify the students about the status change
-                // Notify the assigned to user if he is not the actor
+                const payloadNew = payload.new as Database['public']['Tables']['course_activity_schedules']['Row']
+                const newAttendees = payloadNew.attendees || []
+                const $studentsToNotify = await Promise.all(newAttendees.map(id => getCourseSubscriptionViewById(client, id)))
+                const activity = await getCourseActivityById(client, payloadNew.activity_id)
 
+                for (const student of $studentsToNotify) {
+                    if (!student?.student_user_id) continue
+                    target_user_ids.push(student.student_user_id)
+                }
+                if (payloadNew.assigned_to && payloadNew.assigned_to !== job.actor_id) {
+                    target_user_ids.push(payloadNew.assigned_to)
+                }
+                // Insert Notification
+                if (target_user_ids.length > 0) {
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids,
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            activity_name: activity?.name,
+                            date: payloadNew.start_at,
+                            status: payloadNew.status
+                        },
+                        organization_id: organization.id
+                    })
+                }
             } else if (job.notification_type === 'course_activity_schedules_attendances.inserted') {
                 // Notify the students that he has attended the schedule
 
             } else if (job.notification_type === 'course_subscription_bills.ready_to_pay.updated') {
                 // Notify the student that the bill is ready to pay
+                const payloadNew = payload.new as Database['public']['Tables']['course_subscription_bills']['Row']
+                const subscription = await getCourseSubscriptionViewById(client, payloadNew.course_subscription_id)
+                if (!subscription) {
+                    throw new Error(`Subscription not found: ${payloadNew.course_subscription_id}`)
+                }
+                const student = members.find(member => member.user_id === subscription.student_user_id)
+                if (!student) {
+                    throw new Error(`Student not found: ${subscription.student_user_id}`)
+                }
+                if (student.user_id) {
+                    // Insert Notification
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids: [student.user_id],
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            student_name: student.user_fullname
+                        },
+                        organization_id: organization.id
+                    })
+                }
+
+
 
             } else if (job.notification_type === 'course_subscription_bills.paid_at.updated') {
                 // Notify the student that the bill has been paid
+                const payloadNew = payload.new as Database['public']['Tables']['course_subscription_bills']['Row']
+                const subscription = await getCourseSubscriptionViewById(client, payloadNew.course_subscription_id)
+                if (!subscription) {
+                    throw new Error(`Subscription not found: ${payloadNew.course_subscription_id}`)
+                }
+                const student = members.find(member => member.user_id === subscription.student_user_id)
+                if (!student) {
+                    throw new Error(`Student not found: ${subscription.student_user_id}`)
+                }
+                if (student.user_id) {
+                    // Insert Notification
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids: [student.user_id],
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            student_name: student.user_fullname
+                        },
+                        organization_id: organization.id
+                    })
+                }
 
             } else if (job.notification_type === 'course_subscription_bills.canceled_at.updated') {
                 // Notify the student that the bill has been canceled
+                const payloadNew = payload.new as Database['public']['Tables']['course_subscription_bills']['Row']
+                const subscription = await getCourseSubscriptionViewById(client, payloadNew.course_subscription_id)
+                if (!subscription) {
+                    throw new Error(`Subscription not found: ${payloadNew.course_subscription_id}`)
+                }
+                const student = members.find(member => member.user_id === subscription.student_user_id)
+                if (!student) {
+                    throw new Error(`Student not found: ${subscription.student_user_id}`)
+                }
+                if (student.user_id) {
+                    // Insert Notification
+                    await client.from('organization_notifications').insert({
+                        notification_type: job.notification_type,
+                        author_id: author.user_id,
+                        target_user_ids: [student.user_id],
+                        payload: {
+                            id: payloadNew.id,
+                            author_name: author?.user_fullname,
+                            student_name: student.user_fullname
+                        },
+                        organization_id: organization.id
+                    })
+                }
 
             } else if (job.notification_type === 'students_registration_requests.inserted') {
                 // Notify the admin about the new registration request
+                const target_user_ids: string[] = []
+                const payloadNew = payload.new as Database['public']['Tables']['students_registration_requests']['Row']
+                const admins = members.filter(member => member.organization_role === 'owner' || member.organization_role === 'manager')
+                if (admins.length === 0) {
+                    throw new Error(`No admins found for organization: ${organization.id}`)
+                }
+
+                for (const admin of admins) {
+                    if (admin.user_id) {
+                        target_user_ids.push(admin.user_id)
+                    }
+                }
+                // Insert Notification
+                await client.from('organization_notifications').insert({
+                    notification_type: job.notification_type,
+                    author_id: author.user_id,
+                    target_user_ids,
+                    payload: {
+                        id: payloadNew.id,
+                        author_name: author?.user_fullname,
+                        requester_name: payloadNew.firstname + ' ' + payloadNew.lastname,
+                        requester_email: payloadNew.email,
+                    },
+                    organization_id: organization.id
+                })
 
             } else {
                 throw new Error(`Unknown notification type: ${job.notification_type}`)
             }
 
             // Update Job Status to 'completed'
+            await client.from('notifications_jobs').update({ status: 'COMPLETED' }).eq('id', job.id)
         } catch (error) {
             console.error('Error processing job:', error)
             await client.from('notifications_jobs').update({ status: 'FAILED' }).eq('id', job.id)

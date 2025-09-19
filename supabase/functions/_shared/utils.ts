@@ -51,6 +51,14 @@ export async function getCourseActivityById(supabase: SupabaseClient<Database>, 
     return data
 }
 
+export async function getCourseSubscriptionViewById(supabase: SupabaseClient<Database>, subscriptionId: string): Promise<Database['public']['Views']['course_subscriptions_view']['Row'] | null> {
+    const { data, error } = await supabase.from('course_subscriptions_view').select('*').eq('id', subscriptionId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
 export const getHmacSignature = async (data: string): Promise<string> => {
     const { createHmac } = await import('node:crypto');
     const secret = Deno.env.get("MAIL_WEBHOOK_SECRET_KEY")

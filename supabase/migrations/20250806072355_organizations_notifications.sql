@@ -51,7 +51,8 @@ create table public.organization_notifications (
     target_user_ids uuid[] not null, -- Array of user IDs to whom the notification is targeted
     author_id     uuid references public.users(id) on delete set null,
     payload jsonb not null,
-    read boolean default false not null,
+    updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+    batch_key    text, -- Used to group related notifications
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     organization_id    uuid references public.organizations on delete cascade not null
 );
@@ -59,16 +60,30 @@ comment on table public.organization_notifications is 'Table to store notificati
 -- Enable row-level security for the organization_notifications table
 alter table public.organization_notifications enable row level security;
 revoke update on public.organization_notifications from authenticated, anon;
-grant update (read) on public.organization_notifications to authenticated;
+
+-- Prevent updates of batch_key and organization_id after creation
+create or replace function public.prevent_organization_notifications_update()
+returns trigger as $$
+begin
+    if old.batch_key is distinct from new.batch_key then
+        raise exception 'batch_key cannot be updated';
+    end if;
+    if old.organization_id is distinct from new.organization_id then
+        raise exception 'organization_id cannot be updated';
+    end if;
+    new.updated_at := timezone('utc'::text, now());
+    return new;
+end;
+$$ language plpgsql security invoker set search_path = '';
+create trigger prevent_organization_notifications_update_trigger
+    before update on public.organization_notifications
+    for each row execute procedure public.prevent_organization_notifications_update();
+
+
 -- Create policies for organization_notifications table
 create policy "Allow all users to read their own notifications"
     on public.organization_notifications
     for select to authenticated
-    using (target_user_ids @> array[auth.uid()]);
-
-create policy "Allow users to update their own notifications"
-    on public.organization_notifications
-    for update to authenticated
     using (target_user_ids @> array[auth.uid()]);
 
 -- Indexes for performance
@@ -85,6 +100,10 @@ declare
     batch_key text;
 begin
     actor_id := (select auth.uid());
+
+    if actor_id is null then
+        return new; -- If no actor, do not create a notification
+    end if;
 
     -- Set the batch key as <organization_id>.<notification_type>.<resource_id>
     batch_key := new.organization_id::text || '.' || TG_ARGV[0] || '.' || new.id::text;
@@ -113,7 +132,6 @@ end;
 $$ language plpgsql security invoker set search_path = '';
 
 
-
 -- Trigger for course_subscriptions table to create notifications when a new subscription is inserted
 create trigger course_subscriptions_insert_trigger
     after insert on public.course_subscriptions
@@ -127,108 +145,32 @@ create trigger course_activity_schedules_assigned_to_update_trigger
     execute procedure public.enqueue_notification_job('course_activity_schedules.assigned_to.updated');
 
 
--- -- Trigger for course_activity_schedules table to create notifications when a schedule is assigned to a user
--- create or replace function public.course_activity_schedules_attendees_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.attendees.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_attendees_update_trigger
---     after update on public.course_activity_schedules
---     for each row when (old.attendees <> new.attendees)
---     execute procedure public.course_activity_schedules_attendees_update_trigger_function();
+-- Trigger for course_activity_schedules table to create notifications when a schedule is assigned to a user
+create trigger course_activity_schedules_attendees_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.attendees <> new.attendees)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.attendees.updated');
 
 
--- -- Trigger for course_activity_schedules table to create notifications when a schedule's status is updated
--- create or replace function public.course_activity_schedules_status_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.status.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_status_update_trigger
---     after update on public.course_activity_schedules
---     for each row when (old.status <> new.status)
---     execute procedure public.course_activity_schedules_status_update_trigger_function();
+-- Trigger for course_activity_schedules table to create notifications when a schedule's status is updated
+create trigger course_activity_schedules_status_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.status <> new.status)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.status.updated');
 
 
--- -- Trigger for course_activity_schedules table to create notifications when a schedule's start time is updated
--- create or replace function public.course_activity_schedules_start_at_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.start_at.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_start_at_update_trigger
---     after update on public.course_activity_schedules
---     for each row when (old.start_at <> new.start_at)
---     execute procedure public.course_activity_schedules_start_at_update_trigger_function();
+-- Trigger for course_activity_schedules table to create notifications when a schedule's start time is updated
+create trigger course_activity_schedules_start_at_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.start_at <> new.start_at)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.date.updated');
 
 
--- -- Trigger for course_activity_schedules table to create notifications when a schedule's end time is updated
--- create or replace function public.course_activity_schedules_end_at_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules.end_at.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_end_at_update_trigger
---     after update on public.course_activity_schedules
---     for each row when (old.end_at <> new.end_at)
---     execute procedure public.course_activity_schedules_end_at_update_trigger_function();
-
--- -- Trigger for course_activity_schedules table to create notifications when a schedule is deleted
--- create or replace function public.course_activity_schedules_delete_trigger_function()
---     returns trigger as $$
--- begin
-
---     perform public.create_organization_notification(
---         org_id := old.organization_id,
---         type := 'course_activity_schedules.deleted',
---         author_id := (select auth.uid()),
---         resource_id := old.id,
---         payload_old := to_jsonb(old),
---         payload_new := null
---     );
---     return old;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_delete_trigger
---     after delete on public.course_activity_schedules
---     for each row execute procedure public.course_activity_schedules_delete_trigger_function();
+-- Trigger for course_activity_schedules table to create notifications when a schedule's end time is updated
+create trigger course_activity_schedules_end_at_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.end_at <> new.end_at)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.date.updated');
 
 -- -- Trigger for course_activity_schedules_attendances table to create notifications when a new attendance is inserted
 -- create or replace function public.course_activity_schedules_attendances_insert_trigger_function()
@@ -250,142 +192,26 @@ create trigger course_activity_schedules_assigned_to_update_trigger
 --     for each row execute procedure public.course_activity_schedules_attendances_insert_trigger_function();
 
 
--- -- Trigger for course_activity_schedules_attendances table to create notifications when an attendance is marked as completed
--- create or replace function public.course_activity_schedules_attendances_completed_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_activity_schedules_attendances.completed.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_attendances_completed_update_trigger
---     after update on public.course_activity_schedules_attendances
---     for each row when (old.successfully_completed <> new.successfully_completed)
---     execute procedure public.course_activity_schedules_attendances_completed_update_trigger_function();
+-- Trigger for course_subscription_bills table to create notifications when a bill's paid_at is updated
+create trigger course_subscription_bills_paid_at_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.paid_at <> new.paid_at)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.paid_at.updated');
+
+-- Trigger for course_subscription_bills table to create notifications when a bill's ready_to_pay is updated
+create trigger course_subscription_bills_ready_to_pay_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.ready_to_pay <> new.ready_to_pay)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.ready_to_pay.updated');
 
 
--- -- Trigger for course_activity_schedules_attendances table to create notifications when an attendance is deleted
--- create or replace function public.course_activity_schedules_attendances_delete_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := old.organization_id,
---         type := 'course_activity_schedules_attendances.deleted',
---         author_id := (select auth.uid()),
---         resource_id := old.id,
---         payload_old := to_jsonb(old),
---         payload_new := null
---     );
---     return old;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_activity_schedules_attendances_delete_trigger
---     after delete on public.course_activity_schedules_attendances
---     for each row execute procedure public.course_activity_schedules_attendances_delete_trigger_function();
+-- Trigger for course_subscription_bills table to create notifications when a bill's canceled_at is updated
+create trigger course_subscription_bills_canceled_at_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.canceled_at <> new.canceled_at)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.canceled_at.updated');
 
-
--- -- Trigger for course_subscription_bills table to create notifications when a new bill is inserted
--- create or replace function public.course_subscription_bills_insert_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_subscription_bills.inserted',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := null,
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_subscription_bills_insert_trigger
---     after insert on public.course_subscription_bills
---     for each row execute procedure public.course_subscription_bills_insert_trigger_function();
-
--- -- Trigger for course_subscription_bills table to create notifications when a bill's paid_at is updated
--- create or replace function public.course_subscription_bills_paid_at_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_subscription_bills.paid_at.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_subscription_bills_paid_at_update_trigger
---     after update on public.course_subscription_bills
---     for each row when (old.paid_at <> new.paid_at)
---     execute procedure public.course_subscription_bills_paid_at_update_trigger_function();
-
--- -- Trigger for course_subscription_bills table to create notifications when a bill's ready_to_pay is updated
--- create or replace function public.course_subscription_bills_ready_to_pay_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_subscription_bills.ready_to_pay.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_subscription_bills_ready_to_pay_update_trigger
---     after update on public.course_subscription_bills
---     for each row when (old.ready_to_pay <> new.ready_to_pay)
---     execute procedure public.course_subscription_bills_ready_to_pay_update_trigger_function();
-
-
--- -- Trigger for course_subscription_bills table to create notifications when a bill's canceled_at is updated
--- create or replace function public.course_subscription_bills_canceled_at_update_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'course_subscription_bills.canceled_at.updated',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := to_jsonb(old),
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger course_subscription_bills_canceled_at_update_trigger
---     after update on public.course_subscription_bills
---     for each row when (old.canceled_at <> new.canceled_at)
---     execute procedure public.course_subscription_bills_canceled_at_update_trigger_function();
-    
--- -- Trigger for students_registration_requests table to create notifications when a new registration request is inserted
--- create or replace function public.students_registration_requests_insert_trigger_function()
---     returns trigger as $$
--- begin
---     perform public.create_organization_notification(
---         org_id := new.organization_id,
---         type := 'students_registration_requests.inserted',
---         author_id := (select auth.uid()),
---         resource_id := new.id,
---         payload_old := null,
---         payload_new := to_jsonb(new)
---     );
---     return new;
--- end;
--- $$ language plpgsql security definer set search_path = '';
--- create trigger students_registration_requests_insert_trigger
---     after insert on public.students_registration_requests
---     for each row execute procedure public.students_registration_requests_insert_trigger_function();
+-- Trigger for students_registration_requests table to create notifications when a new registration request is inserted
+create trigger students_registration_requests_insert_trigger
+    after insert on public.students_registration_requests
+    for each row execute procedure public.enqueue_notification_job('students_registration_requests.inserted');

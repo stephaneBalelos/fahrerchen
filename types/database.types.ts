@@ -1155,33 +1155,36 @@ export type Database = {
       organization_notifications: {
         Row: {
           author_id: string | null
+          batch_key: string | null
           created_at: string
           id: string
           notification_type: Database["public"]["Enums"]["notification_type"]
           organization_id: string
           payload: Json
-          read: boolean
           target_user_ids: string[]
+          updated_at: string
         }
         Insert: {
           author_id?: string | null
+          batch_key?: string | null
           created_at?: string
           id?: string
           notification_type: Database["public"]["Enums"]["notification_type"]
           organization_id: string
           payload: Json
-          read?: boolean
           target_user_ids: string[]
+          updated_at?: string
         }
         Update: {
           author_id?: string | null
+          batch_key?: string | null
           created_at?: string
           id?: string
           notification_type?: Database["public"]["Enums"]["notification_type"]
           organization_id?: string
           payload?: Json
-          read?: boolean
           target_user_ids?: string[]
+          updated_at?: string
         }
         Relationships: [
           {
