@@ -1,4 +1,4 @@
-import type { Database, AppOrganization, AppUserOrganizationsView } from "~/types/app.types"
+import type { Database, AppUserOrganizationsView } from "~/types/app.types"
 import { useUserStore } from "./user"
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
@@ -6,69 +6,55 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const userStore = useUserStore()
     const organizations = ref<AppUserOrganizationsView[]>([])
     const isLoading = ref(true)
-    const selectedOrganizationId = ref<string | null>(null)
+    const route = useRoute()
 
+    // Selected organization based on route param org_id
     const selectedOrganization = computed(() => {
-        if (!selectedOrganizationId.value) {
-            return null
+        if (route.params.org_id && organizations.value.length > 0) {
+            return organizations.value.find(o => o.organization_id === route.params.org_id) || null
         }
-        return organizations.value.find(org => org.organization_id === selectedOrganizationId.value) || null
-    })
+        return null
+    });
 
-
-    async function createOrganization(organization: AppOrganization) {
-        if (!userStore.user) {
-            return
+    function relativePath(path: string) {
+        if (!selectedOrganization.value) {
+            return '/my'
         }
-        try {
-            const { error } = await supabase.from('organizations').insert({
-                name: organization.name,
-                owner_id: userStore.user.id
-            })
-            if (error) {
-                console.error(error)
-                return
-            }
-            await loadOrganizationsMemberships()
-        } catch (error) {
-            console.error(error)
-        }
+        return `/my/${selectedOrganization.value.organization_id}${path}`
     }
 
-    async function loadOrganizationsMemberships() {
-        if (!userStore.user) {
-            return
-        }
+
+    const loadOrganizationsMemberships = async () => {
         isLoading.value = true
-        const { data, error } = await supabase.from('users_organizations_view').select('*').eq('user_id', userStore.user.id).order('organization_name', { ascending: true })
-        if (error) {
-            console.error(error)
+        if (!userStore.user) {
+            organizations.value = []
+            isLoading.value = false
             return
         }
-        organizations.value = data
+        const { data, error } = await supabase
+            .from('users_organizations_view')
+            .select('*')
+            .eq('user_id', userStore.user.id)
+            .overrideTypes<AppUserOrganizationsView[]>()
+        if (error) {
+            console.error("Error loading organizations memberships:", error)
+            organizations.value = []
+        } else {
+            organizations.value = data || []
+        }
         isLoading.value = false
     }
 
-    function relativePath(path: string) {
-        if (!selectedOrganizationId.value) {
-            return '/my'
+    const getOrganizationById = async (id: string) => {
+        if (organizations.value.length === 0) return null
+        const org = organizations.value.find(o => o.organization_id === id)
+        if (!org) {
+            await loadOrganizationsMemberships()
         }
-        return `/my/${selectedOrganizationId.value}${path}`
+        return organizations.value.find(o => o.organization_id === id) || null
     }
 
-    async function selectOrganization(org_id: string) {
-        await loadOrganizationsMemberships()
-        const organization = organizations.value.find(org => org.organization_id === org_id)
-        if (!organization) {
-            console.error(`Organization with id ${org_id} not found`)
-            return
-        }
-        selectedOrganizationId.value = organization.organization_id
-    }
 
-    function clearSelectedOrganization() {
-        selectedOrganizationId.value = null
-    }
 
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
@@ -78,7 +64,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
+    return { organizations, loadOrganizationsMemberships, getOrganizationById, relativePath, selectedOrganization, isLoading }
 
-    
+
 })

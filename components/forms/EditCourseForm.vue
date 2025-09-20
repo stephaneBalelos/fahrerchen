@@ -119,11 +119,18 @@ type EditCourseFormProps = Omit<
 
 type Props = {
   courseId?: string;
+  organizationId: string;
 };
 
 const props = defineProps<Props>();
 const supabase = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
+const organization = computed(() => {
+  return userOrganizationsStore.organizations.find(
+    (o) =>
+      o.organization_id === props.organizationId
+  );
+});
 const form = ref<HTMLFormElement | null>(null);
 
 const tutorialStore = useTutorialStore();
@@ -183,7 +190,7 @@ const validate = (state: EditCourseFormProps): FormError[] => {
 };
 
 async function onSubmit(event: FormSubmitEvent<EditCourseFormProps>) {
-  if (!userOrganizationsStore.selectedOrganization) {
+  if (!organization.value) {
     toast.add({
       title: "Error",
       description: "No organization data found",
@@ -199,13 +206,13 @@ async function onSubmit(event: FormSubmitEvent<EditCourseFormProps>) {
   } else {
     createCourse(
       event.data,
-      userOrganizationsStore.selectedOrganization.organization_id
+      organization.value.organization_id
     );
   }
 }
 
 const createCourse = async (d: EditCourseFormProps, org_id: string) => {
-  if (!userOrganizationsStore.selectedOrganization) {
+  if (!organization.value) {
     toast.add({
       title: "Error",
       description: "No organization data found",

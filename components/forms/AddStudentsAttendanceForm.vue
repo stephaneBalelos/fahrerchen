@@ -70,19 +70,18 @@ const supabase = useSupabaseClient();
 
 const q = ref("");
 
-const userOrganizationsStore = useUserOrganizationsStore();
+const { selectedOrganization } = useUserOrganizationsStore();
 
-if (!userOrganizationsStore.selectedOrganization) {
+
+if (!selectedOrganization) {
   throw new Error("Organization not found");
 }
 
 const courseActivity = await useCourseActivities(
-  userOrganizationsStore.selectedOrganization.organization_id,
+  selectedOrganization.organization_id,
   props.courseid,
   props.courseActivitySchedule.activity_id
 );
-
-console.log(props.courseActivitySchedule)
 
 const { data: subscriptions } = await useAsyncData(
   `courses_${props.courseid}_subscriptions`,

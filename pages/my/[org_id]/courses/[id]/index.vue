@@ -1,7 +1,7 @@
 <template>
   <UDashboardPanelContent>
     <div
-      v-if="userOrganizationsStore.selectedOrganization?.organization_id"
+      v-if="organization"
       class="grid lg:grid-cols-3 gap-4"
     >
       <UTabs v-if="tabs.length > 0" :items="tabs" class="w-full col-span-2">
@@ -9,10 +9,8 @@
           <CourseActivitySchedulesSection
             v-if="course_activities"
             :key="item.key"
-            :course-id="props.courseid"
-            :org-id="
-              userOrganizationsStore.selectedOrganization.organization_id
-            "
+            :course-id="courseid"
+            :org-id="organization.organization_id"
             :activity-type-id="item.key"
           />
         </template>
@@ -24,9 +22,9 @@
         />
       </div>
       <FormsCourseDocumentsForm
-        v-if="userOrganizationsStore.selectedOrganization"
-        :orgid="userOrganizationsStore.selectedOrganization.organization_id"
-        :courseid="props.courseid"
+        v-if="organization"
+        :organizationid="organization.organization_id"
+        :courseid="courseid"
       />
     </div>
   </UDashboardPanelContent>
@@ -35,9 +33,7 @@
 <script setup lang="ts">
 import CourseActivitySchedulesSection from "~/components/courses/CourseActivitySchedulesSection.vue";
 import type { Database } from "~/types/database.types";
-type Props = {
-  courseid: string;
-};
+
 definePageMeta({
   layout: "orgs",
 });
@@ -50,24 +46,31 @@ const { t:g } = useI18n({
   useScope: "global",
 });
 
-const props = useAttrs() as Props;
+const route = useRoute();
+const courseid = route.params.id as string;
+const orgid = route.params.org_id as string;
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
+const organization = computed(() => {
+  return userOrganizationsStore.organizations.find(
+    (o) => o.organization_id === orgid
+  );
+});
 const activity_types = await useCourseActivityTypes()
 
 const { data: course_activities } = useAsyncData(
   "course_activity_schedules",
   async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
+    if (!organization.value) {
       return null;
     }
     const { data, error } = await client
       .from("course_activities")
       .select("id, name, description, activity_type")
-      .eq("course_id", props.courseid)
+      .eq("course_id", courseid)
       .eq(
         "organization_id",
-        userOrganizationsStore.selectedOrganization?.organization_id
+        organization.value.organization_id
       );
     if (error) {
       throw error;

@@ -6,7 +6,7 @@
     v-for="notification in notifications"
     :key="notification.id"
     :icon="'i-heroicons-user-plus'"
-    :read="notification.read"
+    :read="false"
     :title="t(`notifications_items.${notification.notification_type.replaceAll('.', '_')}.title`, formatPayload(notification.payload))"
     :description="t(`notifications_items.${notification.notification_type.replaceAll('.', '_')}.description`, formatPayload(notification.payload))"
     :inserted-at="new Date(notification.created_at).toISOString()"
