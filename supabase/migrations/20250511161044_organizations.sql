@@ -17,12 +17,13 @@ create table if not exists public.organizations(
   address_zip    text,
   address_city  text,
   address_country text,
+  setup_completed  boolean default false not null,
   owner_id      uuid references public.users not null
 );
 comment on table public.organizations is 'organization data.';
 alter table public.organizations enable row level security;
 revoke update on table public.organizations from authenticated, anon;
-grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
+grant update (name, handle, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
 
 -- Indexes for faster lookups
 create index idx_organizations_owner_id on public.organizations(owner_id);
@@ -155,7 +156,7 @@ $$ language plpgsql security definer set search_path = '';
 -- Organizations Policies
 create policy "Everyone can see organizations avatars" on storage.objects for select to authenticated, anon using (true);
 
-create policy "members_can_read_their_organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id));
+create policy "members_can_read_their_organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id) or public.is_main_owner(id));
 insert into public.role_permissions
     (role, permission) 
 values 
@@ -171,7 +172,7 @@ values
     ('owner', 'organizations.update'),
     ('manager', 'organizations.update');
 
-create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check ((select auth.uid()) = owner_id);
+create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check (owner_id = (select auth.uid()));
 
 create policy "main_owner_can_delete_organizations" on public.organizations for delete to authenticated using (public.is_main_owner(id));
 

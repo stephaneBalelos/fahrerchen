@@ -19,44 +19,67 @@
 
     <template #links>
       <UButton
+        v-if="organization.setup_completed"
         size="sm"
         color="primary"
         :to="`/my/${organization.id}`"
         icon="i-heroicons-arrow-right-20-solid"
       />
+      <UButton
+        v-else
+        size="sm"
+        color="primary"
+        :label="t('continue_setup')"
+        :to="`/setup/${organization.id}`"
+        icon="i-heroicons-arrow-right-20-solid"
+        trailing
+      />
     </template>
+    <div v-if="organization.setup_completed">
+      <UAlert
+        color="amber"
+        variant="soft"
+        class="mt-4"
+        icon="i-heroicons-exclamation-circle-20-solid"
+        :title="t('no_licence_warning_title')"
+        :actions="[
+          {
+            label: t('manage_licence'),
+            to: `/my/${organization.id}/settings/billing`,
+            variant: 'outline',
+            color: 'amber',
+          },
+        ]"
+      />
+      <UAlert
+        color="green"
+        variant="soft"
+        class="mt-4"
+        icon="i-heroicons-check-circle-20-solid"
+        :title="
+          t('licence_active_title', {
+            date: formatDate(organization.inserted_at),
+          })
+        "
+        :actions="[
+          {
+            label: t('manage_licence'),
+            to: `/my/${organization.id}/settings/billing`,
+            variant: 'outline',
+            color: 'green',
+          },
+        ]"
+      />
+    </div>
+    <div v-else class="mt-4">
+      <UAlert
+        color="blue"
+        variant="soft"
+        icon="i-heroicons-information-circle-20-solid"
+        :title="t('setup_incomplete_title')"
+      />
 
-    <UAlert
-      color="amber"
-      variant="soft"
-      class="mt-4"
-      icon="i-heroicons-exclamation-circle-20-solid"
-      :title="t('no_licence_warning_title')"
-      :actions="[
-        {
-          label: t('manage_licence'),
-          to: `/my/${organization.id}/settings/billing`,
-          variant: 'outline',
-          color: 'amber',
-        },
-      ]"
-    />
-    <UAlert
-      color="green"
-      variant="soft"
-      class="mt-4"
-      icon="i-heroicons-check-circle-20-solid"
-      :title="t('licence_active_title', { date: formatDate(organization.inserted_at) })"
-
-      :actions="[
-        {
-          label: t('manage_licence'),
-          to: `/my/${organization.id}/settings/billing`,
-          variant: 'outline',
-          color: 'green',
-        },
-      ]"
-    />
+    </div>
   </UDashboardCard>
 </template>
 
@@ -108,17 +131,21 @@ const { data: organization } = useAsyncData(
 {
   "de": {
     "created_at": "Erstellt am {date}",
+    "continue_setup": "Einrichtung fortsetzen",
     "no_licence_warning_title": "Keine Lizenz aktiv",
     "licence_active_title": "Lizenz aktiv - Nächste Abrechnung am {date}",
     "next_billing_date": "Nächste Abrechnung am {date}",
-    "manage_licence": "Lizenz verwalten"
+    "manage_licence": "Lizenz verwalten",
+    "setup_incomplete_title": "Deine Fahrschule ist noch nicht einsatzbereit. Bitte schließe die Einrichtung ab."
   },
   "en": {
     "created_at": "Created at {date}",
+    "continue_setup": "Continue setup",
     "no_licence_warning_title": "No active license",
     "licence_active_title": "License active - Next billing on {date}",
     "next_billing_date": "Next billing on {date}",
-    "manage_licence": "Manage license"
+    "manage_licence": "Manage license",
+    "setup_incomplete_title": "Your driving school is not ready for use yet. Please complete the setup."
   }
 }
 </i18n>

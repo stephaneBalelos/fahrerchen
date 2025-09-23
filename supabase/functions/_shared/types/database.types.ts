@@ -1241,6 +1241,7 @@ export type Database = {
           owner_id: string
           phone_number: string
           preferred_language: string
+          setup_completed: boolean
           website: string | null
         }
         Insert: {
@@ -1259,6 +1260,7 @@ export type Database = {
           owner_id: string
           phone_number?: string
           preferred_language?: string
+          setup_completed?: boolean
           website?: string | null
         }
         Update: {
@@ -1277,6 +1279,7 @@ export type Database = {
           owner_id?: string
           phone_number?: string
           preferred_language?: string
+          setup_completed?: boolean
           website?: string | null
         }
         Relationships: [
