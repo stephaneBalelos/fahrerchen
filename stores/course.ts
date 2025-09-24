@@ -1,6 +1,6 @@
 import type { AppCourse } from "~/types/app.types"
 
-export const useCourseStore = defineStore('course', () => {
+export const useCoursesStore = defineStore('course', () => {
     const supabase = useSupabaseClient()
     const userOrganizationsStore = useUserOrganizationsStore()
     const courses = ref<AppCourse[]>([])

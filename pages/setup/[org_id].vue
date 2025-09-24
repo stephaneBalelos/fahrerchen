@@ -24,6 +24,9 @@
                 :submit-label="t('continue')"
                 @updated="onSchoolInformationsUpdated"
               />
+              <div v-else-if="selected === 1">
+                <CoursesSetup :org-id="org.organization_id" @course-setup-completed="onCourseSetupCompleted" />
+                </div>
             </div>
           </div>
         </UDashboardCard>
@@ -33,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import CoursesSetup from '~/components/setup/CoursesSetup.vue';
 definePageMeta({
   layout: "default",
 });
@@ -76,6 +80,11 @@ const onSchoolInformationsUpdated = () => {
   // Handle any actions needed after school informations are updated
   selected.value = 1; // Move to the next tab
   console.log("School informations updated, moving to next step.");
+};
+
+const onCourseSetupCompleted = () => {
+  selected.value = 2; // Move to the final tab
+  console.log("Course setup completed, moving to final step.");
 };
 
 watch(selected, (newValue) => {
