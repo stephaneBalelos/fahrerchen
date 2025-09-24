@@ -25,8 +25,11 @@
                 @updated="onSchoolInformationsUpdated"
               />
               <div v-else-if="selected === 1">
-                <CoursesSetup :org-id="org.organization_id" @course-setup-completed="onCourseSetupCompleted" />
-                </div>
+                <CoursesSetup
+                  :org-id="org.organization_id"
+                  @course-setup-completed="onCourseSetupCompleted"
+                />
+              </div>
             </div>
           </div>
         </UDashboardCard>
@@ -36,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import CoursesSetup from '~/components/setup/CoursesSetup.vue';
+import CoursesSetup from "~/components/setup/CoursesSetup.vue";
 definePageMeta({
   layout: "default",
 });
