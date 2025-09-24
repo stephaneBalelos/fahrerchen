@@ -23,7 +23,7 @@ create table if not exists public.organizations(
 comment on table public.organizations is 'organization data.';
 alter table public.organizations enable row level security;
 revoke update on table public.organizations from authenticated, anon;
-grant update (name, handle, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
+grant update (name, handle, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration, setup_completed) on table public.organizations to authenticated;
 
 -- Indexes for faster lookups
 create index idx_organizations_owner_id on public.organizations(owner_id);

@@ -30,6 +30,9 @@
                   @course-setup-completed="onCourseSetupCompleted"
                 />
               </div>
+              <div v-else-if="selected === 2" class="text-center">
+                <SetupCompleted />
+              </div>
             </div>
           </div>
         </UDashboardCard>
@@ -73,7 +76,6 @@ const steps = [
     key: "setup_complete",
     label: t("setup_complete"),
     icon: "i-heroicons-check-circle-20-solid",
-    content: "Finally, this is the content for Tab3",
   },
 ];
 

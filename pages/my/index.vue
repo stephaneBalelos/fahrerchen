@@ -1,25 +1,16 @@
 <script setup lang="ts">
 import CreateOrganizationForm from "~/components/forms/CreateOrganizationForm.vue";
 import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
-import type { Database } from "~/types/app.types";
+
 
 const organizationsStore = useUserOrganizationsStore();
-
 const isGeneratingDemoData = ref(false);
-
 const modal = useModal();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient<Database>();
-const res = await client
-  .from('organizations')
-  .select('*')
-  .single();
-
-  console.log("Organization fetch result:", res.data);
 
 function openCreateOrgModal() {
   modal.open(CreateOrganizationForm, {
