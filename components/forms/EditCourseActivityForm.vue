@@ -145,7 +145,7 @@ import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
 
 import { ACTIVITY_ICONS } from "~/constants";
 
-type CourseActivityEdit = Omit<
+export type CourseActivityEdit = Omit<
   AppCourseActivity,
   "id" | "course_id" | "organization_id" | "sorting_order"
 >;

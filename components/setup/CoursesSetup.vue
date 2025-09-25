@@ -140,8 +140,10 @@ const openCreateCourseFromTemplateModal = () => {
   if (userOrganizationsStore.selectedOrganization) {
     modal.open(CreateCourseFromTemplateModal, {
       "onCourse-created": async () => {
-        await coursesStore.loadCourses();
+        console.log("Course created from template");
         modal.close();
+        await nextTick();
+        await coursesStore.loadCourses();
       },
       "onClose": () => {
         modal.close();

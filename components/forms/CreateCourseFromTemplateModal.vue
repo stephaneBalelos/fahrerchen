@@ -101,9 +101,7 @@ const state = reactive({
 const onSubmit = async () => {
   loading.value = true;
   const template = getStandardCourseTemplate(state.type);
-  createCourseFromTemplate(template).finally(() => {
-    loading.value = false;
-  });
+  await createCourseFromTemplate(template);
 };
 
 const createCourseFromTemplate = async (template: StandardCourseTemplate) => {
@@ -117,8 +115,17 @@ const createCourseFromTemplate = async (template: StandardCourseTemplate) => {
     if (!newCourseId) {
       throw new Error("Failed to create course");
     }
+    await coursesStore.createCourseCost(newCourseId, template.costs);
+    await coursesStore.createCourseRequiredDocument(
+      newCourseId,
+      template.required_documents
+    );
+    await coursesStore.createCourseActivity(newCourseId, template.activities);
+    $emit("course-created");
   } catch (error) {
     console.error(error);
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -128,12 +135,13 @@ const createCourseFromTemplate = async (template: StandardCourseTemplate) => {
 <i18n lang="json">
 {
   "de": {
+    "driver_license_class": "Führerscheinklasse",
     "form": {
-        "type": {
-            "label": "Kurstyp",
-            "description": "Wählen Sie den Kurstyp, den Sie erstellen möchten.",
-            "placeholder": "Wählen Sie einen Kurstyp"
-        }
+      "type": {
+        "label": "Kurstyp",
+        "description": "Wählen Sie den Kurstyp, den Sie erstellen möchten.",
+        "placeholder": "Wählen Sie einen Kurstyp"
+      }
     },
     "create_course_from_template": "Kurs aus Vorlage erstellen",
     "create_course_from_template_description": "Erstellen Sie einen neuen Kurs basierend auf einer vordefinierten Vorlage.",
@@ -141,12 +149,13 @@ const createCourseFromTemplate = async (template: StandardCourseTemplate) => {
     "create_course": "Kurs erstellen"
   },
   "en": {
+    "driver_license_class": "Driver License Class",
     "form": {
-        "type": {
-            "label": "Course Type",
-            "description": "Select the type of course you want to create.",
-            "placeholder": "Select a course type"
-        }
+      "type": {
+        "label": "Course Type",
+        "description": "Select the type of course you want to create.",
+        "placeholder": "Select a course type"
+      }
     },
     "create_course_from_template": "Create Course from Template",
     "create_course_from_template_description": "Create a new course based on a predefined template.",

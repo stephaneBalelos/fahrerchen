@@ -77,7 +77,7 @@ export const getStandardCourseTemplate = (type: AppCourseType): StandardCourseTe
                 description: "Grundlagen des Straßenverkehrs und Verkehrsregeln",
                 price: 40,
                 required: 12,
-                activity_type: 0, // THEORY
+                activity_type: 1, // THEORY
                 allow_requests: false,
                 allow_self_registration: true
             },

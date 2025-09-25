@@ -60,7 +60,7 @@ type Props = {
   requirementid?: string;
 };
 
-type CourseRequirementEdit = Omit<
+export type CourseRequirementEdit = Omit<
   Database["public"]["Tables"]["course_required_documents"]["Row"],
   "id" | "organization_id" | "course_id" | "name_slug"
 >;

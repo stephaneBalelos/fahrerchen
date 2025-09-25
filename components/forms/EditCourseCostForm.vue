@@ -72,7 +72,7 @@
 import type { AppCourseCost } from "~/types/app.types";
 import type { Form } from "#ui/types";
 
-type CourseCostEdit = Omit<
+export type CourseCostEdit = Omit<
   AppCourseCost,
   "id" | "course_id" | "organization_id"
 >;
