@@ -54,15 +54,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import EditCourseActivityForm from "~/components/forms/EditCourseActivityForm.vue";
 
-const supabase = useSupabaseClient<Database>();
 const slideover = useSlideover();
 const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
 });
+
+const coursesStore = useCoursesStore();
 
 const props = defineProps<{
   orgid: string;
@@ -71,16 +71,10 @@ const props = defineProps<{
 
 const {
   data: course_activities,
-
   refresh,
-} = useAsyncData(`course_activities_${props.courseid}`, async () => {
-  const { data } = await supabase
-    .from("course_activities")
-    .select("*")
-    .eq("course_id", props.courseid)
-    .order("name", { ascending: false });
-  return data;
-});
+} = await useAsyncData(async () => {
+  return await coursesStore.getCourseActivities(props.courseid);
+}, { immediate: true });
 
 const openEditActivityForm = (id?: string) => {
   slideover.open(EditCourseActivityForm, {

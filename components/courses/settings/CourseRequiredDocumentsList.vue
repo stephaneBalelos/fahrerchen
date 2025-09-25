@@ -49,32 +49,23 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 import EditCourseRequirementFrom from "~/components/forms/EditCourseRequirementFrom.vue";
 const { t } = useI18n({
   useScope: "local",
 });
+
+const coursesStore = useCoursesStore();
 
 const props = defineProps<{
   orgid: string;
   courseid: string;
 }>();
 
-const client = useSupabaseClient<Database>();
 const slideover = useSlideover();
-const { data: required_documents, refresh } = useAsyncData(
-  `course_${props.courseid}_required_documents`,
+const { data: required_documents, refresh } = await useAsyncData(
   async () => {
-    const { data, error } = await client
-      .from("course_required_documents")
-      .select("*")
-      .eq("course_id", props.courseid);
-    if (error) {
-      console.log(error);
-      throw error;
-    }
-    return data ?? [];
-  }
+    return await coursesStore.getCourseRequiredDocuments(props.courseid);
+  }, { immediate: true }
 );
 
 function openEditCourseRequiredDocument(id?: string) {

@@ -54,15 +54,14 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCourseCost } from "~/types/app.types";
 import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
 
-const supabase = useSupabaseClient();
 const slideover = useSlideover();
 const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
 });
+const coursesStore = useCoursesStore();
 
 const props = defineProps<{
   orgid: string;
@@ -72,15 +71,9 @@ const props = defineProps<{
 const {
   data: course_costs,
   refresh,
-} = useAsyncData(`course_costs_${props.courseid}`, async () => {
-  const { data } = await supabase
-    .from("course_costs")
-    .select("*")
-    .eq("course_id", props.courseid)
-    .order("name", { ascending: false })
-    .overrideTypes<AppCourseCost[]>();
-  return data;
-});
+} = await useAsyncData(async () => {
+  return await coursesStore.getCourseCosts(props.courseid);
+}, { immediate: true });
 
 const openEditCourseCostForm = (id?: string) => {
   slideover.open(EditCourseCostForm, {
