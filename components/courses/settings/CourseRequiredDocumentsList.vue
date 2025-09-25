@@ -63,6 +63,7 @@ const props = defineProps<{
 
 const slideover = useSlideover();
 const { data: required_documents, refresh } = await useAsyncData(
+  `course_required_documents_${props.courseid}`,
   async () => {
     return await coursesStore.getCourseRequiredDocuments(props.courseid);
   }, { immediate: true }

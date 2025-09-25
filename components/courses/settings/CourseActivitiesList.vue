@@ -72,7 +72,7 @@ const props = defineProps<{
 const {
   data: course_activities,
   refresh,
-} = await useAsyncData(async () => {
+} = await useAsyncData(`course_activities_${props.courseid}`, async () => {
   return await coursesStore.getCourseActivities(props.courseid);
 }, { immediate: true });
 

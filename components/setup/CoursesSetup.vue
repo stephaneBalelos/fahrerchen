@@ -95,6 +95,7 @@ import CourseActivitiesList from "../courses/settings/CourseActivitiesList.vue";
 import CourseCostsList from "../courses/settings/CourseCostsList.vue";
 import CourseRequirementsList from "../courses/settings/CourseRequiredDocumentsList.vue";
 import CreateCourseFromTemplateModal from "../forms/CreateCourseFromTemplateModal.vue";
+import { computedAsync } from "@vueuse/core";
 
 const { t } = useI18n({
   useScope: "local",
@@ -159,12 +160,16 @@ const deleteCourse = async (course_id: string) => {
   }
 };
 
-const isCourseSetupComplete = computed(() => {
-  return (
-    coursesStore.courses &&
-    coursesStore.courses.length > 0
-  );
-});
+const isCourseSetupComplete = computedAsync(async () => {
+  const hasCourses = coursesStore.courses.length > 0;
+  const everyCourseHasActivities = await Promise.all(coursesStore.courses.map(
+    async (course) => {
+      const activities = await coursesStore.getCourseActivities(course.id);
+      return activities.length > 0;
+    }
+  ));
+  return hasCourses && everyCourseHasActivities.every((hasActivities) => hasActivities);
+}, false);
 </script>
 
 <style scoped></style>
