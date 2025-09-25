@@ -1,4 +1,4 @@
-import type { AppCourseType, Database } from "~/types/app.types";
+import type { AppCourseActivity, AppCourseCost, AppCourseType, Database } from "~/types/app.types";
 
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
@@ -32,4 +32,73 @@ export const ACTIVITY_ICONS = {
     'PRACTICE': 'ri-steering-line',
     'EXAM': 'ri-file-list-line',
     'OTHER': 'ri-file-list-line'
+}
+
+export type StandardCourseTemplate = {
+    name: string;
+    description: string;
+    type: AppCourseType;
+    costs: Omit<
+        AppCourseCost,
+        "id" | "course_id" | "organization_id"
+    >[];
+    activities: Omit<
+        AppCourseActivity,
+        "id" | "course_id" | "organization_id" | "sorting_order"
+    >[];
+    required_documents: Omit<
+        Database["public"]["Tables"]["course_required_documents"]["Row"],
+        "id" | "organization_id" | "course_id" | "name_slug"
+    >[];
+}
+
+export const getStandardCourseTemplate = (type: AppCourseType): StandardCourseTemplate => {
+    // Todo: Add Translations
+    // Starts with A
+    return {
+        name: `Führerschein Klasse ${type}`,
+        description: `Standardkurs für den Führerschein der Klasse ${type}`,
+        type: type,
+        costs: [
+            {
+                name: "Grundgebühr",
+                description: "Anmelde- und Verwaltungskosten",
+                price: 250,
+            },
+            {
+                name: "Lernmaterial",
+                description: "Lehrbücher und Online-Ressourcen",
+                price: 100,
+            }
+        ],
+        activities: [
+            {
+                name: "Theoretischer Unterricht",
+                description: "Grundlagen des Straßenverkehrs und Verkehrsregeln",
+                price: 40,
+                required: 12,
+                activity_type: 0, // THEORY
+                allow_requests: false,
+                allow_self_registration: true
+            },
+        ],
+        required_documents: [
+            {
+                name: "Personalausweis oder Reisepass",
+                description: "Gültiges Identifikationsdokument",
+            },
+            {
+                name: "Biometrisches Passfoto",
+                description: "Aktuelles Passfoto nach biometrischen Standards",
+            },
+            {
+                name: "Sehtestbescheinigung",
+                description: "Nachweis über die bestandene Sehtestuntersuchung",
+            },
+            {
+                name: "Erste-Hilfe-Nachweis",
+                description: "Bescheinigung über die Teilnahme an einem Erste-Hilfe-Kurs",    
+            },
+        ],
+    }
 }

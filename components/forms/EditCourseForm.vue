@@ -107,7 +107,7 @@ import type { Database, AppCourse } from "~/types/app.types";
 import type { FormError, FormSubmitEvent } from "#ui/types";
 import { COURSE_ICONS, COURSE_TYPES } from "~/constants";
 
-type EditCourseFormProps = Omit<
+export type EditCourseFormProps = Omit<
   AppCourse,
   | "id"
   | "inserted_at"

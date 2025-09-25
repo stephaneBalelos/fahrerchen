@@ -8,8 +8,7 @@ create table public.courses (
   is_active     boolean default true not null,
   create_bill_on_subscription  boolean default true not null,
   allow_self_registration  boolean default true not null,
-  organization_id    uuid references public.organizations on delete cascade not null,
-  unique (organization_id, type)
+  organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.courses is 'COURSES AVAILABLE.';
 alter table public.courses enable row level security;

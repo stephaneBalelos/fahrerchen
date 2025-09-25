@@ -5,12 +5,14 @@
     :description="t('compose_your_courses_description')"
   >
   <template #links>
-      <UButton
-        color="gray"
-        icon="i-heroicons-plus"
-        @click="() => openCreateCourseModal()"
-        >{{ t("create_new_course") }}</UButton
-      >
+
+      <UDropdown :items="createOptions">
+        <UButton
+          color="gray"
+          icon="i-heroicons-plus"
+          :label="t('create_new_course')"
+          />
+      </UDropdown>
       <UButton
         v-if="isCourseSetupComplete"
         color="primary"
@@ -71,9 +73,14 @@
         :align="'center'"
         :links="[
           {
-            label: t('create_course'),
-            click: openCreateCourseModal,
+            label: t('use_default_course_template'),
+            click: () => openCreateCourseFromTemplateModal(),
             color: 'primary',
+          },
+          {
+            label: t('manually_create_new_course'),
+            click: () => openCreateCourseModal(),
+            color: 'gray',
           },
         ]"
       />
@@ -87,6 +94,7 @@ import EditCourseForm from "../forms/EditCourseForm.vue";
 import CourseActivitiesList from "../courses/settings/CourseActivitiesList.vue";
 import CourseCostsList from "../courses/settings/CourseCostsList.vue";
 import CourseRequirementsList from "../courses/settings/CourseRequiredDocumentsList.vue";
+import CreateCourseFromTemplateModal from "../forms/CreateCourseFromTemplateModal.vue";
 
 const { t } = useI18n({
   useScope: "local",
@@ -97,9 +105,20 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const coursesStore = useCoursesStore();
 const $emits = defineEmits(["course-setup-completed"]);
 
+const createOptions = ref([[
+  {
+    label: t("use_default_course_template"),
+    click: () => openCreateCourseFromTemplateModal(),
+  },
+  {
+    label: t("manually_create_new_course"),
+    click: () => openCreateCourseModal(),
+  },
+]]);
+
+
+
 const openCreateCourseModal = (course_id?: string) => {
-  // Logic to open the modal goes here
-  console.log(course_id);
   if (userOrganizationsStore.selectedOrganization) {
     modal.open(EditCourseForm, {
       organizationId:
@@ -111,6 +130,20 @@ const openCreateCourseModal = (course_id?: string) => {
       },
       "onCourse-updated": async () => {
         await coursesStore.loadCourses();
+        modal.close();
+      },
+    });
+  }
+};
+
+const openCreateCourseFromTemplateModal = () => {
+  if (userOrganizationsStore.selectedOrganization) {
+    modal.open(CreateCourseFromTemplateModal, {
+      "onCourse-created": async () => {
+        await coursesStore.loadCourses();
+        modal.close();
+      },
+      "onClose": () => {
         modal.close();
       },
     });
@@ -141,6 +174,8 @@ const isCourseSetupComplete = computed(() => {
     "compose_your_courses_description":
       "Erstellen Sie Kurse und fügen Sie Aktivitäten, Kosten und erforderliche Dokumente hinzu.",
     "create_new_course": "Neuen Kurs erstellen",
+    "use_default_course_template": "Standard-Kursvorlage verwenden",
+    "manually_create_new_course": "Neuen Kurs manuell erstellen",
     "course_setup_complete": "Kurseinrichtung abgeschlossen",
     "no_courses": "Keine Kurse",
     "no_courses_description":
@@ -158,6 +193,8 @@ const isCourseSetupComplete = computed(() => {
     "compose_your_courses_description":
       "Create courses and add activities, costs, and required documents.",
     "create_new_course": "Create new course",
+    "use_default_course_template": "Use default course template",
+    "manually_create_new_course": "Manually create new course",
     "course_setup_complete": "Course setup complete",
     "no_courses": "No courses",
     "no_courses_description":
