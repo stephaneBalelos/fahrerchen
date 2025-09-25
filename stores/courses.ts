@@ -8,10 +8,13 @@ export const useCoursesStore = defineStore('courses', () => {
     const supabase = useSupabaseClient()
     const userOrganizationsStore = useUserOrganizationsStore()
     const courses = ref<AppCourse[]>([])
+    const isLoadingCourses = ref(false)
 
     const loadCourses = async () => {
+        isLoadingCourses.value = true
         if (!userOrganizationsStore.selectedOrganization) {
             courses.value = []
+            isLoadingCourses.value = false
             return
         }
         const { data, error } = await supabase
@@ -25,6 +28,7 @@ export const useCoursesStore = defineStore('courses', () => {
         } else {
             courses.value = data || []
         }
+        isLoadingCourses.value = false
     }
     const createCourse = async (course: EditCourseFormProps): Promise<string | null> => {
         if (!userOrganizationsStore.selectedOrganization) {
@@ -205,6 +209,7 @@ export const useCoursesStore = defineStore('courses', () => {
     }, { immediate: true })
 
     return {
+        isLoadingCourses,
         courses,
         loadCourses,
         createCourse,

@@ -21,7 +21,7 @@
         >{{ t("course_setup_complete") }}</UButton
       >
     </template>
-    <div v-if="coursesStore.courses && coursesStore.courses.length > 0">
+    <div v-if="!coursesStore.isLoadingCourses && coursesStore.courses.length > 0">
       <UDashboardSection
         v-for="course in coursesStore.courses"
         :key="course.id"
