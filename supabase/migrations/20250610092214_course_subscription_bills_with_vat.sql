@@ -24,8 +24,6 @@ create or replace view public.course_subscription_bills_view as
         s.firstname as student_firstname,
         s.lastname as student_lastname,
         s.email as student_email,
-        c.name as course_name,
-        c.description as course_description,
         csb.vat_rate,
         csb.vat_amount
     from
@@ -33,9 +31,7 @@ create or replace view public.course_subscription_bills_view as
     join
         public.course_subscriptions cs on csb.course_subscription_id = cs.id
     join
-        public.students s on cs.student_id = s.id
-    join
-        public.courses c on cs.course_id = c.id;
+        public.students s on cs.student_id = s.id;
 
 -- Trigger to insert the VAT rate and amount into course_subscription_bills before inserting a new bill
 create or replace function public.set_vat_rate_and_amount()

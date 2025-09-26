@@ -1,7 +1,6 @@
 -- COURSE ACTIVITY SCHEDULES
 create table public.course_activity_schedules (
   id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
   activity_id    uuid references public.course_activities on delete cascade not null,
   assigned_to   uuid references public.users on delete set null,
   organization_id    uuid references public.organizations on delete cascade not null,

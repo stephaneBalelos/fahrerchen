@@ -36,10 +36,9 @@ export type Database = {
     Tables: {
       course_activities: {
         Row: {
-          activity_type: number
+          activity_type: Database["public"]["Enums"]["activity_types"]
           allow_requests: boolean
           allow_self_registration: boolean
-          course_id: string
           description: string
           id: string
           name: string
@@ -49,10 +48,9 @@ export type Database = {
           sorting_order: number
         }
         Insert: {
-          activity_type: number
+          activity_type: Database["public"]["Enums"]["activity_types"]
           allow_requests?: boolean
           allow_self_registration?: boolean
-          course_id: string
           description: string
           id?: string
           name: string
@@ -62,10 +60,9 @@ export type Database = {
           sorting_order?: number
         }
         Update: {
-          activity_type?: number
+          activity_type?: Database["public"]["Enums"]["activity_types"]
           allow_requests?: boolean
           allow_self_registration?: boolean
-          course_id?: string
           description?: string
           id?: string
           name?: string
@@ -75,34 +72,6 @@ export type Database = {
           sorting_order?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "course_activities_activity_type_fkey"
-            columns: ["activity_type"]
-            isOneToOne: false
-            referencedRelation: "course_activity_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activities_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["course_id"]
-          },
-          {
-            foreignKeyName: "course_activities_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activities_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
           {
             foreignKeyName: "course_activities_organization_id_fkey"
             columns: ["organization_id"]
@@ -119,12 +88,75 @@ export type Database = {
           },
         ]
       }
+      course_activities_combinations: {
+        Row: {
+          activity_id: string
+          course_id: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          activity_id: string
+          course_id: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          activity_id?: string
+          course_id?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activities_combinations_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_combinations_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "organizations_schedules_view"
+            referencedColumns: ["activity_id"]
+          },
+          {
+            foreignKeyName: "course_activities_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_activities_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activities_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       course_activity_schedules: {
         Row: {
           activity_id: string
           assigned_to: string | null
           attendees: string[]
-          course_id: string
           end_at: string
           id: string
           organization_id: string
@@ -135,7 +167,6 @@ export type Database = {
           activity_id: string
           assigned_to?: string | null
           attendees?: string[]
-          course_id: string
           end_at: string
           id?: string
           organization_id: string
@@ -146,7 +177,6 @@ export type Database = {
           activity_id?: string
           assigned_to?: string | null
           attendees?: string[]
-          course_id?: string
           end_at?: string
           id?: string
           organization_id?: string
@@ -190,27 +220,6 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
-            foreignKeyName: "course_activity_schedules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["course_id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
-          {
             foreignKeyName: "course_activity_schedules_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -231,7 +240,7 @@ export type Database = {
           activity_description: string
           activity_name: string
           activity_price: number
-          activity_type: number
+          activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id: string | null
           course_activity_schedule_id: string | null
           course_subscription_id: string
@@ -250,7 +259,7 @@ export type Database = {
           activity_description: string
           activity_name: string
           activity_price?: number
-          activity_type: number
+          activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
           course_subscription_id: string
@@ -269,7 +278,7 @@ export type Database = {
           activity_description?: string
           activity_name?: string
           activity_price?: number
-          activity_type?: number
+          activity_type?: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
           course_subscription_id?: string
@@ -335,13 +344,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_activity_schedules_attendances_activity_type_fkey"
-            columns: ["activity_type"]
-            isOneToOne: false
-            referencedRelation: "course_activity_types"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "course_activity_schedules_attendances_course_activity_id_fkey"
             columns: ["course_activity_id"]
             isOneToOne: false
@@ -371,24 +373,8 @@ export type Database = {
           },
         ]
       }
-      course_activity_types: {
-        Row: {
-          id: number
-          type: Database["public"]["Enums"]["activity_types"]
-        }
-        Insert: {
-          id?: number
-          type: Database["public"]["Enums"]["activity_types"]
-        }
-        Update: {
-          id?: number
-          type?: Database["public"]["Enums"]["activity_types"]
-        }
-        Relationships: []
-      }
       course_costs: {
         Row: {
-          course_id: string
           description: string
           id: string
           name: string
@@ -396,7 +382,6 @@ export type Database = {
           price: number
         }
         Insert: {
-          course_id: string
           description: string
           id?: string
           name: string
@@ -404,7 +389,6 @@ export type Database = {
           price?: number
         }
         Update: {
-          course_id?: string
           description?: string
           id?: string
           name?: string
@@ -412,27 +396,6 @@ export type Database = {
           price?: number
         }
         Relationships: [
-          {
-            foreignKeyName: "course_costs_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["course_id"]
-          },
-          {
-            foreignKeyName: "course_costs_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_costs_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
           {
             foreignKeyName: "course_costs_organization_id_fkey"
             columns: ["organization_id"]
@@ -449,9 +412,65 @@ export type Database = {
           },
         ]
       }
+      course_costs_combinations: {
+        Row: {
+          cost_id: string
+          course_id: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          cost_id: string
+          course_id: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          cost_id?: string
+          course_id?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_costs_combinations_cost_id_fkey"
+            columns: ["cost_id"]
+            isOneToOne: false
+            referencedRelation: "course_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_costs_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_costs_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       course_documents: {
         Row: {
-          course_id: string
           created_at: string
           description: string | null
           id: string
@@ -461,7 +480,6 @@ export type Database = {
           path: string
         }
         Insert: {
-          course_id: string
           created_at?: string
           description?: string | null
           id?: string
@@ -471,7 +489,6 @@ export type Database = {
           path: string
         }
         Update: {
-          course_id?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -482,27 +499,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["course_id"]
-          },
-          {
-            foreignKeyName: "course_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
-          {
             foreignKeyName: "course_documents_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -511,6 +507,63 @@ export type Database = {
           },
           {
             foreignKeyName: "course_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
+      course_documents_combinations: {
+        Row: {
+          course_id: string
+          document_id: string
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          course_id: string
+          document_id: string
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          course_id?: string
+          document_id?: string
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_documents_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_documents_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_documents_combinations_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "course_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_documents_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_documents_combinations_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "users_organizations_view"
@@ -520,51 +573,24 @@ export type Database = {
       }
       course_required_documents: {
         Row: {
-          course_id: string
           description: string
           id: string
           name: string
-          name_slug: string | null
           organization_id: string
         }
         Insert: {
-          course_id: string
           description: string
           id?: string
           name: string
-          name_slug?: string | null
           organization_id: string
         }
         Update: {
-          course_id?: string
           description?: string
           id?: string
           name?: string
-          name_slug?: string | null
           organization_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "course_required_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["course_id"]
-          },
-          {
-            foreignKeyName: "course_required_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_required_documents_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
           {
             foreignKeyName: "course_required_documents_organization_id_fkey"
             columns: ["organization_id"]
@@ -581,9 +607,66 @@ export type Database = {
           },
         ]
       }
+      course_required_documents_combinations: {
+        Row: {
+          course_id: string
+          id: string
+          organization_id: string
+          required_document_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          organization_id: string
+          required_document_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          organization_id?: string
+          required_document_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_required_documents_combination_required_document_id_fkey"
+            columns: ["required_document_id"]
+            isOneToOne: false
+            referencedRelation: "course_required_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_required_documents_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions_view"
+            referencedColumns: ["course_id"]
+          },
+          {
+            foreignKeyName: "course_required_documents_combinations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_required_documents_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_required_documents_combinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "users_organizations_view"
+            referencedColumns: ["organization_id"]
+          },
+        ]
+      }
       course_subscription_bill_items: {
         Row: {
-          activity_type: number | null
+          activity_type: Database["public"]["Enums"]["activity_types"]
           bill_id: string | null
           course_activity_attendance_id: string | null
           course_cost_id: string | null
@@ -596,7 +679,7 @@ export type Database = {
           title: string
         }
         Insert: {
-          activity_type?: number | null
+          activity_type: Database["public"]["Enums"]["activity_types"]
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
@@ -609,7 +692,7 @@ export type Database = {
           title: string
         }
         Update: {
-          activity_type?: number | null
+          activity_type?: Database["public"]["Enums"]["activity_types"]
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
@@ -627,13 +710,6 @@ export type Database = {
             columns: ["course_activity_attendance_id"]
             isOneToOne: false
             referencedRelation: "course_activity_schedules_attendances"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_items_activity_type_fkey"
-            columns: ["activity_type"]
-            isOneToOne: false
-            referencedRelation: "course_activity_types"
             referencedColumns: ["id"]
           },
           {
@@ -871,13 +947,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_subscriptions_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
-          {
             foreignKeyName: "course_subscriptions_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -902,35 +971,23 @@ export type Database = {
       }
       courses: {
         Row: {
-          allow_self_registration: boolean
-          create_bill_on_subscription: boolean
-          description: string
           id: string
           inserted_at: string
           is_active: boolean
-          name: string
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Insert: {
-          allow_self_registration?: boolean
-          create_bill_on_subscription?: boolean
-          description: string
           id?: string
           inserted_at?: string
           is_active?: boolean
-          name: string
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Update: {
-          allow_self_registration?: boolean
-          create_bill_on_subscription?: boolean
-          description?: string
           id?: string
           inserted_at?: string
           is_active?: boolean
-          name?: string
           organization_id?: string
           type?: Database["public"]["Enums"]["course_type"]
         }
@@ -944,78 +1001,6 @@ export type Database = {
           },
           {
             foreignKeyName: "courses_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "users_organizations_view"
-            referencedColumns: ["organization_id"]
-          },
-        ]
-      }
-      notifications_jobs: {
-        Row: {
-          actor_id: string | null
-          batch_key: string | null
-          created_at: string
-          id: number
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          organization_id: string
-          payload: Json
-          status: Database["public"]["Enums"]["notification_job_status"]
-          updated_at: string
-        }
-        Insert: {
-          actor_id?: string | null
-          batch_key?: string | null
-          created_at?: string
-          id?: number
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          organization_id: string
-          payload: Json
-          status: Database["public"]["Enums"]["notification_job_status"]
-          updated_at?: string
-        }
-        Update: {
-          actor_id?: string | null
-          batch_key?: string | null
-          created_at?: string
-          id?: number
-          notification_type?: Database["public"]["Enums"]["notification_type"]
-          organization_id?: string
-          payload?: Json
-          status?: Database["public"]["Enums"]["notification_job_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "notifications_jobs_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["student_user_id"]
-          },
-          {
-            foreignKeyName: "notifications_jobs_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_jobs_actor_id_fkey"
-            columns: ["actor_id"]
-            isOneToOne: false
-            referencedRelation: "users_organizations_view"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "notifications_jobs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_jobs_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "users_organizations_view"
@@ -1152,78 +1137,6 @@ export type Database = {
           },
         ]
       }
-      organization_notifications: {
-        Row: {
-          author_id: string | null
-          batch_key: string | null
-          created_at: string
-          id: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          organization_id: string
-          payload: Json
-          target_user_ids: string[]
-          updated_at: string
-        }
-        Insert: {
-          author_id?: string | null
-          batch_key?: string | null
-          created_at?: string
-          id?: string
-          notification_type: Database["public"]["Enums"]["notification_type"]
-          organization_id: string
-          payload: Json
-          target_user_ids: string[]
-          updated_at?: string
-        }
-        Update: {
-          author_id?: string | null
-          batch_key?: string | null
-          created_at?: string
-          id?: string
-          notification_type?: Database["public"]["Enums"]["notification_type"]
-          organization_id?: string
-          payload?: Json
-          target_user_ids?: string[]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "organization_notifications_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions_view"
-            referencedColumns: ["student_user_id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "users_organizations_view"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "organization_notifications_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "users_organizations_view"
-            referencedColumns: ["organization_id"]
-          },
-        ]
-      }
       organizations: {
         Row: {
           address_city: string
@@ -1245,20 +1158,20 @@ export type Database = {
           website: string | null
         }
         Insert: {
-          address_city?: string
-          address_country?: string
-          address_street?: string
-          address_zip?: string
+          address_city: string
+          address_country: string
+          address_street: string
+          address_zip: string
           allow_self_registration?: boolean
           avatar_path?: string | null
           description?: string | null
-          email?: string
+          email: string
           handle: string
           id?: string
           inserted_at?: string
           name: string
           owner_id: string
-          phone_number?: string
+          phone_number: string
           preferred_language?: string
           setup_completed?: boolean
           website?: string | null
@@ -1573,13 +1486,6 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "students_registration_requests_requested_course_id_fkey"
-            columns: ["requested_course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
         ]
       }
       users: {
@@ -1621,10 +1527,9 @@ export type Database = {
         Row: {
           bill_number: string | null
           canceled_at: string | null
-          course_description: string | null
           course_id: string | null
-          course_name: string | null
           course_subscription_id: string | null
+          course_type: Database["public"]["Enums"]["course_type"] | null
           created_at: string | null
           id: string | null
           organization_id: string | null
@@ -1683,13 +1588,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_subscriptions_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "organizations_schedules_view"
-            referencedColumns: ["course_id"]
-          },
-          {
             foreignKeyName: "course_subscriptions_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
@@ -1702,9 +1600,7 @@ export type Database = {
         Row: {
           archived_at: string | null
           costs: number | null
-          course_description: string | null
           course_id: string | null
-          course_name: string | null
           course_type: Database["public"]["Enums"]["course_type"] | null
           id: string | null
           inserted_at: string | null
@@ -1747,15 +1643,12 @@ export type Database = {
           activity_description: string | null
           activity_id: string | null
           activity_name: string | null
-          activity_type: number | null
+          activity_type: Database["public"]["Enums"]["activity_types"] | null
           assigned_to_avatar_path: string | null
           assigned_to_email: string | null
           assigned_to_firstname: string | null
           assigned_to_fullname: string | null
           assigned_to_lastname: string | null
-          course_description: string | null
-          course_id: string | null
-          course_name: string | null
           schedule_assigned_to: string | null
           schedule_attendees: string[] | null
           schedule_end_at: string | null
@@ -1765,13 +1658,6 @@ export type Database = {
           schedule_status: Database["public"]["Enums"]["schedule_status"] | null
         }
         Relationships: [
-          {
-            foreignKeyName: "course_activities_activity_type_fkey"
-            columns: ["activity_type"]
-            isOneToOne: false
-            referencedRelation: "course_activity_types"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
             columns: ["schedule_assigned_to"]
@@ -1848,10 +1734,6 @@ export type Database = {
         Args: { course_id: string; org_id: string; student_id: string }
         Returns: boolean
       }
-      course_allows_self_registration: {
-        Args: { course_id: string }
-        Returns: boolean
-      }
       course_subscription_belongs_to_student_user: {
         Args: { course_subscription_id: string }
         Returns: boolean
@@ -1883,10 +1765,6 @@ export type Database = {
       remove_subscription_from_active_schedules: {
         Args: { course_subscription_id: string }
         Returns: undefined
-      }
-      should_course_create_bill_on_subscription: {
-        Args: { course_id: string }
-        Returns: boolean
       }
       slugify: {
         Args: { value: string }
@@ -1930,14 +1808,27 @@ export type Database = {
         | "courses.create"
         | "courses.update"
         | "courses.delete"
-        | "course_documents.read"
-        | "course_documents.create"
-        | "course_documents.update"
-        | "course_documents.delete"
+        | "course_costs.read"
+        | "course_costs.create"
+        | "course_costs.update"
+        | "course_costs.delete"
+        | "course_costs_combinations.read"
+        | "course_costs_combinations.create"
+        | "course_costs_combinations.delete"
         | "course_required_documents.read"
         | "course_required_documents.create"
         | "course_required_documents.update"
         | "course_required_documents.delete"
+        | "course_required_documents_combinations.read"
+        | "course_required_documents_combinations.create"
+        | "course_required_documents_combinations.delete"
+        | "course_documents.read"
+        | "course_documents.create"
+        | "course_documents.update"
+        | "course_documents.delete"
+        | "course_documents_combinations.read"
+        | "course_documents_combinations.create"
+        | "course_documents_combinations.delete"
         | "course_subscriptions.read"
         | "course_subscriptions.create"
         | "course_subscriptions.update"
@@ -1950,14 +1841,13 @@ export type Database = {
         | "course_activities.create"
         | "course_activities.update"
         | "course_activities.delete"
+        | "course_activities_combinations.read"
+        | "course_activities_combinations.create"
+        | "course_activities_combinations.delete"
         | "course_activity_schedules_attendances.read"
         | "course_activity_schedules_attendances.create"
         | "course_activity_schedules_attendances.update"
         | "course_activity_schedules_attendances.delete"
-        | "course_costs.read"
-        | "course_costs.create"
-        | "course_costs.update"
-        | "course_costs.delete"
         | "course_activity_schedules.read"
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
@@ -1992,19 +1882,15 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
-      notification_job_status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
       notification_type:
-        | "course_subscriptions.inserted"
-        | "course_activity_schedules.assigned_to.updated"
-        | "course_activity_schedules.attendees.updated"
-        | "course_activity_schedules.status.updated"
-        | "course_activity_schedules.date.updated"
-        | "course_activity_schedules.deleted"
-        | "course_activity_schedules_attendances.inserted"
-        | "course_subscription_bills.paid_at.updated"
-        | "course_subscription_bills.ready_to_pay.updated"
-        | "course_subscription_bills.canceled_at.updated"
-        | "students_registration_requests.inserted"
+        | "students_registration_requests.created"
+        | "course_subscriptions.created"
+        | "course_activity_schedules.updated"
+        | "course_activity_schedules.assigned"
+        | "course_subscription_bills.ready_to_pay"
+        | "course_subscription_bills.updated"
+        | "course_subscription_bills.paid"
+        | "course_subscription_bills.canceled"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
@@ -2690,14 +2576,27 @@ export const Constants = {
         "courses.create",
         "courses.update",
         "courses.delete",
-        "course_documents.read",
-        "course_documents.create",
-        "course_documents.update",
-        "course_documents.delete",
+        "course_costs.read",
+        "course_costs.create",
+        "course_costs.update",
+        "course_costs.delete",
+        "course_costs_combinations.read",
+        "course_costs_combinations.create",
+        "course_costs_combinations.delete",
         "course_required_documents.read",
         "course_required_documents.create",
         "course_required_documents.update",
         "course_required_documents.delete",
+        "course_required_documents_combinations.read",
+        "course_required_documents_combinations.create",
+        "course_required_documents_combinations.delete",
+        "course_documents.read",
+        "course_documents.create",
+        "course_documents.update",
+        "course_documents.delete",
+        "course_documents_combinations.read",
+        "course_documents_combinations.create",
+        "course_documents_combinations.delete",
         "course_subscriptions.read",
         "course_subscriptions.create",
         "course_subscriptions.update",
@@ -2710,14 +2609,13 @@ export const Constants = {
         "course_activities.create",
         "course_activities.update",
         "course_activities.delete",
+        "course_activities_combinations.read",
+        "course_activities_combinations.create",
+        "course_activities_combinations.delete",
         "course_activity_schedules_attendances.read",
         "course_activity_schedules_attendances.create",
         "course_activity_schedules_attendances.update",
         "course_activity_schedules_attendances.delete",
-        "course_costs.read",
-        "course_costs.create",
-        "course_costs.update",
-        "course_costs.delete",
         "course_activity_schedules.read",
         "course_activity_schedules.create",
         "course_activity_schedules.update",
@@ -2754,19 +2652,15 @@ export const Constants = {
         "L",
         "T",
       ],
-      notification_job_status: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
       notification_type: [
-        "course_subscriptions.inserted",
-        "course_activity_schedules.assigned_to.updated",
-        "course_activity_schedules.attendees.updated",
-        "course_activity_schedules.status.updated",
-        "course_activity_schedules.date.updated",
-        "course_activity_schedules.deleted",
-        "course_activity_schedules_attendances.inserted",
-        "course_subscription_bills.paid_at.updated",
-        "course_subscription_bills.ready_to_pay.updated",
-        "course_subscription_bills.canceled_at.updated",
-        "students_registration_requests.inserted",
+        "students_registration_requests.created",
+        "course_subscriptions.created",
+        "course_activity_schedules.updated",
+        "course_activity_schedules.assigned",
+        "course_subscription_bills.ready_to_pay",
+        "course_subscription_bills.updated",
+        "course_subscription_bills.paid",
+        "course_subscription_bills.canceled",
       ],
       schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],
       schedule_type: ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],

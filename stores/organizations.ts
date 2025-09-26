@@ -1,17 +1,17 @@
-import type { Database, AppUserOrganizationsView, AppOrganization } from "~/types/app.types"
+import type { Database, AppOrganization } from "~/types/app.types"
 import { useUserStore } from "./user"
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
-    const organizations = ref<AppUserOrganizationsView[]>([])
+    const organizations = ref<AppOrganization[]>([])
     const isLoading = ref(true)
     const route = useRoute()
 
     // Selected organization based on route param org_id
     const selectedOrganization = computed(() => {
         if (route.params.org_id && organizations.value.length > 0) {
-            return organizations.value.find(o => o.organization_id === route.params.org_id) || null
+            return organizations.value.find(o => o.id === route.params.org_id) || null
         }
         return null
     });
@@ -20,7 +20,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         if (!selectedOrganization.value) {
             return '/my'
         }
-        return `/my/${selectedOrganization.value.organization_id}${path}`
+        return `/my/${selectedOrganization.value.id}${path}`
     }
 
 
@@ -32,15 +32,14 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             return
         }
         const { data, error } = await supabase
-            .from('users_organizations_view')
-            .select('*')
+            .from('organization_members')
+            .select('id, organization:organization_id(*)')
             .eq('user_id', userStore.user.id)
-            .overrideTypes<AppUserOrganizationsView[]>()
         if (error) {
             console.error("Error loading organizations memberships:", error)
             organizations.value = []
         } else {
-            organizations.value = data || []
+            organizations.value = data ? data.map(d => (d.organization)) : []
         }
         isLoading.value = false
     }
@@ -50,11 +49,11 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         if (organizations.value.length === 0) {
             await loadOrganizationsMemberships()
         }
-        const org = organizations.value.find(o => o.organization_id === id)
+        const org = organizations.value.find(o => o.id === id)
         if (!org) {
             await loadOrganizationsMemberships()
         }
-        return organizations.value.find(o => o.organization_id === id) || null
+        return organizations.value.find(o => o.id === id) || null
     }
 
     const updateOrganizationById = async (id: string, updates: Partial<AppOrganization>) => {

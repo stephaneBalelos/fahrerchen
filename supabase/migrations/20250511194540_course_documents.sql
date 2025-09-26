@@ -1,7 +1,6 @@
 -- COURSE DOCUMENTS
 create table public.course_documents (
   id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
   name          text,
   description   text,
   path         text not null,
@@ -17,7 +16,6 @@ grant update (name, description) on table public.course_documents to authenticat
 
 -- Indexes for faster lookups
 create index idx_course_documents_organization_id on public.course_documents(organization_id);
-create index idx_course_documents_course_id on public.course_documents(course_id);
 create index idx_course_documents_path on public.course_documents(path);
 
 -- Course Documents Policies
@@ -54,8 +52,8 @@ begin
   end if;
   
   if (TG_OP = 'INSERT') then
-    insert into public.course_documents (course_id, organization_id, name, description, path)
-    values (((storage.foldername(new.name))[2])::uuid, ((storage.foldername(new.name))[1])::uuid, null, null, array_to_string(new.path_tokens, '/'));
+    insert into public.course_documents (organization_id, name, description, path)
+    values (((storage.foldername(new.name))[1])::uuid, null, null, array_to_string(new.path_tokens, '/'));
     return new;
   end if;
   
@@ -80,3 +78,28 @@ create trigger "handle_course_documents_delete" after delete on storage.objects
 for each row
 when (old.bucket_id = 'course_documents')
 execute procedure public.handle_course_documents_storage_ops();
+
+-- Course Documents Combinations
+create table public.course_documents_combinations (
+  id            uuid default uuid_generate_v4() primary key,
+  course_id    uuid references public.courses on delete cascade not null,
+  document_id   uuid references public.course_documents on delete cascade not null,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_id, document_id)
+);
+comment on table public.course_documents_combinations is 'COURSE DOCUMENTS COMBINATIONS.';
+alter table public.course_documents_combinations enable row level security;
+revoke update on table public.course_documents_combinations from authenticated, anon;
+
+-- Indexes for faster lookups
+create index idx_course_documents_combinations_organization_id on public.course_documents_combinations(organization_id);
+
+-- COURSE DOCUMENTS COMBINATIONS POLICIES
+create policy "owner_manager_teacher_student_can_see_course_documents_combinations" on public.course_documents_combinations for select to authenticated using (public.authorize('course_documents_combinations.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_documents_combinations.read'), ('manager', 'course_documents_combinations.read'), ('teacher', 'course_documents_combinations.read'), ('student', 'course_documents_combinations.read');
+
+create policy "owner_can_create_course_documents_combinations" on public.course_documents_combinations for insert to authenticated with check (public.authorize('course_documents_combinations.create', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_documents_combinations.create');
+
+create policy "owner_can_delete_course_documents_combinations" on public.course_documents_combinations for delete to authenticated using (public.authorize('course_documents_combinations.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_documents_combinations.delete');

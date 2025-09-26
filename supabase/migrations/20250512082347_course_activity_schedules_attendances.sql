@@ -4,7 +4,7 @@ create table public.course_activity_schedules_attendances (
   -- activity schedule data remains, in the case activity is deleted or edited
   activity_name  text not null,
   activity_description text not null,
-  activity_type  integer references public.course_activity_types not null,
+  activity_type  public.activity_types not null,
   activity_price        numeric default 0 not null check (activity_price >= 0),
   schedule_start_at     timestamp with time zone not null,
   schedule_end_at       timestamp with time zone not null,

@@ -9,11 +9,12 @@ export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Ro
 export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
 export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
+export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
 export type AppCourseCost = DatabaseGenerated['public']['Tables']['course_costs']['Row']
-export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
+export type CourseCostEdit = Omit<AppCourseCost, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
 export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']
-export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['course_activity_types']['Row']
+export type CourseActivityEdit = Omit<AppCourseActivity, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
@@ -26,7 +27,6 @@ export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['c
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
 export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']
-export type AppOrganizationNotification = DatabaseGenerated['public']['Tables']['organization_notifications']['Row']
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
@@ -59,86 +59,6 @@ export type AppCourseSubscriptionsView = Database["public"]["Views"]["course_sub
 export type AppCourseSubscriptionBillsView = Database["public"]["Views"]["course_subscription_bills_view"]["Row"]
 
 export type Database = MergeDeep<DatabaseGenerated, {
-  public: {
-    Views: {
-      users_organizations_view: {
-        Row: {
-          user_id: string
-          user_email: string
-          user_firstname: string | null
-          user_lastname: string | null
-          user_fullname: string | null
-          organization_id: string,
-          organization_handle: string
-          organization_name: string
-          organization_description: string | null
-          organization_avatar_path: string | null
-          organization_preferred_language: string
-          organization_role: UserRole
-          organization_membership_inserted_at: string
-        }
-      },
-      organizations_schedules_view: {
-        Row: {
-          schedule_id: string
-          schedule_organization_id: string
-          schedule_start_at: string
-          schedule_end_at: string
-          schedule_attendees: string[]
-          schedule_status: DatabaseGenerated["public"]["Enums"]["schedule_status"]
-          schedule_assigned_to: string
-          activity_id: string
-          activity_name: string
-          activity_description: string
-          activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"]
-          course_id: string
-          course_name: string
-          course_description: string
-        }
-      },
-      course_subscriptions_view: {
-        Row: {
-          id: string
-          student_id: string
-          inserted_at: string
-          archived_at: string | null
-          costs: number
-          organization_id: string
-          student_firstname: string
-          student_lastname: string
-          student_email: string
-          student_full_name: string
-          student_avatar_path: string | null
-          course_name: string
-          course_description: string
-          course_id: string
-          course_type: AppCourseType
-        }
-      },
-      course_subscription_bills_view: {
-        Row: {
-          id: string,
-          bill_number: string,
-          organization_id: string,
-          total: number,
-          vat_rate: number,
-          vat_amount: number,
-          total_with_vat: number,
-          paid_at: string | null,
-          canceled_at: string | null,
-          created_at: string,
-          course_subscription_id: string,
-          course_id: string,
-          student_id: string,
-          student_firstname: string,
-          student_lastname: string,
-          student_email: string,
-          course_name: string,
-          course_description: string,
-        }
-      }
-    };
-  };
   storage: {
     Tables: {
       objects: {

@@ -26,11 +26,11 @@ create table public.course_subscription_bill_items (
   bill_id      uuid references public.course_subscription_bills on delete cascade,
   course_cost_id    uuid references public.course_costs on delete set null,
   course_activity_attendance_id    uuid references public.course_activity_schedules_attendances on delete set null,
-  activity_type  integer references public.course_activity_types, -- 0: THEORY, 1: PRACTICAL, 2: EXAM, 3: OTHER, null: Base Cost
+  activity_type  public.activity_types not null,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   title        text not null,
   description   text not null,
-  price       numeric default 0 not null, -- price can be negative if the atten
+  price       numeric default 0 not null, -- price can be negative if the attendance was refunded
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   check (
@@ -189,10 +189,15 @@ begin
     raise exception 'course_subscription_is_not_active';
   end if;
 
-  -- Loop through all the costs and create a bill item for each one
+  -- Loop through all the course costs combinations for the course
   for cost_id, cost_name, cost_description, cost_price in
-    select id, name, description, price from public.course_costs where course_id = new.course_id and organization_id = new.organization_id
+    select c.id, c.name, c.description, c.price
+    from public.course_costs c
+    join public.course_costs_combinations ccc on ccc.cost_id = c.id
+    where ccc.course_id = new.course_id
+      and ccc.organization_id = new.organization_id
   loop
+    -- Insert a bill item for each cost
     insert into public.course_subscription_bill_items (course_subscription_id, course_cost_id, title, description, price, organization_id)
     values (new.id, cost_id, cost_name, cost_description, cost_price, new.organization_id);
   end loop;

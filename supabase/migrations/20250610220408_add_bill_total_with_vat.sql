@@ -22,11 +22,10 @@ create or replace view public.course_subscription_bills_view as
         s.firstname as student_firstname,
         s.lastname as student_lastname,
         s.email as student_email,
-        c.name as course_name,
-        c.description as course_description,
         csb.vat_rate,
         csb.vat_amount,
-        csb.total_with_vat -- Include the new column in the view
+        csb.total_with_vat, -- Include the new column in the view
+        c.type as course_type
     from
         public.course_subscription_bills csb
     join

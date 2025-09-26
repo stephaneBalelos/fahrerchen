@@ -15,15 +15,11 @@ create or replace view public.course_subscription_bills_view as
         cs.student_id as student_id,
         s.firstname as student_firstname,
         s.lastname as student_lastname,
-        s.email as student_email,
-        c.name as course_name,
-        c.description as course_description
+        s.email as student_email
     from
         public.course_subscription_bills csb
     join
         public.course_subscriptions cs on csb.course_subscription_id = cs.id
     join
-        public.students s on cs.student_id = s.id
-    join
-        public.courses c on cs.course_id = c.id;
+        public.students s on cs.student_id = s.id;
 

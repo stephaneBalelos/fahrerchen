@@ -43,18 +43,13 @@ create or replace view public.organizations_schedules_view as
         a.id as activity_id,
         a.name as activity_name,
         a.description as activity_description,
-        a.activity_type as activity_type,
-        c.id as course_id,
-        c.name as course_name,
-        c.description as course_description
+        a.activity_type as activity_type
     from
         public.course_activity_schedules s
     join
         public.course_activities a on s.activity_id = a.id
     left join
-        public.users u on s.assigned_to = u.id
-    join
-        public.courses c on a.course_id = c.id;
+        public.users u on s.assigned_to = u.id;
 
         
 
