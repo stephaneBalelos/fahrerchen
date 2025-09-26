@@ -1,4 +1,4 @@
-import type { Database, AppOrganization } from "~/types/app.types"
+import type { Database, AppOrganization, OrganizationEdit } from "~/types/app.types"
 import { useUserStore } from "./user"
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
@@ -67,6 +67,16 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }
 
+    const createOrganization = async (data: OrganizationEdit) => {
+        const { error } = await supabase
+            .from('organizations')
+            .insert(data)
+        if (error) {
+            throw error
+        }
+        await loadOrganizationsMemberships()
+    }
+
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
             organizations.value = []
@@ -75,7 +85,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, relativePath, selectedOrganization, isLoading }
+    return { organizations, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading }
 
 
 })

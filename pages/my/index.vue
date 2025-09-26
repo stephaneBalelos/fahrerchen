@@ -17,7 +17,6 @@ function openCreateOrgModal() {
       modal.close();
     },
     onCreated: async () => {
-      await organizationsStore.loadOrganizationsMemberships();
       modal.close();
     },
   })

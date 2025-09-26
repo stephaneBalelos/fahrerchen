@@ -119,10 +119,9 @@
 
 <script setup lang="ts">
 import * as z from "zod";
-import type { Database } from "~/types/app.types";
 
 const user = useSupabaseUser();
-const client = useSupabaseClient<Database>();
+const userOrganizationsStore = useUserOrganizationsStore();
 
 const { t, locale } = useI18n({
   useScope: "local",
@@ -217,13 +216,16 @@ const createOrganization = async () => {
 
   try {
     isSubmitting.value = true;
-    console.log("Creating organization with state:", state.value);
     const data = {
       name: state.value.name,
-      email: user.value.email,
-      handle: "ds",
+      email: state.value.email,
+      handle: state.value.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "")
+        .substring(0, 50),
       phone_number: state.value.phone_number,
-      website: "https://example.com",
+      website: "",
       owner_id: user.value.id,
       preferred_language: locale.value === "de" ? "de" : "en",
       address_city: state.value.address_city,
@@ -232,13 +234,7 @@ const createOrganization = async () => {
       address_zip: state.value.address_zip,
       allow_self_registration: false,
     };
-
-    const { error } = await client
-      .from("organizations")
-      .insert(data)
-    if (error) {
-      throw error;
-    }
+    await userOrganizationsStore.createOrganization(data);
     $emits("created");
   } catch (error) {
     console.error("Error creating organization:", error);

@@ -7,6 +7,7 @@ export type RolePermission = DatabaseGenerated['public']['Enums']['app_permissio
 export type AppUser = DatabaseGenerated['public']['Tables']['users']['Row']
 export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Row'] & { role: UserRole }
 export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
+export type OrganizationEdit = Omit<AppOrganization, 'id' | 'description' | 'inserted_at' | 'updated_at' | 'setup_completed' | 'allow_self_registration' | 'avatar_path'>
 export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
 export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
