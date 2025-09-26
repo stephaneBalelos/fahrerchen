@@ -1,174 +1,117 @@
 <template>
-  <UDashboardSection
-    icon="i-heroicons-user"
+  <UPageHeader
     :title="t('compose_your_courses')"
     :description="t('compose_your_courses_description')"
   >
-  <template #links>
-
-      <UDropdown :items="createOptions">
-        <UButton
-          color="gray"
-          icon="i-heroicons-plus"
-          :label="t('create_new_course')"
-          />
-      </UDropdown>
+    <template #links>
       <UButton
         v-if="isCourseSetupComplete"
         color="primary"
         icon="i-heroicons-check-circle"
         @click="$emits('course-setup-completed')"
-        >{{ t("course_setup_complete") }}</UButton
+        >{{ t("course_setup_complete", { count: coursesStore.courses.filter(c => c.is_active).length }) }}</UButton
       >
     </template>
-    <div v-if="!coursesStore.isLoadingCourses && coursesStore.courses.length > 0">
-      <UDashboardSection
-        v-for="course in coursesStore.courses"
-        :key="course.id"
-        :title="course.name"
-        :description="course.description"
-        class="p-4 mt-0 border border-gray-400 dark:border-gray-800 rounded-lg mb-4"
-      >
-        <template #icon>
-          <UAvatar size="lg" color="primary" :icon="COURSE_ICONS['A']" />
-        </template>
-        <template #links>
-          <UButton
-            size="sm"
-            color="gray"
-            :label="t('edit_course')"
-            icon="i-heroicons-pencil-square"
-            @click="() => {
-                openCreateCourseModal(course.id);
-            }"
-          />
-          <UButton
-            size="sm"
-            color="red"
-            variant="soft"
-            icon="i-heroicons-trash"
-            @click="() => deleteCourse(course.id)"
-          />
-        </template>
-        <CourseCostsList
-          :orgid="course.organization_id"
-          :courseid="course.id"
-        />
+    <div
+      v-if="coursesStore.courses.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 gap-4 py-12"
+    >
+      <UCard 
+      v-for="course in coursesStore.courses" :key="course.id"
+      :ui="{
+        base: 'flex flex-col',
+        ring: `${course.is_active ? 'ring-primary-500' : ''}`,
 
-        <CourseActivitiesList
-          :orgid="course.organization_id"
-          :courseid="course.id"
-        />
-
-        <CourseRequirementsList
-          :orgid="course.organization_id"
-          :courseid="course.id"
-        />
-      </UDashboardSection>
+        body: {
+          base: 'flex-1'
+        }
+      }">
+        <template #header>
+          <div class="flex items-center gap-4">
+            <UAvatar
+              size="lg"
+              color="primary"
+              :icon="COURSE_ICONS[course.type]"
+            />
+            <div class="flex items-center gap-2">
+              <span class="text-lg font-semibold">{{
+                t("driving_license_of_type", {
+                  type: g(`course_types.${course.type}.name`),
+                })
+              }}</span>
+            </div>
+          </div>
+        </template>
+        <p>
+          {{ g(`course_types.${course.type}.description`) }}
+        </p>
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <UButton
+              v-if="!course.is_active"
+              size="sm"
+              color="primary"
+              icon="i-heroicons-plus-circle"
+              @click="() => coursesStore.setCourseActiveStatus(course.id, true)"
+              >{{ t("activate_course") }}</UButton
+            >
+                <UBadge
+                v-if="course.is_active"
+                color="green"
+                variant="soft"
+                size="sm"
+                >{{ t("course_activated") }}</UBadge
+              >
+            <UButton
+              v-if="course.is_active"
+              size="sm"
+              color="red"
+              variant="soft"
+              icon="i-heroicons-trash"
+              @click="
+                () => coursesStore.setCourseActiveStatus(course.id, false)
+              "
+            />
+          </div>
+        </template>
+      </UCard>
     </div>
     <div v-else>
-      <UPageHero
-        :title="t('no_courses')"
-        :description="t('no_courses_description')"
-        :align="'center'"
-        :links="[
-          {
-            label: t('use_default_course_template'),
-            click: () => openCreateCourseFromTemplateModal(),
-            color: 'primary',
-          },
-          {
-            label: t('manually_create_new_course'),
-            click: () => openCreateCourseModal(),
-            color: 'gray',
-          },
-        ]"
+      <div v-if="coursesStore.isLoadingCourses" class="space-y-2">
+        <USkeleton class="h-24 w-full" />
+        <USkeleton class="h-24 w-full" />
+      </div>
+      <UAlert
+        v-else
+        icon="i-heroicons-exclamation-triangle-20-solid"
+        color="red"
+        variant="subtle"
+        :title="t('failed_to_load_courses')"
+        :description="t('failed_to_load_courses_description')"
       />
     </div>
-  </UDashboardSection>
+  </UPageHeader>
 </template>
 
 <script setup lang="ts">
 import { COURSE_ICONS } from "~/constants";
-import EditCourseForm from "../forms/EditCourseForm.vue";
-import CourseActivitiesList from "../courses/settings/CourseActivitiesList.vue";
-import CourseCostsList from "../courses/settings/CourseCostsList.vue";
-import CourseRequirementsList from "../courses/settings/CourseRequiredDocumentsList.vue";
-import CreateCourseFromTemplateModal from "../forms/CreateCourseFromTemplateModal.vue";
 import { computedAsync } from "@vueuse/core";
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const modal = useModal();
-const userOrganizationsStore = useUserOrganizationsStore();
+const { t: g } = useI18n({
+  useScope: "global",
+});
 const coursesStore = useCoursesStore();
 const $emits = defineEmits(["course-setup-completed"]);
 
-const createOptions = ref([[
-  {
-    label: t("use_default_course_template"),
-    click: () => openCreateCourseFromTemplateModal(),
-  },
-  {
-    label: t("manually_create_new_course"),
-    click: () => openCreateCourseModal(),
-  },
-]]);
-
-
-
-const openCreateCourseModal = (course_id?: string) => {
-  if (userOrganizationsStore.selectedOrganization) {
-    modal.open(EditCourseForm, {
-      organizationId:
-        userOrganizationsStore.selectedOrganization.organization_id,
-        courseId: course_id,
-      "onCourse-created": async () => {
-        await coursesStore.loadCourses();
-        modal.close();
-      },
-      "onCourse-updated": async () => {
-        await coursesStore.loadCourses();
-        modal.close();
-      },
-    });
-  }
-};
-
-const openCreateCourseFromTemplateModal = () => {
-  if (userOrganizationsStore.selectedOrganization) {
-    modal.open(CreateCourseFromTemplateModal, {
-      "onCourse-created": async () => {
-        console.log("Course created from template");
-        modal.close();
-        await nextTick();
-        await coursesStore.loadCourses();
-      },
-      "onClose": () => {
-        modal.close();
-      },
-    });
-  }
-};
-
-const deleteCourse = async (course_id: string) => {
-  if (confirm(t("confirm_delete_course"))) {
-    await coursesStore.deleteCourse(course_id);
-    await coursesStore.loadCourses();
-  }
-};
-
 const isCourseSetupComplete = computedAsync(async () => {
   const hasCourses = coursesStore.courses.length > 0;
-  const everyCourseHasActivities = await Promise.all(coursesStore.courses.map(
-    async (course) => {
-      const activities = await coursesStore.getCourseActivities(course.id);
-      return activities.length > 0;
-    }
-  ));
-  return hasCourses && everyCourseHasActivities.every((hasActivities) => hasActivities);
+  // at least one course is active
+  const hasActiveCourse = coursesStore.courses.some((c) => c.is_active);
+  return hasCourses && hasActiveCourse;
 }, false);
 </script>
 
@@ -177,42 +120,25 @@ const isCourseSetupComplete = computedAsync(async () => {
 <i18n lang="json">
 {
   "de": {
-    "compose_your_courses": "Kurse zusammenstellen",
-    "compose_your_courses_description":
-      "Erstellen Sie Kurse und fügen Sie Aktivitäten, Kosten und erforderliche Dokumente hinzu.",
-    "create_new_course": "Neuen Kurs erstellen",
-    "use_default_course_template": "Standard-Kursvorlage verwenden",
-    "manually_create_new_course": "Neuen Kurs manuell erstellen",
-    "course_setup_complete": "Kurseinrichtung abgeschlossen",
-    "no_courses": "Keine Kurse",
-    "no_courses_description":
-      "Es wurden noch keine Kurse erstellt. Klicken Sie unten, um Ihren ersten Kurs zu erstellen.",
-    "create_course": "Kurs erstellen",
-    "edit_course": "Kurs bearbeiten",
-    "confirm_delete_course": "Sind Sie sicher, dass Sie diesen Kurs löschen möchten?",
-    "course_saved": "Kurs gespeichert",
-    "course_saved_description": "Der Kurs wurde erfolgreich gespeichert.",
-    "course_deleted": "Kurs gelöscht",
-    "course_deleted_description": "Der Kurs wurde erfolgreich gelöscht."
+    "compose_your_courses": "Ihre Kursangebote zusammenstellen",
+    "compose_your_courses_description": "Wählen Sie die Führerscheinklassen aus, die Sie in Ihrer Fahrschule anbieten möchten. Sie können dies jederzeit anpassen.",
+    "activate_course": "Kurs aktivieren",
+    "driving_license_of_type": "Führerschein der Klasse {type}",
+    "course_setup_complete": "Weiter mit {count} aktiven Kurs(en)",
+    "course_activated": "Kurs aktiviert",
+    "failed_to_load_courses": "Fehler beim Laden der Kurse",
+    "failed_to_load_courses_description": "Es gab ein Problem beim Laden der Kurse. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht."
   },
   "en": {
-    "compose_your_courses": "Compose your courses",
-    "compose_your_courses_description":
-      "Create courses and add activities, costs, and required documents.",
-    "create_new_course": "Create new course",
-    "use_default_course_template": "Use default course template",
-    "manually_create_new_course": "Manually create new course",
-    "course_setup_complete": "Course setup complete",
-    "no_courses": "No courses",
-    "no_courses_description":
-      "No courses have been created yet. Click below to create your first course.",
-    "create_course": "Create course",
-    "edit_course": "Edit course",
-    "confirm_delete_course": "Are you sure you want to delete this course?",
-    "course_saved": "Course saved",
-    "course_saved_description": "The course has been successfully saved.",
-    "course_deleted": "Course deleted",
-    "course_deleted_description": "The course has been successfully deleted."
+    "compose_your_courses": "Compose your course offerings",
+    "compose_your_courses_description": "Select and activate the types of driving license courses you want to offer at your driving school. You can always adjust this later.",
+    "activate_course": "Activate course",
+    "driving_license_of_type": "Driving license of type {type}",
+    "course_setup_complete": "Continue with {count} active course(s)",
+    "course_activated": "Course activated",
+    "failed_to_load_courses": "Failed to load courses",
+    "failed_to_load_courses_description": "There was a problem loading the courses. Please try again or contact support if the problem persists."
   }
 }
-</i18n>"
+</i18n>
+"

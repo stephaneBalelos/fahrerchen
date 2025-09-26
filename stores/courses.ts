@@ -18,7 +18,7 @@ export const useCoursesStore = defineStore('courses', () => {
             .from('courses')
             .select('*')
             .eq('organization_id', userOrganizationsStore.selectedOrganization.id)
-            .order('inserted_at', { ascending: false })
+            .order('type', { ascending: true })
         if (error) {
             console.error("Error loading courses:", error)
             courses.value = []
@@ -48,17 +48,21 @@ export const useCoursesStore = defineStore('courses', () => {
         await loadCourses()
         return data ? data.id : null
     }
-    const deleteCourse = async (course_id: string) => {
+
+    const setCourseActiveStatus = async (courseId: string, isActive: boolean): Promise<void> => {
         const { error } = await supabase
             .from('courses')
-            .delete()
-            .eq('id', course_id)
+            .update({ is_active: isActive })
+            .eq('id', courseId)
+
         if (error) {
-            console.error("Error deleting course:", error)
             throw error
         }
         await loadCourses()
     }
+
+
+
 
 
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
@@ -70,6 +74,6 @@ export const useCoursesStore = defineStore('courses', () => {
         courses,
         loadCourses,
         createCourse,
-        deleteCourse,
+        setCourseActiveStatus
     }
 })
