@@ -6,14 +6,10 @@
     @submit.prevent="onSubmit"
     @error="onError"
   >
-    <UDashboardSection
-      :title="t('settings.title')"
-      :description="t('settings.description')"
-      class="m-0"
-    >
+    <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800">
       <UFormGroup
         :label="t('settings.avatar.label')"
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 pb-4"
         :description="t('settings.avatar.help')"
         :ui="{
           container: 'flex flex-wrap items-center gap-3',
@@ -29,12 +25,13 @@
           @uploaded="onAvatarUploadSuccess"
         />
       </UFormGroup>
+
       <UFormGroup
         name="name"
         :label="t('settings.name.label')"
         :description="t('settings.name.description')"
         required
-        class="grid grid-cols-2 gap-2 items-center"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UInput
@@ -49,7 +46,7 @@
         :label="t('settings.email.label')"
         :description="t('settings.email.description')"
         required
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UInput
@@ -85,7 +82,7 @@
         name="phone_number"
         :label="t('settings.phone_number.label')"
         :description="t('settings.phone_number.description')"
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UInput
@@ -100,7 +97,7 @@
         name="website"
         :label="t('settings.website.label')"
         :description="t('settings.website.description')"
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UInput
@@ -115,7 +112,7 @@
         name="description"
         :label="t('settings.org_description.label')"
         :description="t('settings.org_description.description')"
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UTextarea v-model="state.description" :rows="5" autoresize size="md" />
@@ -123,7 +120,7 @@
       <UFormGroup
         :label="t('settings.address.label')"
         :description="t('settings.address.description')"
-        class="grid grid-cols-2 gap-2"
+        class="grid grid-cols-2 gap-2 py-4"
         :ui="{ container: '' }"
       >
         <UFormGroup
@@ -176,16 +173,16 @@
           />
         </UFormGroup>
       </UFormGroup>
-      <div class="flex justify-end">
+      <div class="flex justify-end pt-4">
         <UButton
           :size="'lg'"
           type="submit"
-          :label="submitLabel || t('settings.save_changes')"
+          :label="t('settings.save_changes')"
           color="black"
           :loading="isSubmitting"
         />
       </div>
-    </UDashboardSection>
+    </div>
   </UForm>
 </template>
 
@@ -197,17 +194,18 @@ import FileUploader from "./Inputs/FileUploader.vue";
 
 type Props = {
   orgId: string;
-  submitLabel?: string;
 };
+
+const props = defineProps<Props>();
 
 const config = useRuntimeConfig().public;
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
-const props = defineProps<Props>();
-const route = useRoute();
+
 const { t } = useI18n({
   useScope: "local",
 });
+
 const { t: g } = useI18n({
   useScope: "global",
 });
@@ -218,18 +216,9 @@ const $emits = defineEmits<{
 
 const isSubmitting = ref(false);
 const { data: org } = await useAsyncData(
-  `organizations/${route.params.org_id}`,
+  `organizations/${props.orgId}`,
   async () => {
-    const { data, error } = await client
-      .from("organizations")
-      .select("*")
-      .eq("id", props.orgId)
-      .single();
-
-    if (error) {
-      throw error;
-    }
-    return data;
+    return await userOrganizationsStore.getOrganizationById(props.orgId);
   },
   {
     transform: (data) => {
@@ -433,7 +422,7 @@ function onError(error: FormError) {
 }
 </script>
 
-<style scoped></style>
+<style></style>
 
 <i18n lang="json">
 {
