@@ -8,7 +8,7 @@
         v-if="isCourseActivitiesSetupComplete"
         color="primary"
         icon="i-heroicons-check-circle"
-        @click="$emits('course-setup-activities-completed')"
+        @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/course-subscriptions`)"
         >{{
           g("weiter")
         }}</UButton
@@ -38,7 +38,6 @@ const { t: g } = useI18n({
 const organizationsStore = useUserOrganizationsStore();
 const courseActivitiesStore = useCourseActivitiesStore();
 
-const $emits = defineEmits(["course-setup-activities-completed"]);
 
 const isCourseActivitiesSetupComplete = computed(() => {
   return (

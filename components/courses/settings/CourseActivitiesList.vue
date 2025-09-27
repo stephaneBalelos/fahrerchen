@@ -18,16 +18,11 @@
       v-if="courseActivitiesStore.courseActivities.length > 0"
       class="space-y-4"
     >
-      <UCard
+      <UiCardsBodyCollapseCard
         v-for="field in courseActivitiesStore.courseActivities"
         :key="field.id"
-        :ui="{
-          body: {
-            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col'
-          },
-        }"
       >
-        <template #header>
+        <template #header="{ }">
           <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
             <div class="flex flex-col gap-1 grow">
               <p class="font-semibold">{{ field.name }}</p>
@@ -36,18 +31,18 @@
             <UButton
               color="gray"
               variant="solid"
-              @click="openEditActivityForm(field.id)"
+              @click.stop="openEditActivityForm(field.id)"
               >{{ t("edit") }}</UButton
             >
             <UButton
               color="red"
               variant="soft"
               :icon="'i-heroicons-trash'"
-              @click="courseActivitiesStore.deleteCourseActivity(field.id)"
+              @click.stop="courseActivitiesStore.deleteCourseActivity(field.id)"
             />
           </div>
         </template>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div class="flex flex-col gap-4">
             <!-- Additional content can go here -->
             <div class="flex flex-col gap-1">
@@ -71,7 +66,12 @@
                   on-icon="i-heroicons-check-20-solid"
                   off-icon="i-heroicons-x-mark-20-solid"
                   :model-value="field.allow_self_registration"
-                  @change="(value) => courseActivitiesStore.updateCourseActivity(field.id, { allow_self_registration: value })"
+                  @change="
+                    (value) =>
+                      courseActivitiesStore.updateCourseActivity(field.id, {
+                        allow_self_registration: value,
+                      })
+                  "
                 />
               </p>
             </div>
@@ -79,17 +79,19 @@
               <p class="text-sm text-gray-500">
                 {{ g(`activities.required_attendance`) }}
               </p>
-              <p class="font-medium break-all">{{ field.required > 0 ? field.required : '-' }}</p>
+              <p class="font-medium break-all">
+                {{ field.required > 0 ? field.required : "-" }}
+              </p>
             </div>
           </div>
           <div class="flex flex-col gap-1 lg:col-span-2">
-            <p class="text-sm text-gray-500 mb-2">{{ g(`activities.allowed_classes`) }}</p>
-            <ActivitiesAllowedCoursesList
-              :activity-id="field.id"
-            />
+            <p class="text-sm text-gray-500 mb-2">
+              {{ g(`activities.allowed_classes`) }}
+            </p>
+            <ActivitiesAllowedCoursesList :activity-id="field.id" />
           </div>
         </div>
-      </UCard>
+      </UiCardsBodyCollapseCard>
     </div>
     <UAlert
       v-else

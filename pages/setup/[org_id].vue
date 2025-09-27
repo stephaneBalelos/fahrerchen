@@ -28,6 +28,9 @@
           </span>
         </div>
       </template>
+              <template #right>
+          <UColorModeButton />
+        </template>
     </UHeader>
     <UMain class="min-h-screen py-6">
       <UContainer class="w-full">
