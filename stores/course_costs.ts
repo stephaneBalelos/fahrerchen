@@ -1,5 +1,5 @@
 import { getStandardCourseActivitiesTemplate, type StandardCourseActivitiesTemplate } from "~/constants"
-import type { AppCourseCost, CourseCostEdit } from "~/types/app.types"
+import type { AppCourseCost, AppCourseCostsCombination, CourseCostEdit } from "~/types/app.types"
 
 export const useCourseCostsStore = defineStore('courseCosts', () => {
     const supabase = useSupabaseClient()
@@ -111,6 +111,53 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         await loadCourseCosts()
     }
 
+    const getAllowedCourseForCost = async (id: string, courseId?: string): Promise<AppCourseCostsCombination[]> => {
+        let query = supabase
+            .from('course_costs_combinations')
+            .select('*')
+            .eq('cost_id', id)
+            
+        if (courseId) {
+            query = query.eq('course_id', courseId)
+        }
+        const { data, error } = await query
+        if (error) {
+            console.error("Error loading allowed course for cost:", error)
+            throw error
+        }
+        console.log("Allowed courses for cost:", data)
+        return data || []
+    }
+
+    const addCostToCourse = async (cost_id: string, course_id: string): Promise<void> => {
+        if (!userOrganizationsStore.selectedOrganization) {
+            throw new Error("No organization selected")
+        }
+        const { error } = await supabase
+            .from('course_costs_combinations')
+            .insert({
+                cost_id,
+                course_id,
+                organization_id: userOrganizationsStore.selectedOrganization.id
+            })
+        if (error) {
+            console.error("Error adding cost to course:", error)
+            throw error
+        }
+    }
+
+    const removeCostFromCourse = async (cost_id: string, course_id: string): Promise<void> => {
+        const { error } = await supabase
+            .from('course_costs_combinations')
+            .delete()
+            .eq('cost_id', cost_id)
+            .eq('course_id', course_id)
+        if (error) {
+            console.error("Error removing cost from course:", error)
+            throw error
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseCosts()
     }, { immediate: true })
@@ -124,5 +171,8 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         createCourseCostsFromTemplate,
         getCourseCost,
         deleteCourseCost,
+        getAllowedCourseForCost,
+        addCostToCourse,
+        removeCostFromCourse
     }
 })

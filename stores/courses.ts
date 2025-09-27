@@ -5,6 +5,7 @@ export const useCoursesStore = defineStore('courses', () => {
     const supabase = useSupabaseClient()
     const userOrganizationsStore = useUserOrganizationsStore()
     const courses = ref<AppCourse[]>([])
+    const activeCourses = computed(() => courses.value.filter(c => c.is_active))
     const isLoadingCourses = ref(false)
 
     const loadCourses = async () => {
@@ -72,6 +73,7 @@ export const useCoursesStore = defineStore('courses', () => {
     return {
         isLoadingCourses,
         courses,
+        activeCourses,
         loadCourses,
         createCourse,
         setCourseActiveStatus

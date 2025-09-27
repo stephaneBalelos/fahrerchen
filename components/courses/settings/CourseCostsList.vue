@@ -17,8 +17,8 @@
     </template>
     <div v-if="courseCostsStore.courseCosts.length > 0" class="space-y-4">
       <UiCardsBodyCollapseCard
-      v-for="field in courseCostsStore.courseCosts"
-      :key="field.id"
+        v-for="field in courseCostsStore.courseCosts"
+        :key="field.id"
       >
         <template #header>
           <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
@@ -40,11 +40,26 @@
             />
           </div>
         </template>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="flex flex-col gap-4">
-            <!-- Additional content can go here -->
-            dasd
-          </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-sm text-gray-500 mb-2">
+            {{ g(`activities.allowed_classes`) }}
+          </p>
+          <UCard
+            :ui="{
+              body: {
+                padding: 'sm:p-0 py-0 px-0',
+              },
+            }"
+          >
+            <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800">
+              <CostsAllowedCourseListItem
+                v-for="course in courseStore.activeCourses"
+                :key="field.id + course.id"
+                :course="course"
+                :cost-id="field.id"
+              />
+            </div>
+          </UCard>
         </div>
       </UiCardsBodyCollapseCard>
     </div>
@@ -78,6 +93,7 @@
 
 <script setup lang="ts">
 import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
+import CostsAllowedCourseListItem from "~/components/courses/settings/CostsAllowedCourseListItem.vue";
 
 const slideover = useSlideover();
 const toast = useToast();
@@ -85,6 +101,12 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
+
+const courseStore = useCoursesStore();
 const courseCostsStore = useCourseCostsStore();
 
 const openEditCourseCostForm = (id?: string) => {
