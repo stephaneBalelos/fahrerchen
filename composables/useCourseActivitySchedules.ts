@@ -135,7 +135,6 @@ export const useCourseActivitySchedules = () => {
             throw error
         }
 
-        console.log("Fetched course activity schedules:", data)
         return data || []
     }
 
