@@ -6,7 +6,7 @@ import FileUploader from "~/components/forms/Inputs/FileUploader.vue";
 import type { Database } from "~/types/database.types";
 
 definePageMeta({
-  layout: "default",
+  layout: "authenticated",
 });
 
 const userStore = useUserStore();

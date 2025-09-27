@@ -2,7 +2,6 @@
 import CreateOrganizationForm from "~/components/forms/CreateOrganizationForm.vue";
 import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
 
-
 const organizationsStore = useUserOrganizationsStore();
 const modal = useModal();
 

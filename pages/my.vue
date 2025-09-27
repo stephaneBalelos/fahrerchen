@@ -6,7 +6,7 @@
 import userProfile from '~/middleware/user-profile';
 
     definePageMeta({
-        layout: 'default',
+        layout: 'authenticated',
         middleware: [userProfile],
     })
 </script>
