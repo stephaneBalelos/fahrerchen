@@ -7,28 +7,47 @@
           dsad
         </template>
       </UDashboardNavbar>
-      <UDashboardPanelContent class="p-0">
-        dasd
-      </UDashboardPanelContent>
+      <UDashboardPanelContent class="p-0"> dasd </UDashboardPanelContent>
     </UDashboardPanel>
     <UDashboardPanel v-model="isPanelOpen" grow collapsible side="right">
-      <UDashboardNavbar :title="'Calendar View'">
-        <template #right>
-          <UButton
-            icon="i-heroicons-plus-circle-solid"
-            color="primary"
-            label="Neuen Termin erstellen"
-            @click="openEditScheduleSlideover()"
-          />
-        </template>
-      </UDashboardNavbar>
-      <UDashboardPanelContent>
-        <div class="bg-cyan-400">
-          <div v-for="schedule, index in schedules" :key="index">
-            {{ schedule.id }} - {{ schedule.status }}
+      <template v-if="selectedScheduleId">
+        <UDashboardNavbar :title="'Schedule Details'">
+          <template #toggle>
+            <UButton
+              icon="i-heroicons-arrow-left-solid"
+              color="black"
+              variant="ghost"
+              @click="selectedScheduleId = null"
+            />
+          </template>
+        </UDashboardNavbar>
+        <UDashboardPanelContent>
+          <ScheduleView :schedule-id="selectedScheduleId" />
+        </UDashboardPanelContent>
+      </template>
+      <template v-else>
+        <UDashboardNavbar :title="'Calendar View'">
+          <template #right>
+            <UButton
+              icon="i-heroicons-plus-circle-solid"
+              color="primary"
+              label="Neuen Termin erstellen"
+              @click="openEditScheduleSlideover()"
+            />
+          </template>
+        </UDashboardNavbar>
+        <UDashboardPanelContent>
+          <div class="bg-cyan-400">
+            <div
+              v-for="(schedule, index) in schedules"
+              :key="index"
+              @click="selectedScheduleId = schedule.id"
+            >
+              {{ schedule.id }} - {{ schedule.status }}
+            </div>
           </div>
-        </div>
-      </UDashboardPanelContent>
+        </UDashboardPanelContent>
+      </template>
     </UDashboardPanel>
   </UDashboardPage>
 </template>
@@ -36,14 +55,29 @@
 <script setup lang="ts">
 import * as z from "zod";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
+import ScheduleView from "~/components/schedules/ScheduleView.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
-
+const route = useRoute();
 const isPanelOpen = ref(true);
-
 const $courseActivitySchedules = useCourseActivitySchedules();
+
+const selectedScheduleId = computed<string | null>({
+  get() {
+    return (route.query.id as string) || null;
+  },
+  set(value) {
+    const query = { ...route.query };
+    if (value) {
+      query.id = value;
+    } else {
+      delete query.id;
+    }
+    navigateTo({ path: route.path, query });
+  },
+});
 
 const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
@@ -69,9 +103,9 @@ const { data: schedules, refresh } = useAsyncData(
     }),
   {
     immediate: true,
-    watch: [filterForm]
+    watch: [filterForm],
   }
-)
+);
 
 const openEditScheduleSlideover = (scheduleId?: string) => {
   const slideover = useSlideover();
@@ -83,7 +117,7 @@ const openEditScheduleSlideover = (scheduleId?: string) => {
     "onActivity-saved": () => {
       refresh();
     },
-  })
+  });
 };
 </script>
 
