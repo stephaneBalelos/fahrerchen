@@ -31,14 +31,19 @@
           </template>
         </UPopover>
       </template>
+      <ScheduleAllowedCourses
+        :activity-id="activity.id"
+        class="col-span-2 mt-2"
+      />
     </UPageHeader>
-    
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { format } from "date-fns";
 import Datepicker from "../forms/Inputs/Datepicker.vue";
+import ScheduleAllowedCourses from "./ScheduleAllowedCourses.vue";
 
 type Props = {
   scheduleId: string;
