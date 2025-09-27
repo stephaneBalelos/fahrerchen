@@ -1,4 +1,4 @@
-import type { AppOrganizationSchedulesView, Database } from "~/types/app.types";
+import type { AppCourseActivitySchedule, CourseActivityScheduleEdit, Database } from "~/types/app.types";
 
 type CourseActivityScheduleQuery = {
     course_id?: string;
@@ -21,9 +21,9 @@ export const useCourseActivitySchedules = () => {
         }
 
         const { data, error } = await client
-            .from("organizations_schedules_view")
+            .from("course_activity_schedules")
             .select("*")
-            .eq("schedule_id", id)
+            .eq("id", id)
             .single()
 
         if (error) {
@@ -31,6 +31,46 @@ export const useCourseActivitySchedules = () => {
         }
         return data
 
+    }
+
+    const createCourseActivitySchedule = async (courseActivitySchedule: CourseActivityScheduleEdit): Promise<AppCourseActivitySchedule | null> => {
+        if (!userOrganizationStore.selectedOrganization) {
+            throw new Error("No organization selected");
+        }
+
+        const { data, error } = await client
+            .from("course_activity_schedules")
+            .insert({
+                ...courseActivitySchedule,
+                organization_id: userOrganizationStore.selectedOrganization.id
+            })
+            .select()
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data
+    }
+
+    const updateCourseActivitySchedule = async (id: string, courseActivitySchedule: Partial<CourseActivityScheduleEdit>): Promise<AppCourseActivitySchedule | null> => {
+        if (!userOrganizationStore.selectedOrganization) {
+            throw new Error("No organization selected");
+        }
+
+        const { data, error } = await client
+            .from("course_activity_schedules")
+            .update({
+                ...courseActivitySchedule,
+            })
+            .eq("id", id)
+            .select()
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data
     }
 
     const deleteCourseActivitySchedule = async (id: string) => {
@@ -46,7 +86,7 @@ export const useCourseActivitySchedules = () => {
         if (error) {
             throw error
         }
-        
+
         return true
     }
 
@@ -56,10 +96,10 @@ export const useCourseActivitySchedules = () => {
         }
 
         const q = client
-            .from("organizations_schedules_view")
+            .from("course_activity_schedules")
             .select("*")
 
-        q.eq("schedule_organization_id", userOrganizationStore.selectedOrganization.organization_id)
+        q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
 
         if (query.course_id) {
             q.eq("course_id", query.course_id)
@@ -89,17 +129,21 @@ export const useCourseActivitySchedules = () => {
             q.lte("schedule_start_at", query.end_at)
         }
 
-        const { data, error } = await q.overrideTypes<AppOrganizationSchedulesView[]>()
+        const { data, error } = await q
 
         if (error) {
             throw error
         }
-        return data
+
+        console.log("Fetched course activity schedules:", data)
+        return data || []
     }
 
     return {
         fetchCourseActivitySchedules,
         fetchCourseActivitySchedulesById,
+        createCourseActivitySchedule,
+        updateCourseActivitySchedule,
         deleteCourseActivitySchedule
     }
 
