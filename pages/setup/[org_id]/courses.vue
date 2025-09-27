@@ -2,7 +2,7 @@
       <CoursesSetup
         v-if="userOrganizationsStore.selectedOrganization"
         :org-id="userOrganizationsStore.selectedOrganization?.id"
-        @course-setup-completed="() => navigateTo(`/setup/${userOrganizationsStore.selectedOrganization?.id}/courses-activities`)"
+        @course-setup-completed="() => navigateTo(`/setup/${userOrganizationsStore.selectedOrganization?.id}/activities`)"
       />
 </template>
 

@@ -8,7 +8,7 @@
         v-if="isCourseActivitiesSetupComplete"
         color="primary"
         icon="i-heroicons-check-circle"
-        @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/course-subscriptions`)"
+        @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/costs`)"
         >{{
           t("continue")
         }}</UButton
