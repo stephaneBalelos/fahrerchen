@@ -1,200 +1,170 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar :title="t('schedules')">
-      <template #right>
-        <USelectMenu
-          v-model="selectedView"
-          :options="views"
-          :option-attribute="'label'"
-          :value-attribute="'value'"
-        />
-      </template>
-    </UDashboardNavbar>
-    <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
-      <template #left>
-        <DateRangePicker v-model="selectedRange" />
-      </template>
-      <template #right>
-        <UPopover overlay>
-          <UButton
-            color="white"
-            label="Filtern"
-            trailing-icon="i-heroicons-chevron-down-20-solid"
+  <UDashboardPage>
+    <UDashboardPanel :width="300">
+      <UDashboardNavbar :title="t('schedules')">
+        <template #right>
+          <USelectMenu
+            v-model="selectedView"
+            :options="views"
+            :option-attribute="'label'"
+            :value-attribute="'value'"
           />
-          <template #panel>
-            <div class="flex flex-col gap-6 p-4 py-6">
-              <UFormGroup
-                :label="t('form.course.label')"
-                :help="t('form.course.description')"
-                name="course_id"
-                :ui="{
-                  wrapper: filterForm.course_id ? 'border-l-4 border-primary-500 ps-4' : '',
-                }"
-              >
-                <template #hint>
-                  <UButton
-                    v-if="filterForm.course_id"
-                    icon="i-heroicons-x-mark-solid"
-                    size="2xs"
-                    color="gray"
-                    square
-                    variant="ghost"
-                    @click="filterForm.course_id = undefined"
-                  />
-                </template>
-                <FormsInputsCourseSelect
-                  v-model="filterForm.course_id"
-                  :orgid="
-                    userOrganizationsStore.selectedOrganization.organization_id
-                  "
-                />
-              </UFormGroup>
-              <UFormGroup
-                :label="t('form.assigned_to.label')"
-                :help="t('form.assigned_to.description')"
-                name="assigned_to"
-                :ui="{
-                  wrapper: filterForm.assigned_to ? 'border-l-4 border-primary-500 ps-4' : '',
-                }"
-              >
-                <template #hint>
-                  <UButton
-                    v-if="filterForm.assigned_to"
-                    icon="i-heroicons-x-mark-solid"
-                    size="2xs"
-                    color="gray"
-                    square
-                    variant="ghost"
-                    @click="filterForm.assigned_to = undefined"
-                  />
-                </template>
-                <FormsInputsUserSelect
-                  v-model="filterForm.assigned_to"
-                  :orgid="
-                    userOrganizationsStore.selectedOrganization.organization_id
-                  "
-                />
-              </UFormGroup>
-              <UFormGroup
-                :label="t('form.status.label')"
-                :help="t('form.status.description')"
-                name="course_id"
-                :ui="{
-                  wrapper: filterForm.status ? 'border-l-4 border-primary-500 ps-4' : '',
-                }"
-              >
-                <template #hint>
-                  <UButton
-                    v-if="filterForm.status"
-                    icon="i-heroicons-x-mark-solid"
-                    size="2xs"
-                    color="gray"
-                    square
-                    variant="ghost"
-                    @click="filterForm.status = undefined"
-                  />
-                </template>
-                <USelectMenu
-                  v-model="filterForm.status"
-                  :options="SCHEDULES_STATUS"
-                >
-                  <template #label>
-                    <span v-if="filterForm.status">
-                      {{
-                        g(
-                          `courses.activities.schedules.schedules_status_${filterForm.status}`
-                        )
-                      }}
-                    </span>
-                    <span v-else class="text-gray-500">{{
-                      t("form.status.placeholder")
-                    }}</span>
-                  </template>
-                  <template #option="{ option }">
-                    {{
-                      g(
-                        `courses.activities.schedules.schedules_status_${option}`
-                      )
-                    }}
-                  </template>
-                </USelectMenu>
-              </UFormGroup>
-              <UFormGroup
-                :label="t('form.student.label')"
-                :help="t('form.student.description')"
-                name="student_id"
-                :ui="{
-                  wrapper: filterForm.student_id ? 'border-l-4 border-primary-500 ps-4' : '',
-                }"
-              >
-                <template #hint>
-                  <UButton
-                    v-if="filterForm.student_id"
-                    icon="i-heroicons-x-mark-solid"
-                    size="2xs"
-                    color="gray"
-                    square
-                    variant="ghost"
-                    @click="filterForm.student_id = undefined"
-                  />
-                </template>
-                <FormsInputsStudentSubscriptionSelect
-                  v-model="filterForm.student_id"
-                  :orgid="
-                    userOrganizationsStore.selectedOrganization.organization_id
-                  "
-                />
-              </UFormGroup>
-            </div>
-          </template>
-        </UPopover>
-      </template>
-    </UDashboardToolbar>
-    <UDashboardPanelContent>
-      <div>
-        <div v-if="selectedView == 'list'">
-          <div
-            v-if="schedules && schedules.length > 0"
-            class="flex flex-col gap-4 p-4"
+        </template>
+      </UDashboardNavbar>
+      <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
+        <template #left>
+          <DateRangePicker v-model="selectedRange" />
+        </template>
+      </UDashboardToolbar>
+      <UDashboardPanelContent class="p-0">
+        <div v-if="userOrganizationsStore.selectedOrganization" class="flex flex-col gap-6 p-4 py-6 divider-y divide-gray-200 dark:divide-gray-700">
+          <UFormGroup
+            :label="t('form.course.label')"
+            :help="t('form.course.description')"
+            name="course_id"
+            :ui="{
+              wrapper: filterForm.course_id
+                ? 'border-l-4 border-primary-500 ps-4'
+                : '',
+            }"
           >
-            <SchedulesScheduleItem
-              v-for="schedule in schedules"
-              :key="schedule.schedule_id"
-              :schedule="schedule"
-              @update="refresh"
+            <template #hint>
+              <UButton
+                v-if="filterForm.course_id"
+                icon="i-heroicons-x-mark-solid"
+                size="2xs"
+                color="gray"
+                square
+                variant="ghost"
+                @click="filterForm.course_id = undefined"
+              />
+            </template>
+            <!-- <FormsInputsCourseSelect
+              v-model="filterForm.course_id"
+              :orgid="userOrganizationsStore.selectedOrganization.id"
+            /> -->
+          </UFormGroup>
+          <UFormGroup
+            :label="t('form.assigned_to.label')"
+            :help="t('form.assigned_to.description')"
+            name="assigned_to"
+            :ui="{
+              wrapper: filterForm.assigned_to
+                ? 'border-l-4 border-primary-500 ps-4'
+                : '',
+            }"
+          >
+            <template #hint>
+              <UButton
+                v-if="filterForm.assigned_to"
+                icon="i-heroicons-x-mark-solid"
+                size="2xs"
+                color="gray"
+                square
+                variant="ghost"
+                @click="filterForm.assigned_to = undefined"
+              />
+            </template>
+            <!-- <FormsInputsUserSelect
+              v-model="filterForm.assigned_to"
+              :orgid="userOrganizationsStore.selectedOrganization.id"
+            /> -->
+          </UFormGroup>
+          <UFormGroup
+            :label="t('form.status.label')"
+            :help="t('form.status.description')"
+            name="course_id"
+            :ui="{
+              wrapper: filterForm.status
+                ? 'border-l-4 border-primary-500 ps-4'
+                : '',
+            }"
+          >
+            <template #hint>
+              <UButton
+                v-if="filterForm.status"
+                icon="i-heroicons-x-mark-solid"
+                size="2xs"
+                color="gray"
+                square
+                variant="ghost"
+                @click="filterForm.status = undefined"
+              />
+            </template>
+            <USelectMenu
+              v-model="filterForm.status"
+              :options="SCHEDULES_STATUS"
+            >
+              <template #label>
+                <span v-if="filterForm.status">
+                  {{
+                    g(
+                      `courses.activities.schedules.schedules_status_${filterForm.status}`
+                    )
+                  }}
+                </span>
+                <span v-else class="text-gray-500">{{
+                  t("form.status.placeholder")
+                }}</span>
+              </template>
+              <template #option="{ option }">
+                {{
+                  g(`courses.activities.schedules.schedules_status_${option}`)
+                }}
+              </template>
+            </USelectMenu>
+          </UFormGroup>
+          <UFormGroup
+            :label="t('form.student.label')"
+            :help="t('form.student.description')"
+            name="student_id"
+            :ui="{
+              wrapper: filterForm.student_id
+                ? 'border-l-4 border-primary-500 ps-4'
+                : '',
+            }"
+          >
+            <template #hint>
+              <UButton
+                v-if="filterForm.student_id"
+                icon="i-heroicons-x-mark-solid"
+                size="2xs"
+                color="gray"
+                square
+                variant="ghost"
+                @click="filterForm.student_id = undefined"
+              />
+            </template>
+            <FormsInputsStudentSubscriptionSelect
+              v-model="filterForm.student_id"
+              :orgid="userOrganizationsStore.selectedOrganization.id"
             />
-          </div>
-          <div v-else class="flex items-center justify-center h-full">
-            <p class="text-gray-500">{{ t("no_schedule_found") }}</p>
-          </div>
+          </UFormGroup>
         </div>
-        <div v-else>
-          <AppCalendar
-            v-if="schedules"
-            :selected-date="selectedDate"
-            :view="'week'"
-            :events="
-              schedules.map((schedule) => ({
-                label: `${schedule.course_name} | ${schedule.activity_name}`,
-                id: schedule.schedule_id,
-                date: new Date(schedule.schedule_start_at),
-                start: new Date(schedule.schedule_start_at),
-                end: new Date(schedule.schedule_end_at),
-                schedule,
-              }))
-            "
-            :refresh-events="refresh"
+      </UDashboardPanelContent>
+    </UDashboardPanel>
+    <UDashboardPanel v-model="isPanelOpen" grow collapsible side="right">
+      <UDashboardNavbar :title="'Calendar View'">
+        <template #right>
+          <UButton
+            icon="i-heroicons-plus-circle-solid"
+            color="primary"
+            label="Neuen Termin erstellen"
           />
+        </template>
+      </UDashboardNavbar>
+      <UDashboardPanelContent>
+        <div class="bg-cyan-400">
+          <div class="min-h-full h-screen">dsds</div>
         </div>
-      </div>
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+      </UDashboardPanelContent>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
-import { endOfDay, startOfDay, sub } from "date-fns";
+import { sub } from "date-fns";
 import * as z from "zod";
-import AppCalendar from "~/components/calendar/AppCalendar.vue";
 import DateRangePicker from "~/components/forms/Inputs/DateRangePicker.vue";
 import { SCHEDULES_STATUS } from "~/constants";
 
@@ -206,6 +176,7 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
+const isPanelOpen = ref(true);
 const selectedView = ref("list");
 const views = computed(() => [
   { label: t("list_view"), value: "list" },
@@ -213,8 +184,6 @@ const views = computed(() => [
 ]);
 
 const userOrganizationsStore = useUserOrganizationsStore();
-const courseActivitySchedules = useCourseActivitySchedules();
-const selectedDate = ref(new Date());
 const selectedRange = ref({
   start: sub(new Date(), { days: 14 }),
   end: new Date(),
@@ -235,29 +204,6 @@ const filterForm = ref<FilterForm>({
   student_id: undefined,
   status: undefined,
 });
-
-const { data: schedules, refresh } = useAsyncData(
-  async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
-      return [];
-    }
-
-    const start = startOfDay(selectedRange.value.start);
-    const end = endOfDay(selectedRange.value.end);
-
-    return await courseActivitySchedules.fetchCourseActivitySchedules({
-      start_at: start.toISOString(),
-      end_at: end.toISOString(),
-      assigned_to: filterForm.value.assigned_to,
-      course_id: filterForm.value.course_id,
-      student_id: filterForm.value.student_id,
-      status: filterForm.value.status,
-    });
-  },
-  {
-    watch: [filterForm.value, selectedRange],
-  }
-);
 </script>
 
 <style scoped></style>
