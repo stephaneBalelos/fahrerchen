@@ -57,11 +57,6 @@ import NotificationsSlideover from "~/components/account/NotificationsSlideover.
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 
-
-// const { t } = useI18n({
-//   useScope: "local",
-// });
-
 const slideover = useSlideover();
 
 const openNotificationsSlideover = () => {

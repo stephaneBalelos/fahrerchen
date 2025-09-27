@@ -21,7 +21,7 @@ const links = computed(() => {
     id: "dashboard",
     label: t("dashboard"),
     icon: "i-heroicons-chart-pie",
-    to: `/my/${selectedOrganization.organization_id}`,
+    to: userOrganizationsStore.relativePath("/"),
     exact: true,
     tooltip: {
       text: t("dashboard"),
@@ -33,7 +33,7 @@ const links = computed(() => {
     id: "schedules",
     label: t("schedules"),
     icon: "i-heroicons-calendar",
-    to: `/my/${selectedOrganization.organization_id}/schedules`,
+    to: userOrganizationsStore.relativePath("/schedules"),
     exact: true,
     tooltip: {
       text: t("schedules"),
@@ -46,7 +46,7 @@ const links = computed(() => {
     id: "courses",
     label: t("courses"),
     icon: "i-heroicons-book-open",
-    to: `/my/${selectedOrganization.organization_id}/courses`,
+    to: userOrganizationsStore.relativePath("/courses"),
     exact: true,
     tooltip: {
       text: t("courses"),
@@ -59,7 +59,7 @@ const links = computed(() => {
       id: "students",
       label: t("students"),
       icon: "i-heroicons-users",
-      to: `/my/${selectedOrganization.organization_id}/students`,
+      to: userOrganizationsStore.relativePath("/students"),
       exact: true,
       tooltip: {
         text: t("students"),
@@ -72,7 +72,7 @@ const links = computed(() => {
     id: "bills",
     label: t("bills"),
     icon: "i-heroicons-credit-card",
-    to: `/my/${selectedOrganization.organization_id}/bills/`,
+    to: userOrganizationsStore.relativePath("/bills"),
     exact: true,
     tooltip: {
       text: t("bills"),
@@ -85,26 +85,26 @@ const links = computed(() => {
       id: "settings",
       label: t("settings"),
       icon: "i-heroicons-cog-8-tooth",
-      to: `/my/${selectedOrganization.organization_id}/settings`,
+      to: userOrganizationsStore.relativePath("/settings"),
       exact: true,
       children: [
         {
           label: t("general"),
-          to: `/my/${selectedOrganization.organization_id}/settings`,
+          to: userOrganizationsStore.relativePath("/settings"),
           exact: true,
         },
         {
           label: t("members"),
-          to: `/my/${selectedOrganization.organization_id}/settings/members`,
+          to: userOrganizationsStore.relativePath("/settings/members"),
         },
         {
           label: t("billing"),
-          to: `/my/${selectedOrganization.organization_id}/settings/billing`,
+          to: userOrganizationsStore.relativePath("/settings/billing"),
           exact: true,
         },
         {
           label: t("payments"),
-          to: `/my/${selectedOrganization.organization_id}/settings/payments`,
+          to: userOrganizationsStore.relativePath("/settings/payments"),
         },
       ],
       tooltip: {
