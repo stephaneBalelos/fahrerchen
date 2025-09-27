@@ -2,7 +2,6 @@
   <UDashboardSection
     :title="t('course_activities')"
     :description="t('set_activities')"
-    orientation="horizontal"
     class="px-4 py-6"
   >
     <template #links>
@@ -15,76 +14,125 @@
         >{{ t("add_activity") }}</UButton
       >
     </template>
-    <UCard
-      v-if="course_activities && course_activities.length > 0"
-      :ui="{
-        body: {
-          base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
-        },
-      }"
+    <div
+      v-if="courseActivitiesStore.courseActivities.length > 0"
+      class="space-y-4"
     >
-      <div
-        v-for="field in course_activities"
+      <UCard
+        v-for="field in courseActivitiesStore.courseActivities"
         :key="field.id"
-        class="flex items-center justify-between pt-4 first:pt-0 gap-2"
+        :ui="{
+          body: {
+            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col'
+          },
+        }"
       >
-        <div class="flex flex-col gap-1 grow">
-          <p class="font-semibold">{{ field.name }}</p>
-          <div class="flex justify-start gap-1">
-            <UBadge color="primary" variant="subtle" size="xs"
-              >{{ field.price }} &euro;</UBadge
+        <template #header>
+          <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
+            <div class="flex flex-col gap-1 grow">
+              <p class="font-semibold">{{ field.name }}</p>
+              <span class="text-sm text-gray-500">{{ field.description }}</span>
+            </div>
+            <UButton
+              color="gray"
+              variant="solid"
+              @click="openEditActivityForm(field.id)"
+              >{{ t("edit") }}</UButton
             >
+            <UButton
+              color="red"
+              variant="soft"
+              :icon="'i-heroicons-trash'"
+              @click="courseActivitiesStore.deleteCourseActivity(field.id)"
+            />
           </div>
-          <span class="text-sm text-gray-500">{{ field.description }}</span>
+        </template>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <!-- Additional content can go here -->
+            <div class="flex flex-col gap-1">
+              <p class="text-sm text-gray-500">{{ g(`activities.price`) }}</p>
+              <p class="font-medium break-all">
+                {{ formatCurrency(field.price) }}
+              </p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="text-sm text-gray-500">{{ g(`activities.type`) }}</p>
+              <p class="font-medium break-all">
+                {{ g(`activities.types.${field.activity_type}.name`) }}
+              </p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="text-sm text-gray-500">
+                {{ g(`activities.allow_self_registration`) }}
+              </p>
+              <p class="font-medium break-all">
+                <UToggle
+                  on-icon="i-heroicons-check-20-solid"
+                  off-icon="i-heroicons-x-mark-20-solid"
+                  :model-value="field.allow_self_registration"
+                  @change="(value) => courseActivitiesStore.updateCourseActivity(field.id, { allow_self_registration: value })"
+                />
+              </p>
+            </div>
+            <div class="flex flex-col gap-1">
+              <p class="text-sm text-gray-500">
+                {{ g(`activities.required_attendance`) }}
+              </p>
+              <p class="font-medium break-all">{{ field.required > 0 ? field.required : '-' }}</p>
+            </div>
+          </div>
         </div>
-        <UButton
-          color="gray"
-          variant="solid"
-          @click="openEditActivityForm(field.id)"
-          >{{ t("edit") }}</UButton
-        >
-      </div>
-    </UCard>
+      </UCard>
+    </div>
     <UAlert
       v-else
       :title="t('no_activities')"
       :description="t('no_activities_description')"
+      :actions="[
+        {
+          label: t('add_activity'),
+          color: 'primary',
+          icon: 'i-heroicons-plus',
+          variant: 'soft',
+          size: '2xs',
+          click: () => openEditActivityForm(''),
+        },
+        {
+          label: t('add_activity_from_template'),
+          color: 'green',
+          icon: 'i-heroicons-check-circle',
+          variant: 'soft',
+          size: '2xs',
+          click: () => {
+            createActivitiesFromTemplate();
+          },
+        },
+      ]"
     />
   </UDashboardSection>
 </template>
 
 <script setup lang="ts">
 import EditCourseActivityForm from "~/components/forms/EditCourseActivityForm.vue";
+import { formatCurrency } from "~/utils/formatters";
 
 const slideover = useSlideover();
 const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
 });
+const { t: g } = useI18n({
+  useScope: "global",
+});
 
-const coursesStore = useCoursesStore();
-
-const props = defineProps<{
-  orgid: string;
-  courseid: string;
-}>();
-
-const {
-  data: course_activities,
-  refresh,
-} = await useAsyncData(`course_activities_${props.courseid}`, async () => {
-  return await coursesStore.getCourseActivities(props.courseid);
-}, { immediate: true });
+const courseActivitiesStore = useCourseActivitiesStore();
 
 const openEditActivityForm = (id?: string) => {
   slideover.open(EditCourseActivityForm, {
-    courseid: props.courseid,
-    orgid: props.orgid,
     courseActivityId: id,
-    sortingOrder: course_activities.value ? course_activities.value.length + 1 : 1,
     "onActivity-saved": () => {
       slideover.close();
-      refresh();
       toast.add({
         title: t("activity_saved"),
         description: t("activity_saved_description"),
@@ -93,7 +141,6 @@ const openEditActivityForm = (id?: string) => {
     },
     "onActivity-deleted": () => {
       slideover.close();
-      refresh();
       toast.add({
         title: t("activity_deleted"),
         description: t("activity_deleted_description"),
@@ -101,6 +148,23 @@ const openEditActivityForm = (id?: string) => {
       });
     },
   });
+};
+
+const createActivitiesFromTemplate = async () => {
+  try {
+    await courseActivitiesStore.createActivitiesFromTemplate();
+    toast.add({
+      title: t("activity_created"),
+      description: t("activity_saved_description"),
+      color: "green",
+    });
+  } catch (error) {
+    toast.add({
+      title: t("error"),
+      description: (error as Error).message,
+      color: "red",
+    });
+  }
 };
 </script>
 
@@ -112,6 +176,7 @@ const openEditActivityForm = (id?: string) => {
     "course_activities": "Kursaktivitäten",
     "set_activities": "Setze die Aktivitäten für diesen Kurs.",
     "add_activity": "Aktivität hinzufügen",
+    "add_activity_from_template": "Aktivitäten aus Vorlage hinzufügen",
     "no_activities": "Keine Aktivitäten",
     "no_activities_description": "Es gibt keine Aktivitäten für diesen Kurs. Fügen Sie Aktivitäten hinzu.",
     "edit": "Bearbeiten",
@@ -125,6 +190,7 @@ const openEditActivityForm = (id?: string) => {
     "course_activities": "Course Activities",
     "set_activities": "Set the Activities for this course.",
     "add_activity": "Add Activity",
+    "add_activity_from_template": "Add Activity from Template",
     "no_activities": "No activities",
     "no_activities_description": "There are no activities for this course. Add activities.",
     "edit": "Edit",

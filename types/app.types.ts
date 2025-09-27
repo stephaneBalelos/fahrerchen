@@ -14,6 +14,7 @@ export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
 export type AppCourseCost = DatabaseGenerated['public']['Tables']['course_costs']['Row']
 export type CourseCostEdit = Omit<AppCourseCost, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
+export type AppCourseActivityType = DatabaseGenerated['public']['Enums']['activity_types']
 export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']
 export type CourseActivityEdit = Omit<AppCourseActivity, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
