@@ -41,11 +41,13 @@ export type Database = {
           allow_self_registration: boolean
           description: string
           id: string
+          inserted_at: string
           name: string
           organization_id: string
           price: number
           required: number
           sorting_order: number
+          updated_at: string
         }
         Insert: {
           activity_type: Database["public"]["Enums"]["activity_types"]
@@ -53,11 +55,13 @@ export type Database = {
           allow_self_registration?: boolean
           description: string
           id?: string
+          inserted_at?: string
           name: string
           organization_id: string
           price?: number
           required?: number
           sorting_order?: number
+          updated_at?: string
         }
         Update: {
           activity_type?: Database["public"]["Enums"]["activity_types"]
@@ -65,11 +69,13 @@ export type Database = {
           allow_self_registration?: boolean
           description?: string
           id?: string
+          inserted_at?: string
           name?: string
           organization_id?: string
           price?: number
           required?: number
           sorting_order?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -377,23 +383,29 @@ export type Database = {
         Row: {
           description: string
           id: string
+          inserted_at: string
           name: string
           organization_id: string
           price: number
+          updated_at: string
         }
         Insert: {
           description: string
           id?: string
+          inserted_at?: string
           name: string
           organization_id: string
           price?: number
+          updated_at?: string
         }
         Update: {
           description?: string
           id?: string
+          inserted_at?: string
           name?: string
           organization_id?: string
           price?: number
+          updated_at?: string
         }
         Relationships: [
           {
@@ -471,31 +483,31 @@ export type Database = {
       }
       course_documents: {
         Row: {
-          created_at: string
           description: string | null
           id: string
-          last_modified_at: string
+          inserted_at: string
           name: string | null
           organization_id: string
           path: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string
           description?: string | null
           id?: string
-          last_modified_at?: string
+          inserted_at?: string
           name?: string | null
           organization_id: string
           path: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string
           description?: string | null
           id?: string
-          last_modified_at?: string
+          inserted_at?: string
           name?: string | null
           organization_id?: string
           path?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -575,20 +587,26 @@ export type Database = {
         Row: {
           description: string
           id: string
+          inserted_at: string
           name: string
           organization_id: string
+          updated_at: string
         }
         Insert: {
           description: string
           id?: string
+          inserted_at?: string
           name: string
           organization_id: string
+          updated_at?: string
         }
         Update: {
           description?: string
           id?: string
+          inserted_at?: string
           name?: string
           organization_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -972,21 +990,18 @@ export type Database = {
       courses: {
         Row: {
           id: string
-          inserted_at: string
           is_active: boolean
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Insert: {
           id?: string
-          inserted_at?: string
           is_active?: boolean
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Update: {
           id?: string
-          inserted_at?: string
           is_active?: boolean
           organization_id?: string
           type?: Database["public"]["Enums"]["course_type"]
@@ -1718,6 +1733,10 @@ export type Database = {
       add_attendee_to_schedule: {
         Args: { course_schedule_id: string; course_subscription_id: string }
         Returns: boolean
+      }
+      add_course_to_allowed_courses: {
+        Args: { activity_id: string; course_id: string }
+        Returns: undefined
       }
       are_users_in_same_organization: {
         Args: { user_id_1: string; user_id_2: string }

@@ -1,4 +1,4 @@
-import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, Database } from "~/types/app.types";
+import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCostEdit, Database } from "~/types/app.types";
 
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
@@ -37,6 +37,7 @@ export const ACTIVITY_ICONS = {
 }
 
 export type StandardCourseActivitiesTemplate = {
+    costs: CourseCostEdit[];
     activities: CourseActivityEdit[];
 }
 
@@ -44,18 +45,18 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
     // Todo: Add Translations
     // Starts with A
     return {
-        // costs: [
-        //     {
-        //         name: "Grundgebühr",
-        //         description: "Anmelde- und Verwaltungskosten",
-        //         price: 250,
-        //     },
-        //     {
-        //         name: "Lernmaterial",
-        //         description: "Lehrbücher und Online-Ressourcen",
-        //         price: 100,
-        //     }
-        // ],
+        costs: [
+            {
+                name: "Grundgebühr",
+                description: "Anmelde- und Verwaltungskosten",
+                price: 250,
+            },
+            {
+                name: "Lernmaterial",
+                description: "Lehrbücher und Online-Ressourcen",
+                price: 100,
+            }
+        ],
         activities: [
             {
                 name: "Grundstoffunterricht",

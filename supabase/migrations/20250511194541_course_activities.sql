@@ -9,6 +9,8 @@ create table public.course_activities (
   sorting_order  integer default 0 not null check (sorting_order >= 0),
   allow_self_registration boolean default false not null,
   allow_requests boolean default false not null,
+  inserted_at  timestamptz default now() not null,
+  updated_at  timestamptz default now() not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';

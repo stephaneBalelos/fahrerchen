@@ -35,7 +35,7 @@
 <script setup lang="ts">
 const isCollapsed = defineModel("isCollapsed", {
   type: Boolean,
-  default: false,
+  default: true,
 });
 
 const toggleCollapse = () => {

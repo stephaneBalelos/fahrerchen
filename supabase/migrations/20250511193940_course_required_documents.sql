@@ -3,6 +3,8 @@ create table public.course_required_documents (
   id            uuid default uuid_generate_v4() primary key,
   name          text not null,
   description   text not null,
+  inserted_at  timestamptz default now() not null,
+  updated_at  timestamptz default now() not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';

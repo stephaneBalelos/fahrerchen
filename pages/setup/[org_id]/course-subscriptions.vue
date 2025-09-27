@@ -9,14 +9,14 @@
         color="primary"
         icon="i-heroicons-check-circle"
         >{{
-          g("weiter")
+          t("continue")
         }}</UButton
       >
     </template>
     <div 
     v-if="organizationsStore.selectedOrganization"
       class="py-12">
-    daslö
+    <CoursesSettingsCourseCostsList/>
     </div>
   </UPageHeader>
 </template>
@@ -28,16 +28,30 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { t: g } = useI18n({
-  useScope: "global",
-});
+
+const courseCostsStore = useCourseCostsStore();
 
 const organizationsStore = useUserOrganizationsStore();
 const isSubscriptionSettingsSetupComplete = computed(() => {
-  return true;
+  return courseCostsStore.courseCosts.length > 0;
 });
 </script>
 
 <style scoped>
 
 </style>
+
+<i18n lang="json">
+{
+  "de": {
+    "setup_your_subscriptions_settings": "Richte deine Abonnement-Einstellungen ein",
+    "setup_your_subscriptions_settings_description": "Lege die Abonnement-Optionen für deine Kurse fest, um den Lernenden flexible Zugangsmöglichkeiten zu bieten.",
+    "continue": "Weiter"
+  },
+  "en": {
+    "setup_your_subscriptions_settings": "Set up your subscription settings",
+    "setup_your_subscriptions_settings_description": "Define the subscription options for your courses to provide learners with flexible access.",
+    "continue": "Continue"
+  }
+}
+</i18n>

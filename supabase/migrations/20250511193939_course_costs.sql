@@ -4,6 +4,8 @@ create table public.course_costs (
   name          text not null,
   description   text not null,
   price        numeric default 0 not null check (price >= 0),
+  inserted_at  timestamptz default now() not null,
+  updated_at  timestamptz default now() not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_costs is 'COURSE COSTS.';

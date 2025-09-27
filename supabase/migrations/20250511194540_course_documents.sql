@@ -4,8 +4,8 @@ create table public.course_documents (
   name          text,
   description   text,
   path         text not null,
-  created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  last_modified_at  timestamp with time zone default timezone('utc'::text, now()) not null,
+  inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at  timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (path)
 );
