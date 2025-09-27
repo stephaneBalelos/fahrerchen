@@ -19,7 +19,7 @@
           <EditBillSettingsForm
             v-if="userOrganizationsStore.selectedOrganization"
             :organization-id="
-              userOrganizationsStore.selectedOrganization.organization_id
+              userOrganizationsStore.selectedOrganization.id
             "
           />
           <template #error="{ error, clearError }">

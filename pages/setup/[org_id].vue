@@ -23,7 +23,6 @@
         </div>
       </template>
       <template #panel>
-
         <UNavigationTree :links="links" />
       </template>
       <template #right>
@@ -60,17 +59,11 @@ const links = computed(() => {
   const basePath = `/setup/${organization.value?.id}`;
   return [
     {
-      label: t("general_info"),
-      to: `${basePath}`,
-      icon: "i-heroicons-information-circle-20-solid",
-      isActive: route.path === `${basePath}/general-info`,
-      exact: true,
-    },
-    {
       label: t("courses"),
       to: `${basePath}/courses`,
       icon: "i-heroicons-academic-cap-20-solid",
       isActive: route.path === `${basePath}/courses`,
+      inactiveClass: "truncate",
     },
     {
       label: t("courses_activities"),
@@ -78,6 +71,7 @@ const links = computed(() => {
       icon: "i-heroicons-cube",
       isActive: route.path === `${basePath}/courses-activities`,
       disabled: courseStore.activeCourses.length === 0,
+      inactiveClass: "truncate",
     },
     {
       label: t("course_costs"),
@@ -87,12 +81,26 @@ const links = computed(() => {
       disabled:
         courseStore.activeCourses.length === 0 ||
         courseActivitiesStore.courseActivities.length === 0,
+      inactiveClass: "truncate",
+    },
+    {
+      label: t("billing_settings"),
+      to: `${basePath}/billing`,
+      icon: "i-heroicons-document-currency-euro-20-solid",
+      isActive: route.path === `${basePath}/billing`,
+      disabled:
+        courseStore.activeCourses.length === 0 ||
+        courseActivitiesStore.courseActivities.length === 0 ||
+        courseCostsStore.courseCosts.length === 0,
+      inactiveClass: "truncate",
     },
     {
       label: t("required_documents"),
       to: `${basePath}/required-documents`,
       icon: "i-heroicons-document-text-20-solid",
       isActive: route.path === `${basePath}/required-documents`,
+      inactiveClass: "truncate",
+
       disabled:
         courseStore.activeCourses.length === 0 ||
         courseActivitiesStore.courseActivities.length === 0 ||
@@ -110,12 +118,16 @@ const links = computed(() => {
     "general_info": "Allgemeine Informationen",
     "courses_activities": "Kursaktivitäten",
     "course_costs": "Kurskosten",
+    "billing_settings": "Rechnungseinstellungen",
+    "courses": "Kurse",
     "required_documents": "Erforderliche Dokumente"
   },
   "en": {
     "general_info": "General Info",
     "courses_activities": "Course Activities",
     "course_costs": "Course Costs",
+    "billing_settings": "Billing Settings",
+    "courses": "Courses",
     "required_documents": "Required Documents"
   }
 }

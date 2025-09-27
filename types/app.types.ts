@@ -39,7 +39,9 @@ export type CourseRequiredDocumentEdit = Omit<AppCourseRequiredDocument, 'id' | 
 export type AppCourseRequiredDocumentCombination = DatabaseGenerated['public']['Tables']['course_required_documents_combinations']['Row']
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
 export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']
+export type OrganizationBillingSettingsEdit = Omit<AppOrganizationBillingSettings, 'id' | 'organization_id' | 'created_at' | 'updated_at'>
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {

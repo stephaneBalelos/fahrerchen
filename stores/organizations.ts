@@ -1,4 +1,4 @@
-import type { Database, AppOrganization, OrganizationEdit } from "~/types/app.types"
+import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit } from "~/types/app.types"
 import { useUserStore } from "./user"
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
@@ -77,6 +77,57 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }
 
+    const getOrganizationBillingSettings = async (orgId: string): Promise<AppOrganizationBillingSettings | null> => {
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .select('*')
+            .eq('id', orgId)
+        if (error) {
+            return null
+        } else {
+            return data[0] || null
+        }
+    }
+
+
+    const createBillingSettings = async (settings: OrganizationBillingSettingsEdit): Promise<AppOrganizationBillingSettings | null> => {
+        if (!selectedOrganization.value) {
+            throw new Error("No organization selected")
+        }
+        const orgId = selectedOrganization.value.id
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .insert({
+                ...settings,
+                id: orgId
+            })
+            .select('*')
+            .single()
+        if (error) {
+            console.error("Error saving billing settings:", error)
+            throw error
+        }
+        return data
+    }
+
+    const updateBillingSettings = async (settings: Partial<OrganizationBillingSettingsEdit>): Promise<AppOrganizationBillingSettings | null> => {
+        if (!selectedOrganization.value) {
+            throw new Error("No organization selected")
+        }
+        const orgId = selectedOrganization.value.id
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .update(settings)
+            .eq('id', orgId)
+            .select('*')
+            .single()
+        if (error) {
+            console.error("Error updating billing settings:", error)
+            throw error
+        }
+        return data
+    }
+
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
             organizations.value = []
@@ -85,7 +136,9 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading }
+    return { organizations, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+        getOrganizationBillingSettings, createBillingSettings, updateBillingSettings
+     }
 
 
 })

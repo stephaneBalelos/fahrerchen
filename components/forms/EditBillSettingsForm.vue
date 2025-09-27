@@ -1,122 +1,128 @@
 <template>
-  <UForm
-    v-if="status == 'success'"
-    :schema="schema"
-    :state="state"
-    :validate-on="['blur', 'submit']"
-    class="space-y-4"
-    @submit="saveSettings"
+  <UCard
+    :ui="{
+      body: {
+        base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
+      },
+    }"
   >
-    <UFormGroup
-      name="bank_account_name"
-      :label="t('form.bank_account_name.label')"
-      :placeholder="t('form.bank_account_name.placeholder')"
-      :description="t('form.bank_account_name.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
+    <UAlert
+      v-if="status == 'success' && !data"
+      :title="t('billing_settings_not_configured')"
+      :description="t('billing_settings_not_configured_description')"
+      color="amber"
+      variant="soft"
+      icon="i-heroicons-exclamation-triangle-20-solid"
+    />
+    <UForm
+      v-if="status == 'success'"
+      :schema="schema"
+      :state="state"
+      :validate-on="['blur', 'submit']"
+      class="space-y-4"
+      @submit="saveSettings"
     >
-      <UInput v-model="state.bank_account_name" size="md" />
-    </UFormGroup>
-
-    <UFormGroup
-      name="bank_account_number"
-      :label="t('form.bank_account_number.label')"
-      :placeholder="t('form.bank_account_number.placeholder')"
-      :description="t('form.bank_account_number.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UInput v-model="state.bank_account_number" size="md" />
-    </UFormGroup>
-    <UFormGroup
-      name="bank_account_iban"
-      :label="t('form.bank_account_iban.label')"
-      :placeholder="t('form.bank_account_iban.placeholder')"
-      :description="t('form.bank_account_iban.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UInput v-model="state.bank_account_iban" size="md" />
-    </UFormGroup>
-    <UFormGroup
-      name="bank_account_bic"
-      :label="t('form.bank_account_bic.label')"
-      :placeholder="t('form.bank_account_bic.placeholder')"
-      :description="t('form.bank_account_bic.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UInput v-model="state.bank_account_bic" size="md" />
-    </UFormGroup>
-
-    <UFormGroup
-      name="vat_rate"
-      :label="t('form.vat_rate.label')"
-      :placeholder="t('form.vat_rate.placeholder')"
-      :description="t('form.vat_rate.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UInput
-        v-model.number="state.vat_rate"
-        type="number"
-        size="md"
-        :min="0"
-        :max="100"
+      <UFormGroup
+        name="bank_account_name"
+        :label="t('form.bank_account_name.label')"
+        :placeholder="t('form.bank_account_name.placeholder')"
+        :description="t('form.bank_account_name.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
       >
-        <template #trailing>
-          <span class="text-gray-500 dark:text-gray-400 text-xs">%</span>
-        </template>
-      </UInput>
-    </UFormGroup>
-    <UFormGroup
-      name="vat_exempt"
-      :label="t('form.vat_exempt.label')"
-      :description="t('form.vat_exempt.description')"
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UToggle v-model="state.vat_exempt" />
-    </UFormGroup>
+        <UInput v-model="state.bank_account_name" size="md" />
+      </UFormGroup>
 
-    <UFormGroup
-      name="tax_id"
-      :label="t('form.tax_id.label')"
-      :placeholder="t('form.tax_id.placeholder')"
-      :description="t('form.tax_id.description')"
-      required
-      class="grid grid-cols-1 gap-4 items-center"
-      :ui="{ container: '' }"
-    >
-      <UInput v-model="state.tax_id" size="md" />
-    </UFormGroup>
+      <UFormGroup
+        name="bank_account_number"
+        :label="t('form.bank_account_number.label')"
+        :placeholder="t('form.bank_account_number.placeholder')"
+        :description="t('form.bank_account_number.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UInput v-model="state.bank_account_number" size="md" />
+      </UFormGroup>
+      <UFormGroup
+        name="bank_account_iban"
+        :label="t('form.bank_account_iban.label')"
+        :placeholder="t('form.bank_account_iban.placeholder')"
+        :description="t('form.bank_account_iban.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UInput v-model="state.bank_account_iban" size="md" />
+      </UFormGroup>
+      <UFormGroup
+        name="bank_account_bic"
+        :label="t('form.bank_account_bic.label')"
+        :placeholder="t('form.bank_account_bic.placeholder')"
+        :description="t('form.bank_account_bic.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UInput v-model="state.bank_account_bic" size="md" />
+      </UFormGroup>
 
-    <div class="flex gap-4 mt-4 justify-end">
-      <UButton :loading="isSaving" :disabled="isSaving" type="submit">
-        {{ t("form.save") }}
-      </UButton>
-      <UButton v-if="data && status === 'success'" variant="soft" @click="openInvoiceCustomization">
-        {{ t("form.template.customize") }}
-      </UButton>
-    </div>
-  </UForm>
+      <UFormGroup
+        name="vat_rate"
+        :label="t('form.vat_rate.label')"
+        :placeholder="t('form.vat_rate.placeholder')"
+        :description="t('form.vat_rate.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UInput
+          v-model.number="state.vat_rate"
+          type="number"
+          size="md"
+          :min="0"
+          :max="100"
+        >
+          <template #trailing>
+            <span class="text-gray-500 dark:text-gray-400 text-xs">%</span>
+          </template>
+        </UInput>
+      </UFormGroup>
+      <UFormGroup
+        name="vat_exempt"
+        :label="t('form.vat_exempt.label')"
+        :description="t('form.vat_exempt.description')"
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UToggle v-model="state.vat_exempt" />
+      </UFormGroup>
+
+      <UFormGroup
+        name="tax_id"
+        :label="t('form.tax_id.label')"
+        :placeholder="t('form.tax_id.placeholder')"
+        :description="t('form.tax_id.description')"
+        required
+        class="grid grid-cols-1 gap-4 items-center"
+        :ui="{ container: '' }"
+      >
+        <UInput v-model="state.tax_id" size="md" />
+      </UFormGroup>
+
+      <div class="flex gap-4 mt-4 justify-end">
+        <UButton :loading="isSaving" :disabled="isSaving" type="submit">
+          {{ t("form.save") }}
+        </UButton>
+      </div>
+    </UForm>
+  </UCard>
 </template>
 
 <script setup lang="ts">
 import { z } from "zod";
-import type { FormSubmitEvent } from "#ui/types";
-import InvoiceCustomizerModal from "../settings/InvoiceCustomizerModal.vue";
 
-type Props = {
-  organizationId: string;
-};
-
-const props = defineProps<Props>();
 const isSaving = ref(false);
 
 const { t } = useI18n({
@@ -127,14 +133,13 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
-const client = useSupabaseClient();
 const toast = useToast();
-const modal = useModal();
-const openInvoiceCustomization = () => {
-  modal.open(InvoiceCustomizerModal, {
-    organizationId: props.organizationId,
-  });
-};
+
+const props = defineProps<{
+  organizationId: string;
+}>();
+
+const organizationsStore = useUserOrganizationsStore();
 
 const schema = z.object({
   bank_account_name: z
@@ -223,18 +228,15 @@ const state = reactive<Schema>({
 });
 
 const { data, status, refresh } = await useAsyncData(
-  `organization/billing-settings`,
+  `organization/${props.organizationId}/billing-settings`,
   async () => {
-    const { data, error } = await client
-      .from("organization_billing_settings")
-      .select("*")
-      .eq("id", props.organizationId);
-
-    if (error) {
-      console.error("Error fetching billing settings:", error);
-      throw error;
-    }
-    return data[0];
+    return await organizationsStore.getOrganizationBillingSettings(
+      props.organizationId
+    );
+  },
+  {
+    watch: [() => props.organizationId],
+    immediate: true,
   }
 );
 
@@ -242,23 +244,36 @@ if (status.value === "success" && data.value) {
   Object.assign(state, data.value);
 }
 
-async function saveSettings(event: FormSubmitEvent<Schema>) {
+async function saveSettings() {
   try {
     isSaving.value = true;
-    const { error } = await client
-      .from("organization_billing_settings")
-      .upsert({
-        id: props.organizationId,
-        invoice_title: data.value?.invoice_title || t("default_invoice_title"),
-        invoice_subtitle: data.value?.invoice_subtitle || t("default_invoice_subtitle"),
-        invoice_message: data.value?.invoice_message || t("default_invoice_message"),
-        invoice_footer: data.value?.invoice_footer || t("default_invoice_footer"),
-        ...event.data,
+    if (data.value) {
+      // Update existing settings
+      await organizationsStore.updateBillingSettings({
+        bank_account_name: state.bank_account_name,
+        bank_account_number: state.bank_account_number,
+        bank_account_iban: state.bank_account_iban,
+        bank_account_bic: state.bank_account_bic,
+        vat_rate: state.vat_rate,
+        vat_exempt: state.vat_exempt,
+        tax_id: state.tax_id,
       });
-
-    if (error) {
-      console.error("Error saving billing settings:", error);
-      throw error;
+    } else {
+      // Create new settings
+      await organizationsStore.createBillingSettings({
+        bank_account_name: state.bank_account_name,
+        bank_account_number: state.bank_account_number,
+        bank_account_iban: state.bank_account_iban,
+        bank_account_bic: state.bank_account_bic,
+        vat_rate: state.vat_rate,
+        vat_exempt: state.vat_exempt,
+        template_name: "default",
+        tax_id: state.tax_id,
+        invoice_title: t("default_invoice_title"),
+        invoice_subtitle: t("default_invoice_subtitle"),
+        invoice_message: t("default_invoice_message"),
+        invoice_footer: t("default_invoice_footer"),
+      });
     }
 
     toast.add({
@@ -266,7 +281,6 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
       description: t("form.save_success.description"),
       color: "green",
     });
-    isSaving.value = false;
   } catch (error) {
     toast.add({
       title: t("form.save_error.title"),
@@ -277,6 +291,7 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
     isSaving.value = false;
   } finally {
     await refresh();
+    isSaving.value = false;
   }
 }
 </script>
@@ -286,6 +301,8 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
 <i18n lang="json">
 {
   "de": {
+    "billing_settings_not_configured": "Rechnungseinstellungen nicht konfiguriert",
+    "billing_settings_not_configured_description": "Diese Informationen werden auf alle Rechnungen angewendet, die Sie erstellen.",
     "default_invoice_title": "Rechnung",
     "default_invoice_subtitle": "Rechnung für die Fahrausbildung",
     "default_invoice_message": "Vielen Dank für Ihren Auftrag",
@@ -340,6 +357,12 @@ async function saveSettings(event: FormSubmitEvent<Schema>) {
     }
   },
   "en": {
+    "billing_settings_not_configured": "Billing Settings Not Configured",
+    "billing_settings_not_configured_description": "These details will apply to all invoices you create.",
+    "default_invoice_title": "Invoice",
+    "default_invoice_subtitle": "Invoice for Driving Lessons",
+    "default_invoice_message": "Thank you for your business",
+    "default_invoice_footer": "This invoice was generated electronically and is valid without a signature.",
     "form": {
       "save": "Save",
       "template": {
