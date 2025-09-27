@@ -9,7 +9,6 @@
         <template #left>
           <ClientOnly>
             <TeamsDropdown />
-
           </ClientOnly>
         </template>
         <template #right>
@@ -33,12 +32,6 @@
             :links="[{ label: 'Colors', draggable: false, children: colors }]"
             @update:links="(links) => (defaultColors = links)"
           /> -->
-
-        <div class="flex-1">
-          <!-- <TutorialNavigation v-if="runtimeConfig.public.show_tutorial" /> -->
-        </div>
-
-        <UDivider class="sticky bottom-0" />
 
         <template #footer>
             <UButton

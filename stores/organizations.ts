@@ -1,10 +1,12 @@
-import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit } from "~/types/app.types"
+import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit, UserRole } from "~/types/app.types"
 import { useUserStore } from "./user"
+
+type UserOrganization = AppOrganization & { organization_role: UserRole }
 
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
-    const organizations = ref<AppOrganization[]>([])
+    const organizations = ref<UserOrganization[]>([])
     const isLoading = ref(true)
     const route = useRoute()
 
@@ -33,13 +35,15 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         }
         const { data, error } = await supabase
             .from('organization_members')
-            .select('id, organization:organization_id(*)')
+            .select('id, role, organization:organization_id(*)')
             .eq('user_id', userStore.user.id)
         if (error) {
             console.error("Error loading organizations memberships:", error)
             organizations.value = []
         } else {
-            organizations.value = data ? data.map(d => (d.organization)) : []
+            organizations.value = data ? data.map(d => {
+                return {...d.organization, organization_role: d.role}
+            }) : []
         }
         isLoading.value = false
     }

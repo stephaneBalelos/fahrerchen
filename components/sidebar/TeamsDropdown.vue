@@ -1,72 +1,34 @@
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 
-const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const userPermissionStore = useUserPermissionsStore();
 const config = useRuntimeConfig().public;
 
-const { t, setLocale } = useI18n({
+const { t } = useI18n({
   useScope: "local",
 });
 
-const { data: organizations } = await useAsyncData(
-  "user_organizations_select",
-  async () => {
-    const { data, error } = await client
-      .from("organizations")
-      .select("id, name, avatar_path")
-      .in(
-        "id",
-        userOrganizationsStore.organizations.map((o) => o.organization_id)
-      );
+const organizationsStore = useUserOrganizationsStore();
 
-    if (error) {
-      throw error;
-    }
-    if (!data) {
-      throw new Error("No Organizations found");
-    }
-    return data;
-  },
-  {
-    watch: [userOrganizationsStore.organizations],
-    immediate: true,
-    transform: (data) => {
-      return data.map((d) => {
-        const avatar_path = d.avatar_path
-          ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
-          : "";
-        return {
-          id: d.id,
-          label: d.name,
-          avatar: {
-            src: avatar_path,
-          },
-          icon: avatar_path ? undefined : "i-heroicons-globe-europe-africa",
-          avatar_path: avatar_path,
-          click: async () => {
-            if (selectedOrganization.value) {
-              try {
-                await userOrganizationsStore.selectOrganization(d.id);
-                const org =
-                  await userOrganizationsStore.fetchOrganizationData();
-
-                if (org) {
-                  await setLocale(org.preferred_language as "de" | "en");
-                }
-              } catch (error) {
-                console.error(error);
-              } finally {
-                navigateTo("/my/" + d.id);
-              }
-            }
-          },
-        };
-      });
-    },
-  }
-);
+const organizations = computed(() => {
+  return organizationsStore.organizations.map((d) => {
+    const avatar_path = d.avatar_path
+      ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.avatar_path}`
+      : "";
+    return {
+      id: d.id,
+      label: d.name,
+      avatar: {
+        src: avatar_path,
+      },
+      icon: avatar_path ? undefined : "i-heroicons-globe-europe-africa",
+      avatar_path: avatar_path,
+      click: async () => {
+        navigateTo(`/my/${d.id}`);
+      },
+    };
+  });
+});
 
 const actions = computed(() => {
   const items = [];
@@ -81,7 +43,7 @@ const actions = computed(() => {
       label: t("settings"),
       icon: "i-heroicons-cog-8-tooth",
       click: () => {
-        navigateTo(`/my/${selectedOrganization.organization_id}/settings`);
+        navigateTo(userOrganizationsStore.relativePath('/settings'));
       },
     });
   }
@@ -93,12 +55,6 @@ const actions = computed(() => {
     },
   });
   return items;
-});
-
-const selectedOrganization = computed(() => {
-  return organizations.value?.find(
-    (o) => o.id === userOrganizationsStore.selectedOrganization?.organization_id
-  );
 });
 </script>
 
@@ -116,18 +72,18 @@ const selectedOrganization = computed(() => {
     <UButton
       v-if="userOrganizationsStore.selectedOrganization"
       color="gray"
-      variant="ghost"
+      variant="solid"
       :class="[open && 'bg-gray-50 dark:bg-gray-800']"
       class="w-full"
     >
       <UAvatar
-        :src="selectedOrganization?.avatar_path"
+        :src="userOrganizationsStore.selectedOrganization.avatar_path ?? undefined"
         :icon="'i-heroicons-globe-europe-africa'"
         size="sm"
       />
 
       <span class="truncate text-gray-900 dark:text-white font-semibold">{{
-        selectedOrganization?.label
+        userOrganizationsStore.selectedOrganization.name
       }}</span>
     </UButton>
   </UDropdown>
