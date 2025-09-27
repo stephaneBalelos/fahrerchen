@@ -20,9 +20,20 @@
               @click="selectedScheduleId = null"
             />
           </template>
+          <template #right>
+            <UButton
+              block
+              color="red"
+              label="Termin löschen"
+              icon="i-heroicons-trash-solid"
+              @click="deleteSchedule(selectedScheduleId)"
+            />
+          </template>
         </UDashboardNavbar>
         <UDashboardPanelContent>
-          <ScheduleView :schedule-id="selectedScheduleId" />
+          <div class="flex-1">
+            <ScheduleView :schedule-id="selectedScheduleId" />
+          </div>
         </UDashboardPanelContent>
       </template>
       <template v-else>
@@ -56,6 +67,7 @@
 import * as z from "zod";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
+import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
 
 const { t } = useI18n({
   useScope: "local",
@@ -63,6 +75,8 @@ const { t } = useI18n({
 const route = useRoute();
 const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
+const modal = useModal();
+const slideover = useSlideover();
 
 const selectedScheduleId = computed<string | null>({
   get() {
@@ -108,7 +122,6 @@ const { data: schedules, refresh } = useAsyncData(
 );
 
 const openEditScheduleSlideover = (scheduleId?: string) => {
-  const slideover = useSlideover();
   slideover.open(EditCourseActivitySchedule, {
     scheduleId: scheduleId || undefined,
     "onActivity-deleted": () => {
@@ -118,6 +131,22 @@ const openEditScheduleSlideover = (scheduleId?: string) => {
       refresh();
     },
   });
+};
+
+const deleteSchedule = async (scheduleId: string) => {
+  modal.open(ConfirmModal, {
+    title: t('delete_schedule_confirm_title'),
+    description: t('delete_schedule_confirm_description'),
+    confirmLabel: t('delete'),
+    cancelLabel: t('cancel'),
+    action: async () => {
+      await $courseActivitySchedules.deleteCourseActivitySchedule(scheduleId);
+      if (selectedScheduleId.value === scheduleId) {
+        selectedScheduleId.value = null;
+      }
+      refresh();
+    }
+  })
 };
 </script>
 
@@ -130,6 +159,10 @@ const openEditScheduleSlideover = (scheduleId?: string) => {
     "calendar_view": "Kalender Ansicht",
     "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
+    "delete_schedule_confirm_title": "Termin löschen",
+    "delete_schedule_confirm_description": "Sind Sie sicher, dass Sie diesen Termin löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
     "form": {
       "assigned_to": {
         "label": "Zugewiesen an",
@@ -155,6 +188,10 @@ const openEditScheduleSlideover = (scheduleId?: string) => {
     "calendar_view": "Calendar view",
     "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
+    "delete_schedule_confirm_title": "Delete Schedule",
+    "delete_schedule_confirm_description": "Are you sure you want to delete this schedule? This action cannot be undone.",
+    "delete": "Delete",
+    "cancel": "Cancel",
     "form": {
       "assigned_to": {
         "label": "Assigned to",
