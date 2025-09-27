@@ -42,7 +42,7 @@
         </template>
         <div class="flex flex-col gap-1">
           <p class="text-sm text-gray-500 mb-2">
-            {{ g(`activities.allowed_classes`) }}
+            {{ g(`costs.allowed_classes`) }}
           </p>
           <UCard
             :ui="{
@@ -93,7 +93,7 @@
 
 <script setup lang="ts">
 import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
-import CostsAllowedCourseListItem from "~/components/courses/settings/CostsAllowedCourseListItem.vue";
+import CostsAllowedCourseListItem from "~/components/courses/settings/AllowedListItems/CostsAllowedCourseListItem.vue";
 
 const slideover = useSlideover();
 const toast = useToast();
@@ -159,6 +159,8 @@ const createCourseCostsFromTemplate = async () => {
     "course_costs": "Kurskosten",
     "set_course_costs": "Setzen Sie die Kurskosten",
     "add_cost": "Kosten hinzufügen",
+    "add_course_cost": "Kosten hinzufügen",
+    "add_course_cost_from_template": "Kosten aus Vorlage hinzufügen",
     "no_course_costs": "Keine Kurskosten",
     "no_course_costs_description": "Es gibt keine Kurskosten für diesen Kurs.",
     "cost_saved": "Kosten gespeichert",
@@ -168,23 +170,27 @@ const createCourseCostsFromTemplate = async () => {
     "error_creating_costs": "Fehler beim Erstellen der Kosten",
     "error_creating_costs_description": "Beim Erstellen der Kosten ist ein Fehler aufgetreten.",
     "cost_deleted": "Kosten gelöscht",
-    "cost_deleted_description": "Die Kosten wurden erfolgreich gelöscht."
+    "cost_deleted_description": "Die Kosten wurden erfolgreich gelöscht.",
+    "costs_created": "Kosten erstellt",
+    "costs_created_description": "Die Kosten wurden erfolgreich aus der Vorlage erstellt."
   },
   "en": {
     "edit": "Edit",
     "course_costs": "Course Costs",
     "set_course_costs": "Set the course costs",
     "add_cost": "Add cost",
+    "add_course_cost": "Add course cost",
+    "add_course_cost_from_template": "Add course cost from template",
     "no_course_costs": "No course costs",
     "no_course_costs_description": "There are no course costs for this course.",
     "cost_saved": "Cost saved",
     "cost_saved_description": "The cost has been saved successfully.",
-    "costs_created": "Costs created",
-    "costs_created_description": "The costs have been created successfully.",
     "error_creating_costs": "Error creating costs",
     "error_creating_costs_description": "There was an error creating the costs.",
     "cost_deleted": "Cost deleted",
-    "cost_deleted_description": "The cost has been deleted successfully."
+    "cost_deleted_description": "The cost has been deleted successfully.",
+    "costs_created": "Costs created",
+    "costs_created_description": "The costs have been created successfully."
   }
 }
 </i18n>

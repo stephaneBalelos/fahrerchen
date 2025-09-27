@@ -31,7 +31,12 @@ export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['c
 export type AppCourseSubscriptionBillItem = DatabaseGenerated['public']['Tables']['course_subscription_bill_items']['Row']
 
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
+export type CourseDocumentEdit = Omit<AppCourseDocument, 'id' | 'organization_id' | 'inserted_at' | 'updated_at' | 'path'>
+export type AppCourseDocumentCombination = DatabaseGenerated['public']['Tables']['course_documents_combinations']['Row']
+
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
+export type CourseRequiredDocumentEdit = Omit<AppCourseRequiredDocument, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
+export type AppCourseRequiredDocumentCombination = DatabaseGenerated['public']['Tables']['course_required_documents_combinations']['Row']
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
 export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']

@@ -18,11 +18,11 @@
       v-if="courseActivitiesStore.courseActivities.length > 0"
       class="space-y-4"
     >
-      <UiCardsBodyCollapseCard
+      <BodyCollapseCard
         v-for="field in courseActivitiesStore.courseActivities"
         :key="field.id"
       >
-        <template #header="{ }">
+        <template #header="{}">
           <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
             <div class="flex flex-col gap-1 grow">
               <p class="font-semibold">{{ field.name }}</p>
@@ -42,7 +42,7 @@
             />
           </div>
         </template>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div class="flex flex-col gap-4">
             <!-- Additional content can go here -->
             <div class="flex flex-col gap-1">
@@ -88,10 +88,25 @@
             <p class="text-sm text-gray-500 mb-2">
               {{ g(`activities.allowed_classes`) }}
             </p>
-            <ActivitiesAllowedCoursesList :activity-id="field.id" />
+                      <UCard
+            :ui="{
+              body: {
+                padding: 'sm:p-0 py-0 px-0',
+              },
+            }"
+          >
+            <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800">
+              <ActivitiesAllowedCourseListItem
+                v-for="course in courseStore.activeCourses"
+                :key="field.id + course.id"
+                :course="course"
+                :activity-id="field.id"
+              />
+            </div>
+          </UCard>
           </div>
         </div>
-      </UiCardsBodyCollapseCard>
+      </BodyCollapseCard>
     </div>
     <UAlert
       v-else
@@ -122,9 +137,11 @@
 </template>
 
 <script setup lang="ts">
+import { UToggle } from "#components";
 import EditCourseActivityForm from "~/components/forms/EditCourseActivityForm.vue";
+import BodyCollapseCard from "~/components/ui/Cards/BodyCollapseCard.vue";
 import { formatCurrency } from "~/utils/formatters";
-import ActivitiesAllowedCoursesList from "./ActivitiesAllowedCoursesList.vue";
+import ActivitiesAllowedCourseListItem from "./AllowedListItems/ActivitiesAllowedCourseListItem.vue";
 
 const slideover = useSlideover();
 const toast = useToast();
@@ -135,6 +152,7 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
+const courseStore = useCoursesStore();
 const courseActivitiesStore = useCourseActivitiesStore();
 
 const openEditActivityForm = (id?: string) => {

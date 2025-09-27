@@ -1,5 +1,5 @@
 <template>
-  <CoursesSettingsAllowedSubscriptionListItem 
+  <AllowedCourseListItemTemplate
     :is-loading="status !== 'success'" :is-allowed="data ? true : false" :course="props.course" 
     :remove-course-from-allowed-courses="removeCourseFromAllowedCourses" 
     :add-course-to-allowed-courses="addCourseToAllowedCourses" />
@@ -7,6 +7,7 @@
 
 <script setup lang="ts">
 import type { AppCourse } from '~/types/app.types';
+import AllowedCourseListItemTemplate from './AllowedCourseListItemTemplate.vue';
 
 type Props = {
   course: AppCourse

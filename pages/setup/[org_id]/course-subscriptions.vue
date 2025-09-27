@@ -15,8 +15,9 @@
     </template>
     <div 
     v-if="organizationsStore.selectedOrganization"
-      class="py-12">
+      class="py-12 divide-y">
     <CoursesSettingsCourseCostsList/>
+    <CoursesSettingsCourseRequiredDocumentsList />
     </div>
   </UPageHeader>
 </template>

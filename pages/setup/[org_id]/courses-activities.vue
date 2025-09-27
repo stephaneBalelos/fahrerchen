@@ -10,7 +10,7 @@
         icon="i-heroicons-check-circle"
         @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/course-subscriptions`)"
         >{{
-          g("weiter")
+          t("continue")
         }}</UButton
       >
     </template>
@@ -31,9 +31,6 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { t: g } = useI18n({
-  useScope: "global",
-});
 
 const organizationsStore = useUserOrganizationsStore();
 const courseActivitiesStore = useCourseActivitiesStore();
@@ -54,11 +51,14 @@ const isCourseActivitiesSetupComplete = computed(() => {
 {
   "de": {
     "setup_your_course_activities": "Richte deine Kursaktivitäten ein",
-    "setup_your_course_activities_description": "Füge Aktivitäten zu deinem Kurs hinzu, um den Lernenden eine strukturierte Erfahrung zu bieten."
+    "setup_your_course_activities_description": "Füge Aktivitäten zu deinem Kurs hinzu, um den Lernenden eine strukturierte Erfahrung zu bieten.",
+    "continue": "Weiter"
+    
   },
   "en": {
     "setup_your_course_activities": "Set up your course activities",
-    "setup_your_course_activities_description": "Add activities to your course to provide learners with a structured experience."
+    "setup_your_course_activities_description": "Add activities to your course to provide learners with a structured experience.",
+    "continue": "Continue"
   }
 }
 </i18n>

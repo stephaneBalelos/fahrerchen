@@ -1,4 +1,4 @@
-import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCostEdit, Database } from "~/types/app.types";
+import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCostEdit, CourseRequiredDocumentEdit, Database } from "~/types/app.types";
 
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
@@ -39,6 +39,7 @@ export const ACTIVITY_ICONS = {
 export type StandardCourseActivitiesTemplate = {
     costs: CourseCostEdit[];
     activities: CourseActivityEdit[];
+    required_documents: CourseRequiredDocumentEdit[];
 }
 
 export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesTemplate => {
@@ -99,23 +100,23 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
                 sorting_order: 4,
             }
         ],
-        // required_documents: [
-        //     {
-        //         name: "Personalausweis oder Reisepass",
-        //         description: "Gültiges Identifikationsdokument",
-        //     },
-        //     {
-        //         name: "Biometrisches Passfoto",
-        //         description: "Aktuelles Passfoto nach biometrischen Standards",
-        //     },
-        //     {
-        //         name: "Sehtestbescheinigung",
-        //         description: "Nachweis über die bestandene Sehtestuntersuchung",
-        //     },
-        //     {
-        //         name: "Erste-Hilfe-Nachweis",
-        //         description: "Bescheinigung über die Teilnahme an einem Erste-Hilfe-Kurs",    
-        //     },
-        // ],
+        required_documents: [
+            {
+                name: "Personalausweis oder Reisepass",
+                description: "Gültiges Identifikationsdokument",
+            },
+            {
+                name: "Biometrisches Passfoto",
+                description: "Aktuelles Passfoto nach biometrischen Standards",
+            },
+            {
+                name: "Sehtestbescheinigung",
+                description: "Nachweis über die bestandene Sehtestuntersuchung",
+            },
+            {
+                name: "Erste-Hilfe-Nachweis",
+                description: "Bescheinigung über die Teilnahme an einem Erste-Hilfe-Kurs",    
+            },
+        ],
     }
 }

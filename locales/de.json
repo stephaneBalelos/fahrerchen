@@ -141,6 +141,19 @@
         "duration_minutes": "Dauer (Minuten)"
 
     },
+    "costs": {
+        "price": "Preis",
+        "allowed_classes": "Erlaubte Klassen",
+        "allowed_classes_help": "Wählen Sie die Fahrzeugklassen aus, für die diese Kosten gelten sollen. Wenn keine Klasse ausgewählt ist, gelten die Kosten für alle Klassen."
+    },
+    "required_documents": {
+        "allowed_classes": "Erlaubte Klassen",
+        "allowed_classes_help": "Wählen Sie die Fahrzeugklassen aus, für die dieses Dokument erforderlich sein soll. Wenn keine Klasse ausgewählt ist, ist das Dokument für alle Klassen erforderlich."
+    },
+    "documents": {
+       "allowed_classes": "Erlaubte Klassen",
+       "allowed_classes_help": "Wählen Sie die Fahrzeugklassen aus, die zugelassen sind. Wenn keine Klasse ausgewählt ist, sind alle Klassen zugelassen."
+    },
     "bills": {
         "status": {
             "paid": "Bezahlt",
