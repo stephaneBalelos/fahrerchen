@@ -47,8 +47,8 @@
             />
           </div>
         </template>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="flex flex-col gap-4">
             <!-- Additional content can go here -->
             <div class="flex flex-col gap-1">
               <p class="text-sm text-gray-500">{{ g(`activities.price`) }}</p>
@@ -81,6 +81,12 @@
               </p>
               <p class="font-medium break-all">{{ field.required > 0 ? field.required : '-' }}</p>
             </div>
+          </div>
+          <div class="flex flex-col gap-1 lg:col-span-2">
+            <p class="text-sm text-gray-500 mb-2">{{ g(`activities.allowed_classes`) }}</p>
+            <ActivitiesAllowedCoursesList
+              :activity-id="field.id"
+            />
           </div>
         </div>
       </UCard>
@@ -116,6 +122,7 @@
 <script setup lang="ts">
 import EditCourseActivityForm from "~/components/forms/EditCourseActivityForm.vue";
 import { formatCurrency } from "~/utils/formatters";
+import ActivitiesAllowedCoursesList from "./ActivitiesAllowedCoursesList.vue";
 
 const slideover = useSlideover();
 const toast = useToast();

@@ -1,5 +1,5 @@
 import { getStandardCourseActivitiesTemplate, type StandardCourseActivitiesTemplate } from "~/constants"
-import type { AppCourseActivity, CourseActivityEdit } from "~/types/app.types"
+import type { AppCourseActivitiesCombination, AppCourseActivity, CourseActivityEdit } from "~/types/app.types"
 
 export const useCourseActivitiesStore = defineStore('courseActivities', () => {
     const supabase = useSupabaseClient()
@@ -114,6 +114,53 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         await loadCourseActivities()
     }
 
+    const getAllowedCourseForActivity = async (id: string, course_id?: string): Promise<AppCourseActivitiesCombination[]> => {
+       let query =  supabase
+            .from('course_activities_combinations')
+            .select('*')
+            .eq('activity_id', id)
+
+        if (course_id) {
+            query = query.eq('course_id', course_id)
+        }
+
+        const { data, error } = await query
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
+    const addCourseToAllowedCourses = async (activity_id: string, course_id: string): Promise<void> => {
+        if (!userOrganizationsStore.selectedOrganization) {
+            throw new Error("No organization selected")
+        }
+        const { error } = await supabase
+            .from('course_activities_combinations')
+            .insert({
+                activity_id,
+                course_id,
+                organization_id: userOrganizationsStore.selectedOrganization.id
+            })
+
+        if (error) {
+            throw error
+        }
+    }
+
+    const removeCourseFromAllowedCourses = async (activity_id: string, course_id: string): Promise<void> => {
+        const { error } = await supabase
+            .from('course_activities_combinations')
+            .delete()
+            .eq('activity_id', activity_id)
+            .eq('course_id', course_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseActivities()
     }, { immediate: true })
@@ -127,5 +174,8 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         updateCourseActivity,
         deleteCourseActivity,
         createActivitiesFromTemplate,
+        getAllowedCourseForActivity,
+        addCourseToAllowedCourses,
+        removeCourseFromAllowedCourses,
     }
 })

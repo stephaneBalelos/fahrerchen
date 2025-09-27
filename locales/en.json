@@ -115,6 +115,37 @@
             "description": "Tractors with a design-related maximum speed of up to 60 km/h as well as self-propelled work machines and feed mixers with a design-related maximum speed of up to 40 km/h, which are each intended by their design for use in agriculture or forestry and are used for such purposes (each also with trailers)."
         }
     },
+    "activities": {
+        "price": "Price",
+        "type": "Type",
+        "types": {
+            "THEORY": {
+                "name": "Theory",
+                "description": "Theory lesson"
+            },
+            "PRACTICE": {
+                "name": "Practice",
+                "description": "Practical driving lesson"
+            },
+            "EXAM": {
+                "name": "Examination",
+                "description": "Examination preparation and presentation fee"
+            },
+            "OTHER": {
+                "name": "Other",
+                "description": "Other activities"
+            }
+        },
+        "allowed_classes": "Allowed Classes",
+        "allowed_classes_help": "Select the vehicle classes for which this activity should be available. If no class is selected, the activity is available for all classes.",
+        "required_attendance": "Required Attendance",
+        "required_attendance_help": "How often must the student participate in this activity to complete it?",
+        "allow_self_registration": "Allow Self-Registration",
+        "allow_self_registration_help": "Allows students to register themselves for this activity.",
+        "allow_requests": "Allow Requests",
+        "allow_requests_help": "Allows students to make requests for this activity.",
+        "duration_minutes": "Duration (Minutes)"
+    },
     "bills": {
         "status": {
             "paid": "Paid",
