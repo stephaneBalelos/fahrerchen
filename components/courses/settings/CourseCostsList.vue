@@ -77,9 +77,9 @@
 </template>
 
 <script setup lang="ts">
-// import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
+import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
 
-const _slideover = useSlideover();
+const slideover = useSlideover();
 const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
@@ -88,27 +88,25 @@ const { t } = useI18n({
 const courseCostsStore = useCourseCostsStore();
 
 const openEditCourseCostForm = (id?: string) => {
-  console.log("Edit cost", id);
-  // slideover.open(EditCourseCostForm, {
-  //   id: id,
-
-  //   "onCost-saved": () => {
-  //     slideover.close();
-  //     toast.add({
-  //       title: t("cost_saved"),
-  //       description: t("cost_saved_description"),
-  //       color: "green",
-  //     });
-  //   },
-  //   "onCost-deleted": () => {
-  //     slideover.close();
-  //     toast.add({
-  //       title: t("cost_deleted"),
-  //       description: t("cost_deleted_description"),
-  //       color: "green",
-  //     });
-  //   },
-  // });
+  slideover.open(EditCourseCostForm, {
+    courseCostId: id,
+    "onCost-saved": () => {
+      slideover.close();
+      toast.add({
+        title: t("cost_saved"),
+        description: t("cost_saved_description"),
+        color: "green",
+      });
+    },
+    "onCost-deleted": () => {
+      slideover.close();
+      toast.add({
+        title: t("cost_deleted"),
+        description: t("cost_deleted_description"),
+        color: "green",
+      });
+    },
+  });
 };
 
 const createCourseCostsFromTemplate = async () => {
@@ -143,6 +141,10 @@ const createCourseCostsFromTemplate = async () => {
     "no_course_costs_description": "Es gibt keine Kurskosten für diesen Kurs.",
     "cost_saved": "Kosten gespeichert",
     "cost_saved_description": "Die Kosten wurden erfolgreich gespeichert.",
+    "cost_created": "Kosten erstellt",
+    "cost_created_description": "Die Kosten wurden erfolgreich erstellt.",
+    "error_creating_costs": "Fehler beim Erstellen der Kosten",
+    "error_creating_costs_description": "Beim Erstellen der Kosten ist ein Fehler aufgetreten.",
     "cost_deleted": "Kosten gelöscht",
     "cost_deleted_description": "Die Kosten wurden erfolgreich gelöscht."
   },
@@ -155,6 +157,10 @@ const createCourseCostsFromTemplate = async () => {
     "no_course_costs_description": "There are no course costs for this course.",
     "cost_saved": "Cost saved",
     "cost_saved_description": "The cost has been saved successfully.",
+    "costs_created": "Costs created",
+    "costs_created_description": "The costs have been created successfully.",
+    "error_creating_costs": "Error creating costs",
+    "error_creating_costs_description": "There was an error creating the costs.",
     "cost_deleted": "Cost deleted",
     "cost_deleted_description": "The cost has been deleted successfully."
   }

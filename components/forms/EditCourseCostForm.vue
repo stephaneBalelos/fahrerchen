@@ -61,30 +61,23 @@
       <UButton @click="form?.submit()">
         {{ t("save") }}
       </UButton>
-      <UButton v-if="props.id && courseCost" variant="ghost" color="red" @click="deleteCourseCost">
-        {{ t("delete") }}
-      </UButton>
     </template>
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import type { AppCourseCost } from "~/types/app.types";
+import type { AppCourseCost, CourseCostEdit } from "~/types/app.types";
 import type { Form } from "#ui/types";
 
-export type CourseCostEdit = Omit<
-  AppCourseCost,
-  "id" | "course_id" | "organization_id"
->;
-
 type Props = {
-  id?: string;
-  courseid: string;
-  orgid: string;
+  courseCostId?: string;
 };
 type Emits = {
   (event: "cost-saved" | "cost-deleted", payload?: AppCourseCost): void;
 };
+
+const slideover = useSlideover();
+
 const props = defineProps<Props>();
 const { t } = useI18n({
   useScope: "local",
@@ -92,37 +85,34 @@ const { t } = useI18n({
 const $emits = defineEmits<Emits>();
 const form = ref<Form<CourseCostEdit> | null>(null);
 
+const courseCostsStore = useCourseCostsStore();
+
 const state = reactive<CourseCostEdit>({
   name: "",
   description: "",
   price: 0,
 });
 
-const { data: courseCost } = await useAsyncData(
-  `course_cost_${props.id}`,
-  async () => {
-    if (!props.id) {
-      return null;
-    }
+onMounted(async () => {
+  if (props.courseCostId) {
+    try {
+          const data = await courseCostsStore.getCourseCost(props.courseCostId);
 
-    const { data, error } = await useSupabaseClient()
-      .from("course_costs")
-      .select("*")
-      .eq("id", props.id)
-      .single();
-
-    if (error) {
-      console.error(error);
-      throw error;
+    if (!data) {
+      throw new Error("Course cost not found");
     }
-    if (data) {
-      state.name = data.name;
-      state.description = data.description;
-      state.price = data.price;
+    state.name = data.name;
+    state.description = data.description;
+    state.price = data.price;
+    } catch (error) {
+      console.error("Error loading course cost:", error);
+      // Handle error, e.g., show a notification
     }
-    return data;
   }
-);
+});
+onUnmounted(() => {
+  slideover.reset();
+});
 
 const validate = (state: CourseCostEdit) => {
   const errors = [];
@@ -136,65 +126,41 @@ const validate = (state: CourseCostEdit) => {
 };
 
 async function saveCourseCost() {
-  if (props.id && courseCost.value) {
-    const { data, error } = await useSupabaseClient()
-      .from("course_costs")
-      .update({
-        name: state.name,
-        description: state.description,
-        price: state.price,
-      })
-      .eq("id", courseCost.value.id)
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    if (data) {
-      $emits("cost-saved", data);
-    }
+  if (props.courseCostId) {
+    await updateCourseCost(state);
   } else {
-    await createCourseCost();
+    await createCourseCost(state);
   }
 }
 
-async function createCourseCost() {
-  const { data, error } = await useSupabaseClient()
-    .from("course_costs")
-    .insert({
+async function updateCourseCost(state: CourseCostEdit) {
+  if (!props.courseCostId) return;
+
+  try {
+    await courseCostsStore.updateCourseCost(props.courseCostId, {
       name: state.name,
       description: state.description,
       price: state.price,
-      course_id: props.courseid,
-      organization_id: props.orgid,
-    })
-    .select("*")
-    .single();
-
-  if (error) {
-    console.error(error);
-    throw error;
-  }
-  if (data) {
-    $emits("cost-saved", data);
+    });
+    $emits("cost-saved");
+  } catch (error) {
+    console.error("Error updating course cost:", error);
+    // Handle error, e.g., show a notification
   }
 }
 
-async function deleteCourseCost() {
-  if (!props.id) return;
-
-  const { error } = await useSupabaseClient()
-    .from("course_costs")
-    .delete()
-    .eq("id", props.id);
-
-  if (error) {
-    console.error(error);
-    throw error;
+async function createCourseCost(state: CourseCostEdit) {
+  try {
+     await courseCostsStore.createCourseCost({
+      name: state.name,
+      description: state.description,
+      price: state.price,
+    });
+    $emits("cost-saved");
+  } catch (error) {
+    console.error("Error creating course cost:", error);
+    // Handle error, e.g., show a notification
   }
-  $emits("cost-deleted");
 }
 </script>
 

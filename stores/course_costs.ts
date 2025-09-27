@@ -75,6 +75,18 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         return await bulkCreateCourseCosts(template.costs)
     }
 
+    const getCourseCost = async (id: string): Promise<AppCourseCost | null> => {
+        const { data, error } = await supabase
+            .from('course_costs')
+            .select('*')
+            .eq('id', id)
+            .single()
+        if (error) {
+            throw error
+        }
+        return data
+    }
+
     const updateCourseCost = async (id: string, courseCost: Partial<CourseCostEdit>) => {
         const { error } = await supabase
             .from('course_costs')
@@ -110,6 +122,7 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         createCourseCost,
         updateCourseCost,
         createCourseCostsFromTemplate,
+        getCourseCost,
         deleteCourseCost,
     }
 })
