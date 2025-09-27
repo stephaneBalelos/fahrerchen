@@ -8,6 +8,12 @@
         v-if="isRequiredDocumentsSettingsSetupComplete"
         color="primary"
         icon="i-heroicons-check-circle"
+        @click="
+          () =>
+            navigateTo(
+              `/setup/${organizationsStore.selectedOrganization?.id}/complete`
+            )
+        "
         >{{
           t("continue")
         }}</UButton

@@ -69,7 +69,7 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const navigateToAfterSetup = async (url: string) => {
   if (userOrganizationsStore.selectedOrganization) {
     await userOrganizationsStore.updateOrganizationById(
-      userOrganizationsStore.selectedOrganization!.organization_id,
+      userOrganizationsStore.selectedOrganization.id,
       { setup_completed: true }
     );
 
