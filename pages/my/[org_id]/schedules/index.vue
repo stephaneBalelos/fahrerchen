@@ -21,13 +21,20 @@
             />
           </template>
           <template #right>
-            <UButton
-              block
-              color="red"
-              label="Termin löschen"
-              icon="i-heroicons-trash-solid"
-              @click="deleteSchedule(selectedScheduleId)"
-            />
+            <div class="flex items-center space-x-2">
+              <UButton
+                icon="i-heroicons-pencil-solid"
+                color="white"
+                :label="t('edit_schedule')"
+                @click="openEditScheduleSlideover(selectedScheduleId)"
+              />
+              <UButton
+                color="red"
+                variant="soft"
+                icon="i-heroicons-trash-solid"
+                @click="deleteSchedule(selectedScheduleId)"
+              />
+            </div>
           </template>
         </UDashboardNavbar>
         <UDashboardPanelContent>
@@ -110,7 +117,7 @@ const filterForm = ref<FilterForm>({
   status: undefined,
 });
 
-const { data: schedules, refresh } =  useAsyncData(
+const { data: schedules, refresh } = useAsyncData(
   "course-activity-schedules",
   async () =>
     await $courseActivitySchedules.fetchCourseActivitySchedules({
@@ -135,18 +142,18 @@ const openEditScheduleSlideover = (scheduleId?: string) => {
 
 const deleteSchedule = async (scheduleId: string) => {
   modal.open(ConfirmModal, {
-    title: t('delete_schedule_confirm_title'),
-    description: t('delete_schedule_confirm_description'),
-    confirmLabel: t('delete'),
-    cancelLabel: t('cancel'),
+    title: t("delete_schedule_confirm_title"),
+    description: t("delete_schedule_confirm_description"),
+    confirmLabel: t("delete"),
+    cancelLabel: t("cancel"),
     action: async () => {
       await $courseActivitySchedules.deleteCourseActivitySchedule(scheduleId);
       if (selectedScheduleId.value === scheduleId) {
         selectedScheduleId.value = null;
       }
       refresh();
-    }
-  })
+    },
+  });
 };
 
 watch(selectedScheduleId, async () => {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <UPageHeader
-      v-if="activity"
+      v-if="activity && schedule"
       :headline="g(`activities.types.${activity.activity_type}.name`)"
       :title="activity.name"
       :description="activity.description"
@@ -10,17 +10,18 @@
       }"
     >
       <template #links>
-        <UPopover v-if="schedule" class="col-span-2" :popper="{ placement: 'bottom-start' }">
-          <div class="w-full">
-            <UButton
-              block
-              color="white"
-              variant="ghost"
-              size="xl"
-              icon="i-heroicons-calendar-days-20-solid"
-              :label="format(new Date(schedule.start_at), 'd MMM, yyy')"
-            />
-          </div>
+        <UPopover
+          v-if="schedule"
+          class="col-span-2"
+          :popper="{ placement: 'bottom-start' }"
+        >
+          <UButton
+            block
+            color="white"
+            variant="solid"
+            size="xl"
+            :label="getLocalizedDateTimeString(new Date(schedule.start_at))"
+          />
           <template #panel="">
             <Datepicker
               v-model="schedule.start_at"
@@ -31,19 +32,13 @@
           </template>
         </UPopover>
       </template>
-      <ScheduleAllowedCourses
-        :activity-id="activity.id"
-        class="col-span-2 mt-2"
-      />
     </UPageHeader>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { format } from "date-fns";
 import Datepicker from "../forms/Inputs/Datepicker.vue";
-import ScheduleAllowedCourses from "./ScheduleAllowedCourses.vue";
+import { getLocalizedDateTimeString } from "~/utils/formatters";
 
 type Props = {
   scheduleId: string;
@@ -58,19 +53,22 @@ const { t: g } = useI18n({
 const courseActivitySchedules = useCourseActivitySchedules();
 const { data: schedule, refresh } = useAsyncData(
   `course-activity-schedule-${props.scheduleId}`,
-  async () => await courseActivitySchedules.fetchCourseActivitySchedulesById(props.scheduleId),
+  async () =>
+    await courseActivitySchedules.fetchCourseActivitySchedulesById(
+      props.scheduleId
+    ),
   {
     transform: (data) => {
       if (!data) {
         return null;
       }
-            return {
-                ...data,
-                start_at: new Date(data.start_at),
-                end_at: new Date(data.end_at),
-            }
-        }
-    }
+      return {
+        ...data,
+        start_at: new Date(data.start_at),
+        end_at: new Date(data.end_at),
+      };
+    },
+  }
 );
 
 const courseActivitiesStore = useCourseActivitiesStore();
@@ -85,7 +83,7 @@ const activity = computed(() => {
 
 const onUpdateStartDate = async (date: Date) => {
   if (!schedule.value) return;
-  schedule.value.start_at = date
+  schedule.value.start_at = date;
   await courseActivitySchedules.updateCourseActivitySchedule(
     schedule.value.id,
     {

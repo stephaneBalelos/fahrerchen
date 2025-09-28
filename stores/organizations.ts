@@ -44,7 +44,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             organizations.value = []
         } else {
             organizations.value = data ? data.map(d => {
-                return {...d.organization, organization_role: d.role}
+                return { ...d.organization, organization_role: d.role }
             }) : []
         }
         isLoading.value = false
@@ -134,12 +134,20 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         return data
     }
 
-    const getOrganizationMembers = async (orgId: string): Promise<OrganizationMember[]> => {
-        console.log("Get organization members for org ID:", orgId)
-        const { data, error } = await supabase
+    const getOrganizationMembers = async (orgId: string, roles: UserRole[] = [], search: string = ""): Promise<OrganizationMember[]> => {
+        let query = supabase
             .from('organization_members')
             .select('id, role, user:user_id(*)')
-            .eq('organization_id', orgId)
+
+        if (roles.length > 0) {
+            query = query.in('role', roles)
+        }
+        if (search) {
+            query = query.or(`user_email.ilike.%${search}%,user_firstname.ilike.%${search}%,user_lastname.ilike.%${search}%`)
+        }
+        query = query.eq('organization_id', orgId)
+
+        const { data, error } = await query
         if (error) {
             console.error("Error loading organization members:", error)
             return []
@@ -171,9 +179,10 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
-        getOrganizationBillingSettings, createBillingSettings, updateBillingSettings
-     }
+    return {
+        organizations, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+        getOrganizationBillingSettings, createBillingSettings, updateBillingSettings, getOrganizationMembers
+    }
 
 
 })

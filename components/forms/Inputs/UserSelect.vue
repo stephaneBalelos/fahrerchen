@@ -8,8 +8,8 @@
   >
     <template #label>
       <div v-if="selected">
-        <UAvatar v-if="selected.user_fullname" :alt="selected.user_fullname" size="xs" />
-        <span class="truncate ms-3">{{ selected.user_fullname }}</span>
+        <UAvatar v-if="selected.fullname" :alt="selected.fullname" size="xs" />
+        <span class="truncate ms-3">{{ selected.fullname }}</span>
       </div>
       <div v-else>
         <UAvatar icon="i-heroicons-user-circle" size="xs" />
@@ -18,8 +18,8 @@
     </template>
 
     <template #option="{ option: person }">
-      <UAvatar :alt="person.user_fullname" size="xs" />
-      <span class="truncate">{{ person.user_fullname }}</span>
+      <UAvatar :alt="person.fullname" size="xs" />
+      <span class="truncate">{{ person.fullname }}</span>
     </template>
 
     <template #option-empty="{ query }">
@@ -32,7 +32,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
 
 type Props = {
   orgid: string;
@@ -43,22 +42,23 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const model = defineModel<string>({ default: null });
-const users = ref<Database['public']['Views']['organization_members_view']['Row'][] | null>(null);
+const model = defineModel<string>({ required: true, default: null });
+const users = ref<OrganizationMember[] | null>(null);
+const organizationStore = useUserOrganizationsStore();
 const selected = computed(() => {
   if (!users.value) {
     return null;
   }
-  return users.value.find((user) => user.user_id === model.value);
+  return users.value.find((user) => user.id === model.value);
 });
 
 
 async function search(q: string) {
   let result;
   if (q.length < 3) {
-    result = await useOrganizationMembers(props.orgid, ["teacher", "manager", "owner"]);
+    result = await organizationStore.getOrganizationMembers(props.orgid, ["teacher", "manager", "owner"]);
   } else {
-    result = await useOrganizationMembers(props.orgid, ["teacher", "manager", "owner"], q);
+    result = await organizationStore.getOrganizationMembers(props.orgid, ["teacher", "manager", "owner"], q);
   }
   users.value = result;
   return result;
