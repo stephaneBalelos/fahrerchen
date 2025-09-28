@@ -1,6 +1,6 @@
 <template>
-    <div v-if="status === 'success' && data && data.length > 0" class="flex flex-wrap gap-2">
-        <div v-for="course in activeCourses" :key="course.id" class="flex items-center gap-2">
+    <div v-if="status === 'success'" class="flex flex-wrap gap-2">
+        <div v-for="course in coursesStore.activeCourses" :key="course.id" class="flex items-center gap-2">
             <UBadge v-if="allowedCourseIds.includes(course.id)" color="white">
                 {{ g(`course_types.${course.type}.name`) }}
             </UBadge>
@@ -32,12 +32,12 @@ const { t: g } = useI18n({
 
 const props = defineProps<Props>();
 const courseActivitiesStore = useCourseActivitiesStore();
-const { activeCourses } = useCoursesStore();
+const coursesStore = useCoursesStore();
 
 const { data, status } = useAsyncData(
   `course_activities_combination_${props.activityId}`,
-  () =>
-    courseActivitiesStore.getAllowedCourseForActivity(
+  async () =>
+    await courseActivitiesStore.getAllowedCourseForActivity(
       props.activityId,
     ),
   {

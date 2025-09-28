@@ -11,14 +11,10 @@ type CourseActivityScheduleQuery = {
 }
 
 export const useCourseActivitySchedules = () => {
-
     const userOrganizationStore = useUserOrganizationsStore()
     const client = useSupabaseClient()
 
     const fetchCourseActivitySchedulesById = async (id: string) => {
-        if (!userOrganizationStore.selectedOrganization) {
-            return null;
-        }
 
         const { data, error } = await client
             .from("course_activity_schedules")
@@ -54,9 +50,6 @@ export const useCourseActivitySchedules = () => {
     }
 
     const updateCourseActivitySchedule = async (id: string, courseActivitySchedule: Partial<CourseActivityScheduleEdit>): Promise<AppCourseActivitySchedule | null> => {
-        if (!userOrganizationStore.selectedOrganization) {
-            throw new Error("No organization selected");
-        }
 
         const { data, error } = await client
             .from("course_activity_schedules")
@@ -74,9 +67,6 @@ export const useCourseActivitySchedules = () => {
     }
 
     const deleteCourseActivitySchedule = async (id: string) => {
-        if (!userOrganizationStore.selectedOrganization) {
-            return null;
-        }
 
         const { error } = await client
             .from("course_activity_schedules")
@@ -92,6 +82,7 @@ export const useCourseActivitySchedules = () => {
 
     const fetchCourseActivitySchedules = async (query: CourseActivityScheduleQuery) => {
         if (!userOrganizationStore.selectedOrganization) {
+            console.error("No organization selected");
             return null;
         }
 

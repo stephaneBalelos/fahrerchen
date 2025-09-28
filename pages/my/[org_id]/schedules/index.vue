@@ -72,6 +72,7 @@ import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
 const { t } = useI18n({
   useScope: "local",
 });
+
 const route = useRoute();
 const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
@@ -109,14 +110,13 @@ const filterForm = ref<FilterForm>({
   status: undefined,
 });
 
-const { data: schedules, refresh } = useAsyncData(
+const { data: schedules, refresh } =  useAsyncData(
   "course-activity-schedules",
-  () =>
-    $courseActivitySchedules.fetchCourseActivitySchedules({
+  async () =>
+    await $courseActivitySchedules.fetchCourseActivitySchedules({
       ...filterForm.value,
     }),
   {
-    immediate: true,
     watch: [filterForm],
   }
 );
@@ -148,6 +148,10 @@ const deleteSchedule = async (scheduleId: string) => {
     }
   })
 };
+
+watch(selectedScheduleId, async () => {
+  await refresh();
+});
 </script>
 
 <style scoped></style>

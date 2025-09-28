@@ -58,13 +58,12 @@ const { t: g } = useI18n({
 const courseActivitySchedules = useCourseActivitySchedules();
 const { data: schedule, refresh } = useAsyncData(
   `course-activity-schedule-${props.scheduleId}`,
-  () =>
-    courseActivitySchedules.fetchCourseActivitySchedulesById(props.scheduleId),
-    {
-        transform: (data) => {
-            if (!data) {
-                return null;
-            }
+  async () => await courseActivitySchedules.fetchCourseActivitySchedulesById(props.scheduleId),
+  {
+    transform: (data) => {
+      if (!data) {
+        return null;
+      }
             return {
                 ...data,
                 start_at: new Date(data.start_at),
