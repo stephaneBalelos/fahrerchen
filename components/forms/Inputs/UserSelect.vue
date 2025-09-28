@@ -42,7 +42,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const model = defineModel<string>({ required: true, default: null });
+const model = defineModel<string>({ default: null });
 const users = ref<OrganizationMember[] | null>(null);
 const organizationStore = useUserOrganizationsStore();
 const selected = computed(() => {
