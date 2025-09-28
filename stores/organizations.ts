@@ -1,12 +1,14 @@
-import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit, UserRole } from "~/types/app.types"
+import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit, UserRole, AppUser } from "~/types/app.types"
 import { useUserStore } from "./user"
 
-type UserOrganization = AppOrganization & { organization_role: UserRole }
-
+export type UserOrganization = AppOrganization & { organization_role: UserRole }
+export type OrganizationMember = (AppUser & { organization_role: UserRole, organization_member_id: string })
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
     const organizations = ref<UserOrganization[]>([])
+    const selectedOrganizationMembers = ref<OrganizationMember[]>([])
+
     const isLoading = ref(true)
     const route = useRoute()
 
@@ -132,6 +134,34 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         return data
     }
 
+    const getOrganizationMembers = async (orgId: string): Promise<OrganizationMember[]> => {
+        const { data, error } = await supabase
+            .from('organization_members')
+            .select('id, role, user:user_id(*)')
+            .eq('organization_id', orgId)
+        if (error) {
+            console.error("Error loading organization members:", error)
+            return []
+        }
+        return data ? data.map(d => {
+            return {
+                ...d.user,
+                organization_role: d.role,
+                organization_member_id: d.id
+            }
+        }) : []
+    }
+
+    watch(() => route.params.org_id, async (newOrgId, oldOrgId) => {
+        if (newOrgId && newOrgId !== oldOrgId) {
+            try {
+                selectedOrganizationMembers.value = await getOrganizationMembers(newOrgId as string)
+            } catch (error) {
+                console.error("Error loading organization members:", error)
+            }
+        }
+    }, { immediate: true })
+
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
             organizations.value = []
@@ -140,7 +170,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+    return { organizations, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
         getOrganizationBillingSettings, createBillingSettings, updateBillingSettings
      }
 

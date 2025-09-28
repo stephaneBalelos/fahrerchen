@@ -1,4 +1,6 @@
-import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCostEdit, CourseRequiredDocumentEdit, Database } from "~/types/app.types";
+import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCostEdit, CourseRequiredDocumentEdit, Database, UserRole } from "~/types/app.types";
+
+export const USER_ROLES: UserRole[] = ['owner', 'manager', 'teacher', 'student']
 
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
