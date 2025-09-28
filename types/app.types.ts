@@ -9,6 +9,7 @@ export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Ro
 export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
 export type OrganizationEdit = Omit<AppOrganization, 'id' | 'description' | 'inserted_at' | 'updated_at' | 'setup_completed' | 'allow_self_registration' | 'avatar_path'>
 export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
+export type AppOrganizationsInvitation = DatabaseGenerated['public']['Tables']['organizations_invitations']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
 export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
 export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']

@@ -1,6 +1,6 @@
 <template>
   <NuxtErrorBoundary>
-    <UCard v-if="invitations && invitations?.length > 0" :title="t('title')" :description="t('description')">
+    <UCard v-if="props.invitations && props.invitations?.length > 0" :title="t('title')" :description="t('description')">
         <template #header>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                 {{ t('title') }}
@@ -11,7 +11,7 @@
         </template>
       <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-800">
         <li
-          v-for="(invite, index) in invitations"
+          v-for="(invite, index) in props.invitations"
           :key="index"
           class="flex items-center justify-between gap-3"
         >
@@ -45,11 +45,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
+import type { AppOrganizationsInvitation, Database } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 
 type Props = {
-  orgid: string;
+  invitations: AppOrganizationsInvitation[]
 };
 
 const props = defineProps<Props>();
@@ -58,29 +58,12 @@ const client = useSupabaseClient<Database>();
 const toast = useToast();
 const { t } = useI18n();
 
-const {
-  data: invitations,
-  error,
-  status,
-  refresh,
-} = useAsyncData(`organizations/${props.orgid}/invitations`, async () => {
-  const { data, error } = await client
-    .from("organizations_invitations")
-    .select("*")
-    .eq("organization_id", props.orgid)
-    .neq("role", "student")
-    .order("inserted_at", { ascending: false });
+const $emits = defineEmits(["deleted"]);
 
-  if (error) {
-    console.error(error);
-    throw error;
-  }
-  return data;
-});
 
 
 const deleteInvite = async (
-  invite: Database["public"]["Tables"]["organizations_invitations"]["Row"]
+  invite: AppOrganizationsInvitation
 ) => {
   const { error } = await client
     .from("organizations_invitations")
@@ -99,7 +82,7 @@ const deleteInvite = async (
     description: t("success.description"),
     color: "green",
   });
-  refresh();
+  $emits("deleted", invite.id);
 };
 </script>
 

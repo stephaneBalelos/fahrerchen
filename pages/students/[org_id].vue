@@ -19,7 +19,6 @@ const route = useRoute();
 
 await useAsyncData('userOrganizations', async () => {
     await userOrganizationsStore.loadOrganizationsMemberships();
-    await userOrganizationsStore.selectOrganization(route.params.org_id as string);
     return true;
 });
 
