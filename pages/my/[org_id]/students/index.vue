@@ -35,7 +35,6 @@
         </UButton>
       </template>
     </UDashboardNavbar>
-
     <UDashboardToolbar>
       <template #left>
         <UInput
@@ -63,7 +62,6 @@
             multiple
           /> -->
       </template>
-
     </UDashboardToolbar>
 
     <UDashboardPanelContent class="p-0">
@@ -86,12 +84,12 @@
         </template>
         <template #status-data="{ row }">
           <UBadge
-            :label="(row.subscriptions_count ?? 0 )? t('status_subscribed', { count: row.subscriptions_count }) : t('status_not_subscribed')"
-            :color="
-              (row.subscriptions_count ?? 0)
-                ? 'green'
-                : 'orange'
+            :label="
+              row.subscriptions_count ?? 0
+                ? t('status_subscribed', { count: row.subscriptions_count })
+                : t('status_not_subscribed')
             "
+            :color="row.subscriptions_count ?? 0 ? 'green' : 'orange'"
             variant="subtle"
             class="capitalize"
           />
@@ -132,7 +130,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient();
+const studentsStore = useStudentsStore();
 const slideover = useSlideover();
 const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -166,31 +164,21 @@ const {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    const query = client
-      .from("students")
-      .select("*, course_subscriptions(*)")
-      .eq(
-        "organization_id",
-        userOrganizationsStore.selectedOrganization.organization_id
-      )
-      .is("course_subscriptions.archived_at", null)
-
-      if (q.value) {
-        query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);
-      }
-
-    const { data } = await query;
+    const data = await studentsStore.queryStudents({
+      org_id: userOrganizationsStore.selectedOrganization.id,
+      search: q.value,
+    });
     return data;
   },
   {
     watch: [q],
     transform: (data) => {
       return data
-        ? data.map((item) => {       
+        ? data.map((item) => {
             return {
               ...item,
-              subscriptions_count: item.course_subscriptions?.length ?? 0,
-              name: `${item.firstname} ${item.lastname}`
+              subscriptions_count: item.subscriptions?.length ?? 0,
+              name: `${item.firstname} ${item.lastname}`,
             };
           })
         : [];
@@ -208,7 +196,7 @@ const createUserOptions = ref([
           return;
         }
         modal.open(AddStudentModal, {
-          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          orgid: userOrganizationsStore.selectedOrganization.id,
           onClose: () => {
             modal.close();
           },
@@ -223,7 +211,7 @@ const createUserOptions = ref([
           return;
         }
         modal.open(OnboardingLinkModal, {
-          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          orgid: userOrganizationsStore.selectedOrganization.id,
           onClose: () => {
             modal.close();
           },
@@ -245,7 +233,7 @@ const openStudentForm = (id?: string) => {
     return;
   }
   slideover.open(EditStudentForm, {
-    organizationId: userOrganizationsStore.selectedOrganization.organization_id,
+    organizationId: userOrganizationsStore.selectedOrganization.id,
     studentId: id,
     "onStudent-created": (student: AppStudent) => {
       console.log("student created", student);
