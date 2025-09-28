@@ -2,6 +2,7 @@ import type { AppCourseSubscription, AppStudent, StudentEdit } from "~/types/app
 
 export type StudentWithSubscriptions = AppStudent & {
     subscriptions: AppCourseSubscription[]
+    active_subscriptions: AppCourseSubscription[] // Subscriptions that are not archived
 }
 
 export type StudentQueryFilter = {
@@ -56,7 +57,34 @@ export const useStudentsStore = defineStore('students', () => {
 
         if (error) throw error
 
-        return data || []
+        if (!data) return []
+        
+        return data.map((item) => {
+            const active_subscriptions = item.subscriptions?.filter((sub) => sub.archived_at === null) ?? [];
+             return {
+               ...item,
+               active_subscriptions: active_subscriptions
+             };
+        })
+    }
+
+    const getStudentById = async (id: string): Promise<StudentWithSubscriptions | null> => {
+        const { data, error } = await supabase
+            .from('students')
+            .select(`*, subscriptions:course_subscriptions(*)`)
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            console.error("Error fetching student by ID:", error);
+            return null;
+        }
+        if (!data) return null;
+        const active_subscriptions = data.subscriptions?.filter((sub) => sub.archived_at === null) ?? [];
+        return {
+            ...data,
+            active_subscriptions: active_subscriptions
+        };
     }
 
     const createStudents = async (newStudents: StudentEdit[]): Promise<string[]> => {
@@ -76,11 +104,26 @@ export const useStudentsStore = defineStore('students', () => {
         return data.map(s => s.id)
     }
 
+    const updateStudent = async (id: string, student: Partial<StudentEdit>): Promise<void> => {
+        const { error } = await supabase
+            .from('students')
+            .update(student)
+            .eq('id', id)
+
+        if (error) throw error
+    }
+
+    watch(() => userOrganizationsStore.selectedOrganization, () => {
+        loadStudents()
+    }, { immediate: true })
+
     return {
         students,
         isLoadingStudents,
         loadStudents,
         queryStudents,
-        createStudents
+        getStudentById,
+        createStudents,
+        updateStudent,
     }
 })

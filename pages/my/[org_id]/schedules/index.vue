@@ -11,7 +11,7 @@
       </UDashboardNavbar>
       <UDashboardPanelContent class="p-0"> {{ panelWWidth }} </UDashboardPanelContent>
     </UDashboardPanel>
-    <UDashboardPanel id="schedule-details" v-model="isPanelOpen" grow collapsible side="right">
+    <UDashboardPanel id="schedule-details" :model-value="selectedScheduleId ? true : false" grow collapsible side="right">
       <template v-if="selectedScheduleId">
         <UDashboardNavbar :title="'Schedule Details'">
           <template #toggle>
@@ -85,7 +85,7 @@ const { t } = useI18n({
 const panelWWidth = ref(350);
 
 const route = useRoute();
-const isPanelOpen = ref(true);
+// const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
 const modal = useModal();
 const slideover = useSlideover();

@@ -1,52 +1,53 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar>
-      <template #left>
-        <h2 class="font-semibold text-gray-900 dark:text-white">
-          {{ t("students") }}
-          <UBadge color="primary" variant="soft">{{
-            students?.length ?? 0
-          }}</UBadge>
-        </h2>
-      </template>
-      <template #right>
-        <UDropdown
-          :items="createUserOptions"
-          :popper="{
-            placement: 'bottom-start',
-          }"
-          :ui="{
-            width: 'w-72',
-          }"
-        >
+  <UDashboardPage>
+    <UDashboardPanel id="student-list" grow>
+      <UDashboardNavbar>
+        <template #left>
+          <h2 class="font-semibold text-gray-900 dark:text-white">
+            {{ t("students") }}
+            <UBadge color="primary" variant="soft">{{
+              students?.length ?? 0
+            }}</UBadge>
+          </h2>
+        </template>
+        <template #right>
+          <UDropdown
+            :items="createUserOptions"
+            :popper="{
+              placement: 'bottom-start',
+            }"
+            :ui="{
+              width: 'w-72',
+            }"
+          >
+            <UButton
+              :label="t('new_user')"
+              trailing-icon="i-heroicons-plus"
+              color="gray"
+            />
+          </UDropdown>
           <UButton
-            :label="t('new_user')"
-            trailing-icon="i-heroicons-plus"
             color="gray"
+            variant="solid"
+            size="2xs"
+            :to="userOrganizationsStore.relativePath('/students/requests')"
+          >
+            {{ t("pre_registration") }}
+          </UButton>
+        </template>
+      </UDashboardNavbar>
+      <UDashboardToolbar>
+        <template #left>
+          <UInput
+            ref="input"
+            v-model="q"
+            icon="i-heroicons-funnel"
+            autocomplete="off"
+            :placeholder="t('filter_users')"
+            class="hidden lg:block"
+            @keydown.esc="$event.target.blur()"
           />
-        </UDropdown>
-        <UButton
-          color="gray"
-          variant="solid"
-          size="2xs"
-          :to="userOrganizationsStore.relativePath('/students/requests')"
-        >
-          {{ t("pre_registration") }}
-        </UButton>
-      </template>
-    </UDashboardNavbar>
-    <UDashboardToolbar>
-      <template #left>
-        <UInput
-          ref="input"
-          v-model="q"
-          icon="i-heroicons-funnel"
-          autocomplete="off"
-          :placeholder="t('filter_users')"
-          class="hidden lg:block"
-          @keydown.esc="$event.target.blur()"
-        />
-        <!-- <USelectMenu
+          <!-- <USelectMenu
             v-model="selectedStatuses"
             icon="i-heroicons-check-circle"
             placeholder="Status"
@@ -61,62 +62,108 @@
             :options="defaultLocations"
             multiple
           /> -->
-      </template>
-    </UDashboardToolbar>
+        </template>
+      </UDashboardToolbar>
 
-    <UDashboardPanelContent class="p-0">
-      <UTable
-        v-model:sort="sort"
-        :rows="students ?? []"
-        :columns="columns"
-        :loading="status === 'pending'"
-        sort-mode="manual"
-        class="w-full"
-        :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
+      <UDashboardPanelContent class="p-0">
+        <UTable
+          v-model:sort="sort"
+          :rows="students ?? []"
+          :columns="columns"
+          :loading="status === 'pending'"
+          sort-mode="manual"
+          class="w-full"
+          :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
+        >
+          <template #name-data="{ row }">
+            <div class="flex items-center gap-3">
+              <UAvatar
+                v-if="row.avatar_path"
+                :src="
+                  $publicStorageUrl('users_avatars', row.avatar_path) ??
+                  undefined
+                "
+                :alt="`${row.firstname} ${row.lastname}`"
+                size="xs"
+              />
+              <UAvatar
+                v-else
+                :alt="`${row.firstname} ${row.lastname}`"
+                size="xs"
+              />
+              <div class="flex flex-col">
+                <span class="text-md text-gray-900 dark:text-white font-medium">
+                  {{ row.firstname }} {{ row.lastname }}
+                </span>
+                <span class="text-gray-500 text-sm">{{ row.email }}</span>
+              </div>
+            </div>
+          </template>
+          <template #status-data="{ row }">
+            <UBadge
+              v-if="row.active_subscriptions.length === 0"
+              :label="t('status_not_subscribed')"
+              :color="'orange'"
+              variant="subtle"
+              class="capitalize"
+            />
+            <UBadge
+              v-else-if="row.active_subscriptions.length > 0"
+              :label="
+                t('status_subscribed', { count: row.subscriptions_count })
+              "
+              :color="'green'"
+              variant="subtle"
+              class="capitalize"
+            />
+            <!-- <UBadge
+                v-if="row.subscriptions_count > 0"
+                :label="t('status_subscribed', { count: row.subscriptions_count })"
+                :color="'green'"
+                variant="subtle"
+                class="capitalize"
+              />
+              <UBadge
+                v-else
+                :label="t('status_not_subscribed')"
+                :color="'orange'"
+                variant="subtle"
+                class="capitalize"
+              /> -->
+          </template>
+          <template #actions-data="{ row }">
+            <div class="flex gap-2">
+              <UButton
+                color="gray"
+                variant="solid"
+                icon="i-heroicons-pencil"
+                @click="() => openStudentForm(row.id)"
+              />
+              <UButton
+                color="gray"
+                variant="solid"
+                icon="i-heroicons-eye"
+                @click="() => openStudentSubscriptionsSlideOver(row.id)"
+              />
+            </div>
+          </template>
+        </UTable>
+      </UDashboardPanelContent>
+      <div
+        class="flex justify-center p-4 border-t border-gray-200 dark:border-gray-800"
       >
-        <template #name-data="{ row }">
-          <div class="flex items-center gap-3">
-            <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
-            <span class="text-gray-900 dark:text-white font-medium">{{
-              row.name
-            }}</span>
-          </div>
-        </template>
-        <template #status-data="{ row }">
-          <UBadge
-            :label="
-              row.subscriptions_count ?? 0
-                ? t('status_subscribed', { count: row.subscriptions_count })
-                : t('status_not_subscribed')
-            "
-            :color="row.subscriptions_count ?? 0 ? 'green' : 'orange'"
-            variant="subtle"
-            class="capitalize"
-          />
-        </template>
-        <template #actions-data="{ row }">
-          <div class="flex gap-2">
-            <UButton
-              color="gray"
-              variant="solid"
-              icon="i-heroicons-pencil"
-              @click="() => openStudentForm(row.id)"
-            />
-            <UButton
-              color="gray"
-              variant="solid"
-              icon="i-heroicons-eye"
-              @click="() => openStudentSubscriptionsSlideOver(row.id)"
-            />
-          </div>
-        </template>
-      </UTable>
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+        <UPagination
+          :active-button="{ variant: 'outline' }"
+          :inactive-button="{ color: 'gray' }"
+          :model-value="1"
+          :total="100"
+        />
+      </div>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
-import type { AppStudent } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
@@ -173,15 +220,10 @@ const {
   {
     watch: [q],
     transform: (data) => {
-      return data
-        ? data.map((item) => {
-            return {
-              ...item,
-              subscriptions_count: item.subscriptions?.length ?? 0,
-              name: `${item.firstname} ${item.lastname}`,
-            };
-          })
-        : [];
+      if (!data) {
+        return data;
+      }
+      return Array(40).fill(data[0]);
     },
   }
 );
@@ -235,12 +277,12 @@ const openStudentForm = (id?: string) => {
   slideover.open(EditStudentForm, {
     organizationId: userOrganizationsStore.selectedOrganization.id,
     studentId: id,
-    "onStudent-created": (student: AppStudent) => {
-      console.log("student created", student);
+    "onStudent-created": () => {
+      console.log("student created");
       refresh();
     },
-    "onStudent-updated": (student: AppStudent) => {
-      console.log("student updated", student);
+    "onStudent-updated": () => {
+      console.log("student updated");
       refresh();
     },
   });

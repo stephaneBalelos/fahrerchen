@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import type { AppStudent, Database } from "~/types/app.types";
+import type { AppStudent } from "~/types/app.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
 import DatePicker from "./Inputs/Datepicker.vue";
@@ -111,7 +111,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "student-created" | "student-updated", value: AppStudent): void;
+  (e: "student-created" | "student-updated", value: AppStudent | null): void;
 }>();
 
 const { t } = useI18n({
@@ -122,7 +122,6 @@ const { t:g } = useI18n({
   useScope: "global",
 });
 
-const tutorialStore = useTutorialStore();
 
 const schema = z.object({
   email: z.string()
@@ -172,7 +171,7 @@ const state = reactive<UserSchema>({
 });
 const fullname = computed(() => `${state.firstname} ${state.lastname}`);
 
-const client = useSupabaseClient<Database>();
+const studentsStore = useStudentsStore();
 const toast = useToast();
 
 if (props.studentId) {
@@ -183,15 +182,7 @@ if (props.studentId) {
       if (!props.studentId) {
         return null;
       }
-      const { data, error } = await client
-        .from("students")
-        .select("*")
-        .eq("id", props.studentId)
-        .single();
-      if (error) {
-        throw error;
-      }
-      return data;
+      return await studentsStore.getStudentById(props.studentId);
     }
   );
 
@@ -217,36 +208,40 @@ function saveStudent($event: FormSubmitEvent<UserSchema>) {
   if (props.studentId) {
     updateStudent($event.data, props.studentId);
   } else {
-    createStudent($event.data, props.organizationId);
+    createStudent($event.data);
   }
 }
 
-async function createStudent(data: UserSchema, organization_id: string) {
-  const { data: student, error } = await client
-    .from("students")
-    .insert({
-      ...data,
-      birth_date: data.birth_date.toISOString(),
-      organization_id: organization_id,
-    })
-    .select("*")
-    .single();
-  if (error) {
+async function createStudent(data: UserSchema) {
+  try {
+    await studentsStore.createStudents([
+      {
+        email: data.email,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        phone_number: data.phone_number,
+        address_street: data.address_street,
+        address_city: data.address_city,
+        address_zip: data.address_zip,
+        address_country: data.address_country,
+        has_a_license: data.has_a_license,
+        birth_date: data.birth_date.toISOString(),
+      },
+    ])
+    emit("student-created", null);
+  } catch (error) {
+    console.error("Error creating student", error);
     toast.add({
       title: "Error",
-      description: error.message,
+      description: (error as Error).message,
       color: "red",
     });
-    throw error;
   }
-  emit("student-created", student);
-  tutorialStore.completeStep('course_student_invite');
 }
 
 async function updateStudent(data: UserSchema, student_id: string) {
-  const { data: student, error } = await client
-    .from("students")
-    .update({
+  try {
+    await studentsStore.updateStudent(student_id, {
       email: data.email,
       firstname: data.firstname,
       lastname: data.lastname,
@@ -257,19 +252,16 @@ async function updateStudent(data: UserSchema, student_id: string) {
       address_country: data.address_country,
       has_a_license: data.has_a_license,
       birth_date: data.birth_date.toISOString(),
-    })
-    .eq("id", student_id)
-    .select("*")
-    .single();
-  if (error) {
+    });
+    emit("student-updated", null);
+  } catch (error) {
+    console.error("Error updating student", error);
     toast.add({
       title: "Error",
-      description: error.message,
+      description: (error as Error).message,
       color: "red",
     });
-    throw error;
   }
-  emit("student-updated", student);
 }
 </script>
 
