@@ -81,7 +81,7 @@ async function onRoleChange(member: OrganizationMember, role: UserRole) {
           :model-value="member.organization_role"
           :options="roles"
               value-attribute="value"
-    option-attribute="label"
+            option-attribute="label"
           color="white"
           :ui-menu="{ select: 'capitalize', option: { base: 'capitalize' } }"
           @update:model-value="onRoleChange(member, $event)"

@@ -135,6 +135,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     }
 
     const getOrganizationMembers = async (orgId: string): Promise<OrganizationMember[]> => {
+        console.log("Get organization members for org ID:", orgId)
         const { data, error } = await supabase
             .from('organization_members')
             .select('id, role, user:user_id(*)')

@@ -68,8 +68,6 @@ type InvitationResponse = {
 
 onMounted(async () => {
   const { invitation_id, signature } = route.query;
-  console.log(invitation_id, signature);
-
   if (!invitation_id || !signature) {
     throw new Error("Invalid invitation");
   }
