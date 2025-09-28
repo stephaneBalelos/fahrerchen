@@ -1,15 +1,17 @@
 <template>
   <UDashboardPage>
-    <UDashboardPanel :width="300">
+    <UDashboardPanel 
+    id="filter-panel"
+      :width="panelWWidth" resizable>
       <UDashboardNavbar :title="t('schedules')">
         <template #right>
           <!-- <UButtonGroup v-model="selectedView" :options="views" size="sm" /> -->
-          dsad
+          
         </template>
       </UDashboardNavbar>
-      <UDashboardPanelContent class="p-0"> dasd </UDashboardPanelContent>
+      <UDashboardPanelContent class="p-0"> {{ panelWWidth }} </UDashboardPanelContent>
     </UDashboardPanel>
-    <UDashboardPanel v-model="isPanelOpen" grow collapsible side="right">
+    <UDashboardPanel id="schedule-details" v-model="isPanelOpen" grow collapsible side="right">
       <template v-if="selectedScheduleId">
         <UDashboardNavbar :title="'Schedule Details'">
           <template #toggle>
@@ -79,6 +81,8 @@ import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
 const { t } = useI18n({
   useScope: "local",
 });
+
+const panelWWidth = ref(350);
 
 const route = useRoute();
 const isPanelOpen = ref(true);
