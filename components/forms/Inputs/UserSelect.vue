@@ -3,30 +3,44 @@
     v-model="model"
     :searchable="search"
     :searchable-placeholder="t('search_by_name_or_email')"
-    value-attribute="user_id"
+    value-attribute="id"
     :search-attributes="['name', 'email']"
+    :variant="'none'"
   >
-    <template #label>
+    <UButton
+      :color="props.color"
+      :variant="props.variant || 'outline'"
+      :size="props.size || 'md'"
+    >
+      <template #leading>
+        <div v-if="selected">
+          <UAvatar
+            v-if="selected.fullname"
+            :alt="selected.fullname"
+            :size="'xs'"
+          />
+        </div>
+        <div v-else>
+          <UAvatar icon="i-heroicons-user-circle" :size="'xs'" />
+        </div>
+      </template>
       <div v-if="selected">
-        <UAvatar v-if="selected.fullname" :alt="selected.fullname" size="xs" />
-        <span class="truncate ms-3">{{ selected.fullname }}</span>
+        <span class="truncate">{{ selected.fullname }}</span>
       </div>
       <div v-else>
-        <UAvatar icon="i-heroicons-user-circle" size="xs" />
-        <span class="truncate ms-3">{{ t('select_a_person') }}</span>
+        <span class="truncate">{{ t("select_a_person") }}</span>
       </div>
-    </template>
-
+    </UButton>
     <template #option="{ option: person }">
       <UAvatar :alt="person.fullname" size="xs" />
       <span class="truncate">{{ person.fullname }}</span>
     </template>
 
     <template #option-empty="{ query }">
-      {{ t('no_user_found', { query }) }}
+      {{ t("no_user_found", { query }) }}
     </template>
     <template #empty>
-      {{ t('no_users') }}
+      {{ t("no_users") }}
     </template>
   </USelectMenu>
 </template>
@@ -35,6 +49,29 @@
 
 type Props = {
   orgid: string;
+  color?:
+    | "primary"
+    | "gray"
+    | "white"
+    | "red"
+    | "orange"
+    | "amber"
+    | "yellow"
+    | "lime"
+    | "green"
+    | "emerald"
+    | "teal"
+    | "cyan"
+    | "sky"
+    | "blue"
+    | "indigo"
+    | "violet"
+    | "purple"
+    | "fuchsia"
+    | "pink"
+    | "rose";
+  variant?: "outline" | "solid" | "ghost" | "link";
+  size?: "md" | "2xs" | "xs" | "sm" | "lg" | "xl";
 };
 const props = defineProps<Props>();
 
@@ -52,21 +89,28 @@ const selected = computed(() => {
   return users.value.find((user) => user.id === model.value);
 });
 
-
 async function search(q: string) {
   let result;
   if (q.length < 3) {
-    result = await organizationStore.getOrganizationMembers(props.orgid, ["teacher", "manager", "owner"]);
+    result = await organizationStore.getOrganizationMembers(props.orgid, [
+      "teacher",
+      "manager",
+      "owner",
+    ]);
   } else {
-    result = await organizationStore.getOrganizationMembers(props.orgid, ["teacher", "manager", "owner"], q);
+    result = await organizationStore.getOrganizationMembers(
+      props.orgid,
+      ["teacher", "manager", "owner"],
+      q
+    );
   }
+  result = result.filter((user) => user.firstname && user.lastname);
   users.value = result;
   return result;
 }
 </script>
 
 <style scoped></style>
-
 
 <i18n lang="json">
 {

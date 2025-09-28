@@ -137,13 +137,15 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const getOrganizationMembers = async (orgId: string, roles: UserRole[] = [], search: string = ""): Promise<OrganizationMember[]> => {
         let query = supabase
             .from('organization_members')
-            .select('id, role, user:user_id(*)')
+            .select('id, role, user:users!user_id(*)')
 
         if (roles.length > 0) {
             query = query.in('role', roles)
         }
         if (search) {
-            query = query.or(`user_email.ilike.%${search}%,user_firstname.ilike.%${search}%,user_lastname.ilike.%${search}%`)
+            query = query.or(`email.ilike.%${search}%,firstname.ilike.%${search}%,lastname.ilike.%${search}%`, {
+                referencedTable: 'users'
+            })
         }
         query = query.eq('organization_id', orgId)
 
