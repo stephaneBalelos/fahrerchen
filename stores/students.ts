@@ -17,7 +17,12 @@ export const useStudentsStore = defineStore('students', () => {
     const students = ref<StudentWithSubscriptions[]>([])
     const isLoadingStudents = ref(false)
     const route = useRoute()
-    const selectedStudent = ref<StudentWithSubscriptions | null>(null)
+    // const selectedStudent = ref<StudentWithSubscriptions | null>(null)
+    const selectedStudent = computed(() => {
+        const studentId = route.params.student_id as string | undefined
+        if (!studentId) return null
+        return students.value.find(s => s.id === studentId) || null
+    })
 
     const loadStudents = async () => {
         isLoadingStudents.value = true
@@ -36,6 +41,8 @@ export const useStudentsStore = defineStore('students', () => {
             console.error("Error loading students:", error)
             students.value = []
         } finally {
+            console.log("Students loaded:", students.value.length)
+
             isLoadingStudents.value = false
         }
     }
@@ -122,10 +129,6 @@ export const useStudentsStore = defineStore('students', () => {
         loadStudents()
     }, { immediate: true })
 
-    watch(() => route.params.student_id, async (value) => {
-        await loadStudents();
-        selectedStudent.value = students.value.find(s => s.id === value) || null;
-    }, { immediate: true });
 
     return {
         students,
