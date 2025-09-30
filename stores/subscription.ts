@@ -1,29 +1,59 @@
-import type { AppCourseSubscriptionsView } from "~/types/app.types"
+import type { AppCourseSubscription } from "~/types/app.types"
 
 export const useSubscriptionStore = defineStore('subscription', () => {
     const supabase = useSupabaseClient()
-    const subscription = ref<AppCourseSubscriptionsView | null>(null)
+    const userOrganizationsStore = useUserOrganizationsStore()
+    const subscriptions = ref<AppCourseSubscription[]>([])
+    const isLoadingSubscriptions = ref(false)
 
-    const loadSubscription = async (subId: string) => {
-        const { data, error } = await supabase
-            .from('course_subscriptions_view')
-            .select('*')
-            .eq('id', subId)
-            .single().overrideTypes<AppCourseSubscriptionsView>()
+    const selectedSubscription = computed(() => {
+        const route = useRoute()
+        const subscriptionId = route.params.subscription_id as string | undefined
+        if (!subscriptionId) return null
+        return subscriptions.value.find(s => s.id === subscriptionId) || null
+    })
 
-        if (error) {
-            throw new Error(`Error loading subscription: ${error.message}`)
+    const loadSubscriptions = async () => {
+        isLoadingSubscriptions.value = true
+        if (!userOrganizationsStore.selectedOrganization) {
+            subscriptions.value = []
+            isLoadingSubscriptions.value = false
+            return
         }
-        subscription.value = data
+         try {
+            const { data, error } = await supabase
+                .from('course_subscriptions')
+                .select('*')
+                .eq('id', userOrganizationsStore.selectedOrganization.id)
+                .single()
+
+            if (error) {
+                throw new Error(`Error loading subscription: ${error.message}`)
+            }
+            subscriptions.value = [data]
+        } catch (error) {
+            console.error(error)
+        } finally {
+            isLoadingSubscriptions.value = false
+        }
     }
 
-    const reset = () => {
-        subscription.value = null
+    const getSubscriptionById = (id: string): AppCourseSubscription | null => {
+        return subscriptions.value.find(sub => sub.id === id) || null
     }
+
+
+    watch(() => userOrganizationsStore.selectedOrganization, () => {
+        loadSubscriptions()
+    }, { immediate: true })
+
+
 
     return {
-        subscription,
-        loadSubscription,
-        reset
+        loadSubscriptions,
+        subscriptions,
+        selectedSubscription,
+        isLoadingSubscriptions,
+        getSubscriptionById,
     }
 })

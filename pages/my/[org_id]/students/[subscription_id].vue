@@ -1,25 +1,25 @@
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
-      <UDashboardNavbar v-if="studentsStore.selectedStudent">
+      <UDashboardNavbar v-if="subscriptionStore.selectedSubscription && student" :ui="{ wrapper: 'px-4' }">
         <template #title>
           <div class="flex items-center gap-2">
             <UAvatar
-              :alt="`${studentsStore.selectedStudent.firstname} ${studentsStore.selectedStudent.lastname}`"
+              :alt="`${student.firstname} ${student.lastname}`"
               size="sm"
             />
-            <span>{{ studentsStore.selectedStudent.full_name }}</span> |
+            <span>{{ student.full_name }}</span> |
             <span>
-              {{ studentsStore.selectedStudent.id }}
+              {{ student.id }}
             </span>
-            <UBadge v-if="studentsStore.selectedStudent" color="red" size="sm">
+            <UBadge v-if="student" color="red" size="sm">
               {{ t("archive") }}
             </UBadge>
           </div>
         </template>
         <template #right>
           <UButton
-            v-if="studentsStore.selectedStudent"
+            v-if="student"
             size="sm"
             color="primary"
             variant="outline"
@@ -38,35 +38,48 @@
 </template>
 
 <script setup lang="ts">
+
 const { t } = useI18n({
   useScope: "local",
 });
 
+const userOrganizationsStore = useUserOrganizationsStore();
 const studentsStore = useStudentsStore();
+const subscriptionStore = useSubscriptionStore();
+
+const student = computed(() => {
+  if (!subscriptionStore.selectedSubscription) return null;
+  return studentsStore.students.find(
+    (s) => s.id === (subscriptionStore.selectedSubscription?.student_id ?? "")
+  );  
+});
+
+if (!subscriptionStore.selectedSubscription) {
+  // Throw error if no subscription found
+  throw new Error("No subscription found");
+}
 
 const links = computed(() => {
-  const student = studentsStore.selectedStudent;
-  if (!student) return [];
-  const org_id = student.organization_id;
-  const student_id = student.id;
+  const subscription = subscriptionStore.selectedSubscription
+  if (!subscription) return [];
   return [
     [
       {
         label: t("overview"),
-        to: `/my/${org_id}/students/${student_id}`,
+        to: userOrganizationsStore.relativePath(`/students/${subscription.id}`),
         exact: true,
       },
       {
         label: t("activity"),
-        to: `/my/${org_id}/students/${student_id}/activity`,
+        to: userOrganizationsStore.relativePath(`/students/${subscription.id}/activity`),
       },
       {
         label: t("bills"),
-        to: `/my/${org_id}/students/${student_id}/bills`,
+        to: userOrganizationsStore.relativePath(`/students/${subscription.id}/bills`),
       },
       {
         label: t("subscription"),
-        to: `/my/${org_id}/students/${student_id}/subscription`,
+        to: userOrganizationsStore.relativePath(`/students/${subscription.id}/subscription`),
       },
     ],
   ];

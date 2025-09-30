@@ -16,13 +16,7 @@ export const useStudentsStore = defineStore('students', () => {
     const userOrganizationsStore = useUserOrganizationsStore()
     const students = ref<StudentWithSubscriptions[]>([])
     const isLoadingStudents = ref(false)
-    const route = useRoute()
-    // const selectedStudent = ref<StudentWithSubscriptions | null>(null)
-    const selectedStudent = computed(() => {
-        const studentId = route.params.student_id as string | undefined
-        if (!studentId) return null
-        return students.value.find(s => s.id === studentId) || null
-    })
+
 
     const loadStudents = async () => {
         isLoadingStudents.value = true
@@ -132,7 +126,6 @@ export const useStudentsStore = defineStore('students', () => {
 
     return {
         students,
-        selectedStudent,
         isLoadingStudents,
         loadStudents,
         queryStudents,

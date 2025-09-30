@@ -3,19 +3,19 @@
     <!-- <StudentsStudentSubscriptionStats :subscription-id="subscription_id" />
     <StudentsCourseStudentProgression :subscription-id="subscription_id" /> -->
     <UPageHeader
-      v-if="studentsStore.selectedStudent"
-      :title="`${studentsStore.selectedStudent.firstname} ${studentsStore.selectedStudent.lastname}`"
+      v-if="student"
+      :title="`${student.firstname} ${student.lastname}`"
       :ui="{
         wrapper: 'py-4 pb-4',
       }"
     >
     <template #icon>
-      <UAvatar :alt="studentsStore.selectedStudent.full_name ? studentsStore.selectedStudent.full_name : ''" size="lg" />
+      <UAvatar :alt="student.full_name ? student.full_name : ''" size="lg" />
     </template>
     <template #description>
       <div class="flex items-center gap-2">
         <span class="text-lg text-gray-600 dark:text-gray-400">
-          {{ studentsStore.selectedStudent.email }}
+          {{ student.email }}
         </span>
       </div>
     </template>
@@ -25,14 +25,14 @@
         variant="solid"
         :icon="'i-heroicons-phone-arrow-down-left'"
         >
-      {{ studentsStore.selectedStudent.phone_number }}
+      {{ student.phone_number }}
       </UButton>
       <UButton
         :color="'white'"
         variant="solid"
         :icon="'i-heroicons-calendar-days'"
         >
-        {{ formatDate(studentsStore.selectedStudent.birth_date) }}
+    {{ formatDate(student.birth_date) }}
       </UButton>
     </div>
   </UPageHeader>
@@ -48,15 +48,19 @@ definePageMeta({
 });
 
 const studentsStore = useStudentsStore();
-const { courses } = useCoursesStore();
+const subscriptionStore = useSubscriptionStore();
 
-const activeCourse = computed(() => {
-  const student = studentsStore.selectedStudent;
-  if (!student || !student.subscriptions || student.subscriptions.length === 0) return null;
-  const activeSubscription = student.subscriptions.find(sub => sub.archived_at === null);
-  if (!activeSubscription) return null;
-  return courses.find(course => course.id === activeSubscription.course_id) || null;
+const student = computed(() => {
+  if (!subscriptionStore.selectedSubscription) return null;
+  return studentsStore.students.find(
+    (s) => s.id === (subscriptionStore.selectedSubscription?.student_id ?? "")
+  );  
 });
+
+if (!subscriptionStore.selectedSubscription) {
+  // Throw error if no subscription found
+  throw new Error("No subscription found");
+}
 
 function _deleteStudent() {
   console.log("delete student");

@@ -137,13 +137,13 @@
                 color="gray"
                 variant="solid"
                 icon="i-heroicons-pencil"
-                @click="() => openStudentProfileSlideover(row.id)"
+                @click="() => openStudentForm(row.id)"
               />
               <UButton
                 color="gray"
                 variant="solid"
                 icon="i-heroicons-eye"
-                :to="`${userOrganizationsStore.relativePath('/students')}/${row.id}`"
+                @click="() => openStudentProfileSlideover(row.id)"
               />
             </div>
           </template>
