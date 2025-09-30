@@ -137,13 +137,13 @@
                 color="gray"
                 variant="solid"
                 icon="i-heroicons-pencil"
-                @click="() => openStudentForm(row.id)"
+                @click="() => openStudentProfileSlideover(row.id)"
               />
               <UButton
                 color="gray"
                 variant="solid"
                 icon="i-heroicons-eye"
-                @click="() => openStudentSubscriptionsSlideOver(row.id)"
+                :to="`${userOrganizationsStore.relativePath('/students')}/${row.id}`"
               />
             </div>
           </template>
@@ -167,7 +167,7 @@
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
-import StudentSubscriptionsSlideover from "~/components/students/StudentSubscriptionsSlideover.vue";
+import StudentCourseProfileSlideover from "~/components/students/StudentCourseProfileSlideover.vue";
 
 definePageMeta({
   layout: "orgs",
@@ -219,12 +219,6 @@ const {
   },
   {
     watch: [q],
-    transform: (data) => {
-      if (!data) {
-        return data;
-      }
-      return Array(40).fill(data[0]);
-    },
   }
 );
 
@@ -288,15 +282,12 @@ const openStudentForm = (id?: string) => {
   });
 };
 
-const openStudentSubscriptionsSlideOver = (id: string) => {
-  slideover.open(StudentSubscriptionsSlideover, {
+const openStudentProfileSlideover = (id: string) => {
+  slideover.open(StudentCourseProfileSlideover, {
     studentId: id,
-    onClose: (path) => {
-      slideover.close();
-      navigateTo(path);
-    },
   });
 };
+
 </script>
 
 <style scoped>

@@ -2,20 +2,20 @@
   <UDashboardPage>
     <UDashboardPanel grow>
       <UDashboardNavbar
-        v-if="subscriptionStore.subscription"
+        v-if="studentsStore.selectedStudent"
       >
       <template #title>
         <div class="flex items-center gap-2">
           <UAvatar
-            :alt="`${subscriptionStore.subscription.student_firstname} ${subscriptionStore.subscription.student_lastname}`"
+            :alt="`${studentsStore.selectedStudent.firstname} ${studentsStore.selectedStudent.lastname}`"
             size="sm"
           />
-          <span>{{ subscriptionStore.subscription.student_full_name }}</span> |
+          <span>{{ studentsStore.selectedStudent.full_name }}</span> |
           <span>
-            {{  subscriptionStore.subscription.course_name }}
+            {{  studentsStore.selectedStudent.id }}
           </span>
           <UBadge
-            v-if="subscriptionStore.subscription.archived_at"
+            v-if="studentsStore.selectedStudent"
             color="red"
             size="sm"
           >
@@ -34,54 +34,44 @@
 
 <script setup lang="ts">
 
-definePageMeta({
-  layout: "orgs",
-});
-
-const route = useRoute();
-const subscription_id = route.params.id as string;
-const org_id = route.params.org_id as string;
-const subscriptionStore = useSubscriptionStore();
-
 const { t } = useI18n({
   useScope: "local",
 });
 
-await useAsyncData(async() => {
-  return await subscriptionStore.loadSubscription(subscription_id);
-})
+const studentsStore = useStudentsStore();
+
 
 
 
 
 const links = computed(() => {
+  const student = studentsStore.selectedStudent
+  if (!student) return [];
+  const org_id = student.organization_id;
+  const student_id = student.id;
   return [
     [
       {
         label: t("overview"),
-        to: `/my/${org_id}/students/${subscription_id}`,
+        to: `/my/${org_id}/students/${student_id}`,
         exact: true,
       },
       {
         label: t("activity"),
-        to: `/my/${org_id}/students/${subscription_id}/activity`,
+        to: `/my/${org_id}/students/${student_id}/activity`,
       },
       {
         label: t("bills"),
-        to: `/my/${org_id}/students/${subscription_id}/bills`,
+        to: `/my/${org_id}/students/${student_id}/bills`,
       },
       {
         label: t("subscription"),
-        to: `/my/${org_id}/students/${subscription_id}/subscription`,
+        to: `/my/${org_id}/students/${student_id}/subscription`,
       },
     ],
   ];
 });
 
-onUnmounted(() => {
-  subscriptionStore.reset()
-  console.log(subscriptionStore.subscription)
-});
 </script>
 
 <style scoped></style>

@@ -16,6 +16,8 @@ export const useStudentsStore = defineStore('students', () => {
     const userOrganizationsStore = useUserOrganizationsStore()
     const students = ref<StudentWithSubscriptions[]>([])
     const isLoadingStudents = ref(false)
+    const route = useRoute()
+    const selectedStudent = ref<StudentWithSubscriptions | null>(null)
 
     const loadStudents = async () => {
         isLoadingStudents.value = true
@@ -101,6 +103,8 @@ export const useStudentsStore = defineStore('students', () => {
 
         if (error) throw error
 
+        await loadStudents()
+
         return data.map(s => s.id)
     }
 
@@ -111,14 +115,21 @@ export const useStudentsStore = defineStore('students', () => {
             .eq('id', id)
 
         if (error) throw error
+        await loadStudents()
     }
 
     watch(() => userOrganizationsStore.selectedOrganization, () => {
         loadStudents()
     }, { immediate: true })
 
+    watch(() => route.params.student_id, async (value) => {
+        await loadStudents();
+        selectedStudent.value = students.value.find(s => s.id === value) || null;
+    }, { immediate: true });
+
     return {
         students,
+        selectedStudent,
         isLoadingStudents,
         loadStudents,
         queryStudents,
