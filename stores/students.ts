@@ -123,6 +123,28 @@ export const useStudentsStore = defineStore('students', () => {
         loadStudents()
     }, { immediate: true })
 
+    const deleteStudent = async (id: string): Promise<void> => {
+        const { error } = await supabase
+            .from('students')
+            .delete()
+            .eq('id', id)
+
+        if (error) throw error
+        await loadStudents()
+    }
+
+    const subscribeStudent = async (studentId: string, course_id: string, organization_id: string): Promise<void> => {
+        const { error } = await supabase
+            .from('course_subscriptions')
+            .insert({
+                student_id: studentId,
+                course_id: course_id,
+                organization_id: organization_id
+            })
+
+        if (error) throw error
+        await loadStudents()
+    }
 
     return {
         students,
@@ -132,5 +154,7 @@ export const useStudentsStore = defineStore('students', () => {
         getStudentById,
         createStudents,
         updateStudent,
+        deleteStudent,
+        subscribeStudent
     }
 })

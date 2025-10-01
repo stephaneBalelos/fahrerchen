@@ -24,13 +24,12 @@ export const useSubscriptionStore = defineStore('subscription', () => {
             const { data, error } = await supabase
                 .from('course_subscriptions')
                 .select('*')
-                .eq('id', userOrganizationsStore.selectedOrganization.id)
-                .single()
+                .eq('organization_id', userOrganizationsStore.selectedOrganization.id)
 
             if (error) {
                 throw new Error(`Error loading subscription: ${error.message}`)
             }
-            subscriptions.value = [data]
+            subscriptions.value = data
         } catch (error) {
             console.error(error)
         } finally {

@@ -7,6 +7,7 @@
       :title="`${student.firstname} ${student.lastname}`"
       :ui="{
         wrapper: 'py-4 pb-4',
+        description: 'mt-2',
       }"
     >
     <template #icon>
@@ -57,10 +58,6 @@ const student = computed(() => {
   );  
 });
 
-if (!subscriptionStore.selectedSubscription) {
-  // Throw error if no subscription found
-  throw new Error("No subscription found");
-}
 
 function _deleteStudent() {
   console.log("delete student");

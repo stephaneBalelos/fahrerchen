@@ -10,6 +10,17 @@
             }}</UBadge>
           </h2>
         </template>
+        <template #center>
+          <UAlert
+            v-if="error"
+            :color="'red'"
+            :variant="'solid'"
+            :closable="false"
+            class="w-full"
+          >
+            {{ error.message }}
+          </UAlert>
+        </template>
         <template #right>
           <UDropdown
             :items="createUserOptions"
@@ -62,6 +73,14 @@
             :options="defaultLocations"
             multiple
           /> -->
+        </template>
+        <template #right>
+          <UButton
+            color="gray"
+            size="xs"
+            icon="i-heroicons-arrow-path"
+            @click="refresh"
+          />
         </template>
       </UDashboardToolbar>
 
@@ -205,17 +224,17 @@ const {
   data: students,
   status,
   refresh,
+  error,
 } = await useAsyncData(
   "students",
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    const data = await studentsStore.queryStudents({
+    return await studentsStore.queryStudents({
       org_id: userOrganizationsStore.selectedOrganization.id,
       search: q.value,
     });
-    return data;
   },
   {
     watch: [q],
@@ -285,6 +304,12 @@ const openStudentForm = (id?: string) => {
 const openStudentProfileSlideover = (id: string) => {
   slideover.open(StudentCourseProfileSlideover, {
     studentId: id,
+    onClose: (shouldRefresh) => {
+      slideover.close();
+      if (shouldRefresh) {
+        refresh();
+      }
+    },
   });
 };
 

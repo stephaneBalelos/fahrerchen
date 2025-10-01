@@ -29,9 +29,9 @@
           </UButton>
         </template>
       </UDashboardNavbar>
-      <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
-        <UHorizontalNavigation :links="links" />
-      </UDashboardToolbar>
+  <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
+    <UHorizontalNavigation :links="links" />
+  </UDashboardToolbar>
       <NuxtPage />
     </UDashboardPanel>
   </UDashboardPage>
@@ -53,11 +53,6 @@ const student = computed(() => {
     (s) => s.id === (subscriptionStore.selectedSubscription?.student_id ?? "")
   );  
 });
-
-if (!subscriptionStore.selectedSubscription) {
-  // Throw error if no subscription found
-  throw new Error("No subscription found");
-}
 
 const links = computed(() => {
   const subscription = subscriptionStore.selectedSubscription
