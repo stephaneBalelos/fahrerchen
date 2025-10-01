@@ -132,6 +132,18 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         return data || []
     }
 
+    const getActivitiesForCourse = async (course_id: string): Promise<AppCourseActivity[]> => {
+        const { data, error } = await supabase
+            .from('course_activities_combinations')
+            .select('*, activity:course_activities(*)')
+            .eq('course_id', course_id)
+
+        if (error) {
+            throw error
+        }
+        return data.map(d => d.activity)
+    }
+
     const addCourseToAllowedCourses = async (activity_id: string, course_id: string): Promise<void> => {
         if (!userOrganizationsStore.selectedOrganization) {
             throw new Error("No organization selected")
@@ -175,6 +187,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         deleteCourseActivity,
         createActivitiesFromTemplate,
         getAllowedCourseForActivity,
+        getActivitiesForCourse,
         addCourseToAllowedCourses,
         removeCourseFromAllowedCourses,
     }

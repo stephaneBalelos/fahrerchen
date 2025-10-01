@@ -8,12 +8,17 @@
               :alt="`${student.firstname} ${student.lastname}`"
               size="sm"
             />
-            <span>{{ student.full_name }}</span> |
-            <span>
-              {{ student.id }}
-            </span>
-            <UBadge v-if="student" color="red" size="sm">
+            <div class="flex flex-col me-4">
+              <span>{{ student.full_name }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">
+                {{ student.email }}
+              </span>
+            </div>
+            <UBadge v-if="subscriptionStore.selectedSubscription.archived_at" color="red" size="sm">
               {{ t("archive") }}
+            </UBadge>
+            <UBadge v-if="!subscriptionStore.selectedSubscription.archived_at" color="green" size="sm">
+              {{ t("active") }}
             </UBadge>
           </div>
         </template>
@@ -46,6 +51,7 @@ const { t } = useI18n({
 const userOrganizationsStore = useUserOrganizationsStore();
 const studentsStore = useStudentsStore();
 const subscriptionStore = useSubscriptionStore();
+
 
 const student = computed(() => {
   if (!subscriptionStore.selectedSubscription) return null;

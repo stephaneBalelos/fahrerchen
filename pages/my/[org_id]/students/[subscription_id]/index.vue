@@ -2,47 +2,19 @@
   <UDashboardPanelContent>
     <!-- <StudentsStudentSubscriptionStats :subscription-id="subscription_id" />
     <StudentsCourseStudentProgression :subscription-id="subscription_id" /> -->
-    <UPageHeader
-      v-if="student"
-      :title="`${student.firstname} ${student.lastname}`"
-      :ui="{
-        wrapper: 'py-4 pb-4',
-        description: 'mt-2',
-      }"
-    >
-    <template #icon>
-      <UAvatar :alt="student.full_name ? student.full_name : ''" size="lg" />
-    </template>
-    <template #description>
-      <div class="flex items-center gap-2">
-        <span class="text-lg text-gray-600 dark:text-gray-400">
-          {{ student.email }}
-        </span>
-      </div>
-    </template>
-    <div class="flex flex-wrap gap-2 mt-4">
-      <UButton
-        :color="'white'"
-        variant="solid"
-        :icon="'i-heroicons-phone-arrow-down-left'"
-        >
-      {{ student.phone_number }}
-      </UButton>
-      <UButton
-        :color="'white'"
-        variant="solid"
-        :icon="'i-heroicons-calendar-days'"
-        >
-    {{ formatDate(student.birth_date) }}
-      </UButton>
+    <div v-if="subscriptionStore.selectedSubscription">
+      <StudentsStudentSubscriptionStats
+        :subscription-id="subscriptionStore.selectedSubscription.id"
+      />
+      <StudentsCourseStudentProgression
+        :subscription="subscriptionStore.selectedSubscription"
+      />
     </div>
-  </UPageHeader>
     <div v-else>No student selected</div>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import { formatDate } from '~/utils/formatters';
 
 definePageMeta({
   layout: "orgs",
@@ -51,13 +23,12 @@ definePageMeta({
 const studentsStore = useStudentsStore();
 const subscriptionStore = useSubscriptionStore();
 
-const student = computed(() => {
+const _student = computed(() => {
   if (!subscriptionStore.selectedSubscription) return null;
   return studentsStore.students.find(
     (s) => s.id === (subscriptionStore.selectedSubscription?.student_id ?? "")
-  );  
+  );
 });
-
 
 function _deleteStudent() {
   console.log("delete student");
