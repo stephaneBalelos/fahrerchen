@@ -310,6 +310,10 @@ const openStudentProfileSlideover = (id: string) => {
         refresh();
       }
     },
+    "onClose-and-navigate": async (path: string) => {
+      await slideover.close();
+      navigateTo(path);
+    },
   });
 };
 

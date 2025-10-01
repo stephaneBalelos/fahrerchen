@@ -18,7 +18,7 @@
             variant="ghost"
             size="xs"
             :label="t('course_profile')"
-            :to="userOrganizationsStore.relativePath(`/students/${student.activeSubscription.id}`)"
+            @click="closeAndNavigateTo(userOrganizationsStore.relativePath(`/students/${student.activeSubscription.id}`))"
           />
           <UButton
             v-if="!student.activeSubscription"
@@ -107,7 +107,6 @@
           </div>
           <div class="font-medium">
             <address class="not-italic">
-              // eslint-disable-next-line vue/html-self-closing
               {{ student.address_street || "-" }}<br >
               {{ student.address_zip || "-" }} {{ student.address_city || "-"
               }}<br >
@@ -157,6 +156,7 @@ const toast = useToast();
 const modal = useModal();
 const $emit = defineEmits<{
   (e: "close", shouldRefresh?: boolean): void;
+  (e: "close-and-navigate", path: string): void;
 }>();
 
 const {
@@ -266,6 +266,10 @@ const subscribeStudent = async () => {
     });
     console.error(err);
   }
+};
+
+const closeAndNavigateTo = (path: string) => {
+  $emit("close-and-navigate", path);
 };
 </script>
 
