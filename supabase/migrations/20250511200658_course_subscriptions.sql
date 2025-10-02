@@ -16,7 +16,6 @@ grant update (archived_at, costs) on table public.course_subscriptions to authen
 -- unique constraint to prevent multiple active subscriptions for the same course and student
 create unique index unique_active_subscription on public.course_subscriptions(student_id) where archived_at is null;
 
-
 -- check subscription is coherent with organization
 -- the referenced course and student must belong to the same organization
 create or replace function public.check_subscription_organization(

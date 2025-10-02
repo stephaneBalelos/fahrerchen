@@ -45,82 +45,55 @@ create policy "student_can_see_their_own_course_activity_schedules_attendances" 
 create or replace function public.create_attendance_record_for_schedule()
 returns trigger as $$
 declare
-  c_activity_name text;
-  c_activity_description text;
-  c_activity_type integer;
-  c_activity_price numeric;
-  s_assigned_to_email text;
-  s_assigned_to_firstname text;
-  s_assigned_to_lastname text;
+  r_attendee record;
+  v_activity record;
+  a_user record;
 begin
-    -- If Schedule ist Completed, generate Attendances for all attendees
-  if new.status = 'COMPLETED' then
-    -- No attendees, no attendance
-    if array_length(new.attendees, 1) = 0 then
-      return new;
-    end if;
-    -- if no assigned_to, prevent changing the status
-    if new.assigned_to is null then
-      raise exception 'Assigned to cannot be null';
-    end if;
 
-    -- get the course activity name, description, type and price
-    select ca.name, ca.description, ca.activity_type, ca.price
-    into c_activity_name, c_activity_description, c_activity_type, c_activity_price
-    from public.course_activities ca
-    where ca.id = new.activity_id;
-
-    -- get the assigned_to email, firstname and lastname
-    select u.email, u.firstname, u.lastname
-    into s_assigned_to_email, s_assigned_to_firstname, s_assigned_to_lastname
-    from public.users u
-    where u.id = new.assigned_to;
-
-    -- loop over the attendees and insert the attendance
-    for i in 1..array_length(new.attendees, 1) loop
-      -- check if the subscription is active
-      if public.is_subscription_active(new.attendees[i]) then
-        -- insert the attendance
-        insert into public.course_activity_schedules_attendances(
-          activity_name,
-          activity_description,
-          activity_type,
-          activity_price,
-          schedule_start_at,
-          schedule_end_at,
-          schedule_assigned_to_email,
-          schedule_assigned_to_firstname,
-          schedule_assigned_to_lastname,
-          successfully_completed,
-          course_activity_id,
-          course_activity_schedule_id,
-          schedule_assigned_to_id,
-          course_subscription_id,
-          organization_id
-        ) values (
-          c_activity_name,
-          c_activity_description,
-          c_activity_type,
-          c_activity_price,
-          new.start_at,
-          new.end_at,
-          s_assigned_to_email,
-          s_assigned_to_firstname,
-          s_assigned_to_lastname,
-          false, -- successfully_completed
-          new.activity_id,
-          new.id,
-          new.assigned_to,
-          new.attendees[i],
-          new.organization_id
-        );
-      end if;
-    end loop;
+  a_user := (select email, firstname, lastname from public.users where id = new.assigned_to);
+  if a_user is null then
+    -- Throw an error if assigned_to user not found
+    raise exception 'Assigned to user not found for schedule %', new.id;
   end if;
+
+  for r_attendee in select * from public.course_activity_schedules_attendees where schedule_id = new.id loop
+    select * into v_activity from public.course_activities where id = new.activity_id;
+    insert into public.course_activity_schedules_attendances (
+      activity_name,
+      activity_description,
+      activity_type,
+      activity_price,
+      schedule_start_at,
+      schedule_end_at,
+      schedule_assigned_to_email,
+      schedule_assigned_to_firstname,
+      schedule_assigned_to_lastname,
+      course_activity_id,
+      course_activity_schedule_id,
+      schedule_assigned_to_id,
+      course_subscription_id,
+      organization_id
+    ) values (
+      v_activity.name,
+      v_activity.description,
+      v_activity.type,
+      v_activity.price,
+      new.start_at,
+      new.start_at + (new.duration_minutes || ' minutes')::interval,
+      a_user.email,
+      a_user.firstname,
+      a_user.lastname,
+      new.activity_id,
+      new.id,
+      new.assigned_to,
+      r_attendee.subscription_id,
+      new.organization_id
+    );
+  end loop;
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = '';
+$$ language plpgsql security invoker set search_path = '';
 create trigger create_attendance_record_for_schedule
 after update on public.course_activity_schedules
 for each row

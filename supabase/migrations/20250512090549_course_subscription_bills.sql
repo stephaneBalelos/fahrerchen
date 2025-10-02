@@ -13,6 +13,9 @@ create table public.course_subscription_bills (
   stripe_payment_intent_id  text, -- Stripe Payment Intent ID
   canceled_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
+  vat_rate numeric(5, 2) default 0.0 not null check (vat_rate >= 0.0 and vat_rate <= 100.0),
+  vat_amount numeric(10, 2) default 0.0 not null check (vat_amount >= 0.0),
+  total_with_vat numeric(10, 2) generated always as (total + (total * (vat_rate / 100))) stored,
   check ((paid_at is not null and canceled_at is null) or (paid_at is null and canceled_at is not null) or (paid_at is null and canceled_at is null))
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
@@ -355,3 +358,42 @@ before update on public.course_subscriptions
 for each row
 when (new.archived_at is not null and old.archived_at is null)
 execute procedure public.validate_course_subscription_before_archiving_trigger();
+
+-- Trigger to insert the VAT rate and amount into course_subscription_bills before inserting a new bill
+create or replace function public.set_vat_rate_and_amount()
+returns trigger as $$
+declare
+    org_billing_settings_vat_rate numeric(5, 2);
+    org_billing_settings_vat_exempt boolean;
+begin
+    -- Get the VAT rate and exemption status from the organization's billing settings
+    select vat_rate, vat_exempt into org_billing_settings_vat_rate, org_billing_settings_vat_exempt
+    from public.organization_billing_settings
+    where id = new.organization_id;
+
+    -- If the organization does not have billing settings, set default values
+    if org_billing_settings_vat_rate is null then
+        org_billing_settings_vat_rate := 19.0; -- Default VAT rate
+    end if;
+    if org_billing_settings_vat_exempt is null then
+        org_billing_settings_vat_exempt := false; -- Default to not exempt
+    end if;
+
+    -- If the organization is VAT exempt, set the VAT rate to 0
+    if org_billing_settings_vat_exempt then
+        new.vat_rate := 0.0;
+        new.vat_amount := 0.0;
+    else
+        new.vat_rate := org_billing_settings_vat_rate;
+        -- Calculate the VAT amount based on the total and the VAT rate
+        new.vat_amount := round(new.total * (org_billing_settings_vat_rate / 100), 2);
+    end if;
+
+    return new;
+end;
+$$ language plpgsql security invoker set search_path = '';
+-- Create the trigger to set VAT rate and amount before inserting a new bill
+create trigger before_insert_course_subscription_bills
+before insert on public.course_subscription_bills
+for each row
+execute procedure public.set_vat_rate_and_amount();
