@@ -15,7 +15,7 @@
           <UButton
             v-if="student.activeSubscription"
             icon="i-heroicons-document-text"
-            variant="ghost"
+            variant="solid"
             size="xs"
             :label="t('course_profile')"
             @click="closeAndNavigateTo(userOrganizationsStore.relativePath(`/students/${student.activeSubscription.id}`))"
@@ -279,11 +279,51 @@ const closeAndNavigateTo = (path: string) => {
 {
   "de": {
     "course_profile": "Kursprofil",
-    "course_profile_desc": "Kursprofil"
+    "course_profile_desc": "Kursprofil",
+    "subscribe_student": "Schüler einschreiben",
+    "current_subscription": "Aktueller Kurs",
+    "no_active_subscription": "Kein aktiver Kurs",
+    "registerer_since": "Registriert seit",
+    "phone_number": "Telefonnummer",
+    "address": "Adresse",
+    "confirm_delete_student": "Schüler löschen",
+    "confirm_delete_student_description": "Möchten Sie diesen Schüler wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "delete": "Löschen",
+    "cancel": "Abbrechen",
+    "student_deleted": "Schüler gelöscht",
+    "student_deleted_successfully": "Der Schüler wurde erfolgreich gelöscht.",
+    "error": "Fehler",
+    "error_deleting_student": "Fehler beim Löschen des Schülers.",
+    "student_not_found": "Schüler nicht gefunden.",
+    "no_courses_available": "Keine Kurse verfügbar.",
+    "course_not_found": "Kurs nicht gefunden.",
+    "student_subscribed": "Schüler eingeschrieben",
+    "student_subscribed_successfully": "Der Schüler wurde erfolgreich eingeschrieben.",
+    "error_subscribing_student": "Fehler beim Einschreiben des Schülers."
   },
   "en": {
     "course_profile": "Course profile",
-    "course_profile_desc": "Course profile"
+    "course_profile_desc": "Course profile",
+    "subscribe_student": "Subscribe student",
+    "current_subscription": "Current subscription",
+    "no_active_subscription": "No active subscription",
+    "registerer_since": "Registered since",
+    "phone_number": "Phone number",
+    "address": "Address",
+    "confirm_delete_student": "Delete student",
+    "confirm_delete_student_description": "Are you sure you want to delete this student? This action cannot be undone.",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "student_deleted": "Student deleted",
+    "student_deleted_successfully": "The student has been successfully deleted.",
+    "error": "Error",
+    "error_deleting_student": "Error deleting the student.",
+    "student_not_found": "Student not found.",
+    "no_courses_available": "No courses available.",
+    "course_not_found": "Course not found.",
+    "student_subscribed": "Student subscribed",
+    "student_subscribed_successfully": "The student has been successfully subscribed.",
+    "error_subscribing_student": "Error subscribing the student."
   }
 }
 </i18n>

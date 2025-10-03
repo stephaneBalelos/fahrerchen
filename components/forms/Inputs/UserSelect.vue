@@ -8,6 +8,7 @@
     :variant="'none'"
   >
     <UButton
+    block
       :color="props.color"
       :variant="props.variant || 'outline'"
       :size="props.size || 'md'"

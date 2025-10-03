@@ -37,6 +37,7 @@
             :options="courseActivitiesStore.courseActivities"
             value-attribute="id"
             label-attribute="name"
+            :size="'md'"
             :disabled="!!props.scheduleId"
           >
             <template #label>
@@ -74,6 +75,8 @@
           <FormsInputsUserSelect
             v-model="state.assigned_to"
             :orgid="organizationStore.selectedOrganization.id"
+            :variant="'solid'"
+            :color="'white'"
           />
         </UFormGroup>
         <UFormGroup
@@ -86,7 +89,6 @@
         >
           <div class="grid grid-cols-2 gap-4">
             <UPopover
-              class="col-span-2"
               :popper="{ placement: 'bottom-start' }"
             >
               <div class="w-full">
@@ -95,6 +97,7 @@
                   color="white"
                   variant="solid"
                   icon="i-heroicons-calendar-days-20-solid"
+                  :size="'md'"
                   :label="format(new Date(state.start_at), 'd MMM, yyy')"
                 />
               </div>
@@ -103,7 +106,6 @@
                   v-model="state.start_at"
                   is-required
                   :mode="'dateTime'"
-                  @update:model-value="onUpdateStartDate"
                 />
               </template>
             </UPopover>
@@ -114,6 +116,7 @@
                   color="white"
                   variant="solid"
                   icon="i-heroicons-clock"
+                  :size="'md'"
                   :label="format(new Date(state.start_at), 'HH:mm a')"
                 />
               </div>
@@ -122,22 +125,7 @@
                   v-model="state.start_at"
                   is-required
                   :mode="'time'"
-                  @update:model-value="onUpdateStartDate"
                 />
-              </template>
-            </UPopover>
-            <UPopover :popper="{ placement: 'bottom-start' }">
-              <div class="w-full">
-                <UButton
-                  block
-                  color="white"
-                  variant="solid"
-                  icon="i-heroicons-clock"
-                  :label="format(new Date(state.end_at), 'HH:mm a')"
-                />
-              </div>
-              <template #panel="">
-                <DatePicker v-model="state.end_at" is-required :mode="'time'" />
               </template>
             </UPopover>
           </div>
@@ -174,7 +162,7 @@ import type { CourseActivityScheduleEdit } from "~/types/app.types";
 import type { Database } from "~/types/database.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
 import { z } from "zod";
-import { addHours, format } from "date-fns";
+import { format } from "date-fns";
 import DatePicker from "./Inputs/Datepicker.vue";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 
@@ -208,22 +196,11 @@ const { data, refresh } = await useAsyncData(async () => {
 
 const schema = z
   .object({
-    activity_id: z.string().uuid(),
-    assigned_to: z.string().uuid().optional(),
+    activity_id: z.string().uuid({message: t("form.activity.errors.required")}),
+    assigned_to: z.string().uuid({message: t("form.assigned_to.errors.required")}).optional(),
     start_at: z.date(),
-    end_at: z.date(),
+    duration_minutes: z.number().min(15).max(240).default(45),
   })
-  .superRefine((data, ctx) => {
-    if (data.start_at > data.end_at) {
-      ctx.addIssue({
-        path: ["start_at"],
-        code: z.ZodIssueCode.custom,
-        message: t("form.start_at.errors.invalid_range"),
-      });
-      return z.NEVER;
-    }
-    return true;
-  });
 
 type Schema = z.infer<typeof schema>;
 
@@ -233,9 +210,7 @@ const state = reactive<Schema>({
   start_at: data.value?.start_at
     ? new Date(data.value.start_at)
     : props.date ?? new Date(),
-  end_at: data.value?.end_at
-    ? new Date(data.value.end_at)
-    : addHours(new Date(), 1),
+  duration_minutes: data.value?.duration_minutes ?? 45,
   activity_id: data.value?.activity_id ?? "",
   assigned_to: data.value?.assigned_to ?? undefined,
 });
@@ -251,7 +226,7 @@ function onSubmit(_event: FormSubmitEvent<Schema>) {
     activity_id: state.activity_id,
     assigned_to: state.assigned_to ?? null,
     start_at: state.start_at.toISOString(),
-    end_at: state.end_at.toISOString(),
+    duration_minutes: 45, // default duration of 45 minutes
     status: data.value?.status ?? "PLANNED",
   };
 
@@ -388,11 +363,6 @@ async function updateScheduleStatus(
     console.error(error);
   }
 }
-
-function onUpdateStartDate(date: Date) {
-  state.start_at = date;
-  state.end_at = addHours(date, 1);
-}
 </script>
 
 <style scoped></style>
@@ -417,12 +387,18 @@ function onUpdateStartDate(date: Date) {
       "activity": {
         "label": "Aktivität",
         "description": "Wählen Sie die Aktivität aus, die für diesen Termin geplant ist.",
-        "placeholder": "Wählen Sie eine Aktivität aus"
+        "placeholder": "Wählen Sie eine Aktivität aus",
+        "errors": {
+          "required": "Die Aktivität ist erforderlich."
+        }
       },
       "assigned_to": {
         "label": "Zugewiesen an",
         "description": "Wählen Sie den Benutzer aus, der für diese Aktivität verantwortlich ist.",
-        "placeholder": "Wählen Sie einen Benutzer aus"
+        "placeholder": "Wählen Sie einen Benutzer aus",
+        "errors": {
+          "required": "Der Benutzer ist erforderlich."
+        }
       },
       "start_at": {
         "label": "Startzeit",
@@ -473,12 +449,18 @@ function onUpdateStartDate(date: Date) {
       "activity": {
         "label": "Activity",
         "description": "Select the activity to be scheduled for this date.",
-        "placeholder": "Select an activity"
+        "placeholder": "Select an activity",
+        "errors": {
+          "required": "The activity is required."
+        }
       },
       "assigned_to": {
         "label": "Assigned to",
         "description": "Select the user responsible for this activity.",
-        "placeholder": "Select a user"
+        "placeholder": "Select a user",
+        "errors": {
+          "required": "The user is required."
+        }
       },
       "start_at": {
         "label": "Start time",

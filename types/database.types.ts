@@ -563,7 +563,7 @@ export type Database = {
       }
       course_subscription_bill_items: {
         Row: {
-          activity_type: Database["public"]["Enums"]["activity_types"]
+          activity_type: Database["public"]["Enums"]["activity_types"] | null
           bill_id: string | null
           course_activity_attendance_id: string | null
           course_cost_id: string | null
@@ -576,7 +576,7 @@ export type Database = {
           title: string
         }
         Insert: {
-          activity_type: Database["public"]["Enums"]["activity_types"]
+          activity_type?: Database["public"]["Enums"]["activity_types"] | null
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
@@ -589,7 +589,7 @@ export type Database = {
           title: string
         }
         Update: {
-          activity_type?: Database["public"]["Enums"]["activity_types"]
+          activity_type?: Database["public"]["Enums"]["activity_types"] | null
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
@@ -806,18 +806,21 @@ export type Database = {
       courses: {
         Row: {
           id: string
+          inserted_at: string
           is_active: boolean
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Insert: {
           id?: string
+          inserted_at?: string
           is_active?: boolean
           organization_id: string
           type: Database["public"]["Enums"]["course_type"]
         }
         Update: {
           id?: string
+          inserted_at?: string
           is_active?: boolean
           organization_id?: string
           type?: Database["public"]["Enums"]["course_type"]
