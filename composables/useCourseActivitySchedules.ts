@@ -1,13 +1,11 @@
 import type { AppCourseActivitySchedule, CourseActivityScheduleEdit, Database } from "~/types/app.types";
 
 type CourseActivityScheduleQuery = {
-    course_id?: string;
     activity_id?: string;
     status?: Database["public"]["Enums"]["schedule_status"];
     assigned_to?: string;
-    student_id?: string;
     start_at?: string;
-    end_at?: string;
+    subscription_id?: string;
 }
 
 export const useCourseActivitySchedules = () => {
@@ -88,42 +86,38 @@ export const useCourseActivitySchedules = () => {
 
         const q = client
             .from("course_activity_schedules")
-            .select("*")
+            .select("*, course_activity_schedules_attendees(id, subscription_id)")
 
         q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
-
-        if (query.course_id) {
-            q.eq("course_id", query.course_id)
-        }
 
         if (query.activity_id) {
             q.eq("activity_id", query.activity_id)
         }
 
         if (query.status) {
-            q.eq("schedule_status", query.status)
+            q.eq("status", query.status)
         }
 
         if (query.assigned_to) {
-            q.eq("schedule_assigned_to", query.assigned_to)
-        }
-
-        if (query.student_id) {
-            q.contains('schedule_attendees', [query.student_id])
+            q.eq("assigned_to", query.assigned_to)
         }
 
         if (query.start_at) {
-            q.gte("schedule_start_at", query.start_at)
-        }
-
-        if (query.end_at) {
-            q.lte("schedule_start_at", query.end_at)
+            q.gte("start_at", query.start_at)
         }
 
         const { data, error } = await q
 
         if (error) {
             throw error
+        }
+
+        if (query.subscription_id) {
+            // filter the schedules that have the subscription_id in their attendees
+            return data?.filter(schedule => {
+                const attendees = schedule.course_activity_schedules_attendees || []
+                return attendees.some(attendee => attendee.subscription_id === query.subscription_id)
+            }) || []
         }
 
         return data || []

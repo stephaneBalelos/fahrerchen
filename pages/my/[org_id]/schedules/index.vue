@@ -135,10 +135,10 @@ const { data: schedules, refresh } = useAsyncData(
 const openEditScheduleSlideover = (scheduleId?: string) => {
   slideover.open(EditCourseActivitySchedule, {
     scheduleId: scheduleId || undefined,
-    "onActivity-deleted": () => {
+    "onSchedule-deleted": () => {
       refresh();
     },
-    "onActivity-saved": () => {
+    "onSchedule-saved": () => {
       refresh();
     },
   });
