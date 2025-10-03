@@ -13,7 +13,7 @@
     </UDashboardPanel>
     <UDashboardPanel id="schedule-details" :model-value="selectedScheduleId ? true : false" grow collapsible side="right">
       <template v-if="selectedScheduleId">
-        <UDashboardNavbar :title="'Schedule Details'">
+        <UDashboardNavbar :title="t('schedule_details')">
           <template #toggle>
             <UButton
               icon="i-heroicons-arrow-left-solid"
@@ -174,6 +174,8 @@ watch(selectedScheduleId, async () => {
     "calendar_view": "Kalender Ansicht",
     "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
+    "schedule_details": "Termin Details",
+    "edit_schedule": "Termin bearbeiten",
     "delete_schedule_confirm_title": "Termin löschen",
     "delete_schedule_confirm_description": "Sind Sie sicher, dass Sie diesen Termin löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "delete": "Löschen",
@@ -203,6 +205,8 @@ watch(selectedScheduleId, async () => {
     "calendar_view": "Calendar view",
     "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
+    "schedule_details": "Schedule Details",
+    "edit_schedule": "Edit Schedule",
     "delete_schedule_confirm_title": "Delete Schedule",
     "delete_schedule_confirm_description": "Are you sure you want to delete this schedule? This action cannot be undone.",
     "delete": "Delete",

@@ -24,15 +24,22 @@
         class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800 pt-0"
       >
         <UFormGroup
-          :label="t('settings.start_at.label')"
-          :description="t('settings.start_at.description')"
+          :label="t('form.start_at.label')"
+          :description="t('form.start_at.description')"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
           :ui="{
-            container: 'flex flex-wrap items-center gap-3',
+            container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
           }"
         >
-          <UPopover class="col-span-2" :popper="{ placement: 'bottom-start' }" @update:open="(open) => { if (!open) saveState() }">
+          <UPopover
+            :popper="{ placement: 'bottom-start' }"
+            @update:open="
+              (open) => {
+                if (!open) saveState();
+              }
+            "
+          >
             <UButton
               color="white"
               variant="solid"
@@ -54,7 +61,7 @@
           :description="t('form.assigned_to.description')"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
           :ui="{
-            container: 'flex flex-wrap items-center gap-3',
+            container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
           }"
         >
@@ -72,13 +79,27 @@
           :description="t('form.allowed_courses.description')"
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
           :ui="{
-            container: 'flex flex-wrap items-center gap-3',
+            container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
           }"
         >
           <SchedulesScheduleAllowedCourses
             :schedule-id="schedule.id"
             :activity-id="activity.id"
+          />
+        </UFormGroup>
+        <UFormGroup
+          name="attendees"
+          :label="t('form.attendees.label')"
+          :description="t('form.attendees.description')"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
+          :ui="{
+            container: 'flex flex-wrap items-center gap-3 col-span-2',
+            help: 'mt-0',
+          }"
+        >
+          <SchedulesScheduleAttendeesList
+            :course-activity-schedule="schedule"
           />
         </UFormGroup>
       </div>
@@ -184,13 +205,11 @@ const saveState = async () => {
 <i18n lang="json">
 {
   "en": {
-    "settings": {
+    "form": {
       "start_at": {
         "label": "Start At",
         "description": "The date and time when the activity is scheduled to start."
-      }
-    },
-    "form": {
+      },
       "assigned_to": {
         "label": "Assigned To",
         "description": "The user assigned to this activity schedule."
@@ -198,17 +217,19 @@ const saveState = async () => {
       "allowed_courses": {
         "label": "Allowed Courses",
         "description": "Courses that are allowed to access this activity schedule."
+      },
+      "attendees": {
+        "label": "Attendees",
+        "description": "Students attending this activity schedule."
       }
     }
   },
   "de": {
-    "settings": {
+    "form": {
       "start_at": {
         "label": "Startzeit",
         "description": "Das Datum und die Uhrzeit, zu der die Aktivität beginnen soll."
-      }
-    },
-    "form": {
+      },
       "assigned_to": {
         "label": "Zugewiesen an",
         "description": "Der Benutzer, der diesem Aktivitätsplan zugewiesen ist."
@@ -216,6 +237,10 @@ const saveState = async () => {
       "allowed_courses": {
         "label": "Erlaubte Kurse",
         "description": "Kurse, die auf diesen Aktivitätsplan zugreifen dürfen."
+      },
+      "attendees": {
+        "label": "Teilnehmer",
+        "description": "Schüler, die an diesem Aktivitätsplan teilnehmen."
       }
     }
   }

@@ -145,6 +145,31 @@ export const useCourseActivitySchedules = () => {
         return data || []
     }
 
+    const removeAttendeeFromSchedule = async (attendee_id: string) => {
+        const { error } = await client
+            .from("course_activity_schedules_attendees")
+            .delete()
+            .eq("id", attendee_id)
+
+        if (error) {
+            throw error
+        }
+        return true
+    }
+
+    const fetchAttendeesForSchedule = async (schedule_id: string) => {
+        const { data, error } = await client
+            .from("course_activity_schedules_attendees")
+            .select("*, course_subscriptions:subscription_id(id, student:students(*), course:courses(*))")
+            .eq("schedule_id", schedule_id)
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
+
     return {
         fetchCourseActivitySchedules,
         fetchCourseActivitySchedulesById,
@@ -152,6 +177,8 @@ export const useCourseActivitySchedules = () => {
         updateCourseActivitySchedule,
         deleteCourseActivitySchedule,
         addAttendeesToSchedule,
+        removeAttendeeFromSchedule,
+        fetchAttendeesForSchedule
     }
 
 }
