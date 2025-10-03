@@ -25,7 +25,6 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         } else {
             courseActivities.value = data || []
         }
-        console.log("Loaded course activities:", courseActivities.value)
         isLoadingCourseActivities.value = false
     }
 
@@ -151,7 +150,6 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         if (error) {
             throw error
         }
-        console.log("getCourseActivities", data);
         return data || []
     }
 

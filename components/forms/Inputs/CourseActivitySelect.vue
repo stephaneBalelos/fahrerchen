@@ -52,7 +52,6 @@ const selected = computed(() => {
 });
 
 async function searchCourseActivity(search: string) {
-  console.log("searchCourseActivity", search);
   const res = await courseActivitiesStore.getCourseActivities(
     props.orgId,
     props.courseId,

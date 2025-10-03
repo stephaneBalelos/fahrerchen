@@ -35,8 +35,6 @@ export const useStudentsStore = defineStore('students', () => {
             console.error("Error loading students:", error)
             students.value = []
         } finally {
-            console.log("Students loaded:", students.value.length)
-
             isLoadingStudents.value = false
         }
     }
