@@ -1,7 +1,7 @@
 <template>
     <UCard v-if="student" class="mb-4">
         <div class="flex items-center gap-4">
-            <UAvatar v-if="student.avatar_path" :src="$publicStorageUrl('student_documents', student.avatar_path)" />
+            <UAvatar v-if="student.avatar_path" :src="$publicStorageUrl('student_documents', student.avatar_path) ?? undefined" />
             <UAvatar v-else :alt="`${student.firstname} ${student.lastname}`"/>
             <div class="flex flex-col">
                 <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ student.firstname }} {{ student.lastname }}</div>

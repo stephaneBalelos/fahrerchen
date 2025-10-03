@@ -25,6 +25,7 @@
           </UButton>
         </template>
         <UFormGroup
+          v-if="organizationStore.selectedOrganization"
           name="activity_id"
           :label="t('form.activity.label')"
           :description="t('form.activity.description')"
@@ -32,36 +33,11 @@
           class="grid grid-cols-1 gap-4 items-center"
           :ui="{ container: '' }"
         >
-          <USelectMenu
+          <FormsInputsCourseActivitySelect
             v-model="state.activity_id"
-            :options="courseActivitiesStore.courseActivities"
-            value-attribute="id"
-            label-attribute="name"
-            :size="'md'"
-            :disabled="!!props.scheduleId"
-          >
-            <template #label>
-              <div
-                v-if="
-                  state.activity_id && courseActivitiesStore.courseActivities
-                "
-              >
-                <span class="truncate">{{
-                  courseActivitiesStore.courseActivities.find(
-                    (a) => a.id === state.activity_id
-                  )?.name
-                }}</span>
-              </div>
-              <div v-else>
-                <span class="truncate">
-                  {{ t("form.activity.placeholder") }}
-                </span>
-              </div>
-            </template>
-            <template #option="{ option }">
-              <span class="truncate">{{ option.name }}</span>
-            </template>
-          </USelectMenu>
+            :org-id="organizationStore.selectedOrganization.id"
+            :course-id="props.courseId"
+          />
         </UFormGroup>
         <UFormGroup
           v-if="organizationStore.selectedOrganization"
@@ -130,6 +106,17 @@
             </UPopover>
           </div>
         </UFormGroup>
+        <UFormGroup
+          v-if="subscriptionId"
+          :label="t('form.activity_attendees.label')"
+          :description="t('form.activity_attendees.description')"
+          class="grid grid-cols-1 gap-4 items-center"
+          :ui="{ container: '' }"
+        >
+        <StudentsCourseSubscriptionListItem
+          :subscription-id="subscriptionId"
+        />
+        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
@@ -169,10 +156,14 @@ import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 type Props = {
   scheduleId?: string;
   date?: Date;
+  subscriptionId?: string;
+  courseId?: string;
 };
 
 const props = defineProps<Props>();
-const emits = defineEmits(["activity-saved", "activity-deleted"]);
+const emits = defineEmits<{
+  (e: "schedule-saved" | "schedule-deleted", schedule_id: string): void;
+}>();
 const toast = useToast();
 const modal = useModal();
 const organizationStore = useUserOrganizationsStore();
@@ -252,7 +243,7 @@ async function createCourseActivitySchedule(data: CourseActivityScheduleEdit) {
       description: t("success.created.description"),
       color: "green",
     });
-    emits("activity-saved");
+    emits("schedule-saved", schedule.id);
   } catch (error) {
     console.error(error);
     toast.add({
@@ -279,7 +270,7 @@ async function updateCourseActivitySchedule(
         description: t("success.updated.description"),
         color: "green",
       });
-      emits("activity-saved");
+      emits("schedule-saved", schedule.id);
     
   } catch (error) {
     console.error(error);
@@ -304,7 +295,7 @@ async function deleteCourseActivitySchedule(id: string) {
         if (!result) {
           throw new Error("Failed to delete course activity schedule");
         }
-        emits("activity-deleted");
+        emits("schedule-deleted", id);
       },
     });
   } catch (error) {
@@ -358,7 +349,7 @@ async function updateScheduleStatus(
       throw new Error("Failed to update course activity schedule");
     }
     refresh();
-    emits("activity-saved");
+    emits("schedule-saved", schedule.id);
   } catch (error) {
     console.error(error);
   }
@@ -407,6 +398,19 @@ async function updateScheduleStatus(
         "errors": {
           "invalid_range": "Die Startzeit kann nicht nach der Endzeit liegen."
         }
+      },
+      "duration_minutes": {
+        "label": "Dauer (Minuten)",
+        "description": "Geben Sie die Dauer dieser Aktivität in Minuten an.",
+        "placeholder": "Dauer in Minuten",
+        "errors": {
+          "min": "Die Dauer muss mindestens 15 Minuten betragen.",
+          "max": "Die Dauer darf maximal 240 Minuten betragen."
+        }
+      },
+      "activity_attendees": {
+        "label": "Aktivitätsteilnehmer",
+        "description": "Folgende Teilnehmer werden an dieser Aktivität teilnehmen."
       }
     },
     "save": "Speichern",
@@ -469,6 +473,19 @@ async function updateScheduleStatus(
         "errors": {
           "invalid_range": "The start time cannot be after the end time."
         }
+      },
+      "duration_minutes": {
+        "label": "Duration (minutes)",
+        "description": "Enter the duration of this activity in minutes.",
+        "placeholder": "Duration in minutes",
+        "errors": {
+          "min": "The duration must be at least 15 minutes.",
+          "max": "The duration must be at most 240 minutes."
+        }
+      },
+      "activity_attendees": {
+        "label": "Activity attendees",
+        "description": "The following attendees will participate in this activity."
       }
     },
     "save": "Save",

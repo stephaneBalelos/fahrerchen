@@ -129,12 +129,35 @@ export const useCourseActivitySchedules = () => {
         return data || []
     }
 
+    const addAttendeesToSchedule = async (schedule_id: string, subscription_id: string[]) => {
+        if (!userOrganizationStore.selectedOrganization) {
+            throw new Error("No organization selected");
+        }
+        const attendees = subscription_id.map(id => {
+            return {
+                schedule_id,
+                subscription_id: id,
+                organization_id: userOrganizationStore.selectedOrganization!.id
+            }
+        })
+        const { data, error } = await client
+            .from("course_activity_schedules_attendees")
+            .insert(attendees)
+            .select()
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
     return {
         fetchCourseActivitySchedules,
         fetchCourseActivitySchedulesById,
         createCourseActivitySchedule,
         updateCourseActivitySchedule,
-        deleteCourseActivitySchedule
+        deleteCourseActivitySchedule,
+        addAttendeesToSchedule,
     }
 
 }

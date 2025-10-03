@@ -27,10 +27,21 @@
             v-if="student"
             size="sm"
             color="primary"
+            variant="solid"
+            icon="i-heroicons-plus-circle-solid"
+            @click="() => { openEditCourseActivityScheduleSlideover() }"
+          >
+            {{ t("new_schedule_for_student", { student: student.firstname }) }}
+          </UButton>
+          <UButton
+            v-if="student"
+            size="sm"
+            color="primary"
             variant="outline"
+            icon="i-heroicons-document-arrow-down-solid"
             @click="() => {}"
           >
-            {{ t("generate_certifcate") }}
+            {{ t("generate_certificate") }}
           </UButton>
         </template>
       </UDashboardNavbar>
@@ -43,12 +54,17 @@
 </template>
 
 <script setup lang="ts">
+import EditCourseActivitySchedule from '~/components/forms/EditCourseActivitySchedule.vue';
+
 
 const { t } = useI18n({
   useScope: "local",
 });
 
+const slideover = useSlideover();
+
 const userOrganizationsStore = useUserOrganizationsStore();
+const $courseActivitySchedules = useCourseActivitySchedules();
 const studentsStore = useStudentsStore();
 const subscriptionStore = useSubscriptionStore();
 
@@ -85,6 +101,19 @@ const links = computed(() => {
     ],
   ];
 });
+
+const openEditCourseActivityScheduleSlideover = () => {
+  if (!subscriptionStore.selectedSubscription) return;
+  const subscription = subscriptionStore.selectedSubscription
+  slideover.open(EditCourseActivitySchedule, {
+    subscriptionId: subscriptionStore.selectedSubscription.id,
+    courseId: subscriptionStore.selectedSubscription.course_id,
+    "onSchedule-saved": async (id) => {
+      slideover.close();
+      await $courseActivitySchedules.addAttendeesToSchedule(id, [subscription.id]);
+    },
+  })
+}
 </script>
 
 <style scoped></style>
@@ -101,7 +130,8 @@ const links = computed(() => {
     "subscription": "Einschreibung",
     "student_is_inactive": "Der Schüler ist inaktiv.",
     "student_is_inactive_description": "Der Schüler ist inaktiv und hat keine aktiven Abonnements.",
-    "generate_certifcate": "Zertifikat generieren"
+    "generate_certificate": "Zertifikat generieren",
+    "new_schedule_for_student": "Neuer Termin für {student}"
   },
   "en": {
     "title": "Student",
@@ -113,7 +143,8 @@ const links = computed(() => {
     "subscription": "Registration",
     "student_is_inactive": "The student is inactive.",
     "student_is_inactive_description": "The student is inactive and has no active subscriptions.",
-    "generate_certifcate": "Generate certificate"
+    "generate_certificate": "Generate certificate",
+    "new_schedule_for_student": "New schedule for {student}"
   }
 }
 </i18n>

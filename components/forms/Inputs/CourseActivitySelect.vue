@@ -9,13 +9,8 @@
   >
     <template #label>
       <div v-if="selected">
-        <UAvatar
-          :icon="'i-heroicons-document-text'"
-          size="2xs"
-        />
-        <span class="truncate ms-3">{{
-          `${selected.name}`
-        }}</span>
+        <UAvatar :icon="'i-heroicons-document-text'" size="2xs" />
+        <span class="truncate ms-3">{{ `${selected.name}` }}</span>
       </div>
       <div v-else>
         <UAvatar icon="i-heroicons-document-text" size="2xs" />
@@ -24,9 +19,7 @@
     </template>
 
     <template #option="{ option: activity }">
-      <span class="truncate">{{
-        `${activity.name}`
-      }}</span>
+      <span class="truncate">{{ `${activity.name}` }}</span>
     </template>
 
     <template #option-empty="{ query }">
@@ -39,14 +32,11 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  AppCourseActivity,
-  Database,
-} from "~/types/app.types";
+import type { AppCourseActivity } from "~/types/app.types";
 
 type Props = {
   orgId: string;
-  courseId: string;
+  courseId?: string;
 };
 const props = defineProps<Props>();
 
@@ -54,8 +44,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient<Database>();
-
+const courseActivitiesStore = useCourseActivitiesStore();
 const model = defineModel<string>({ default: null });
 const courseActivties = ref<AppCourseActivity[] | null>(null);
 const selected = computed(() => {
@@ -66,31 +55,12 @@ const selected = computed(() => {
 });
 
 async function searchCourseActivity(search: string) {
-  let q;
-  if (search.length < 3) {
-    q = client
-      .from("course_activities")
-      .select("*")
-      .eq("organization_id", props.orgId)
-      .eq("course_id", props.courseId)
-      .limit(5);
-  } else {
-    q = await client
-      .from("course_activities")
-      .select("*")
-      .eq("organization_id", props.orgId)
-      .eq("course_id", props.courseId)
-      .or(
-        `name.ilike.%${search}%,description.ilike.%${search}%`
-      )
-      .limit(5);
-  }
-  const { data, error } = await q;
-  if (error) {
-    throw error;
-  }
-  courseActivties.value = data;
-  return data;
+  console.log("searchCourseActivity", search);
+  return await courseActivitiesStore.getCourseActivities(
+    props.orgId,
+    props.courseId,
+    search.length >= 3 ? search : undefined
+  )
 }
 </script>
 
@@ -104,11 +74,11 @@ async function searchCourseActivity(search: string) {
     "no_activity_found": "'{query}' nicht gefunden",
     "no_activities": "Keine Kursaktivitäten"
   },
-    "en": {
-        "search_by_name_or_description": "Search by name or description",
-        "select_a_course_activity": "Select a course activity",
-        "no_activity_found": "'{query}' not found",
-        "no_activities": "No course activities"
-    }
+  "en": {
+    "search_by_name_or_description": "Search by name or description",
+    "select_a_course_activity": "Select a course activity",
+    "no_activity_found": "'{query}' not found",
+    "no_activities": "No course activities"
+  }
 }
 </i18n>

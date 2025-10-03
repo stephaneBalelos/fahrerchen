@@ -29,7 +29,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         isLoadingCourseActivities.value = false
     }
 
-    const createCourseActivity = async (courseActivity: CourseActivityEdit): Promise<string |   null> => {
+    const createCourseActivity = async (courseActivity: CourseActivityEdit): Promise<string | null> => {
         if (!userOrganizationsStore.selectedOrganization) {
             console.error("No organization selected")
             return null
@@ -116,7 +116,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
     }
 
     const getAllowedCourseForActivity = async (id: string, course_id?: string): Promise<AppCourseActivitiesCombination[]> => {
-       let query =  supabase
+        let query = supabase
             .from('course_activities_combinations')
             .select('*')
             .eq('activity_id', id)
@@ -130,6 +130,28 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         if (error) {
             throw error
         }
+        return data || []
+    }
+
+    const getCourseActivities = async (org_id: string, course_id?: string, search?: string): Promise<AppCourseActivity[]> => {
+        let q = supabase
+            .from("course_activities")
+            .select("*, course_activities_combinations!inner(*)")
+            .eq("organization_id", org_id);
+
+        if (search && search.length < 3) {
+            q = q.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+        }
+        if (course_id) {
+            q = q.eq("course_activities_combinations.course_id", course_id);
+        }
+        q = q.order("name", { ascending: true }).limit(5);
+
+        const { data, error } = await q;
+        if (error) {
+            throw error
+        }
+        console.log("getCourseActivities", data);
         return data || []
     }
 
@@ -184,6 +206,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         loadCourseActivities,
         createCourseActivity,
         getCourseActivity,
+        getCourseActivities,
         updateCourseActivity,
         deleteCourseActivity,
         createActivitiesFromTemplate,
