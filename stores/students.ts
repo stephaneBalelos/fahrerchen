@@ -43,7 +43,7 @@ export const useStudentsStore = defineStore('students', () => {
     const queryStudents = async (q: StudentQueryFilter): Promise<StudentWithSubscriptions[]> => {
         let query = supabase
             .from('students')
-            .select(`*, subscriptions:course_subscriptions(*)`)
+            .select(`*, subscriptions:course_subscriptions(*, course:courses(*))`)
 
         if (q.org_id) {
             query = query.eq('organization_id', q.org_id)

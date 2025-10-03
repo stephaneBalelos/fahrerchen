@@ -129,7 +129,7 @@
             <UBadge
               v-else-if="row.active_subscriptions.length > 0"
               :label="
-                t('status_subscribed', { count: row.subscriptions_count })
+                g(`course_types.${row.active_subscriptions[0].course.type}.name_full`)
               "
               :color="'green'"
               variant="subtle"
@@ -187,6 +187,7 @@ import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
 import StudentCourseProfileSlideover from "~/components/students/StudentCourseProfileSlideover.vue";
+import SubscribeStudentToCourseModal from "~/components/forms/SubscribeStudentToCourseModal.vue";
 
 definePageMeta({
   layout: "orgs",
@@ -195,6 +196,8 @@ definePageMeta({
 const { t } = useI18n({
   useScope: "local",
 });
+
+const { t: g } = useI18n({ useScope: 'global' });
 
 const studentsStore = useStudentsStore();
 const slideover = useSlideover();
@@ -217,6 +220,8 @@ const columns = [
     key: "actions",
   },
 ];
+
+const toast = useToast();
 const q = ref("");
 const sort = ref({ column: "id", direction: "asc" as const });
 
@@ -240,6 +245,7 @@ const {
     watch: [q],
   }
 );
+
 
 const createUserOptions = ref([
   [
@@ -314,7 +320,55 @@ const openStudentProfileSlideover = (id: string) => {
       await slideover.close();
       navigateTo(path);
     },
+    "onClose-and-subscribe": async (studentId: string) => {
+      await slideover.close();
+      openSubscribeStudentToCourseModal(studentId);
+    },
   });
+};
+
+const openSubscribeStudentToCourseModal = async (studentId: string) => {
+  const student = studentsStore.students.find((s) => s.id === studentId);
+  if (!student) {
+    console.error("Student not found");
+    return;
+  }
+
+  if (!userOrganizationsStore.selectedOrganization) {
+    console.error("No organization selected");
+    return;
+  }
+
+  modal.open(SubscribeStudentToCourseModal, {
+    student,
+    "onClose": () => {
+      modal.close();
+    },
+    "onSubscribe": async (courseId?: string) => {
+      modal.close();
+      if (!courseId || !student) return;
+      await handleSubscribeToCourse(courseId, student.id, student.organization_id);
+    },
+  });
+};
+
+const handleSubscribeToCourse = async (courseId: string, studentId: string, organizationId: string) => {
+  try {
+    await studentsStore.subscribeStudent(studentId, courseId, organizationId);
+    toast.add({
+      title: t("student_subscribed"),
+      description: t("student_subscribed_successfully"),
+      color: "green",
+    });
+    refresh();
+  } catch (err) {
+    toast.add({
+      title: t("error"),
+      description: t("error_subscribing_student"),
+      color: "red",
+    });
+    console.error(err);
+  }
 };
 
 </script>
@@ -387,6 +441,9 @@ const openStudentProfileSlideover = (id: string) => {
     "manual_registration": "Manuelle Registrierung",
     "status_subscribed": "In {count} Kursen eingeschrieben",
     "status_not_subscribed": "Nicht eingeschrieben",
+    "student_subscribed": "Fahrschüler:in eingeschrieben",
+    "student_subscribed_successfully": "Der Fahrschüler:in wurde erfolgreich ingeschrieben.",
+    "error_subscribing_student": "Fehler beim Einschreiben des Fahrschülers:in.",
     "table": {
       "name": "Name",
       "email": "E-Mail",
@@ -404,6 +461,9 @@ const openStudentProfileSlideover = (id: string) => {
     "manual_registration": "Manual registration",
     "status_subscribed": "Subscribed to {count} courses",
     "status_not_subscribed": "Not subscribed",
+    "student_subscribed": "Student subscribed",
+    "student_subscribed_successfully": "The student was successfully subscribed.",
+    "error_subscribing_student": "Error subscribing the student.",
     "table": {
       "name": "Name",
       "email": "Email",

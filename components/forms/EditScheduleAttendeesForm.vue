@@ -2,8 +2,8 @@
   <UDashboardSlideover :title="t('edit_attendees')">
     <div v-if="subscriptions && subscriptions.length > 0" class="space-y-2">
       <ScheduleAttendeesListItem
-        v-for="(subscription, index) in subscriptions"
-        :key="index"
+        v-for="(subscription) in subscriptions"
+        :key="subscription.id"
         :subscription="subscription"
         :schedule-id="props.scheduleId"
       />
@@ -33,8 +33,7 @@ const { data: subscriptions } = await useAsyncData(async () => {
     const courses = await courseActivitiesStore.getAllowedCourseForActivity(
       props.schedule.activity_id,
     );
-    return subscriptionStore.activeSubscriptions.filter((s) => courses.some((c) => c.course_id === s.course_id)
-    );
+    return subscriptionStore.activeSubscriptions.filter((s) => courses.some((c) => c.course_id === s.course_id));
 });
 </script>
 

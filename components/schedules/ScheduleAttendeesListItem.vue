@@ -72,7 +72,7 @@ const course = computed(() => {
   );
 });
 
-const { data: attendeeId, status, refresh } = useAsyncData(async () => {
+const { data: attendeeId, status, refresh } = useAsyncData(`attendee-${props.scheduleId}-${props.subscription.id}`, async () => {
   const { data, error } = await client
     .from("course_activity_schedules_attendees")
     .select("id")
@@ -81,6 +81,7 @@ const { data: attendeeId, status, refresh } = useAsyncData(async () => {
   if (error) {
     return null;
   }
+  console.log(data);
   return data && data.length > 0 ? data[0].id : null;
 });
 

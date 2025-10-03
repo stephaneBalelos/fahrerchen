@@ -1,5 +1,5 @@
 <template>
-  <UDashboardSlideover :ui="{ width: 'w-screen max-w-xl' }">
+  <UDashboardSlideover :ui="{ width: 'w-screen max-w-xl' }" prevent-close>
     <template #header>
       <div v-if="student" class="flex justify-between items-center w-full">
         <div class="flex items-center space-x-2">
@@ -151,17 +151,17 @@ const props = defineProps<Props>();
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const studentsStore = useStudentsStore();
-const coursesStore = useCoursesStore();
 const toast = useToast();
 const modal = useModal();
 const $emit = defineEmits<{
   (e: "close", shouldRefresh?: boolean): void;
   (e: "close-and-navigate", path: string): void;
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  (e: "close-and-subscribe", studentId: string): void;
 }>();
 
 const {
   data: student,
-  refresh,
   status,
   error,
 } = useAsyncData(
@@ -223,49 +223,8 @@ const deleteStudent = async (studentId: string) => {
 };
 
 const subscribeStudent = async () => {
-  // Should Open Subscription Modal
-  if (!student.value) {
-    toast.add({
-      title: t("error"),
-      description: t("student_not_found"),
-      color: "red",
-    });
-    return;
-  }
-  if (coursesStore.courses.length === 0) {
-    toast.add({
-      title: t("error"),
-      description: t("no_courses_available"),
-      color: "red",
-    });
-    return;
-  }
-  const course = coursesStore.courses[0];
-  if (!course) {
-    toast.add({
-      title: t("error"),
-      description: t("course_not_found"),
-      color: "red",
-    });
-    return;
-  }
-
-  try {
-    await studentsStore.subscribeStudent(student.value.id, course.id, student.value.organization_id);
-    toast.add({
-      title: t("student_subscribed"),
-      description: t("student_subscribed_successfully"),
-      color: "green",
-    });
-    refresh();
-  } catch (err) {
-    toast.add({
-      title: t("error"),
-      description: t("error_subscribing_student"),
-      color: "red",
-    });
-    console.error(err);
-  }
+  if (!student.value) return;
+  $emit("close-and-subscribe", student.value.id);
 };
 
 const closeAndNavigateTo = (path: string) => {
