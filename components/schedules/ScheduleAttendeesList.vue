@@ -8,7 +8,7 @@
       />
     </template>
 
-    <div v-if="attendees && attendees.length > 0" class="space-y-3 p-4 max-h-96 overflow-y-auto">
+    <div v-if="attendees && attendees.length > 0" class="space-y-6 max-h-96 overflow-y-auto">
         <div v-for="attendee in filteredAttendees" :key="attendee.id">
           <div class="flex items-center">
             <UAvatar
