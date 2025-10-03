@@ -62,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+import { ACTIVITY_TYPES } from "~/constants";
 import type { AppCourseSubscriptionBillItem } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 
@@ -74,14 +75,13 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const activityTypes = await useCourseActivityTypes();
 
 const groups = computed(() => {
   const grouped = props.billItems.reduce((acc, item) => {
-    const activityType = activityTypes.find(
-      (type) => type.id === item.activity_type
+    const activityType = ACTIVITY_TYPES.find(
+      (type) => type === item.activity_type
     );
-    const activityTypeName = activityType ? activityType.type : "OTHER";
+    const activityTypeName = activityType ? activityType : "OTHER";
     if (!acc[activityTypeName]) {
       acc[activityTypeName] = [];
     }

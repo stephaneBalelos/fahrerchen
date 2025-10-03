@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { useClipboard } from "@vueuse/core";
 import BillInformations from "~/components/bills/BillInformations.vue";
-import StudentCourseProfileSlideover from "~/components/courses/StudentCourseProfileSlideover.vue";
+import StudentCourseProfileSlideover from "~/components/students/StudentCourseProfileSlideover.vue";
 import { formatCurrency } from "~/utils/formatters";
 
 definePageMeta({
@@ -193,14 +193,12 @@ const { data: billingSettingsExist } = useAsyncData(
       .from("organization_billing_settings")
       .select("*")
       .eq("id", bill.value.data.organization_id)
-      .single();
 
     if (error) {
-      console.error(error);
       throw error;
     }
 
-    return !!data;
+    return data && data.length > 0;
   }
 );
 
@@ -213,8 +211,10 @@ function openStudentProfile() {
     bill.value.subscription.student
   ) {
     slideover.open(StudentCourseProfileSlideover, {
-      subscriptionId: bill.value.subscription.id,
-      student: bill.value.subscription.student,
+      studentId: bill.value.subscription.student.id,
+      "onClose": () => {
+        slideover.close();
+      },
     });
   }
 }
@@ -263,6 +263,7 @@ async function markAsPaid() {
       description: "The bill has been marked as paid",
       color: "green",
     });
+    refresh();
   } catch (error) {
     console.error(error);
     toast.add({
@@ -289,6 +290,7 @@ async function markAsCanceled() {
       description: "The bill has been canceled",
       color: "green",
     });
+    refresh();
   } catch (error) {
     console.error(error);
     toast.add({

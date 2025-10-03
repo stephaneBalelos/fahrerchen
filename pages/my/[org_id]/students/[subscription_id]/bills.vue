@@ -3,14 +3,15 @@
     <UDashboardToolbar>
       <UHorizontalNavigation :links="tabs" />
     </UDashboardToolbar>
-    <UDashboardPanelContent>
+    <UDashboardPanelContent v-if="subscriptionStore.selectedSubscription">
       <StudentSubscriptionSettlement
         v-if="currentTab === 'current_settlement'"
-        :subscription-id="subscription_id"
+        :subscription-id="subscriptionStore.selectedSubscription.id"
         :org-id="org_id"
         @refresh="refresh"
       />
       <UDashboardSection
+      v-if="currentTab === 'bills'"
         icon="i-heroicons-document-text"
         :title="t('bills')"
         :description="t('bills_description')"
@@ -72,10 +73,10 @@ import StudentSubscriptionSettlement from "~/components/students/StudentSubscrip
 import { formatDateTime, formatCurrency } from "~/utils/formatters";
 
 const route = useRoute();
-const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 
 const client = useSupabaseClient();
+const subscriptionStore = useSubscriptionStore();
 
 const currentTab = ref("current_settlement");
 
@@ -104,13 +105,14 @@ const tabs = computed(() => {
   ];
 });
 
-const { data: bills, refresh } = useAsyncData(``, async () => {
+const { data: bills, refresh } = useAsyncData(`bills_${subscriptionStore.selectedSubscription?.id}`, async () => {
+  if (!subscriptionStore.selectedSubscription) return [];
   const { data, error } = await client
     .from("course_subscription_bills")
     .select(
       "id, created_at, total, total_with_vat, organization_id, paid_at, ready_to_pay, canceled_at"
     )
-    .eq("course_subscription_id", subscription_id)
+    .eq("course_subscription_id", subscriptionStore.selectedSubscription?.id)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -119,7 +121,7 @@ const { data: bills, refresh } = useAsyncData(``, async () => {
   }
 
   return data;
-});
+}, { immediate: true, watch: [() => subscriptionStore.selectedSubscription] });
 </script>
 
 <style scoped></style>

@@ -1,5 +1,6 @@
 <template>
   <UDashboardSection
+  v-if="subscriptionStore.selectedSubscription"
     icon="i-heroicons-document-text"
     :title="t('settlements')"
     :description="t('settlements_description')"
@@ -16,7 +17,7 @@
       </div>
       <UButton
         v-if="
-          permissionsStore.hasPermission('course_subscription_bills.create') && subscriptionStore.subscription?.archived_at === null
+          permissionsStore.hasPermission('course_subscription_bills.create') && subscriptionStore.selectedSubscription.archived_at === null
         "
         color="primary"
         variant="soft"
