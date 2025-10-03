@@ -4,6 +4,7 @@ create table public.courses (
   type         public.course_type not null,
   is_active     boolean default false not null,
   organization_id    uuid references public.organizations on delete cascade not null,
+  inserted_at  timestamptz default timezone('utc'::text, now()) not null,
   unique (organization_id, type)
 );
 comment on table public.courses is 'COURSES AVAILABLE.';

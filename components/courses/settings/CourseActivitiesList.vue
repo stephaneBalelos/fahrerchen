@@ -88,22 +88,24 @@
             <p class="text-sm text-gray-500 mb-2">
               {{ g(`activities.allowed_classes`) }}
             </p>
-                      <UCard
-            :ui="{
-              body: {
-                padding: 'sm:p-0 py-0 px-0',
-              },
-            }"
-          >
-            <div class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800">
-              <ActivitiesAllowedCourseListItem
-                v-for="course in courseStore.activeCourses"
-                :key="field.id + course.id"
-                :course="course"
-                :activity-id="field.id"
-              />
-            </div>
-          </UCard>
+            <UCard
+              :ui="{
+                body: {
+                  padding: 'sm:p-0 py-0 px-0',
+                },
+              }"
+            >
+              <div
+                class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800"
+              >
+                <ActivitiesAllowedCourseListItem
+                  v-for="course in courseStore.activeCourses"
+                  :key="field.id + course.id"
+                  :course="course"
+                  :activity-id="field.id"
+                />
+              </div>
+            </UCard>
           </div>
         </div>
       </BodyCollapseCard>

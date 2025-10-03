@@ -29,7 +29,7 @@ create table public.course_subscription_bill_items (
   bill_id      uuid references public.course_subscription_bills on delete cascade,
   course_cost_id    uuid references public.course_costs on delete set null,
   course_activity_attendance_id    uuid references public.course_activity_schedules_attendances on delete set null,
-  activity_type  public.activity_types not null,
+  activity_type  public.activity_types,
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   title        text not null,
   description   text not null,
@@ -40,7 +40,8 @@ create table public.course_subscription_bill_items (
     (course_cost_id is not null and course_activity_attendance_id is null) or
     (course_cost_id is null and course_activity_attendance_id is not null) or
     (course_cost_id is null and course_activity_attendance_id is null)
-  )
+  ), -- either cost_id or attendance_id can be set, but not both
+  check (course_cost_id is null and (activity_type is not null and course_activity_attendance_id is not null) or (course_cost_id is not null and activity_type is null and course_activity_attendance_id is null) or (course_cost_id is null and activity_type is null and course_activity_attendance_id is null))
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;

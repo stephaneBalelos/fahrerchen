@@ -18,13 +18,14 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
             .from('course_activities')
             .select('*')
             .eq('organization_id', userOrganizationsStore.selectedOrganization.id)
-            .order('inserted_at', { ascending: false })
+            .order('name', { ascending: true })
         if (error) {
             console.error("Error loading course activities:", error)
             courseActivities.value = []
         } else {
             courseActivities.value = data || []
         }
+        console.log("Loaded course activities:", courseActivities.value)
         isLoadingCourseActivities.value = false
     }
 
