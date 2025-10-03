@@ -1,5 +1,5 @@
 <template>
-  <div v-if="subscriptionStore.subscription" class="flex flex-col flex-1 overflow-y-auto">
+  <div v-if="subscriptionStore.selectedSubscription" class="flex flex-col flex-1 overflow-y-auto">
     <UDashboardToolbar>
       <template #left>
         <UButtonGroup size="sm" orientation="horizontal">
@@ -65,10 +65,10 @@
 
         <UButtonGroup size="sm" orientation="horizontal">
           <FormsInputsCourseActivitySelect
-            v-if="subscriptionStore.subscription.course_id"
+            v-if="subscriptionStore.selectedSubscription.course_id"
             v-model="filterForm.activityId"
             :org-id="org_id"
-            :course-id="subscriptionStore.subscription.course_id"
+            :course-id="subscriptionStore.selectedSubscription.course_id"
           />
           <UButton
             v-if="filterForm.activityId"
@@ -81,7 +81,7 @@
       </template>
       <template #right>
         <UButton
-          v-if="subscriptionStore.subscription"
+          v-if="subscriptionStore.selectedSubscription"
           :loading="isDownloadingCertificate"
           variant="soft"
           color="primary"
@@ -93,7 +93,7 @@
     </UDashboardToolbar>
     <UDashboardPanelContent class="relative">
       <StudentsStudentActivitiesSection
-        :subscription-id="subscription_id"
+        :subscription-id="subscriptionStore.selectedSubscription.id"
         :org-id="org_id"
         :filters="filterForm"
       />
@@ -119,6 +119,14 @@ const { t: g } = useI18n({
 const route = useRoute();
 const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
+const studentsStore = useStudentsStore();
+
+const student = computed(() => {
+  if (!subscriptionStore.selectedSubscription) return null;
+  return studentsStore.students.find(
+    (s) => s.id === (subscriptionStore.selectedSubscription?.student_id ?? "")
+  );
+});
 
 const filterForm = ref({
   activityId: "",
@@ -131,7 +139,10 @@ const subscriptionStore = useSubscriptionStore();
 const isDownloadingCertificate = ref(false);
 
 async function generateCertificate() {
-  if (!subscriptionStore.subscription) {
+  if (!subscriptionStore.selectedSubscription) {
+    return;
+  }
+  if (!student.value) {
     return;
   }
   if (isDownloadingCertificate.value) {
@@ -151,7 +162,7 @@ async function generateCertificate() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ausbildungsnachweis-b-${subscriptionStore.subscription.student_firstname}-${subscriptionStore.subscription.student_lastname}-${date}.pdf`;
+    a.download = `ausbildungsnachweis-b-${student.value?.firstname}-${student.value?.lastname}-${date}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

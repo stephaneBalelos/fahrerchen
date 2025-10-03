@@ -18,14 +18,6 @@
               index > 0 ? schedules[index - 1].start_at : null
             )
           "
-          @open-edit-schedule="
-            () =>
-              openEditSchedule(
-                schedule.id,
-                schedule.activity_id,
-                schedule.course_id
-              )
-          "
         />
       </div>
     </div>
@@ -34,7 +26,6 @@
 
 <script setup lang="ts">
 import StudentActivityItem from "~/components/students/StudentActivityItem.vue";
-import AddScheduleForSubscriptionsForm from "~/components/forms/AddScheduleForSubscriptionsForm.vue";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 import type { Database } from "~/types/app.types";
 
@@ -52,12 +43,13 @@ const props = withDefaults(
   }
 );
 
-const client = useSupabaseClient();
 const slideover = useSlideover();
 
 const { t } = useI18n({
   useScope: "local",
 });
+
+const $courseActivitySchedules = useCourseActivitySchedules();
 
 const {
   data: schedules,
@@ -65,57 +57,22 @@ const {
   status,
   refresh,
 } = useAsyncData(async () => {
-  const q = client
-    .from("course_activity_schedules")
-    .select("*")
-    .contains("attendees", [props.subscriptionId])
-    .eq("organization_id", props.orgId);
 
-  if (props.filters?.activityId) {
-    q.eq("activity_id", props.filters.activityId);
-  }
-  if (props.filters?.activityStatus) {
-    q.eq("status", props.filters.activityStatus);
-  }
-
-  const { data, error } = await q.order("start_at", { ascending: false });
-
-  if (error) {
-    throw error;
-  }
-  return data;
+  return $courseActivitySchedules.fetchCourseActivitySchedules({
+    subscription_id: props.subscriptionId,
+    activity_id: props.filters?.activityId,
+    status: props.filters?.activityStatus,
+  });
 }, {
   watch: [props.filters],
 });
 
 const _openAddScheduleForSubscription = () => {
-  slideover.open(AddScheduleForSubscriptionsForm, {
-    subscriptionId: props.subscriptionId,
-    orgId: props.orgId,
-    onClose: () => {
-      slideover.close();
-    },
-    onCreated: () => {
-      slideover.close();
-      refresh();
-    },
-  });
-};
-
-const openEditSchedule = (
-  schedule_id: string,
-  activity_id: string,
-  course_id: string
-) => {
   slideover.open(EditCourseActivitySchedule, {
-    orgid: props.orgId,
-    activityid: activity_id,
-    scheduleId: schedule_id,
-    courseid: course_id,
-    "onActivity-saved": () => {
-      refresh();
-    },
-    "onActivity-deleted": () => {
+    subscriptionId: props.subscriptionId,
+    
+    "onSchedule-saved": () => {
+      slideover.close();
       refresh();
     },
   });
