@@ -8,41 +8,18 @@
       />
     </template>
 
-    <div v-if="attendees && attendees.length > 0" class="space-y-6 max-h-96 overflow-y-auto">
-        <div v-for="attendee in filteredAttendees" :key="attendee.id">
-          <div class="flex items-center">
-            <UAvatar
-              :alt="`${attendee.course_subscriptions.student.firstname} ${attendee.course_subscriptions.student.lastname}`"
-              size="sm"
-            />
-            <div class="ms-3 flex-1">
-              <div class="font-semibold">
-                {{
-                  `${attendee.course_subscriptions.student.firstname} ${attendee.course_subscriptions.student.lastname}`
-                }}
-              </div>
-              <div class="text-sm text-muted-foreground">
-                {{ attendee.course_subscriptions.student.email }}
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <UBadge color="primary">
-                {{
-                  g(
-                    `course_types.${attendee.course_subscriptions.course.type}.name`
-                  )
-                }}
-              </UBadge>
-              <UButton
-                v-if="courseActivitySchedule.status === 'PLANNED'"
-                icon="i-heroicons-minus-circle"
-                color="red"
-                variant="ghost"
-                @click="removeFromSchedule(attendee.id)"
-              />
-            </div>
-          </div>
-        </div>
+    <div
+      v-if="attendees && attendees.length > 0"
+      class="space-y-6 max-h-96 overflow-y-auto"
+    >
+      <div v-for="attendee in filteredAttendees" :key="attendee.id">
+        <ScheduleAttendeesListItem
+          :subscription="attendee.course_subscriptions"
+          :schedule-id="courseActivitySchedule.id"
+          :disabled="courseActivitySchedule.status !== 'PLANNED'"
+          @remove="removeFromSchedule"
+        />
+      </div>
     </div>
     <div v-else class="p-4 text-center text-sm text-muted-foreground">
       <div v-if="attendees === null">
@@ -55,10 +32,10 @@
       </div>
     </div>
     <template v-if="courseActivitySchedule.status === 'PLANNED'" #footer>
-        <UButton
-            :label="t('add_new_attendees')"
-            @click="openEditScheduleAttendeesSlideover()"
-        />
+      <UButton
+        :label="t('add_new_attendees')"
+        @click="openEditScheduleAttendeesSlideover()"
+      />
     </template>
   </UCard>
 </template>
@@ -67,6 +44,7 @@
 import type { AppCourseActivitySchedule } from "~/types/app.types";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
 import EditScheduleAttendeesForm from "../forms/EditScheduleAttendeesForm.vue";
+import ScheduleAttendeesListItem from "./ScheduleAttendeesListItem.vue";
 
 type Props = {
   courseActivitySchedule: AppCourseActivitySchedule;
@@ -74,11 +52,8 @@ type Props = {
 
 const { t } = useI18n({ useScope: "local" });
 
-const { t: g } = useI18n({ useScope: "global" });
-
 const modal = useModal();
 const slideover = useSlideover();
-
 
 const props = defineProps<Props>();
 const $emit = defineEmits(["updated"]);

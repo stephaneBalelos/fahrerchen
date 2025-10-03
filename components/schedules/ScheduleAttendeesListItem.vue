@@ -1,10 +1,10 @@
 <template>
-  <div v-if="status === 'success' && student" :class="`flex items-center ${isAttending ? 'bg-primary-50 dark:bg-primary-400 dark:bg-opacity-10' : ''} p-4 rounded-md`">
+  <div v-if="status === 'success' && student" :class="`flex items-center rounded-md`">
     <div class="flex flex-col items-start">
-      <UBadge v-if="isAttending" color="primary" variant="soft" size="xs">{{
+      <UBadge v-if="isAttending && !props.disabled" color="primary" variant="soft" size="xs" class="mb-2">{{
         t("is_attending")
       }}</UBadge>
-      <p class="text-sm font-medium break-all mt-2">
+      <p class="text-sm font-medium break-all">
         {{ student.firstname }} {{ student.lastname }}
       </p>
       <p class="text-xs text-muted-foreground break-all">
@@ -17,7 +17,7 @@
       }}</UBadge>
     </div>
 
-    <div class="ml-auto">
+    <div v-if="!props.disabled" class="ml-auto">
       <div v-if="isAttending && attendeeId" class="flex items-center gap-2">
         <UButton
           size="2xs"
@@ -49,11 +49,16 @@ import type { AppCourseSubscription } from "~/types/app.types";
 type Props = {
   subscription: AppCourseSubscription;
   scheduleId: string;
+  disabled?: boolean;
 };
 const props = defineProps<Props>();
 
 const { t } = useI18n({ useScope: "local" });
 const { t: g } = useI18n({ useScope: "global" });
+
+const $emits = defineEmits<{
+  (e: "remove", attendeeId: string): void;
+}>()
 
 const client = useSupabaseClient();
 const coursesStore = useCoursesStore();
@@ -98,8 +103,7 @@ const addedToSchedule = async () => {
 };
 const removedFromSchedule = async () => {
     if (!attendeeId.value) return;
-    await $activitySchedules.removeAttendeeFromSchedule(attendeeId.value);
-  await refresh();
+    $emits("remove", attendeeId.value);
 };
 </script>
 

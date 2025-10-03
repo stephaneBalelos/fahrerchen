@@ -14,13 +14,28 @@
             <UBadge color="primary" variant="soft" size="sm">
               {{ g(`activities.types.${activity.activity_type}.name`) }}
             </UBadge>
-            <UBadge v-if="schedule.status === 'PLANNED'" color="primary" variant="soft" size="sm">
+            <UBadge
+              v-if="schedule.status === 'PLANNED'"
+              color="primary"
+              variant="soft"
+              size="sm"
+            >
               {{ g(`schedules.status.${schedule.status}`) }}
             </UBadge>
-            <UBadge v-if="schedule.status === 'CANCELED'" color="red" variant="soft" size="sm">
+            <UBadge
+              v-if="schedule.status === 'CANCELED'"
+              color="red"
+              variant="soft"
+              size="sm"
+            >
               {{ g(`schedules.status.${schedule.status}`) }}
             </UBadge>
-            <UBadge v-if="schedule.status === 'COMPLETED'" color="green" variant="soft" size="sm">
+            <UBadge
+              v-if="schedule.status === 'COMPLETED'"
+              color="green"
+              variant="soft"
+              size="sm"
+            >
               {{ g(`schedules.status.${schedule.status}`) }}
             </UBadge>
           </div>
@@ -31,7 +46,9 @@
       </template>
       <template #links>
         <UButton
-          v-if="schedule.status !== 'COMPLETED' && schedule.status !== 'CANCELED'"
+          v-if="
+            schedule.status !== 'COMPLETED' && schedule.status !== 'CANCELED'
+          "
           size="sm"
           class="ml-2"
           color="white"
@@ -39,7 +56,9 @@
           @click="markAsCompleted(schedule.id)"
         />
         <UButton
-          v-if="schedule.status !== 'CANCELED' && schedule.status !== 'COMPLETED'"
+          v-if="
+            schedule.status !== 'CANCELED' && schedule.status !== 'COMPLETED'
+          "
           size="sm"
           class="ml-2"
           color="red"
@@ -133,7 +152,13 @@
             help: 'mt-0',
           }"
         >
+          <SchedulesScheduleAttendancesList
+            v-if="schedule.status === 'COMPLETED'"
+            :schedule-id="schedule.id"
+            :organization-id="activity.organization_id"
+          />
           <SchedulesScheduleAttendeesList
+            v-else
             :course-activity-schedule="schedule"
           />
         </UFormGroup>

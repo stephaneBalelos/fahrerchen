@@ -158,16 +158,39 @@ export const useCourseActivitySchedules = () => {
     }
 
     const fetchAttendeesForSchedule = async (schedule_id: string) => {
+        if (!userOrganizationStore.selectedOrganization) {
+            console.warn("No organization selected");
+            return []
+        }
         const { data, error } = await client
             .from("course_activity_schedules_attendees")
-            .select("*, course_subscriptions:subscription_id(id, student:students(*), course:courses(*))")
+            .select("*, course_subscriptions:subscription_id(*, student:students(*), course:courses(*))")
             .eq("schedule_id", schedule_id)
+            .eq("organization_id", userOrganizationStore.selectedOrganization.id)
 
         if (error) {
             throw error
         }
         return data || []
     }
+
+    const fetchScheduleAttendancesForSchedule = async (schedule_id: string) => {
+        if (!userOrganizationStore.selectedOrganization) {
+            console.warn("No organization selected");
+            return []
+        }
+        const { data, error } = await client
+            .from("course_activity_schedules_attendances")
+            .select("*, subscription:course_subscription_id(*, student:students(*))")
+            .eq("course_activity_schedule_id", schedule_id)
+            .eq("organization_id", userOrganizationStore.selectedOrganization.id)
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
 
 
     return {
@@ -178,7 +201,8 @@ export const useCourseActivitySchedules = () => {
         deleteCourseActivitySchedule,
         addAttendeesToSchedule,
         removeAttendeeFromSchedule,
-        fetchAttendeesForSchedule
+        fetchAttendeesForSchedule,
+        fetchScheduleAttendancesForSchedule
     }
 
 }
