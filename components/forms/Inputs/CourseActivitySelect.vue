@@ -45,22 +45,21 @@ const { t } = useI18n({
 });
 
 const courseActivitiesStore = useCourseActivitiesStore();
-const model = defineModel<string>({ default: null });
-const courseActivties = ref<AppCourseActivity[] | null>(null);
+const model = defineModel<string>();
+const courseActivities = ref<AppCourseActivity[]>([]);
 const selected = computed(() => {
-  if (!courseActivties.value) {
-    return null;
-  }
-  return courseActivties.value.find((ca) => ca.id === model.value);
+  return courseActivities.value.find((ca) => ca.id === model.value);
 });
 
 async function searchCourseActivity(search: string) {
   console.log("searchCourseActivity", search);
-  return await courseActivitiesStore.getCourseActivities(
+  const res = await courseActivitiesStore.getCourseActivities(
     props.orgId,
     props.courseId,
     search.length >= 3 ? search : undefined
-  )
+  );
+  courseActivities.value = res;
+  return res;
 }
 </script>
 

@@ -34,10 +34,17 @@
           :ui="{ container: '' }"
         >
           <FormsInputsCourseActivitySelect
+            v-if="!data"
             v-model="state.activity_id"
             :org-id="organizationStore.selectedOrganization.id"
             :course-id="props.courseId"
           />
+          <div v-else class="flex items-center">
+            <UAvatar icon="i-heroicons-document-text" size="sm" />
+            <span class="truncate font-semibold ms-3">{{
+              selectedActivity ? selectedActivity.name : state.activity_id
+            }}</span>
+          </div>
         </UFormGroup>
         <UFormGroup
           v-if="organizationStore.selectedOrganization"

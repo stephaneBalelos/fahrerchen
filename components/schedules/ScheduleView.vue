@@ -90,7 +90,6 @@
 import Datepicker from "../forms/Inputs/Datepicker.vue";
 import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { z } from "zod";
-import { addHours } from "date-fns";
 import type { AppCourseActivitySchedule } from "~/types/app.types";
 
 type Props = {
@@ -112,14 +111,12 @@ const schedule = ref<AppCourseActivitySchedule | null>(null);
 const _schema = z.object({
   assigned_to: z.string().uuid().optional(),
   start_at: z.date(),
-  end_at: z.date(),
 });
 
 type Schema = z.infer<typeof _schema>;
 
 const state = reactive<Schema>({
   start_at: schedule.value ? new Date(schedule.value.start_at) : new Date(),
-  end_at: schedule.value ? new Date(schedule.value.end_at) : new Date(),
   assigned_to: schedule.value?.assigned_to
     ? schedule.value.assigned_to
     : undefined,
@@ -137,7 +134,6 @@ const loadSchedule = async () => {
     schedule.value = s;
     if (s) {
       state.start_at = new Date(s.start_at);
-      state.end_at = new Date(s.end_at);
       state.assigned_to = s.assigned_to ? s.assigned_to : undefined;
     }
   } catch (e) {
@@ -172,7 +168,6 @@ const saveState = async () => {
       {
         assigned_to: state.assigned_to ? state.assigned_to : null,
         start_at: state.start_at.toISOString(),
-        end_at: addHours(state.start_at, 1).toISOString(),
       }
     );
   } catch (e) {
