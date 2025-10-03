@@ -1,4 +1,3 @@
-import type { EditCourseFormProps } from "~/components/forms/EditCourseForm.vue"
 import type { AppCourse } from "~/types/app.types"
 
 export const useCoursesStore = defineStore('courses', () => {
@@ -28,27 +27,6 @@ export const useCoursesStore = defineStore('courses', () => {
         }
         isLoadingCourses.value = false
     }
-    const createCourse = async (course: EditCourseFormProps): Promise<string | null> => {
-        if (!userOrganizationsStore.selectedOrganization) {
-            console.error("No organization selected")
-            return null
-        }
-        const { data, error } = await supabase
-            .from('courses')
-            .insert({
-                ...course,
-                organization_id: userOrganizationsStore.selectedOrganization.id
-            })
-            .select('id')
-            .single()
-
-        if (error) {
-            throw error
-        }
-
-        await loadCourses()
-        return data ? data.id : null
-    }
 
     const setCourseActiveStatus = async (courseId: string, isActive: boolean): Promise<void> => {
         const { error } = await supabase
@@ -75,7 +53,6 @@ export const useCoursesStore = defineStore('courses', () => {
         courses,
         activeCourses,
         loadCourses,
-        createCourse,
         setCourseActiveStatus
     }
 })

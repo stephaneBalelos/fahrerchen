@@ -4,7 +4,10 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     const supabase = useSupabaseClient()
     const userOrganizationsStore = useUserOrganizationsStore()
     const subscriptions = ref<AppCourseSubscription[]>([])
+
     const isLoadingSubscriptions = ref(false)
+
+    const activeSubscriptions = computed(() => subscriptions.value.filter(s => s.archived_at === null))
 
     const selectedSubscription = computed(() => {
         const route = useRoute()
@@ -51,6 +54,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
     return {
         loadSubscriptions,
         subscriptions,
+        activeSubscriptions,
         selectedSubscription,
         isLoadingSubscriptions,
         getSubscriptionById,
