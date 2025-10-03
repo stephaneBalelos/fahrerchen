@@ -1,19 +1,24 @@
 <template>
   <UDashboardPage>
-    <UDashboardPanel 
-    id="filter-panel"
-      :width="panelWWidth" resizable>
+    <UDashboardPanel id="filter-panel" :width="panelWWidth" resizable>
       <UDashboardNavbar :title="t('schedules')">
         <template #right>
           <!-- <UButtonGroup v-model="selectedView" :options="views" size="sm" /> -->
-          
         </template>
       </UDashboardNavbar>
-      <UDashboardPanelContent class="p-0"> {{ panelWWidth }} </UDashboardPanelContent>
+      <UDashboardPanelContent class="p-0">
+        {{ panelWWidth }}
+      </UDashboardPanelContent>
     </UDashboardPanel>
-    <UDashboardPanel id="schedule-details" :model-value="selectedScheduleId ? true : false" grow collapsible side="right">
+    <UDashboardPanel
+      id="schedule-details"
+      :model-value="selectedScheduleId ? true : false"
+      grow
+      collapsible
+      side="right"
+    >
       <template v-if="selectedScheduleId">
-        <UDashboardNavbar :title="t('schedule_details')">
+        <UDashboardNavbar>
           <template #toggle>
             <UButton
               icon="i-heroicons-arrow-left-solid"
@@ -22,18 +27,20 @@
               @click="selectedScheduleId = null"
             />
           </template>
+          <template #title>
+            {{ t("schedule_details") }}
+          </template>
           <template #right>
             <div class="flex items-center space-x-2">
               <UButton
-                icon="i-heroicons-pencil-solid"
+                icon="i-heroicons-pencil-square"
                 color="white"
-                :label="t('edit_schedule')"
                 @click="openEditScheduleSlideover(selectedScheduleId)"
               />
               <UButton
                 color="red"
                 variant="soft"
-                icon="i-heroicons-trash-solid"
+                icon="i-heroicons-trash"
                 @click="deleteSchedule(selectedScheduleId)"
               />
             </div>

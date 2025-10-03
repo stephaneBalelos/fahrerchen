@@ -47,11 +47,13 @@ returns trigger as $$
 declare
   r_attendee record;
   v_activity record;
-  a_user record;
+  a_firstname text;
+  a_lastname text;
+  a_email text;
 begin
 
-  a_user := (select email, firstname, lastname from public.users where id = new.assigned_to);
-  if a_user is null then
+  select firstname, lastname, email into a_firstname, a_lastname, a_email from public.users where id = new.assigned_to;
+  if a_firstname is null or a_lastname is null or a_email is null then
     -- Throw an error if assigned_to user not found
     raise exception 'Assigned to user not found for schedule %', new.id;
   end if;
@@ -76,13 +78,13 @@ begin
     ) values (
       v_activity.name,
       v_activity.description,
-      v_activity.type,
+      v_activity.activity_type,
       v_activity.price,
       new.start_at,
       new.start_at + (new.duration_minutes || ' minutes')::interval,
-      a_user.email,
-      a_user.firstname,
-      a_user.lastname,
+      a_email,
+      a_firstname,
+      a_lastname,
       new.activity_id,
       new.id,
       new.assigned_to,

@@ -157,6 +157,13 @@
         "duration_minutes": "Dauer (Minuten)"
 
     },
+    "schedules": {
+        "status": {
+            "PLANNED": "Geplant",
+            "CANCELED": "Abgesagt",
+            "COMPLETED": "Abgeschlossen"
+        }
+    },
     "costs": {
         "price": "Preis",
         "allowed_classes": "Erlaubte Klassen",

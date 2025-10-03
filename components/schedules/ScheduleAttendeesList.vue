@@ -54,7 +54,7 @@
         {{ t("no_attendees_yet") }}
       </div>
     </div>
-    <template #footer>
+    <template v-if="courseActivitySchedule.status === 'PLANNED'" #footer>
         <UButton
             :label="t('add_new_attendees')"
             @click="openEditScheduleAttendeesSlideover()"

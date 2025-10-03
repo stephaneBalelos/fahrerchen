@@ -5,10 +5,11 @@
     :searchable-placeholder="t('search_by_name_or_email')"
     value-attribute="id"
     :search-attributes="['name', 'email']"
+    :disabled="props.disabled"
     :variant="'none'"
   >
     <UButton
-    block
+      block
       :color="props.color"
       :variant="props.variant || 'outline'"
       :size="props.size || 'md'"
@@ -47,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-
 type Props = {
   orgid: string;
   color?:
@@ -73,6 +73,7 @@ type Props = {
     | "rose";
   variant?: "outline" | "solid" | "ghost" | "link";
   size?: "md" | "2xs" | "xs" | "sm" | "lg" | "xl";
+  disabled?: boolean;
 };
 const props = defineProps<Props>();
 
