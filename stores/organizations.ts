@@ -8,6 +8,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const userStore = useUserStore()
     const organizations = ref<UserOrganization[]>([])
     const selectedOrganizationMembers = ref<OrganizationMember[]>([])
+    const config = useRuntimeConfig().public
 
     const isLoading = ref(true)
     const route = useRoute()
@@ -44,7 +45,11 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             organizations.value = []
         } else {
             organizations.value = data ? data.map(d => {
-                return { ...d.organization, organization_role: d.role }
+                return { 
+                    ...d.organization, 
+                    organization_role: d.role, 
+                    avatar_path: d.organization.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.organization.avatar_path}` : null,
+                }
             }) : []
         }
         isLoading.value = false

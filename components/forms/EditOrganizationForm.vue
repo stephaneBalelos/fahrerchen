@@ -173,7 +173,7 @@
           />
         </UFormGroup>
       </UFormGroup>
-      <div class="flex justify-end pt-4">
+      <div class="flex justify-end py-4">
         <UButton
           :size="'lg'"
           type="submit"

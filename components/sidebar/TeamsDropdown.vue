@@ -71,7 +71,7 @@ const actions = computed(() => {
   >
     <UButton
       v-if="userOrganizationsStore.selectedOrganization"
-      color="gray"
+      color="white"
       variant="solid"
       :class="[open && 'bg-gray-50 dark:bg-gray-800']"
       class="w-full"
@@ -79,7 +79,7 @@ const actions = computed(() => {
       <UAvatar
         :src="userOrganizationsStore.selectedOrganization.avatar_path ?? undefined"
         :icon="'i-heroicons-globe-europe-africa'"
-        size="sm"
+        size="xs"
       />
 
       <span class="truncate text-gray-900 dark:text-white font-semibold">{{
