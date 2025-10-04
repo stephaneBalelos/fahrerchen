@@ -27,8 +27,10 @@ export async function getOrganization(supabase: SupabaseClient<Database>, orgid:
     return data
 }
 
-export async function getOrganizationMembers(supabase: SupabaseClient<Database>, orgid: string): Promise<Database['public']['Views']['users_organizations_view']['Row'][] | null> {
-    const { data, error } = await supabase.from('users_organizations_view').select('*').eq('organization_id', orgid)
+export async function getOrganizationMembers(supabase: SupabaseClient<Database>, orgid: string) {
+    const { data, error } = await supabase.from('organization_members')
+        .select('*, user:users(id, email, firstname, lastname, email)')
+        .eq('organization_id', orgid)
     if (error || !data) {
         return null
     }
@@ -51,8 +53,28 @@ export async function getCourseActivityById(supabase: SupabaseClient<Database>, 
     return data
 }
 
-export async function getCourseSubscriptionViewById(supabase: SupabaseClient<Database>, subscriptionId: string): Promise<Database['public']['Views']['course_subscriptions_view']['Row'] | null> {
-    const { data, error } = await supabase.from('course_subscriptions_view').select('*').eq('id', subscriptionId).single()
+export async function getCourseActivityScheduleById(supabase: SupabaseClient<Database>, scheduleId: string) {
+    const { data, error } = await supabase.from('course_activity_schedules')
+        .select('*, activity:course_activities(id, name)').eq('id', scheduleId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getCourseSubscriptionById(supabase: SupabaseClient<Database>, subscriptionId: string) {
+    const { data, error } = await supabase.from('course_subscriptions')
+        .select('*, s:students(id, firstname, lastname, email, user_id)').eq('id', subscriptionId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getScheduleAttendeesByScheduleId(supabase: SupabaseClient<Database>, scheduleId: string) {
+    const { data, error } = await supabase.from('course_activity_schedules_attendees')
+        .select('*, cs:course_subscriptions(id, s:students(id, firstname, lastname, email, user_id))')
+        .eq('schedule_id', scheduleId)
     if (error || !data) {
         return null
     }
@@ -84,6 +106,11 @@ export const verifyHmacSignature = async (data: string, signature: string): Prom
 }
 
 export const sendEmail = async (to: string, subject: string, text: string): Promise<void> => {
+    // Check if dev or production
+    if (!Deno.env.get('MAILER_API_KEY') || !Deno.env.get('MAILER_DOMAIN') || !Deno.env.get('MAILER_FROM_EMAIL')) {
+        await sendWithToMailPit(to, subject, text)
+        return
+    }
     const body = new FormData()
     body.append('from', Deno.env.get('MAILER_FROM_EMAIL') ?? '')
     body.append('to', to)
@@ -92,7 +119,6 @@ export const sendEmail = async (to: string, subject: string, text: string): Prom
 
     const domain = Deno.env.get('MAILER_DOMAIN')
     const apiKey = Deno.env.get('MAILER_API_KEY')
-
 
     const res = await fetch(`https://api.eu.mailgun.net/v3/${domain}/messages`, {
         method: 'POST',
@@ -103,16 +129,33 @@ export const sendEmail = async (to: string, subject: string, text: string): Prom
     })
 
     const data = await res.text()
-    console.log(data)
+    console.log('Mailgun response:', data)
 
 }
 
-export const translator = (translationsEn: Record<string, string>, translationsDe: Record<string, string>, lang: string= 'de') => (key: string, ...args: string[]): string => {
+const sendWithToMailPit = async(to: string, subject: string, text: string) => {
+    const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({"From":{"Email":"no-reply@karjolen.de","Name":"Fahrerchen Dev"},"To":[{"Email": to }],"Subject": subject,"HTML": text})
+    };
+
+    const url = Deno.env.get("MAIL_PIT_URL")
+
+    console.log(url);
+
+    const response = await fetch(url ?? '', options)
+    const data = await response.json()
+    console.log('MailPit response:', data)
+    
+}
+
+export const translator = (translationsEn: Record<string, string>, translationsDe: Record<string, string>, lang: string = 'de') => (key: string, ...args: string[]): string => {
     const translations = lang.includes('de') ? translationsDe : translationsEn
     let translation = translations[key] || key
     if (args.length > 0) {
         for (let i = 0; i < args.length; i++) {
-            translation = translation.replace(`{${i}}`, args[i] )
+            translation = translation.replace(`{${i}}`, args[i])
         }
     }
 
@@ -140,9 +183,5 @@ export const getNotificationEmailData = (notification_type: Database['public']['
 }
 
 export const sendNotificationEmail = async (to: string, subject: string, html: string): Promise<void> => {
-    if (Deno.env.get("IS_PRODUCTION") === "true") {
-        await sendEmail(to, subject, html)
-    } else {
-        console.log(`Sending email to: ${to}, subject: ${subject}`)
-    }
+    await sendEmail(to, subject, html)
 }

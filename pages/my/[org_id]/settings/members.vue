@@ -17,7 +17,10 @@ const isInviteModalOpen = ref(false);
 const invitations = ref<AppOrganizationsInvitation[]>([]);
 
 const filteredMembers = computed(() => {
-  return organizationStore.selectedOrganizationMembers.filter((member) => {
+  return organizationStore.selectedOrganizationMembers
+  .filter((member) => member.id !== userOrganizationsStore.selectedOrganization?.owner_id)
+  .filter((member) => member.organization_role !== "student")
+  .filter((member) => {
     return (
       member.firstname?.search(new RegExp(q.value, "i")) !== -1 ||
       member.lastname?.search(new RegExp(q.value, "i")) !== -1

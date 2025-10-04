@@ -835,6 +835,57 @@ export type Database = {
           },
         ]
       }
+      notifications_jobs: {
+        Row: {
+          actor_id: string | null
+          batch_key: string | null
+          created_at: string
+          id: number
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          status: Database["public"]["Enums"]["notification_job_status"]
+          updated_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          batch_key?: string | null
+          created_at?: string
+          id?: number
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          status: Database["public"]["Enums"]["notification_job_status"]
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          batch_key?: string | null
+          created_at?: string
+          id?: number
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          organization_id?: string
+          payload?: Json
+          status?: Database["public"]["Enums"]["notification_job_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_jobs_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_billing_settings: {
         Row: {
           bank_account_bic: string
@@ -932,6 +983,57 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_notifications: {
+        Row: {
+          author_id: string | null
+          batch_key: string | null
+          created_at: string
+          id: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          target_user_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          batch_key?: string | null
+          created_at?: string
+          id?: string
+          notification_type: Database["public"]["Enums"]["notification_type"]
+          organization_id: string
+          payload: Json
+          target_user_ids: string[]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          batch_key?: string | null
+          created_at?: string
+          id?: string
+          notification_type?: Database["public"]["Enums"]["notification_type"]
+          organization_id?: string
+          payload?: Json
+          target_user_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_notifications_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1424,15 +1526,20 @@ export type Database = {
         | "DE"
         | "L"
         | "T"
+      notification_job_status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED"
       notification_type:
-        | "students_registration_requests.created"
-        | "course_subscriptions.created"
-        | "course_activity_schedules.updated"
-        | "course_activity_schedules.assigned"
-        | "course_subscription_bills.ready_to_pay"
-        | "course_subscription_bills.updated"
-        | "course_subscription_bills.paid"
-        | "course_subscription_bills.canceled"
+        | "course_subscriptions.inserted"
+        | "course_activity_schedules.assigned_to.updated"
+        | "course_activity_schedules_attendees.inserted"
+        | "course_activity_schedules_attendees.removed"
+        | "course_activity_schedules.status.updated"
+        | "course_activity_schedules.start_at.updated"
+        | "course_activity_schedules.deleted"
+        | "course_activity_schedules_attendances.inserted"
+        | "course_subscription_bills.paid_at.updated"
+        | "course_subscription_bills.ready_to_pay.updated"
+        | "course_subscription_bills.canceled_at.updated"
+        | "students_registration_requests.inserted"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
@@ -2197,15 +2304,20 @@ export const Constants = {
         "L",
         "T",
       ],
+      notification_job_status: ["PENDING", "PROCESSING", "COMPLETED", "FAILED"],
       notification_type: [
-        "students_registration_requests.created",
-        "course_subscriptions.created",
-        "course_activity_schedules.updated",
-        "course_activity_schedules.assigned",
-        "course_subscription_bills.ready_to_pay",
-        "course_subscription_bills.updated",
-        "course_subscription_bills.paid",
-        "course_subscription_bills.canceled",
+        "course_subscriptions.inserted",
+        "course_activity_schedules.assigned_to.updated",
+        "course_activity_schedules_attendees.inserted",
+        "course_activity_schedules_attendees.removed",
+        "course_activity_schedules.status.updated",
+        "course_activity_schedules.start_at.updated",
+        "course_activity_schedules.deleted",
+        "course_activity_schedules_attendances.inserted",
+        "course_subscription_bills.paid_at.updated",
+        "course_subscription_bills.ready_to_pay.updated",
+        "course_subscription_bills.canceled_at.updated",
+        "students_registration_requests.inserted",
       ],
       schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],
       schedule_type: ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
