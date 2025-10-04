@@ -8,27 +8,17 @@
       orientation="horizontal"
       class="px-4 pt-8"
     >
-      <UCard
-        :ui="{
-          body: {
-            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
-          },
-        }"
-      >
-        <NuxtErrorBoundary>
-          <EditBillSettingsForm
-            v-if="userOrganizationsStore.selectedOrganization"
-            :organization-id="
-              userOrganizationsStore.selectedOrganization.id
-            "
-          />
-          <template #error="{ error, clearError }">
-            <p>An error occurred: {{ error }}</p>
+      <NuxtErrorBoundary>
+        <EditBillSettingsForm
+          v-if="userOrganizationsStore.selectedOrganization"
+          :organization-id="userOrganizationsStore.selectedOrganization.id"
+        />
+        <template #error="{ error, clearError }">
+          <p>An error occurred: {{ error }}</p>
 
-            <button @click="clearError">Clear error</button>
-          </template>
-        </NuxtErrorBoundary>
-      </UCard>
+          <button @click="clearError">Clear error</button>
+        </template>
+      </NuxtErrorBoundary>
     </UDashboardSection>
   </UDashboardPanelContent>
 </template>
@@ -39,7 +29,6 @@ import EditBillSettingsForm from "~/components/forms/EditBillSettingsForm.vue";
 const { t } = useI18n({
   useScope: "local",
 });
-
 
 const userOrganizationsStore = useUserOrganizationsStore();
 </script>
