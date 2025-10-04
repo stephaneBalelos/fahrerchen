@@ -6,6 +6,7 @@ type CourseActivityScheduleQuery = {
     assigned_to?: string;
     start_at?: string;
     subscription_id?: string;
+    limit?: number;
 }
 
 export const useCourseActivitySchedules = () => {
@@ -86,7 +87,7 @@ export const useCourseActivitySchedules = () => {
 
         const q = client
             .from("course_activity_schedules")
-            .select("*, course_activity_schedules_attendees(id, subscription_id)")
+            .select("*, course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
 
         q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
 
@@ -104,6 +105,11 @@ export const useCourseActivitySchedules = () => {
 
         if (query.start_at) {
             q.gte("start_at", query.start_at)
+        }
+        if (query.limit) {
+            q.limit(query.limit)
+        } else {
+            q.limit(100) // default limit to 100
         }
 
         const { data, error } = await q

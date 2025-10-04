@@ -1,5 +1,6 @@
 <template>
   <UDashboardCard
+    v-if="userOrganizationsStore.selectedOrganization"
     :title="t('incoming_appointments')"
     :description="t('incoming_appointments_description')"
     icon="i-heroicons-calendar"
@@ -8,80 +9,85 @@
       <UButton
         color="gray"
         variant="solid"
-        :to="`/my/${userOrganizationsStore.selectedOrganization?.organization_id}/schedules`"
+        :to="`/my/${userOrganizationsStore.selectedOrganization.id}/schedules`"
       >
         {{ t("view_all") }}
       </UButton>
     </template>
-    <NuxtErrorBoundary>
-      <div v-if="schedules && schedules.length > 0">
-        <NuxtLink
-          v-for="(schedule, index) in schedules"
-          :key="index"
-          class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-          @click="openScheduleModal(schedule)"
-        >
-          <div class="text-sm flex-1">
-            <div>
-              <p class="text-gray-900 dark:text-white font-medium">
-                {{ schedule.activity_name }} | {{ schedule.course_name }}
+    <div v-if="schedules && schedules.length > 0">
+      <NuxtLink
+        v-for="(schedule, index) in schedules"
+        :key="index"
+        class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
+        @click="openScheduleModal(schedule.id)"
+      >
+        <div class="text-sm flex-1">
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col flex-1">
+              <p class="text-lg font-medium">
+                {{ schedule.activity.name }}
               </p>
               <p class="text-gray-500 dark:text-gray-400">
-                {{ formatDate(schedule.schedule_start_at ?? "") }}
+                {{ schedule.activity.description }}
+              </p>
+              <p class="text-gray-500 dark:text-gray-400">
+                {{ formatDate(schedule.start_at ?? "") }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p class="text-sm font-medium">
+                {{ schedule.course_activity_schedules_attendees.length }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ t("attendees") }}
               </p>
             </div>
           </div>
-          <p class="text-gray-900 dark:text-white font-medium text-lg">
-            <UBadge
-              v-if="schedule.schedule_status == 'PLANNED'"
-              color="primary"
-              variant="soft"
-              >{{
-                g(
-                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
-                )
-              }}</UBadge
-            >
-            <UBadge
-              v-if="schedule.schedule_status == 'CANCELED'"
-              color="red"
-              variant="soft"
-              >{{
-                g(
-                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
-                )
-              }}</UBadge
-            >
-            <UBadge
-              v-if="schedule.schedule_status == 'COMPLETED'"
-              color="green"
-              variant="soft"
-              >{{
-                g(
-                  `courses.activities.schedules.schedules_status_${schedule.schedule_status}`
-                )
-              }}</UBadge
-            >
-          </p>
-        </NuxtLink>
-      </div>
-      <div v-else class="min-h-96 flex flex-col items-center justify-center">
-        <UIcon name="i-heroicons-circle-stack" class="w-5 h-5" />
-        <p class="text-gray-500 dark:text-gray-400">
-          {{ t("no_appointments") }}
+        </div>
+        <p class="text-gray-900 dark:text-white font-medium text-lg">
+          <UBadge
+            v-if="schedule.status == 'PLANNED'"
+            color="primary"
+            variant="soft"
+            >{{
+              g(
+                `courses.activities.schedules.schedules_status_${schedule.status}`
+              )
+            }}</UBadge
+          >
+          <UBadge
+            v-if="schedule.status == 'CANCELED'"
+            color="red"
+            variant="soft"
+            >{{
+              g(
+                `courses.activities.schedules.schedules_status_${schedule.status}`
+              )
+            }}</UBadge
+          >
+          <UBadge
+            v-if="schedule.status == 'COMPLETED'"
+            color="green"
+            variant="soft"
+            >{{
+              g(
+                `courses.activities.schedules.schedules_status_${schedule.status}`
+              )
+            }}</UBadge
+          >
         </p>
-      </div>
-      <template #error="{ error: e, clearError }">
-        <p>An error occurred: {{ e }}</p>
-
-        <button @click="clearError">Clear error</button>
-      </template>
-    </NuxtErrorBoundary>
+      </NuxtLink>
+    </div>
+    <div v-else class="min-h-96 flex flex-col items-center justify-center">
+      <UIcon name="i-heroicons-circle-stack" class="w-5 h-5" />
+      <p class="text-gray-500 dark:text-gray-400">
+        {{ t("no_appointments") }}
+      </p>
+    </div>
   </UDashboardCard>
 </template>
 
 <script setup lang="ts">
-import type { AppOrganizationSchedulesView } from "~/types/app.types";
 import { formatDate } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 
@@ -93,46 +99,20 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 
-const client = useSupabaseClient();
 const userOrganizationsStore = useUserOrganizationsStore();
+const $courseActivitySchedules = useCourseActivitySchedules();
 const slideover = useSlideover();
 
-if (!userOrganizationsStore.selectedOrganization) {
-  throw new Error("No active organization");
-}
-
 const { data: schedules } = useAsyncData(async () => {
-  if (!userOrganizationsStore.selectedOrganization) {
-    throw new Error("No active organization");
-  }
-
-  const { data, error } = await client
-    .from("organizations_schedules_view")
-    .select("*")
-    .eq(
-      "schedule_organization_id",
-      userOrganizationsStore.selectedOrganization.organization_id
-    )
-    .gte("schedule_start_at", new Date().toISOString())
-    .order("schedule_start_at", { ascending: true })
-    .limit(10)
-    .overrideTypes<AppOrganizationSchedulesView[]>();
-
-  if (error) {
-    throw error;
-  }
-
-  console.log("schedules", data);
-
-  return data;
+  return await $courseActivitySchedules.fetchCourseActivitySchedules({
+    start_at: new Date().toISOString(),
+    limit: 10,
+  });
 });
 
-async function openScheduleModal(schedule: AppOrganizationSchedulesView) {
+async function openScheduleModal(scheduleId: string) {
   slideover.open(EditCourseActivitySchedule, {
-    orgid: schedule.schedule_organization_id,
-    courseid: schedule.course_id,
-    activityid: schedule.activity_id,
-    scheduleId: schedule.schedule_id,
+    scheduleId: scheduleId,
   });
 }
 </script>
@@ -145,13 +125,15 @@ async function openScheduleModal(schedule: AppOrganizationSchedulesView) {
     "incoming_appointments": "Kommende Termine",
     "incoming_appointments_description": "Hier sind die nächsten Termine, die Sie haben.",
     "no_appointments": "Keine Termine",
-    "view_all": "Alle anzeigen"
+    "view_all": "Alle anzeigen",
+    "attendees": "Teilnehmer"
   },
   "en": {
     "incoming_appointments": "Incoming Appointments",
     "incoming_appointments_description": "Here are the next appointments you have.",
     "no_appointments": "No appointments",
-    "view_all": "View all"
+    "view_all": "View all",
+    "attendees": "Attendees"
   }
 }
 </i18n>
