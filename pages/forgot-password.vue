@@ -37,19 +37,19 @@ const fields = [
   },
 ];
 
-const validate = (state: any) => {
+const validate = (state: { email: string }) => {
   const errors: FormError[] = [];
   if (!state.email)
     errors.push({ path: "email", message: "Email is required" });
   return errors;
 };
 
-const onSubmit = async (data: any) => {
+const onSubmit = async (data: { email: string }) => {
   try {
     const cookieName = useRuntimeConfig().public.supabase.cookieName;
-    const redirectCookie = useCookie(`${cookieName}-redirect-path`)
+    const redirectCookie = useCookie(`${cookieName}-redirect-path`);
     redirectCookie.value = "/account/password-reset";
-    const { data: res, error } = await supabase.auth.resetPasswordForEmail(
+    const { data: _res, error } = await supabase.auth.resetPasswordForEmail(
       data.email,
       {
         redirectTo: `${window.location.origin}/confirm`,
