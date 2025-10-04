@@ -17,7 +17,7 @@
     </template>
 
     <template #option="{ option: course }">
-      <span class="truncate">{{ g(`course_types.${course.type}.name_full`) }}</span>
+      <span>{{ g(`course_types.${course.type}.name_full`) }}</span>
     </template>
 
     <template #option-empty="{ query }">

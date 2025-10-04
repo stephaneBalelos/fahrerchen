@@ -8,11 +8,11 @@
         <template #right>
           <FormsInputsCourseSelect
             v-model="filterForm.course_id"
-            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+            :orgid="userOrganizationsStore.selectedOrganization.id"
           />
           <StudentSelect
             v-model="filterForm.student_id"
-            :orgid="userOrganizationsStore.selectedOrganization.organization_id"
+            :orgid="userOrganizationsStore.selectedOrganization.id"
           />
         </template>
       </UDashboardNavbar>
@@ -22,8 +22,28 @@
           :rows="bills ?? []"
           :loading="status === 'pending'"
         >
+          <template #student-data="{ row }">
+            <div class="flex items-center gap-2">
+              <UAvatar
+                :src="row.cs.student.avatar_url ?? undefined"
+                :alt="`${row.cs.student.firstname} ${row.cs.student.lastname}`"
+                size="sm"
+                class="mr-2"
+              />
+              <div class="flex flex-col">
+                <p class="font-medium text-md text-gray-900 dark:text-gray-100">
+                  {{ `${row.cs.student.firstname} ${row.cs.student.lastname}` }}
+                </p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ row.cs.student.email }}
+                </p>
+              </div>
+            </div>
+          </template>
           <template #course-data="{ row }">
-            {{ row.course_name }}
+            <UBadge v-if="row.cs.course" :color="row.cs.archived_at ? 'gray' : 'green'" variant="soft">
+              {{ g(`course_types.${row.cs.course.type}.name_full`) }}
+            </UBadge>
           </template>
           <template #status-data="{ row }">
             <UBadge v-if="row.status === 'paid'" :color="'green'">
@@ -37,15 +57,16 @@
             </UBadge>
           </template>
           <template #total-data="{ row }">
-            <p class="text-gray-500 dark:text-gray-400 font-medium">
+            <p class="text-lg text-gray-900 dark:text-gray-100 font-medium">
               {{ formatCurrency(row.total_with_vat) }}
             </p>
           </template>
           <template #action-data="{ row }">
             <UButton
-              variant="link"
               color="white"
               :to="userOrganizationsStore.relativePath(`/bills/${row.id}`)"
+              :icon="'i-heroicons-chevron-right-20-solid'"
+              trailing
               >{{ t("table.view") }}</UButton
             >
           </template>
@@ -58,7 +79,6 @@
 <script setup lang="ts">
 import { z } from "zod";
 import StudentSelect from "~/components/forms/Inputs/StudentSelect.vue";
-import type { AppCourse } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 
 definePageMeta({
@@ -91,23 +111,13 @@ const filterForm = ref<FilterForm>({
   course_id: undefined,
 });
 
-const courses = ref<AppCourse[]>([]);
-
-courses.value = await useCourses(
-  userOrganizationsStore.selectedOrganization.organization_id
-);
-
 const columns = [
   {
-    key: "student_firstname",
-    label: t("table.firstname"),
+    key: "student",
+    label: t("table.student"),
   },
   {
-    key: "student_lastname",
-    label: t("table.lastname"),
-  },
-  {
-    key: "course_name",
+    key: "course",
     label: t("table.course"),
   },
   {
@@ -131,6 +141,7 @@ const { data: bills, status } = useAsyncData(
     return await subscriptionBills.fetchSubscriptionBills({
       course_id: filterForm.value.course_id,
       student_id: filterForm.value.student_id,
+      organization_id: userOrganizationsStore.selectedOrganization.id,
     });
   },
   {
@@ -158,8 +169,7 @@ const { data: bills, status } = useAsyncData(
   "de": {
     "title": "Rechnungen",
     "table": {
-      "firstname": "Vorname",
-      "lastname": "Nachname",
+      "student": "Schüler:in",
       "course": "Kurs",
       "amount": "Betrag",
       "status": "Status",
@@ -169,8 +179,7 @@ const { data: bills, status } = useAsyncData(
   "en": {
     "title": "Bills",
     "table": {
-      "firstname": "Firstname",
-      "lastname": "Lastname",
+      "student": "Student",
       "course": "Course",
       "amount": "Amount",
       "status": "Status",
