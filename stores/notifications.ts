@@ -14,7 +14,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
             return
         }
         const { data, error } = await client.from('organization_notifications').select('*')
-        .eq('organization_id', organizationsStore.selectedOrganization.organization_id)
+        .eq('organization_id', organizationsStore.selectedOrganization.id)
         .contains('target_user_ids', [userStore.user.id])
         .order('created_at', { ascending: false })
         
@@ -22,6 +22,8 @@ export const useNotificationsStore = defineStore('notifications', () => {
             console.error(error)
             return
         }
+
+        console.log('Loaded notifications:', data)
 
         notifications.value = data
     }
@@ -40,13 +42,15 @@ export const useNotificationsStore = defineStore('notifications', () => {
     //     immediate: true
     // })
 
-    // watch(() => organizationsStore.selectedOrganization, async () => {
-    //     if (organizationsStore.selectedOrganization) {
-    //         await loadNotifications()
-    //     }
-    // }, {
-    //     immediate: true
-    // })
+    watch(() => organizationsStore.selectedOrganization, async () => {
+        if (organizationsStore.selectedOrganization) {
+            await loadNotifications()
+        } else {
+            notifications.value = []
+        }
+    }, {
+        immediate: true
+    })
 
     return {
         notifications,

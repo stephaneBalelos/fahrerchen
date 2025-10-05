@@ -236,7 +236,8 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                         payload: {
                             id: payloadNew.id,
                             author_name: author.user.firstname + ' ' + author.user.lastname,
-                            student_name: student.user?.firstname + ' ' + student.user?.lastname
+                            student_name: student.user?.firstname + ' ' + student.user?.lastname,
+                            course_type: subscription.c?.type,
                         },
                         organization_id: organization.id
                     })
@@ -264,7 +265,8 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                         payload: {
                             id: payloadNew.id,
                             author_name: author.user.firstname + ' ' + author.user.lastname,
-                            student_name: student.user?.firstname + ' ' + student.user?.lastname
+                            student_name: student.user?.firstname + ' ' + student.user?.lastname,
+                            course_type: subscription.c?.type,
                         },
                         organization_id: organization.id
                     })
@@ -290,7 +292,8 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                         payload: {
                             id: payloadNew.id,
                             author_name: author.user.firstname + ' ' + author.user.lastname,
-                            student_name: student.user?.firstname + ' ' + student.user?.lastname
+                            student_name: student.user?.firstname + ' ' + student.user?.lastname,
+                            course_type: subscription.c?.type,
                         },
                         organization_id: organization.id
                     })

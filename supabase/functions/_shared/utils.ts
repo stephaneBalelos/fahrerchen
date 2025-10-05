@@ -64,7 +64,7 @@ export async function getCourseActivityScheduleById(supabase: SupabaseClient<Dat
 
 export async function getCourseSubscriptionById(supabase: SupabaseClient<Database>, subscriptionId: string) {
     const { data, error } = await supabase.from('course_subscriptions')
-        .select('*, s:students(id, firstname, lastname, email, user_id)').eq('id', subscriptionId).single()
+        .select('*, c:courses(id, type), s:students(id, firstname, lastname, email, user_id)').eq('id', subscriptionId).single()
     if (error || !data) {
         return null
     }

@@ -49,6 +49,9 @@ export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables'
 export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']
 export type OrganizationBillingSettingsEdit = Omit<AppOrganizationBillingSettings, 'id' | 'organization_id' | 'created_at' | 'updated_at'>
 
+export type NotificationType = DatabaseGenerated['public']['Enums']['notification_type']
+export type AppOrganizationNotification = DatabaseGenerated['public']['Tables']['organization_notifications']['Row']
+
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
     payment_method_id: Stripe.PaymentMethod.Type
@@ -65,6 +68,7 @@ export type AppStripeAccountPaymentMethodSettings = {
 }
 
 export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
+
 
 export type StripeConnectPostBody = {
   org_id: string
@@ -135,5 +139,3 @@ export type BillTemplateData = {
     total: string;
   }[]
 }
-
-export type NotificationType = DatabaseGenerated['public']['Enums']['notification_type']
