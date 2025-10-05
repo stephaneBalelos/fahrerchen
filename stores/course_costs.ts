@@ -16,7 +16,7 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         }
         const { data, error } = await supabase
             .from('course_costs')
-            .select('*')
+            .select('*, course_costs_combinations(*)')
             .eq('organization_id', userOrganizationsStore.selectedOrganization.id)
             .order('inserted_at', { ascending: false })
         if (error) {

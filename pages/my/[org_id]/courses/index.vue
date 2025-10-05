@@ -1,59 +1,3 @@
-<script setup lang="ts">
-import type { Database } from "~/types/database.types";
-import EditCourseForm from "~/components/forms/EditCourseForm.vue";
-
-definePageMeta({
-  layout: "orgs",
-});
-
-const supabase = useSupabaseClient<Database>();
-const toast = useToast();
-const slideover = useSlideover();
-const userOrganizationsStore = useUserOrganizationsStore();
-
-const { t } = useI18n({
-  useScope: "local",
-});
-
-const { data, refresh } = await useAsyncData(
-  async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
-      return;
-    }
-    const { data, error } = await supabase
-      .from("courses")
-      .select("*")
-      .eq(
-        "organization_id",
-        userOrganizationsStore.selectedOrganization.organization_id
-      );
-    if (error) {
-      throw error;
-    }
-    return data;
-  },
-  { immediate: true }
-);
-
-onMounted(async () => {
-  await refresh();
-});
-
-const openCreateCourseForm = () => {
-  slideover.open(EditCourseForm, {
-    "onCourse-created": () => {
-      refresh();
-      slideover.close();
-      toast.add({
-        title: "Course created",
-        description: "Course has been created successfully",
-        color: "green",
-      });
-    },
-  });
-};
-</script>
-
 <template>
   <UDashboardPanel grow>
     <UDashboardNavbar :title="t('title')" />
@@ -63,67 +7,122 @@ const openCreateCourseForm = () => {
         :headline="t('headline')"
         :title="t('title')"
         :description="t('description')"
-        :links="[
-          {
-            label: t('create_course'),
-            color: 'white',
-            icon: 'i-heroicons-folder-plus',
-            click: () => openCreateCourseForm(),
-          },
-        ]"
       />
-      <div v-if="data && data?.length > 0" class="grid grid-cols-1 gap-3">
-        <UDashboardCard
-          v-for="(d, index) in data"
-          :key="index"
-          :title="d.name"
-          class="course-card"
-          :description="d.description ? d.description : t('no_description')"
-          :links="[
-            {
-              label: t('open_course'),
-              color: 'gray',
-              trailingIcon: 'i-heroicons-arrow-right-20-solid',
-              to: userOrganizationsStore.relativePath(`/courses/${d.id}`),
-            },
-          ]"
-        />
-      </div>
-      <div v-else class="flex flex-col items-center justify-center max-w-lg mx-auto py-12">
-
-        <p class="text-lg text-center mb-4">{{ t('no_courses') }}</p>
-        <p class="text-gray-500 text-center mb-4">{{ t('no_courses_description') }}</p>
-        <UButton id="create-course-btn" @click="openCreateCourseForm"
-          >Create your first course</UButton
-        >
+      <div
+        v-if="coursesStore.courses && coursesStore.courses.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+      >
+        <UCard v-for="(d, index) in coursesStore.courses" :key="index">
+          <template #header>
+            <div class="flex justify-between items-center w-full">
+              <div class="flex flex-col flex-1 items-start">
+                <p class="font-medium">
+                  {{ g(`course_types.${d.type}.name_full`) }}
+                </p>
+                <!-- <p class="text-xs text-gray-500 truncate w-full">{{ g(`course_types.${d.type}.description`) }}</p> -->
+              </div>
+              <UButton color="white" size="xs" icon="i-heroicons-pencil">{{
+                t("open_course")
+              }}</UButton>
+            </div>
+          </template>
+          <div class="flex flex-col gap-8">
+            <CourseCostsList :course-id="d.id" />
+            <CourseActivitiesList :course-id="d.id" />
+          </div>
+          <template #footer>
+            <div class="flex justify-between items-center gap-4">
+              <div class="flex gap-2">
+                <UBadge
+                  v-if="d.is_active"
+                  color="green"
+                  variant="soft"
+                  :label="t('active')"
+                />
+                <UBadge v-if="d.is_active" color="white">
+                  {{
+                    t("active_subscription_count", {
+                      count: subscriptionStore.subscriptions.filter(
+                        (s) => s.course_id === d.id && s.archived_at === null
+                      ).length,
+                    })
+                  }}
+                </UBadge>
+                <UBadge v-else color="white">
+                  {{
+                    t("total_subscription_count", {
+                      count: subscriptionStore.subscriptions.filter(
+                        (s) => s.course_id === d.id
+                      ).length,
+                    })
+                  }}
+                </UBadge>
+              </div>
+              <div class="flex flex-col items-end">
+                <p class="text-sm text-gray-500">
+                  {{ t('total_costs') }}
+                </p>
+                <p class="font-medium">
+                  {{ formatCurrency(1200) }}
+                </p>
+              </div>
+            </div>
+          </template>
+        </UCard>
       </div>
     </UDashboardPanelContent>
   </UDashboardPanel>
 </template>
 
+<script setup lang="ts">
+import CourseCostsList from "~/components/courses/CourseCostsList.vue";
+import CourseActivitiesList from "~/components/courses/CourseActivitiesList.vue";
+import { formatCurrency } from "~/utils/formatters";
+
+definePageMeta({
+  layout: "orgs",
+});
+
+// const toast = useToast();
+// const slideover = useSlideover();
+const coursesStore = useCoursesStore();
+const subscriptionStore = useSubscriptionStore();
+
+const { t } = useI18n({
+  useScope: "local",
+});
+const { t: g } = useI18n({
+  useScope: "global",
+});
+</script>
 <style scoped></style>
 
 <i18n lang="json">
 {
   "de": {
-    "title": "Kurse",
+    "title": "Kurseangebote",
     "headline": "Kurse",
-    "description": "Hier findest du alle Kurse, die du erstellt hast.",
-    "create_course": "Kurs erstellen",
-    "open_course": "Kurs öffnen",
-    "no_description": "Keine Beschreibung vorhanden",
-    "no_courses": "Keine Kurse vorhanden",
-    "no_courses_description": "Erstelle deinen ersten Kurs, um loszulegen."
+    "description": "Hier findest du alle Kurse, die deine Fahrschule anbietet.",
+    "open_course": "Kurs bearbeiten",
+    "no_courses": "Es sind noch keine Kurse angelegt.",
+    "no_courses_description": "Lege jetzt deinen ersten Kurs an, um Fahrstunden zu buchen.",
+    "active": "Aktiv",
+    "active_subscription_count": "{count} aktive Anmeldung(en)",
+    "total_subscription_count": "{count} Anmeldung(en)",
+    "total_costs": "Kurs gesamt ab"
+
   },
   "en": {
-    "title": "Courses",
+    "title": "Course offerings",
     "headline": "Courses",
-    "description": "Here you can find all courses you have created.",
-    "create_course": "Create course",
-    "open_course": "Open course",
-    "no_description": "No description available",
-    "no_courses": "No courses available",
-    "no_courses_description": "Create your first course to get started."
+    "description": "Here you can find all the courses your driving school offers.",
+    "open_course": "Edit course",
+    "no_courses": "No courses have been created yet.",
+    "no_courses_description": "Create your first course now to book driving lessons.",
+    "active": "Active",
+    "active_subscription_count": "{count} active subscription(s)",
+    "total_subscription_count": "{count} subscription(s)",
+    "total_costs": "Course total from"
   }
 }
 </i18n>
