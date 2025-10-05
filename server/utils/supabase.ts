@@ -127,7 +127,7 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
 
 export const getBillDataById = async (event: H3Event, id: string) => {
     const client = await serverSupabaseClient<Database>(event)
-    const { data, error } = await client.from('course_subscription_bills').select('*, cs:course_subscriptions(*, student:students(*), courses:course(*))').eq('id', id).single()
+    const { data, error } = await client.from('course_subscription_bills').select('*, cs:course_subscriptions(*, student:students(*), course:courses(*))').eq('id', id).single()
     if (error) {
         return null
     }

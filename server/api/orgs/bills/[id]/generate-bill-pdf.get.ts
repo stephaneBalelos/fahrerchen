@@ -15,8 +15,6 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    console.log('Generating bill PDF...')
-
     // Get the id
     const id = getRouterParam(event, 'id')
     if (!id) {

@@ -38,16 +38,14 @@
             :to="`/my/${bill.subscription.organization_id}/students/${bill.subscription.id}`"
           />
           <UButton
-          v-if="billingSettingsExist"
+            v-if="billingSettingsExist"
             :label="t('download_pdf')"
             icon="i-heroicons-document-arrow-down"
             size="sm"
             color="gray"
             square
-            :to="`/api/orgs/bills/${bill.data.id}/generate-bill-pdf`"
-            :external="true"
-            target="_blank"
-            rel="noopener noreferrer"
+            :loading="isDowloadingBillPdf"
+            @click="downloadBillPdf"
           />
         </template>
       </UDashboardNavbar>
@@ -79,7 +77,11 @@
               >
                 <template #links>
                   <UButton
-                    v-if="!bill.data.paid_at && bill.data.ready_to_pay && !bill.data.canceled_at"
+                    v-if="
+                      !bill.data.paid_at &&
+                      bill.data.ready_to_pay &&
+                      !bill.data.canceled_at
+                    "
                     color="green"
                     variant="solid"
                     size="xs"
@@ -88,7 +90,10 @@
                     <span>{{ t("mark_as_paid") }}</span>
                   </UButton>
                   <UButton
-                    v-if="!bill.data.ready_to_pay && (!bill.data.paid_at || !bill.data.canceled_at)"
+                    v-if="
+                      !bill.data.ready_to_pay &&
+                      (!bill.data.paid_at || !bill.data.canceled_at)
+                    "
                     color="primary"
                     variant="soft"
                     @click="markAsReadyToPay"
@@ -118,26 +123,28 @@
             <UDashboardToolbar
               class="absolute bottom-0 w-full border-t border-gray-200 dark:border-gray-800 pb-24 pt-4 bg-white dark:bg-gray-900"
             >
-                <div class="flex justify-end w-full gap-8">
-                  <div class="flex flex-col items-end">
-                    <span class="text-sm text-gray-500">{{ t("total") }}</span>
-                    <span class="text-xl font-bold">{{
-                      formatCurrency(bill.data.total)
-                    }}</span>
-                  </div>
-                  <div class="flex flex-col items-end">
-                    <span class="text-sm text-gray-500">{{ t("vat") }}</span>
-                    <span class="text-xl font-bold">{{
-                      bill.data.vat_rate.toFixed(2) + "%"
-                    }}</span>
-                  </div>
-                  <div class="flex flex-col items-end">
-                    <span class="text-sm text-gray-500">{{ t("total_with_vat") }}</span>
-                    <span class="text-xl font-bold">{{
-                      formatCurrency(bill.data.total_with_vat || bill.data.total)
-                    }}</span>
-                  </div>
+              <div class="flex justify-end w-full gap-8">
+                <div class="flex flex-col items-end">
+                  <span class="text-sm text-gray-500">{{ t("total") }}</span>
+                  <span class="text-xl font-bold">{{
+                    formatCurrency(bill.data.total)
+                  }}</span>
                 </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-sm text-gray-500">{{ t("vat") }}</span>
+                  <span class="text-xl font-bold">{{
+                    bill.data.vat_rate.toFixed(2) + "%"
+                  }}</span>
+                </div>
+                <div class="flex flex-col items-end">
+                  <span class="text-sm text-gray-500">{{
+                    t("total_with_vat")
+                  }}</span>
+                  <span class="text-xl font-bold">{{
+                    formatCurrency(bill.data.total_with_vat || bill.data.total)
+                  }}</span>
+                </div>
+              </div>
             </UDashboardToolbar>
           </div>
         </UDashboardPanel>
@@ -161,8 +168,7 @@ const client = useSupabaseClient();
 const toast = useToast();
 const { t } = useI18n({ useScope: "local" });
 const slideover = useSlideover();
-
-const tutorialStore = useTutorialStore();
+const isDowloadingBillPdf = ref(false);
 
 const { data: bill, refresh } = await useAsyncData(`bills_${id}`, async () => {
   const { data, error } = await client
@@ -193,7 +199,7 @@ const { data: billingSettingsExist } = useAsyncData(
     const { data, error } = await client
       .from("organization_billing_settings")
       .select("*")
-      .eq("id", bill.value.data.organization_id)
+      .eq("id", bill.value.data.organization_id);
 
     if (error) {
       throw error;
@@ -213,7 +219,7 @@ function openStudentProfile() {
   ) {
     slideover.open(StudentCourseProfileSlideover, {
       studentId: bill.value.subscription.student.id,
-      "onClose": () => {
+      onClose: () => {
         slideover.close();
       },
     });
@@ -237,7 +243,6 @@ async function markAsReadyToPay() {
       color: "green",
     });
     refresh();
-    tutorialStore.completeStep("invoice_send")
   } catch (error) {
     console.error(error);
     toast.add({
@@ -301,6 +306,35 @@ async function markAsCanceled() {
     });
   }
 }
+
+const downloadBillPdf = async () => {
+  if (bill.value && billingSettingsExist.value) {
+    try {
+      isDowloadingBillPdf.value = true;
+      const res = await $fetch<Blob>(
+        `/api/orgs/bills/${bill.value.data.id}/generate-bill-pdf`,
+        {
+          method: "GET",
+        }
+      );
+
+      const blob = new Blob([res], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bill-${bill.value.data.id}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to generate certificate");
+    } finally {
+      isDowloadingBillPdf.value = false;
+    }
+  }
+};
 </script>
 
 <style scoped></style>
