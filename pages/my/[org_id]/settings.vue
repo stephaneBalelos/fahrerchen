@@ -51,6 +51,7 @@ const links = computed(() => {
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
+      <UDashboardNavbar :title="t('setting')" />
       <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
         <UHorizontalNavigation :links="links" />
       </UDashboardToolbar>
@@ -62,6 +63,7 @@ const links = computed(() => {
 <i18n lang="json">
 {
   "de": {
+    "setting": "Einstellungen",
     "settings": "Allgemein",
     "members": "Mitglieder",
     "billing": "Abrechnung",
@@ -70,6 +72,7 @@ const links = computed(() => {
     "subscription": "Abonnement"
   },
   "en": {
+    "setting": "Settings",
     "settings": "General",
     "members": "Members",
     "billing": "Billing",
