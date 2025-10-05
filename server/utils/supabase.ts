@@ -33,7 +33,7 @@ export const getBillById = async (event: H3Event, id: string) => {
 export const getSubscriptionCertifcateData = async (event: H3Event, id: string) => {
     const client = await serverSupabaseClient(event)
     const { data: subData, error: subError } = await client.from('course_subscriptions')
-    .select('*, student:student_id(*), course:course_id(*), organization:organization_id(*)')
+    .select('*, student:students(*), course:courses(*), organization:organizations(*)')
     .eq('id', id).single()
 
     const { data: attendancesData, error: attendancesError } = await client.from('course_activity_schedules_attendances')
@@ -60,11 +60,15 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         }
     })
 
-    const { data: courseCosts, error: courseCostsError } = await client.from('course_costs').select().eq('course_id', subData.course_id)
+    const { data: courseCosts, error: courseCostsError } = await client.from('course_costs_combinations')
+    .select('*, costs:course_costs!inner(*)')
+    .eq('course_id', subData.course_id)
     if (courseCostsError) {
         throw new Error('Course costs not found')
     }
-    const { data: activities, error: activitiesError } = await client.from('course_activities').select().eq('course_id', subData.course_id)
+    const { data: activities, error: activitiesError } = await client.from('course_activities_combinations')
+    .select('*, activity:course_activities!inner(*)')
+    .eq('course_id', subData.course_id)
     if (activitiesError) {
         throw new Error('Course activities not found')
     }
@@ -79,21 +83,21 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         ...subData.student,
     }
 
-    const courseCoustsFormatted = courseCosts.map((c) => {
+    const courseCostsFormatted = courseCosts.map((c) => {
         return {
-            name: c.name,
-            price: c.price,
+            name: c.costs.name,
+            price: c.costs.price,
         }
     })
     const courseCostsTotal = courseCosts.reduce((acc, c) => {
-        return acc + c.price
+        return acc + c.costs.price
     }, 0)
 
     const activitiesCostsFormatted = activities.map((a) => {
         return {
-            activity_type: a.activity_type,
-            name: a.name,
-            price: a.price,
+            activity_type: a.activity.activity_type,
+            name: a.activity.name,
+            price: a.activity.price,
         }
     })
 
@@ -101,19 +105,19 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
         return acc + a.activity_price
     }, 0)
 
-    const examCostsTotal = attendancesData.filter((a) => a.activity_type === 3).reduce((acc, a) => {
+    const examCostsTotal = attendancesData.filter((a) => a.activity_type === 'EXAM').reduce((acc, a) => {
         return acc + a.activity_price
     }, 0)
 
     return {
-        base_costs: courseCoustsFormatted,
+        base_costs: courseCostsFormatted,
         activity_costs: activitiesCostsFormatted,
         trainingCostsWithoutExam: courseCostsTotal + attendanceCostsTotal - examCostsTotal,
         examCostsTotal: examCostsTotal,
-        theory_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 1), 20),
-        practice_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 2), 20),
-        theory_exam_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 3), 5),
-        practice_exam_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 3), 5),
+        theory_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 'THEORY'), 20),
+        practice_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 'PRACTICE'), 20),
+        theory_exam_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 'EXAM'), 5),
+        practice_exam_attendances: arrayFillWithNullValues(attendanceDataFormatted.filter((a) => a.activity_type === 'EXAM'), 5),
         student: student,
         course: subData.course,
         organization: subData.organization,
@@ -123,7 +127,7 @@ export const getSubscriptionCertifcateData = async (event: H3Event, id: string) 
 
 export const getBillDataById = async (event: H3Event, id: string) => {
     const client = await serverSupabaseClient<Database>(event)
-    const { data, error } = await client.from('course_subscription_bills_view').select().eq('id', id).single()
+    const { data, error } = await client.from('course_subscription_bills').select('*, cs:course_subscriptions(*, student:students(*), courses:course(*))').eq('id', id).single()
     if (error) {
         return null
     }

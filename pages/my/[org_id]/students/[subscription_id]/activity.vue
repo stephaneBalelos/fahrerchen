@@ -1,5 +1,8 @@
 <template>
-  <div v-if="subscriptionStore.selectedSubscription" class="flex flex-col flex-1 overflow-y-auto">
+  <div
+    v-if="subscriptionStore.selectedSubscription"
+    class="flex flex-col flex-1 overflow-y-auto"
+  >
     <UDashboardToolbar>
       <template #left>
         <UButtonGroup size="sm" orientation="horizontal">
@@ -117,7 +120,6 @@ const { t: g } = useI18n({
   useScope: "global",
 });
 const route = useRoute();
-const subscription_id = route.params.id as string;
 const org_id = route.params.org_id as string;
 const studentsStore = useStudentsStore();
 
@@ -142,31 +144,14 @@ async function generateCertificate() {
   if (!subscriptionStore.selectedSubscription) {
     return;
   }
-  if (!student.value) {
-    return;
-  }
-  if (isDownloadingCertificate.value) {
-    return;
-  }
   isDownloadingCertificate.value = true;
-  try {
-    const res = await $fetch<Blob>(
-      `/api/orgs/subscriptions/${subscription_id}/generate-certificate`,
-      {
-        method: "GET",
-      }
-    );
-    const date = format(new Date(), "yyyy-MM-dd");
 
-    const blob = new Blob([res], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ausbildungsnachweis-b-${student.value?.firstname}-${student.value?.lastname}-${date}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const date = format(new Date(), "yyyy-MM-dd");
+  try {
+    await subscriptionStore.generateCertificate(
+      subscriptionStore.selectedSubscription.id,
+      `ausbildungsnachweis-b-${student.value?.firstname}-${student.value?.lastname}-${date}.pdf`
+    );
   } catch (error) {
     console.error(error);
   } finally {

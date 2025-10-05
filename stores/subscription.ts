@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import type { AppCourseSubscription } from "~/types/app.types"
 
 export const useSubscriptionStore = defineStore('subscription', () => {
@@ -23,7 +24,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
             isLoadingSubscriptions.value = false
             return
         }
-         try {
+        try {
             const { data, error } = await supabase
                 .from('course_subscriptions')
                 .select('*')
@@ -61,6 +62,32 @@ export const useSubscriptionStore = defineStore('subscription', () => {
         }
     }
 
+    async function generateCertificate(subscriptionId: string, filename?: string) {
+
+        try {
+            const res = await $fetch<Blob>(
+                `/api/orgs/subscriptions/${subscriptionId}/generate-certificate`,
+                {
+                    method: "GET",
+                }
+            );
+            const date = format(new Date(), "yyyy-MM-dd");
+
+            const blob = new Blob([res], { type: "application/pdf" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename || `ausbildungsnachweis-b-${subscriptionId}-${date}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(error);
+            throw new Error('Failed to generate certificate');
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, () => {
         loadSubscriptions()
     }, { immediate: true })
@@ -74,6 +101,7 @@ export const useSubscriptionStore = defineStore('subscription', () => {
         selectedSubscription,
         isLoadingSubscriptions,
         getSubscriptionById,
-        getSubscriptionsForStudent
+        getSubscriptionsForStudent,
+        generateCertificate
     }
 })

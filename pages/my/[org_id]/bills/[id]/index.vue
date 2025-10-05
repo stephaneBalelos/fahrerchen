@@ -45,6 +45,7 @@
             color="gray"
             square
             :to="`/api/orgs/bills/${bill.data.id}/generate-bill-pdf`"
+            :external="true"
             target="_blank"
             rel="noopener noreferrer"
           />

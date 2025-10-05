@@ -40,7 +40,6 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Subscription not found'
         })
     }
-
     // Build the pdf
     const html = template(data)
 

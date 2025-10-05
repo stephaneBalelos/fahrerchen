@@ -33,16 +33,6 @@
           >
             {{ t("new_schedule_for_student", { student: student.firstname }) }}
           </UButton>
-          <UButton
-            v-if="student"
-            size="sm"
-            color="primary"
-            variant="outline"
-            icon="i-heroicons-document-arrow-down-solid"
-            @click="() => {}"
-          >
-            {{ t("generate_certificate") }}
-          </UButton>
         </template>
       </UDashboardNavbar>
   <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
@@ -114,6 +104,7 @@ const openEditCourseActivityScheduleSlideover = () => {
     },
   })
 }
+
 </script>
 
 <style scoped></style>

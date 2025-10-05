@@ -2,7 +2,7 @@ import type { User } from "@supabase/supabase-js"
 import Handlebars from "handlebars"
 import { format } from "date-fns"
 import { Readable } from "stream"
-import { getBillDataById, getBillItemsByBillId, getOrganisationBilllingSettings, getStudentById } from "~/server/utils/supabase"
+import { getBillDataById, getBillItemsByBillId, getOrganisationBilllingSettings } from "~/server/utils/supabase"
 import type { BillTemplateData } from "~/types/app.types"
 
 export default defineEventHandler(async (event) => {
@@ -14,6 +14,8 @@ export default defineEventHandler(async (event) => {
             statusMessage: 'Forbidden'
         })
     }
+
+    console.log('Generating bill PDF...')
 
     // Get the id
     const id = getRouterParam(event, 'id')
@@ -55,7 +57,7 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const studentData = await getStudentById(event, billData.student_id)
+    const studentData = billData.cs.student
     if (!studentData) {
         return createError({
             status: 404,
