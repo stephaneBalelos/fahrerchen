@@ -3,51 +3,276 @@
     <NotificationsNotificationItem
       v-for="notification in notifications"
       :key="notification.id"
-      :icon="'i-heroicons-user-plus'"
+      :icon="notification.icon"
       :read="false"
-      :title="
-        t(
-          `notifications_items.${notification.notification_type.replaceAll(
-            '.',
-            '_'
-          )}.title`,
-          formatPayload(notification.payload)
-        )
-      "
-      :description="
-        t(
-          `notifications_items.${notification.notification_type.replaceAll(
-            '.',
-            '_'
-          )}.description`,
-          formatPayload(notification.payload)
-        )
-      "
+      :title="notification.title"
+      :description="notification.description"
+      :action-url="notification.action_url"
       :inserted-at="new Date(notification.created_at).toISOString()"
     />
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import { formatDate, formatTime } from "~/utils/formatters";
+import type { AppOrganizationNotification } from '~/types/app.types';
 
-const { t } = useI18n({
+const { t, locale } = useI18n({
   useScope: "local",
 });
 
+type NotificationItem = {
+  id: string;
+  created_at: string;
+  notification_type: string;
+  title: string;
+  description: string;
+  icon: string;
+  action_url: string | null;
+}
+
 const notificationsStore = useNotificationsStore();
+const userOrganizationsStore = useUserOrganizationsStore();
 
 const { data: notifications } = useAsyncData("notifications", async () => {
-  await notificationsStore.loadNotifications();
-  return notificationsStore.notifications;
+  return await notificationsStore.loadNotifications();
+}, {
+  transform: (data) => formatNotifications(data as AppOrganizationNotification[]),
 });
 
-const formatPayload = (payload: Record<string, string>) => {
-  return {
-    ...payload,
-    date: payload.date ? formatDate(payload.date) : "",
-    time: payload.time ? formatTime(payload.time) : "",
-  };
+const formatNotifications = (notifications: AppOrganizationNotification[]): NotificationItem[] => {
+  const items: NotificationItem[] = [];
+
+  for (const notification of notifications) {
+    if (notification.notification_type === 'course_activity_schedules.assigned_to.updated') {
+      const payload = notification.payload as {
+        id: string;
+        author_name: string;
+        activity_id: string;
+        activity_name: string;
+        schedule_start_at: string;
+        schedule_assigned_to: string | null;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_activity_schedules_assigned_to_updated.title', {
+          author_name: payload.author_name,
+        }),
+        description: t('notifications_items.course_activity_schedules_assigned_to_updated.description', {
+          author_name: payload.author_name,
+          activity_name: payload.activity_name,
+          schedule_start_at: new Date(payload.schedule_start_at).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        icon: 'i-heroicons-calendar',
+        action_url: userOrganizationsStore.relativePath(`/schedules?id=${payload.id}`),
+      }
+      items.push(item);
+      continue;
+    }
+    if (notification.notification_type === 'course_activity_schedules.start_at.updated') {
+      const payload = notification.payload as {
+        id: string;
+        author_name: string;
+        activity_id: string;
+        activity_name: string;
+        schedule_start_at: string;
+        schedule_old_start_at: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_activity_schedules_start_at_updated.title', {
+          activity_name: payload.activity_name,
+          schedule_start_at: new Date(payload.schedule_start_at).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        description: t('notifications_items.course_activity_schedules_start_at_updated.description', {
+          activity_name: payload.activity_name,
+          schedule_start_at: new Date(payload.schedule_start_at).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          schedule_old_start_at: new Date(payload.schedule_old_start_at).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        icon: 'i-heroicons-calendar',
+        action_url: userOrganizationsStore.relativePath(`/schedules?id=${payload.id}`),
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_activity_schedules_attendees.inserted') {
+      const payload = notification.payload as {
+        id: string;
+        author_name: string;
+        activity_id: string;
+        activity_name: string;
+        schedule_date: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_activity_schedules_attendees_inserted.title', {
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        description: t('notifications_items.course_activity_schedules_attendees_inserted.description', {
+          author_name: payload.author_name,
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        icon: 'i-heroicons-calendar',
+        action_url: null,
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_activity_schedules_attendees.removed') {
+      const payload = notification.payload as {
+        id: string;
+        author_name: string;
+        activity_id: string;
+        activity_name: string;
+        schedule_date: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_activity_schedules_attendees_removed.title', {
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        description: t('notifications_items.course_activity_schedules_attendees_removed.description', {
+          author_name: payload.author_name,
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        icon: 'i-heroicons-calendar',
+        action_url: null,
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_activity_schedules.status.updated') {
+      const payload = notification.payload as {
+        id: string;
+        author_name: string;
+        activity_id: string;
+        activity_name: string;
+        schedule_date: string;
+        schedule_status: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t(`notifications_items.course_activity_schedules_status_updated_${payload.schedule_status}.title`, {
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+        }),
+        description: t(`notifications_items.course_activity_schedules_status_updated_${payload.schedule_status}.description`, {
+          author_name: payload.author_name,
+          activity_name: payload.activity_name,
+          schedule_date: new Date(payload.schedule_date).toLocaleDateString(locale.value, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          schedule_status: payload.schedule_status,
+        }),
+        icon: 'i-heroicons-calendar',
+        action_url: null,
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_subscription_bills.ready_to_pay.updated') {
+      const payload = notification.payload as {
+        id: string;
+        course_type: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_subscription_bills_ready_to_pay_updated.title'),
+        description: t('notifications_items.course_subscription_bills_ready_to_pay_updated.description', {
+          course_type: payload.course_type,
+        }),
+        icon: 'i-heroicons-document',
+        action_url: userOrganizationsStore.relativePath('/billing'),
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_subscription_bills.paid_at.updated') {
+      const payload = notification.payload as {
+        id: string;
+        course_type: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_subscription_bills.paid_at.updated.title'),
+        description: t('notifications_items.course_subscription_bills.paid_at.updated.description', {
+          course_type: payload.course_type,
+        }),
+        icon: 'i-heroicons-document',
+        action_url: userOrganizationsStore.relativePath('/billing'),
+      }
+      items.push(item);
+    }
+    if (notification.notification_type === 'course_subscription_bills.canceled_at.updated') {
+      const payload = notification.payload as {
+        id: string;
+        course_type: string;
+      }
+      const item = {
+        id: notification.id,
+        created_at: notification.created_at,
+        notification_type: notification.notification_type,
+        title: t('notifications_items.course_subscription_bills_canceled_at_updated.title'),
+        description: t('notifications_items.course_subscription_bills_canceled_at_updated.description', {
+          course_type: payload.course_type,
+        }),
+        icon: 'i-heroicons-document',
+        action_url: userOrganizationsStore.relativePath('/billing'),
+      }
+      items.push(item);
+    }
+  }
+  return items;
 };
 </script>
 
@@ -66,20 +291,24 @@ const formatPayload = (payload: Record<string, string>) => {
         "description": "{author_name} hat dir {activity_name} am {schedule_date} zugewiesen."
       },
       "course_activity_schedules_attendees_inserted": {
-        "title": "Neue Teilnahmer:in",
-        "description": "{student_name} wurde zu {activity_name} am {schedule_date} hinzugefügt."
+        "title": "Neuer Termin - {activity_name}",
+        "description": "{author_name} hat dich zu {activity_name} am {schedule_date} hinzugefügt."
       },
       "course_activity_schedules_attendees_removed": {
-        "title": "Teilnahmer:in entfernt",
-        "description": "{student_name} wurde von {activity_name} am {schedule_date} entfernt."
+        "title": "Termin abgesagt - {activity_name}",
+        "description": "{author_name} hat dich von {activity_name} am {schedule_date} entfernt."
       },
-      "course_activity_schedules_status_updated": {
+      "course_activity_schedules_status_updated_CANCELED": {
         "title": "{activity_name} wurde abgesagt",
         "description": "{activity_name} am {schedule_date} findet nicht mehr statt."
       },
+      "course_activity_schedules_status_updated_COMPLETED": {
+        "title": "{activity_name} wurde abgeschlossen",
+        "description": "{activity_name} am {schedule_date} wurde abgeschlossen."
+      },
       "course_activity_schedules_start_at_updated": {
-        "title": "Dein Termin am {schedule_date}",
-        "description": "Der Termin für {activity_name} wurde auf {schedule_date} um {time} aktualisiert."
+        "title": "{activity_name} am {schedule_start_at}",
+        "description": "Der Termin für {activity_name} wurde von dem {schedule_old_start_at} auf den {schedule_start_at} geändert."
       },
       "course_activity_schedules_deleted": {
         "title": "Kursaktivität gelöscht",
@@ -89,15 +318,15 @@ const formatPayload = (payload: Record<string, string>) => {
         "title": "Du hast an {activity_name} am {schedule_date} teilgenommen.",
         "description": "Dein Fortschritt in {activity_name} wurde aufgezeichnet."
       },
-      "course_subscription_bills.paid_at.updated": {
+      "course_subscription_bills_paid_at_updated": {
         "title": "Rechnung bezahlt",
         "description": "Die Rechnung für deinen {course_type} Kurs wurde bezahlt."
       },
-      "course_subscription_bills.ready_to_pay.updated": {
+      "course_subscription_bills_ready_to_pay_updated": {
         "title": "Rechnung bereit zur Zahlung",
         "description": "Die Rechnung für deinen {course_type} Kurs ist bereit zur Zahlung."
       },
-      "course_subscription_bills.canceled_at.updated": {
+      "course_subscription_bills_canceled_at_updated": {
         "title": "Rechnung storniert",
         "description": "Die Rechnung für deinen {course_type} Kurs wurde storniert."
       }

@@ -26,6 +26,7 @@ export const useNotificationsStore = defineStore('notifications', () => {
         console.log('Loaded notifications:', data)
 
         notifications.value = data
+        return data
     }
 
     async function markAsRead(id: string) {

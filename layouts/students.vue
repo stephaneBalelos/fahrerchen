@@ -31,11 +31,19 @@
 
         <template #right>
           <UColorModeButton />
-          <UButton :label="t('logout')" color="gray" @click="logout" />
+          <UButton
+            icon="i-heroicons-bell"
+            size="sm"
+            color="white"
+            square
+            variant="ghost"
+            @click="openNotificationsSlideover"
+          />
+          <UButton color="white" variant="ghost" :icon="'i-heroicons-arrow-left-start-on-rectangle'" @click="logout" />
         </template>
 
         <template #panel>
-          <UNavigationTree :links="links" default-open/>
+          <UNavigationTree :links="links" default-open />
         </template>
       </UHeader>
       <ClientOnly>
@@ -48,10 +56,12 @@
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core";
 import type { Database } from "~/types/app.types";
+import NotificationsSlideover from "~/components/account/NotificationsSlideover.vue";
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
 const studentStore = useStudentStore();
+const slideover = useSlideover();
 
 const { t } = useI18n({
   useScope: "local",
@@ -102,6 +112,10 @@ const links = computed(() => {
 
   return l;
 });
+
+const openNotificationsSlideover = () => {
+  slideover.open(NotificationsSlideover);
+};
 
 async function logout() {
   await client.auth.signOut();

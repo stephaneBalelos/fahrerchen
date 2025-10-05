@@ -103,8 +103,10 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                             payload: {
                                 id: payloadNew.id,
                                 author_name: `${author.user.firstname} ${author.user.lastname}`,
+                                activity_id: activity.id,
                                 activity_name: activity.name,
-                                date: payloadNew.start_at
+                                schedule_start_at: payloadNew.start_at,
+                                schedule_assigned_to: payloadNew.assigned_to
                             },
                             organization_id: organization.id
                         })
@@ -114,6 +116,7 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                 // Notify the students about the date change
                 const target_user_ids= new Set<string>()
                 const payloadNew = payload.new as Database['public']['Tables']['course_activity_schedules']['Row']
+                const payloadOld = payload.old as Database['public']['Tables']['course_activity_schedules']['Row']
                 const attendees = await getScheduleAttendeesByScheduleId(client, payloadNew.id)
                 if (!attendees) {
                     throw new Error(`No attendees found for schedule: ${payloadNew.id}`)
@@ -136,7 +139,9 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                             id: payloadNew.id,
                             author_name: author.user.firstname + ' ' + author.user.lastname,
                             activity_name: activity?.name,
-                            schedule_date: payloadNew.start_at
+                            activity_type: activity?.activity_type,
+                            schedule_start_at: payloadNew.start_at,
+                            schedule_old_start_at: payloadOld.start_at
                         },
                         organization_id: organization.id
                     })
@@ -159,9 +164,6 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                 if (subscription.s.user_id) {
                     target_user_ids.add(subscription.s.user_id)
                 }
-                if (schedule.assigned_to && schedule.assigned_to !== job.actor_id) {
-                    target_user_ids.add(schedule.assigned_to)
-                }
 
                 // Insert Notification
                 if (target_user_ids.size > 0) {
@@ -172,6 +174,7 @@ async function processJobs(client: SupabaseClient<Database>, jobs: Array<Databas
                         payload: {
                             id: payloadNew.id,
                             schedule_status: schedule.status,
+                            schedule_assigned_to: schedule.assigned_to,
                             author_name: author.user.firstname + ' ' + author.user.lastname,
                             activity_name: schedule.activity?.name,
                             schedule_date: schedule.start_at
