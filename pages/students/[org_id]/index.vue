@@ -1,15 +1,16 @@
 <template>
   <UDashboardPanelContent>
-    <UContainer class="w-full">
-      <UDashboardSection
-        :title="
-          t('hello_student', {
-            student: `${studentStore.student?.firstname} ${studentStore.student?.lastname}`,
-          })
-        "
-        :description="studentStore.student?.email"
-        class="py-12"
-      >
+    <UContainer
+      v-if="studentStore.student"
+      class="w-full">
+      <UDashboardSection :description="studentStore.student?.email">
+        <template #title>
+          {{
+            t("hello_student", {
+              student: `${studentStore.student?.firstname} ${studentStore.student?.lastname}`,
+            })
+          }}
+        </template>
         <template #links>
           <UButton
             :label="t('edit_profile')"
@@ -17,15 +18,15 @@
             @click="openEditStudent"
           />
         </template>
-        <div v-if="studentStore.subscriptions.length > 0">
+        <div v-if="studentSubscription.length > 0">
           <div
-            v-for="subscription in studentStore.subscriptions"
+            v-for="subscription in studentSubscription"
             :key="subscription.id"
           >
             <UButton
-              :to="`/students/${org_id}/subscription/${subscription.id}`"
+              :to="`/students/${studentStore.student?.organization_id}/subscription/${subscription.id}`"
             >
-              {{ subscription.course_name }}
+              {{ g(`course_types.${subscription.course.type}.name_full`) }}
             </UButton>
           </div>
         </div>
@@ -46,15 +47,10 @@
           <div class="flex flex-col space-y-4">
             <div class="flex flex-col space-y-2">
               <div class="text-lg font-semibold">
-                {{
-                  organizationData.name
-                }}
+                {{ organizationData.name }}
               </div>
               <div class="text-sm">
-                {{
-                  organizationData.description ??
-                  t("not_specified")
-                }}
+                {{ organizationData.description ?? t("not_specified") }}
               </div>
             </div>
             <div class="flex flex-col space-y-2">
@@ -65,9 +61,7 @@
               <div class="text-sm">
                 {{ organizationData.address_zip }}
                 {{ organizationData.address_city }},
-                {{
-                  organizationData.address_country
-                }}
+                {{ organizationData.address_country }}
               </div>
             </div>
           </div>
@@ -81,10 +75,7 @@
                   {{ t("contact_email") }}
                 </div>
                 <div class="text-sm">
-                  {{
-                    organizationData.email ??
-                    t("not_specified")
-                  }}
+                  {{ organizationData.email ?? t("not_specified") }}
                 </div>
               </div>
               <div class="flex flex-col">
@@ -92,10 +83,7 @@
                   {{ t("contact_phone") }}
                 </div>
                 <div class="text-sm">
-                  {{
-                    organizationData.phone_number ??
-                    t("not_specified")
-                  }}
+                  {{ organizationData.phone_number ?? t("not_specified") }}
                 </div>
               </div>
               <div class="flex flex-col">
@@ -103,24 +91,18 @@
                   {{ t("contact_website") }}
                 </div>
                 <div class="text-sm">
-                  {{
-                    organizationData.website ??
-                    t("not_specified")
-                  }}
+                  {{ organizationData.website ?? t("not_specified") }}
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="coursesData" class="pt-8">
+          <div v-if="studentStore.courses.length > 0" class="pt-8">
             <div class="text-lg font-semibold">{{ t("org_courses") }}</div>
             <div class="grid grid-cols-2 gap-4 mt-4">
-              <UCard
-                v-for="course in coursesData"
-                :key="course.id"
-              >
+              <UCard v-for="course in studentStore.courses" :key="course.id">
                 <div class="flex flex-col space-y-2">
-                  <div class="text-lg font-semibold">{{ course.name }}</div>
-                  <div class="text-sm">{{ course.description }}</div>
+                  <div class="text-lg font-semibold">{{ g(`course_types.${course.type}.name_full`) }}</div>
+                  <div class="text-sm">{{ g(`course_types.${course.type}.description`) }}</div>
                 </div>
               </UCard>
             </div>
@@ -134,51 +116,33 @@
 <script setup lang="ts">
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 
-const studentStore = useStudentStore();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient();
-const route = useRoute();
-const org_id = route.params.org_id as string;
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
+const userOrganizationsStore = useUserOrganizationsStore();
+const studentStore = useStudentStore();
 const toast = useToast();
 const slideover = useSlideover();
 
+const organizationData = computed(() => {
+  return userOrganizationsStore.selectedOrganization ?? null;
+});
 
-const { data: organizationData } = await useAsyncData(
-  "organization/" + org_id,
-  async () => {
-    if (!org_id) return false;
-    const { data, error } = await client
-      .from("organizations")
-      .select("*")
-      .eq("id", org_id)
-      .single();
-    if (error) {
-      console.error("Error fetching organization:", error);
-      return false;
-    }
-    return data;
-  }
-);
+const studentSubscription = computed(() => {
+  return studentStore.subscriptions.map((sub) => {
+    const course = studentStore.courses.find(
+      (course) => course.id === sub.course_id
+    );
+    return { ...sub, course: course };
+  }).filter(sub => sub.course !== undefined) as (typeof studentStore.subscriptions[0] & { course: typeof studentStore.courses[0] })[];
+});
 
-const { data: coursesData } = await useAsyncData(
-  "organization_courses/" + org_id,
-  async () => {
-    if (!org_id) return false;
-    const { data, error } = await client
-      .from("courses")
-      .select("*")
-      .eq("organization_id", org_id);
-    if (error) {
-      console.error("Error fetching organization courses:", error);
-      return false;
-    }
-    return data;
-  }
-);
 
 async function openEditStudent() {
   if (!studentStore.student) {
@@ -186,10 +150,10 @@ async function openEditStudent() {
   }
   slideover.open(EditStudentForm, {
     studentId: studentStore.student.id,
-    organizationId: org_id,
+    organizationId: studentStore.student.organization_id,
     "onStudent-updated": () => {
       if (studentStore.student?.user_id) {
-        studentStore.loadStudent(org_id, studentStore.student.user_id);
+        studentStore.loadStudent(studentStore.student.organization_id, studentStore.student.user_id);
       }
       slideover.close();
 

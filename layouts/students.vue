@@ -61,17 +61,8 @@ const organization = computedAsync(async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     return null;
   }
-  const { data, error } = await client
-    .from("organizations")
-    .select("*")
-    .eq("id", userOrganizationsStore.selectedOrganization.organization_id)
-    .single();
-  if (error) {
-    console.log(error);
-    return null;
-  }
 
-  return data;
+  return userOrganizationsStore.selectedOrganization;
 });
 
 const links = computedAsync(async () => {
@@ -79,33 +70,33 @@ const links = computedAsync(async () => {
     return [];
   }
 
-  if (!subscriptionStore.subscription) {
+  if (!subscriptionStore.selectedSubscription) {
     return [];
   }
 
-  const subscription_id = subscriptionStore.subscription.id;
+  const subscription_id = subscriptionStore.selectedSubscription.id;
   const l = [
     {
       label: t("overview"),
       icon: "i-heroicons-home",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}`,
       exact: true,
     },
     {
       label: t("course"),
       icon: "i-heroicons-book-open",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/course`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/course`,
     },
     {
       label: t("activity"),
       icon: "i-heroicons-calendar",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/activity`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/activity`,
       exact: true,
     },
     {
       label: t("bills"),
       icon: "i-heroicons-document",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/billing`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/billing`,
     },
   ];
 

@@ -44,6 +44,22 @@ export const useSubscriptionStore = defineStore('subscription', () => {
         return subscriptions.value.find(sub => sub.id === id) || null
     }
 
+    const getSubscriptionsForStudent = async (org_id: string, student_id: string): Promise<AppCourseSubscription[]> => {
+        try {
+            const { data, error } = await supabase
+                .from('course_subscriptions')
+                .select('*')
+                .eq('student_id', student_id)
+                .eq('organization_id', org_id);
+            if (error) {
+                throw new Error(`Error loading subscriptions for student ${student_id}: ${error.message}`);
+            }
+            return data;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    }
 
     watch(() => userOrganizationsStore.selectedOrganization, () => {
         loadSubscriptions()
@@ -58,5 +74,6 @@ export const useSubscriptionStore = defineStore('subscription', () => {
         selectedSubscription,
         isLoadingSubscriptions,
         getSubscriptionById,
+        getSubscriptionsForStudent
     }
 })

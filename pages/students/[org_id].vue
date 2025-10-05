@@ -14,7 +14,6 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const userStore = useUserStore();
 const userPermissionStore = useUserPermissionsStore();
 const studentStore = useStudentStore();
-const stripeStore = useStripeStore();
 const route = useRoute();
 
 await useAsyncData('userOrganizations', async () => {
@@ -34,11 +33,6 @@ await useAsyncData('student', async () => {
     return true;
 });
 
-await useAsyncData('stripe', async () => {
-    await stripeStore.fetchStripeAccount();
-    await stripeStore.getStripeAppSettings();
-    return true;
-});
 </script>
 
 <style scoped>
