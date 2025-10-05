@@ -8,6 +8,16 @@
       orientation="horizontal"
       class="px-4 pt-8"
     >
+    <template #links>
+        <UButton
+          size="sm"
+          color="gray"
+          variant="outline"
+          square
+          icon="mdi-pencil"
+          @click="openBillCustomerModal"
+        />
+    </template>
       <NuxtErrorBoundary>
         <EditBillSettingsForm
           v-if="userOrganizationsStore.selectedOrganization"
@@ -25,12 +35,21 @@
 
 <script setup lang="ts">
 import EditBillSettingsForm from "~/components/forms/EditBillSettingsForm.vue";
+import InvoiceCustomizerModal from "~/components/settings/InvoiceCustomizerModal.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
 
 const userOrganizationsStore = useUserOrganizationsStore();
+const modal = useModal();
+
+const openBillCustomerModal = () => {
+  if (!userOrganizationsStore.selectedOrganization) return;
+  modal.open(InvoiceCustomizerModal, {
+    organizationId: userOrganizationsStore.selectedOrganization.id,
+  });
+};
 </script>
 
 <style scoped></style>
