@@ -1,6 +1,5 @@
 <template>
   <UDashboardSection
-  v-if="subscriptionStore.selectedSubscription"
     icon="i-heroicons-document-text"
     :title="t('settlements')"
     :description="t('settlements_description')"
@@ -17,7 +16,7 @@
       </div>
       <UButton
         v-if="
-          permissionsStore.hasPermission('course_subscription_bills.create') && subscriptionStore.selectedSubscription.archived_at === null
+          permissionsStore.hasPermission('course_subscription_bills.create')
         "
         color="primary"
         variant="soft"
@@ -80,7 +79,7 @@
         />
       </div>
     </div>
-    <div v-else-if="status === 'pending'">
+    <div v-else-if="status === 'pending'" class="flex divide-x">
       <div>
         <USkeleton class="h-4 w-full" />
         <USkeleton class="h-4 w-1/2" />
@@ -112,7 +111,6 @@ const toast = useToast();
 const isGeneratingBill = ref(false);
 
 const permissionsStore = useUserPermissionsStore();
-const subscriptionStore = useSubscriptionStore();
 
 const {
   data: bill_items,

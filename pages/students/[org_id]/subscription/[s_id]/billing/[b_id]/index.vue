@@ -19,7 +19,7 @@
       </template>
       <div v-if="bill" class="border-none">
         <BillsBillingList :bill-id="bill_id" />
-        <div class="flex justify-end w-full">
+        <div class="flex justify-end w-full gap-4">
           <div class="flex flex-col items-end justify-end py-4">
             <span
               class="text-sm font-semibold text-gray-500 dark:text-gray-400"
@@ -44,7 +44,7 @@
               >{{ t("total_with_vat") }}</span
             >
             <span v-if="bill.total_with_vat" class="text-lg font-bold">{{
-              bill.total_with_vat
+              formatCurrency(bill.total_with_vat)
             }}</span>
           </div>
         </div>
@@ -124,7 +124,9 @@ async function openCheckoutModal() {
     "canceled": "Storniert am {date}",
     "not_paid": "Nicht bezahlt",
     "pay_now": "Jetzt bezahlen",
-    "total": "Gesamt"
+    "total": "Gesamt",
+    "vat": "MwSt.",
+    "total_with_vat": "Gesamt inkl. MwSt."
   },
   "en": {
     "bill_number": "Bill number {id}",
@@ -134,7 +136,9 @@ async function openCheckoutModal() {
     "canceled": "Canceled at {date}",
     "not_paid": "Not paid",
     "pay_now": "Pay now",
-    "total": "Total"
+    "total": "Total",
+    "vat": "VAT",
+    "total_with_vat": "Total with VAT"
   }
 }
 </i18n>

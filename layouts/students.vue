@@ -51,7 +51,7 @@ import type { Database } from "~/types/app.types";
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
-const subscriptionStore = useSubscriptionStore();
+const studentStore = useStudentStore();
 
 const { t } = useI18n({
   useScope: "local",
@@ -65,16 +65,16 @@ const organization = computedAsync(async () => {
   return userOrganizationsStore.selectedOrganization;
 });
 
-const links = computedAsync(async () => {
+const links = computed(() => {
   if (!userOrganizationsStore.selectedOrganization) {
     return [];
   }
 
-  if (!subscriptionStore.selectedSubscription) {
+  if (!studentStore.selectedSubscription) {
     return [];
   }
 
-  const subscription_id = subscriptionStore.selectedSubscription.id;
+  const subscription_id = studentStore.selectedSubscription.id;
   const l = [
     {
       label: t("overview"),
