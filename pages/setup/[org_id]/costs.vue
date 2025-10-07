@@ -8,7 +8,7 @@
         v-if="isCostSettingsSetupComplete"
         color="primary"
         icon="i-heroicons-check-circle"
-        @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/required-documents`)"
+        @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/billing`)"
         >{{
           t("continue")
         }}</UButton

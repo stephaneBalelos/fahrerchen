@@ -11,7 +11,7 @@
         @click="
           () =>
             navigateTo(
-              `/setup/${organizationsStore.selectedOrganization?.id}/costs`
+              `/setup/${organizationsStore.selectedOrganization?.id}/required-documents`
             )
         "
         >{{ t("continue") }}</UButton
