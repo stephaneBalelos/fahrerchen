@@ -1,77 +1,78 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar :title="t('title')" />
-    <UDashboardPanelContent>
-      <UPageHeader
-        class="courses-header"
-        :headline="t('headline')"
-        :title="t('title')"
-        :description="t('description')"
-      />
-      <div
-        v-if="coursesStore.courses && coursesStore.courses.length > 0"
-        class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
-      >
-        <UCard v-for="(d, index) in coursesStore.courses" :key="index">
-          <template #header>
-            <div class="flex justify-between items-center w-full">
-              <div class="flex flex-col flex-1 items-start">
-                <p class="font-medium">
-                  {{ g(`course_types.${d.type}.name_full`) }}
-                </p>
-                <!-- <p class="text-xs text-gray-500 truncate w-full">{{ g(`course_types.${d.type}.description`) }}</p> -->
-              </div>
-              <UButton color="white" size="xs" icon="i-heroicons-pencil">{{
-                t("open_course")
-              }}</UButton>
+  <UDashboardPanelContent>
+    <UPageHeader
+      class="courses-header"
+      :headline="t('headline')"
+      :title="t('title')"
+      :description="t('description')"
+    />
+    <div
+      v-if="coursesStore.courses && coursesStore.courses.length > 0"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-2"
+    >
+      <UCard v-for="(d, index) in coursesStore.courses" :key="index">
+        <template #header>
+          <div class="flex justify-between items-center w-full">
+            <div class="flex flex-col flex-1 items-start">
+              <p class="font-medium">
+                {{ g(`course_types.${d.type}.name_full`) }}
+              </p>
+              <!-- <p class="text-xs text-gray-500 truncate w-full">{{ g(`course_types.${d.type}.description`) }}</p> -->
             </div>
-          </template>
-          <div class="flex flex-col gap-8">
-            <CourseCostsList :course-id="d.id" />
-            <CourseActivitiesList :course-id="d.id" />
+            <UButton
+              color="white"
+              size="xs"
+              icon="i-heroicons-pencil"
+              @click="() => {}"
+              >{{ t("open_course") }}</UButton
+            >
           </div>
-          <template #footer>
-            <div class="flex justify-between items-center gap-4">
-              <div class="flex gap-2">
-                <UBadge
-                  v-if="d.is_active"
-                  color="green"
-                  variant="soft"
-                  :label="t('active')"
-                />
-                <UBadge v-if="d.is_active" color="white">
-                  {{
-                    t("active_subscription_count", {
-                      count: subscriptionStore.subscriptions.filter(
-                        (s) => s.course_id === d.id && s.archived_at === null
-                      ).length,
-                    })
-                  }}
-                </UBadge>
-                <UBadge v-else color="white">
-                  {{
-                    t("total_subscription_count", {
-                      count: subscriptionStore.subscriptions.filter(
-                        (s) => s.course_id === d.id
-                      ).length,
-                    })
-                  }}
-                </UBadge>
-              </div>
-              <div class="flex flex-col items-end">
-                <p class="text-sm text-gray-500">
-                  {{ t('total_costs') }}
-                </p>
-                <p class="font-medium">
-                  {{ formatCurrency(1200) }}
-                </p>
-              </div>
+        </template>
+        <div class="flex flex-col gap-8">
+          <CourseCostsList :course-id="d.id" />
+          <CourseActivitiesList :course-id="d.id" />
+        </div>
+        <template #footer>
+          <div class="flex justify-between items-center gap-4">
+            <div class="flex gap-2">
+              <UBadge
+                v-if="d.is_active"
+                color="green"
+                variant="soft"
+                :label="t('active')"
+              />
+              <UBadge v-if="d.is_active" color="white">
+                {{
+                  t("active_subscription_count", {
+                    count: subscriptionStore.subscriptions.filter(
+                      (s) => s.course_id === d.id && s.archived_at === null
+                    ).length,
+                  })
+                }}
+              </UBadge>
+              <UBadge v-else color="white">
+                {{
+                  t("total_subscription_count", {
+                    count: subscriptionStore.subscriptions.filter(
+                      (s) => s.course_id === d.id
+                    ).length,
+                  })
+                }}
+              </UBadge>
             </div>
-          </template>
-        </UCard>
-      </div>
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+            <div class="flex flex-col items-end">
+              <p class="text-sm text-gray-500">
+                {{ t("total_costs") }}
+              </p>
+              <p class="font-medium">
+                {{ formatCurrency(1200) }}
+              </p>
+            </div>
+          </div>
+        </template>
+      </UCard>
+    </div>
+  </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
@@ -110,7 +111,6 @@ const { t: g } = useI18n({
     "active_subscription_count": "{count} aktive Anmeldung(en)",
     "total_subscription_count": "{count} Anmeldung(en)",
     "total_costs": "Kurs gesamt ab"
-
   },
   "en": {
     "title": "Course offerings",
