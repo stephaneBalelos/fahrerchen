@@ -93,18 +93,24 @@ export type Database = {
           course_id: string
           id: string
           organization_id: string
+          price: number | null
+          required: number | null
         }
         Insert: {
           activity_id: string
           course_id: string
           id?: string
           organization_id: string
+          price?: number | null
+          required?: number | null
         }
         Update: {
           activity_id?: string
           course_id?: string
           id?: string
           organization_id?: string
+          price?: number | null
+          required?: number | null
         }
         Relationships: [
           {
@@ -365,18 +371,21 @@ export type Database = {
           course_id: string
           id: string
           organization_id: string
+          price: number | null
         }
         Insert: {
           cost_id: string
           course_id: string
           id?: string
           organization_id: string
+          price?: number | null
         }
         Update: {
           cost_id?: string
           course_id?: string
           id?: string
           organization_id?: string
+          price?: number | null
         }
         Relationships: [
           {

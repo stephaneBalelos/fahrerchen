@@ -63,3 +63,13 @@ const costs = computed(() => {
 <style scoped>
 
 </style>
+
+<i18n lang="json">
+{
+  "en": {
+    "title": "Course Costs"
+  },
+  "de": {
+    "title": "Kurskosten"
+  }
+}</i18n>

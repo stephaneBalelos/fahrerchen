@@ -13,6 +13,8 @@ alter table public.course_activity_schedules enable row level security;
 revoke update on table public.course_activity_schedules from authenticated, anon;
 grant update (assigned_to, status, start_at, duration_minutes) on table public.course_activity_schedules to authenticated;
 
+
+-- COURSE ACTIVITY SCHEDULES ATTENDEES
 create table public.course_activity_schedules_attendees (
   id            uuid default uuid_generate_v4() primary key,
   schedule_id   uuid references public.course_activity_schedules on delete cascade not null,

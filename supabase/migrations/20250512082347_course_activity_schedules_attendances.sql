@@ -47,6 +47,8 @@ returns trigger as $$
 declare
   r_attendee record;
   v_activity record;
+  v_course_id uuid;
+  c_activity_price numeric;
   a_firstname text;
   a_lastname text;
   a_email text;
@@ -59,6 +61,20 @@ begin
   end if;
 
   for r_attendee in select * from public.course_activity_schedules_attendees where schedule_id = new.id loop
+    -- Get course id from subscription
+    select course_id into v_course_id from public.course_subscriptions where id = r_attendee.subscription_id;
+    if v_course_id is null then
+      raise exception 'Course subscription not found for attendance record creation, subscription id: %', r_attendee.subscription_id;
+    end if;
+
+    -- Get course activity combination to check if the activity belongs to the course and get the alternative price if set
+    select price into c_activity_price from public.course_activities_combinations where course_id = v_course_id and activity_id = new.activity_id;
+
+    -- If price is null in the combination, use the default activity price
+    if c_activity_price is null then
+      select price into c_activity_price from public.course_activities where id = new.activity_id;
+    end if;
+    
     select * into v_activity from public.course_activities where id = new.activity_id;
     insert into public.course_activity_schedules_attendances (
       activity_name,
@@ -79,7 +95,7 @@ begin
       v_activity.name,
       v_activity.description,
       v_activity.activity_type,
-      v_activity.price,
+      c_activity_price,
       new.start_at,
       new.start_at + (new.duration_minutes || ' minutes')::interval,
       a_email,

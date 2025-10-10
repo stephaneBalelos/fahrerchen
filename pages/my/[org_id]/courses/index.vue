@@ -29,7 +29,7 @@
           </div>
         </template>
         <div class="flex flex-col gap-8">
-          <CourseCostsList :course-id="d.id" />
+          <CourseCostsOverview :course-id="d.id" />
           <CourseActivitiesOverview :course-id="d.id" />
         </div>
         <template #footer>
@@ -76,9 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import CourseCostsList from "~/components/courses/CourseCostsList.vue";
 import CourseActivitiesOverview from "~/components/courses/CourseActivitiesOverview.vue";
 import { formatCurrency } from "~/utils/formatters";
+import CourseCostsOverview from "~/components/courses/CourseCostsOverview.vue";
 
 definePageMeta({
   layout: "orgs",

@@ -2,7 +2,6 @@
   <UDashboardSection
     :title="t('course_costs')"
     :description="t('set_course_costs')"
-    orientation="horizontal"
     class="px-4 py-6"
   >
     <template #links>

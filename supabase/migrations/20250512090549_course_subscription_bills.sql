@@ -33,15 +33,14 @@ create table public.course_subscription_bill_items (
   course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
   title        text not null,
   description   text not null,
-  price       numeric default 0 not null, -- price can be negative if the attendance was refunded
+  price       numeric default 0 not null, -- price can be negative if the attendance was refunded or a payment adjustment is made
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   check (
     (course_cost_id is not null and course_activity_attendance_id is null) or
     (course_cost_id is null and course_activity_attendance_id is not null) or
     (course_cost_id is null and course_activity_attendance_id is null)
-  ), -- either cost_id or attendance_id can be set, but not both
-  check (course_cost_id is null and (activity_type is not null and course_activity_attendance_id is not null) or (course_cost_id is not null and activity_type is null and course_activity_attendance_id is null) or (course_cost_id is null and activity_type is null and course_activity_attendance_id is null))
+  ) -- either cost_id or attendance_id can be set, but not both
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;
@@ -187,6 +186,7 @@ declare
   cost_name text;
   cost_description text;
   cost_price numeric;
+  c_cost_price numeric;
 begin
   -- Check if the subscription is active
   if not public.is_subscription_active(new.id) then
@@ -194,13 +194,18 @@ begin
   end if;
 
   -- Loop through all the course costs combinations for the course
-  for cost_id, cost_name, cost_description, cost_price in
-    select c.id, c.name, c.description, c.price
+  for cost_id, cost_name, cost_description, cost_price, c_cost_price in
+    select c.id, c.name, c.description, c.price, ccc.price
     from public.course_costs c
     join public.course_costs_combinations ccc on ccc.cost_id = c.id
     where ccc.course_id = new.course_id
       and ccc.organization_id = new.organization_id
   loop
+    -- If there is a specific price for the cost in the combination, use it
+    if c_cost_price is not null then
+      cost_price := c_cost_price;
+    end if;
+
     -- Insert a bill item for each cost
     insert into public.course_subscription_bill_items (course_subscription_id, course_cost_id, title, description, price, organization_id)
     values (new.id, cost_id, cost_name, cost_description, cost_price, new.organization_id);
@@ -266,7 +271,7 @@ declare
   bill_item_price numeric;
 begin
   -- check if the attendance has a bill item
-  select id, bill_id, price into bill_item_id, bill_item_bill_id, bill_item_price from public.course_subscription_bill_items where course_activity_attendance_id = new.id;
+  select id, bill_id, price into bill_item_id, bill_item_bill_id, bill_item_price from public.course_subscription_bill_items where course_activity_attendance_id = old.id;
 
   -- if the bill item is already attached to a bill, create a refund item
   if bill_item_bill_id is not null then
@@ -282,10 +287,10 @@ begin
       old.course_subscription_id,
       old.activity_name,
       old.activity_description,
-      old.activity_type,
       -- refund the price of the attendance
+      old.activity_type,
       -1 * bill_item_price,
-      new.organization_id
+      old.organization_id
     );
   else
     -- if the bill item is not attached to a bill, delete it

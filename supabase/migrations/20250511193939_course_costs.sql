@@ -35,6 +35,7 @@ create table public.course_costs_combinations (
   id            uuid default uuid_generate_v4() primary key,
   course_id    uuid references public.courses on delete cascade not null,
   cost_id      uuid references public.course_costs on delete cascade not null,
+  price        numeric default null check (price >= 0),
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_id, cost_id)
 );

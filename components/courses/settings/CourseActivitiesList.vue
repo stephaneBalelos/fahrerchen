@@ -90,6 +90,7 @@
             </p>
             <UCard
               :ui="{
+                base: 'overflow-hidden',
                 body: {
                   padding: 'sm:p-0 py-0 px-0',
                 },

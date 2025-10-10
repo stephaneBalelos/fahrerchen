@@ -1,6 +1,7 @@
 <template>
   <UCard
     :ui="{
+      base: 'overflow-hidden',
       header: {
         padding: 'p-0 sm:p-0',
       },
