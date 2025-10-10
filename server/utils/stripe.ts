@@ -12,9 +12,6 @@ export const stripeClient = async (key: string) => {
             message: 'Failed to load stripe client'
         })
     } catch (error) {
-        throw createError({
-            status: 500,
-            message: 'Failed to load stripe client'
-        })
+        console.error('Error initializing Stripe client:', error);
     }
 }

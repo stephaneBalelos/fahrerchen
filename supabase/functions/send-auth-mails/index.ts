@@ -8,8 +8,6 @@ import { sendEmail } from '../_shared/utils.ts';
 
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string
 
-
-
 Deno.serve(async (req) => {
     if (req.method !== 'POST') {
         return new Response('not allowed', { status: 400 })

@@ -8,21 +8,22 @@ create table if not exists public.organizations(
   avatar_path    text,
   name          text not null,
   description       text,
-  email         text,
-  phone_number    text,
+  email         text not null,
+  phone_number    text not null,
   website       text,
   allow_self_registration  boolean default true not null,
   preferred_language    text default 'de' not null,
-  address_street  text,
-  address_zip    text,
-  address_city  text,
-  address_country text,
+  address_street  text not null,
+  address_zip    text not null,
+  address_city  text not null,
+  address_country text not null,
+  setup_completed  boolean default false not null,
   owner_id      uuid references public.users not null
 );
 comment on table public.organizations is 'organization data.';
 alter table public.organizations enable row level security;
 revoke update on table public.organizations from authenticated, anon;
-grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration) on table public.organizations to authenticated;
+grant update (name, description, avatar_path, email, phone_number, website, address_street, address_zip, address_city, address_country, preferred_language, allow_self_registration, setup_completed) on table public.organizations to authenticated;
 
 -- Indexes for faster lookups
 create index idx_organizations_owner_id on public.organizations(owner_id);
@@ -135,18 +136,19 @@ create or replace function public.are_users_in_same_organization(
   user_id_2 uuid
 )
 returns boolean as $$
-declare
-  org_id_1 uuid;
-  org_id_2 uuid;
 begin
 
-  -- chech if user_id are the same
+  -- check if user_id are the same
   if user_id_1 = user_id_2 then
     return true;
   end if;
 
-  return exists (select 1 from public.organization_members member_1 join organization_members member_2 on member_1.organization_id = member_2.organization_id
-  where member_1.user_id = user_id_1 and member_2.user_id = user_id_2); 
+  return exists (
+    select 1
+    from public.organization_members om1
+    join public.organization_members om2 on om1.organization_id = om2.organization_id
+    where om1.user_id = user_id_1 and om2.user_id = user_id_2
+  );
 end;
 $$ language plpgsql security definer set search_path = '';
 
@@ -155,7 +157,7 @@ $$ language plpgsql security definer set search_path = '';
 -- Organizations Policies
 create policy "Everyone can see organizations avatars" on storage.objects for select to authenticated, anon using (true);
 
-create policy "members_can_read_their_organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id));
+create policy "members_can_read_their_organizations" on public.organizations for select to authenticated, anon using (public.authorize('organizations.read', id) or public.is_main_owner(id));
 insert into public.role_permissions
     (role, permission) 
 values 
@@ -171,7 +173,7 @@ values
     ('owner', 'organizations.update'),
     ('manager', 'organizations.update');
 
-create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check ((select auth.uid()) = owner_id);
+create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check (owner_id = (select auth.uid()));
 
 create policy "main_owner_can_delete_organizations" on public.organizations for delete to authenticated using (public.is_main_owner(id));
 

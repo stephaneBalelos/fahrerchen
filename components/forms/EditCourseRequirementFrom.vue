@@ -51,27 +51,19 @@
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
+import type { CourseRequiredDocumentEdit } from "~/types/app.types";
 import type { Form} from "#ui/types";
 
 type Props = {
-  courseid: string;
-  orgid: string;
-  requirementid?: string;
+  courseRequiredDocumentId?: string;
 };
-
-type CourseRequirementEdit = Omit<
-  Database["public"]["Tables"]["course_required_documents"]["Row"],
-  "id" | "organization_id" | "course_id" | "name_slug"
->;
-
-const tutorialStore = useTutorialStore();
+const slideover = useSlideover();
 const props = defineProps<Props>();
-const client = useSupabaseClient<Database>();
-const form = ref<Form<CourseRequirementEdit> | null>(null);
+const form = ref<Form<CourseRequiredDocumentEdit> | null>(null);
 const $emit = defineEmits(['requirement-saved', 'requirement-created']);
+const courseRequiredDocumentsStore = useCourseRequiredDocumentsStore();
 
-const state = reactive<CourseRequirementEdit>({
+const state = reactive<CourseRequiredDocumentEdit>({
   name: "",
   description: ""
 });
@@ -80,37 +72,28 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const {
-  data: requirement,
-} = useAsyncData(`course_requirement_${props.requirementid}`, async () => {
-  console.log(props.requirementid);
-  if (!props.requirementid) return null;
-  const { data, error } = await client
-    .from("course_required_documents")
-    .select("*")
-    .eq("id", props.requirementid)
-    .single();
 
-    console.log(data);
+onMounted(async () => {
+  if (props.courseRequiredDocumentId) {
+    try {
+      const data = await courseRequiredDocumentsStore.getCourseRequiredDocument(props.courseRequiredDocumentId);
 
-    if (error) {
-        console.error(error);
-        throw error;
-    } else {
-      state.name = data.name;
-      state.description = data.description;
+    if (!data) {
+      throw new Error("Course cost not found");
     }
-  return data;
-});
-
-onMounted(() => {
-  if (requirement.value) {
-    state.name = requirement.value.name;
-    state.description = requirement.value.description;
+    state.name = data.name;
+    state.description = data.description;
+    } catch (error) {
+      console.error("Error loading course cost:", error);
+      // Handle error, e.g., show a notification
+    }
   }
 });
+onUnmounted(() => {
+  slideover.reset();
+});
 
-const validate = (state: CourseRequirementEdit) => {
+const validate = (state: CourseRequiredDocumentEdit) => {
   const errors = [];
   if (!state.name)
     errors.push({ path: "name", message: "Please enter a name" });
@@ -120,40 +103,32 @@ const validate = (state: CourseRequirementEdit) => {
 };
 
 const saveCourseRequirement = async () => {
-    
-  if (props.requirementid) {
-    try {
-      const {error} = await client
-        .from("course_required_documents")
-        .update(state)
-        .eq("id", props.requirementid);
-        if (error) throw error;
-      $emit('requirement-saved');
-    } catch (error) {
-      console.error(error);
-    }
+  if (props.courseRequiredDocumentId) {
+    await updateCourseRequirement(state);
   } else {
-    createCourseRequirement();
+    await createCourseRequirement(state);
   }
 };
 
-const createCourseRequirement = async () => {
-    try {
-        const { error} = await client.from("course_required_documents").insert({
-            ...state,
-            organization_id: props.orgid,
-            course_id: props.courseid,
-        });
-        if (error) throw error;
-        $emit('requirement-created');
-        tutorialStore.completeStep('course_document_create')
-    } catch (error) {
-        console.error(error);
-    }
+const updateCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
+  if (!props.courseRequiredDocumentId) return;
+  try {
+    await courseRequiredDocumentsStore.updateCourseRequiredDocument(props.courseRequiredDocumentId!, state);
+    $emit('requirement-saved');
+  } catch (error) {
+    console.error(error);
+    // Handle error, e.g., show a notification
+  }
 };
 
-const _deleteCourseRequirement = async () => {
-  console.log('delete');
+const createCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
+  try {
+    await courseRequiredDocumentsStore.createCourseRequiredDocument(state);
+    $emit('requirement-created');
+  } catch (error) {
+    console.error(error);
+    // Handle error, e.g., show a notification
+  }
 };
 </script>
 

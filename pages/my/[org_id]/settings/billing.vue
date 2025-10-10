@@ -8,40 +8,48 @@
       orientation="horizontal"
       class="px-4 pt-8"
     >
-      <UCard
-        :ui="{
-          body: {
-            base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
-          },
-        }"
-      >
-        <NuxtErrorBoundary>
-          <EditBillSettingsForm
-            v-if="userOrganizationsStore.selectedOrganization"
-            :organization-id="
-              userOrganizationsStore.selectedOrganization.organization_id
-            "
-          />
-          <template #error="{ error, clearError }">
-            <p>An error occurred: {{ error }}</p>
+    <template #links>
+        <UButton
+          size="sm"
+          color="gray"
+          variant="outline"
+          square
+          icon="mdi-pencil"
+          @click="openBillCustomerModal"
+        />
+    </template>
+      <NuxtErrorBoundary>
+        <EditBillSettingsForm
+          v-if="userOrganizationsStore.selectedOrganization"
+          :organization-id="userOrganizationsStore.selectedOrganization.id"
+        />
+        <template #error="{ error, clearError }">
+          <p>An error occurred: {{ error }}</p>
 
-            <button @click="clearError">Clear error</button>
-          </template>
-        </NuxtErrorBoundary>
-      </UCard>
+          <button @click="clearError">Clear error</button>
+        </template>
+      </NuxtErrorBoundary>
     </UDashboardSection>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
 import EditBillSettingsForm from "~/components/forms/EditBillSettingsForm.vue";
+import InvoiceCustomizerModal from "~/components/settings/InvoiceCustomizerModal.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-
 const userOrganizationsStore = useUserOrganizationsStore();
+const modal = useModal();
+
+const openBillCustomerModal = () => {
+  if (!userOrganizationsStore.selectedOrganization) return;
+  modal.open(InvoiceCustomizerModal, {
+    organizationId: userOrganizationsStore.selectedOrganization.id,
+  });
+};
 </script>
 
 <style scoped></style>

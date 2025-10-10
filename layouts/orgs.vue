@@ -9,7 +9,6 @@
         <template #left>
           <ClientOnly>
             <TeamsDropdown />
-
           </ClientOnly>
         </template>
         <template #right>
@@ -34,34 +33,40 @@
             @update:links="(links) => (defaultColors = links)"
           /> -->
 
-        <div class="flex-1">
-          <!-- <TutorialNavigation v-if="runtimeConfig.public.show_tutorial" /> -->
-        </div>
-
-        <UDivider class="sticky bottom-0" />
-
         <template #footer>
-          <LocaleSwitcher />
+            <UButton
+              icon="i-heroicons-bell"
+              size="sm"
+              color="primary"
+              square
+              variant="ghost"
+              @click="openNotificationsSlideover"
+            />
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
-    <ClientOnly>
+    <ClientOnly v-if="userOrganizationStore.selectedOrganization">
       <slot/>
       <!-- <LazyUiAppSearchComponent /> -->
     </ClientOnly>
+    <div v-else class="">
+        ..loading
+    </div>
   </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
-import LocaleSwitcher from "~/components/settings/LocaleSwitcher.vue";
+import NotificationsSlideover from "~/components/account/NotificationsSlideover.vue";
 import SidebarLinks from "~/components/sidebar/SidebarLinks.vue";
 import TeamsDropdown from "~/components/sidebar/TeamsDropdown.vue";
 
+const slideover = useSlideover();
 
-// const { t } = useI18n({
-//   useScope: "local",
-// });
+const openNotificationsSlideover = () => {
+  slideover.open(NotificationsSlideover)
+};
 
+const userOrganizationStore = useUserOrganizationsStore();
 
 
 // const footerLinks = [

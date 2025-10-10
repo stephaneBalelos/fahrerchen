@@ -3,42 +3,22 @@ import CreateOrganizationForm from "~/components/forms/CreateOrganizationForm.vu
 import OrganizationCard from "~/components/ui/Cards/OrganizationCard.vue";
 
 const organizationsStore = useUserOrganizationsStore();
-
-const isGeneratingDemoData = ref(false);
-
 const modal = useModal();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
+
 function openCreateOrgModal() {
   modal.open(CreateOrganizationForm, {
     onClose: () => {
       modal.close();
     },
-    onCreated: () => {
-      organizationsStore.loadOrganizationsMemberships();
+    onCreated: async () => {
       modal.close();
     },
   })
-}
-
-async function generateDemoData() {
-  if (isGeneratingDemoData.value) return;
-  isGeneratingDemoData.value = true;
-
-  try {
-    const _res = await $fetch("/api/demo/generate", {
-      retry: 0,
-      timeout: 60000, // 60 seconds timeout
-    });
-    organizationsStore.loadOrganizationsMemberships();
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isGeneratingDemoData.value = false;
-  }
 }
 </script>
 
@@ -51,13 +31,12 @@ async function generateDemoData() {
           :description="t('description')"
           :links="[
             { label: t('create_new_organization'), click: () => openCreateOrgModal() },
-            { label: t('generate_demo_data'), click: () => generateDemoData(), loading: isGeneratingDemoData },
           ]"
         />
         <OrganizationCard
           v-for="org in organizationsStore.organizations"
-          :key="org.organization_id"
-          :org-id="org.organization_id"
+          :key="org.id"
+          :org-id="org.id"
         />
         <UPageCard
           v-if="

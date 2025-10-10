@@ -11,11 +11,13 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const { t:g } = useI18n({
+const { t: g } = useI18n({
   useScope: "global",
 });
 
 const emit = defineEmits(["close"]);
+
+const isSubmitting = ref(false);
 
 const client = useSupabaseClient<Database>();
 type AddMemberFormProps = {
@@ -42,42 +44,46 @@ const validate = (state: AddMemberFormProps): FormError[] => {
 };
 
 async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
-  const orgId = props.orgid
-
+  const orgId = props.orgid;
   if (orgId) {
-    const {data, error} = await client.functions.invoke("invite-user", {
-    method: 'POST',
-    body: {
-      email: event.data.email,
-      role: event.data.role,
-      orgid: orgId,
-    },
-  });
-  console.log(data);
-  if (error) {
-    console.error(error);
-    toasts.add({
-      id: "member-invited-error",
-      title: "Error",
-      description: "Could not invite member",
-      color: "red",
-    });
-    return;
-  }
-  toasts.add({
-    id: "member-invited",
-    title: "Success",
-    description: "Member invited",
-    color: "green",
-  });
-  emit("close");
+    try {
+      isSubmitting.value = true;
+      const { error } = await client.functions.invoke("invite-user", {
+        method: "POST",
+        body: {
+          email: event.data.email,
+          role: event.data.role,
+          orgid: orgId,
+        },
+      });
+      if (error) {
+        throw error;
+      }
+      toasts.add({
+        id: "member-invited",
+        title: "Success",
+        description: "Member invited",
+        color: "green",
+      });
+      emit("close");
+    } catch (error) {
+      console.error(error);
+      toasts.add({
+        id: "member-invited-error",
+        title: "Error",
+        description: "Could not invite member",
+        color: "red",
+      });
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 }
 </script>
 
 <template>
   <UForm
-  id="add-member-form"
+    id="add-member-form"
     :validate="validate"
     :validate-on="['submit']"
     :state="state"
@@ -89,15 +95,13 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
         v-model="state.email"
         type="email"
         :placeholder="t('form.email.placeholder')"
+        :disabled="isSubmitting"
         autofocus
       />
     </UFormGroup>
 
     <UFormGroup :label="t('form.role.label')" name="role">
-      <USelectMenu
-        v-model="state.role"
-        :options="roles"
-      >
+      <USelectMenu v-model="state.role" :options="roles" :disabled="isSubmitting">
         <template #option="{ option }">
           {{ g(`roles.${option}`) }}
         </template>
@@ -115,7 +119,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
         variant="ghost"
         @click="emit('close')"
       />
-      <UButton type="submit" :label="t('invite')" color="black" />
+      <UButton :loading="isSubmitting" :disabled="isSubmitting" type="submit" :label="t('invite')" color="black" />
     </div>
   </UForm>
 </template>
@@ -133,8 +137,7 @@ async function onSubmit(event: FormSubmitEvent<AddMemberFormProps>) {
       }
     },
     "cancel": "Abbrechen",
-    "invite": "Einladen"   
-
+    "invite": "Einladen"
   },
   "en": {
     "form": {

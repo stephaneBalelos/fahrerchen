@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta content="text/html; charset=UTF-8" http-equiv="content-type">
-    <style type="text/css">
+    <style>
         ol.lst-kix_list_3-1 {
             list-style-type: none
         }
@@ -814,7 +815,7 @@
         .c8 {
             background-color: #ffffff;
             max-width: 453.5pt;
-            padding: 36.9pt 70.9pt 56.7pt 70.9pt
+            padding: 0 70.9pt 0 70.9pt;
         }
 
         .c31 {
@@ -1091,31 +1092,23 @@
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c3"></span></p>
     <p class="c1"><span class="c19 c7"></span></p>
-    <div>
-        <p class="c2"><span class="c7 c19"></span></p>
-        <table class="c36">
-            <tr class="c29">
-                <td class="c12" colspan="1" rowspan="1">
-                    <p class="c5"><span class="c7 c39">Bankverbindung:</span></p>
-                </td>
-                <td class="c12" colspan="1" rowspan="1">
-                    <p class="c1"><span class="c10 c7"></span></p>
-                </td>
-            </tr>
-            <tr class="c28">
-                <td class="c12" colspan="1" rowspan="1">
-                    <p class="c27"><span class="c10 c7">{{bill_settings_bank_account_name}}</span></p>
-                    <p class="c27"><span class="c10 c7">BIC: {{bill_settings_bank_account_bic}} Konto-Nr.:
-                            {{bill_settings_bank_account_number}}</span></p>
-                    <p class="c27"><span class="c7 c10">IBAN: {{bill_settings_bank_account_iban}}</span></p>
-                </td>
-                <td class="c12" colspan="1" rowspan="1">
-                    <p class="c5"><span class="c10 c7">Steuernummer: {{bill_settings_tax_id}}</span></p>
-                </td>
-            </tr>
-        </table>
-        <p class="c1"><span class="c3"></span></p>
-    </div>
+    <footer>
+        <div style="width: 100%; display: flex; font-size: 10px;">
+            <div style="flex: 1;">
+                Bankverbindung:
+                <p>{{bill_settings_bank_account_name}}</p>
+                <p>BIC: {{bill_settings_bank_account_bic}}</p>
+                <p>Konto-Nr.: {{bill_settings_bank_account_number}}</p>
+                <p>IBAN: {{bill_settings_bank_account_iban}}</p>
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <p>Steuernummer: {{bill_settings_tax_id}}</p>
+            </div>
+        </div>
+        <div style="width: 100%; font-size: 10px; text-align: center;">
+            <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+    </footer>
 </body>
 
 </html>

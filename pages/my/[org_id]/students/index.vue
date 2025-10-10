@@ -1,53 +1,64 @@
 <template>
-  <UDashboardPanel grow>
-    <UDashboardNavbar>
-      <template #left>
-        <h2 class="font-semibold text-gray-900 dark:text-white">
-          {{ t("students") }}
-          <UBadge color="primary" variant="soft">{{
-            students?.length ?? 0
-          }}</UBadge>
-        </h2>
-      </template>
-      <template #right>
-        <UDropdown
-          :items="createUserOptions"
-          :popper="{
-            placement: 'bottom-start',
-          }"
-          :ui="{
-            width: 'w-72',
-          }"
-        >
+  <UDashboardPage>
+    <UDashboardPanel id="student-list" grow>
+      <UDashboardNavbar>
+        <template #left>
+          <h2 class="font-semibold text-gray-900 dark:text-white">
+            {{ t("students") }}
+            <UBadge color="primary" variant="soft">{{
+              students?.length ?? 0
+            }}</UBadge>
+          </h2>
+        </template>
+        <template #center>
+          <UAlert
+            v-if="error"
+            :color="'red'"
+            :variant="'solid'"
+            :closable="false"
+            class="w-full"
+          >
+            {{ error.message }}
+          </UAlert>
+        </template>
+        <template #right>
+          <UDropdown
+            :items="createUserOptions"
+            :popper="{
+              placement: 'bottom-start',
+            }"
+            :ui="{
+              width: 'w-72',
+            }"
+          >
+            <UButton
+              :label="t('new_user')"
+              trailing-icon="i-heroicons-plus"
+              color="gray"
+            />
+          </UDropdown>
           <UButton
-            :label="t('new_user')"
-            trailing-icon="i-heroicons-plus"
             color="gray"
+            variant="solid"
+            size="2xs"
+            :to="userOrganizationsStore.relativePath('/students/requests')"
+          >
+            {{ t("pre_registration") }}
+          </UButton>
+        </template>
+      </UDashboardNavbar>
+      <UDashboardToolbar>
+        <template #left>
+          <UInput
+            ref="input"
+            v-model="q"
+            icon="i-heroicons-funnel"
+            autocomplete="off"
+            :placeholder="t('filter_users')"
+            class="hidden lg:block"
+            @keydown.esc="$event.target.blur()"
           />
-        </UDropdown>
-        <UButton
-          color="gray"
-          variant="solid"
-          size="2xs"
-          :to="userOrganizationsStore.relativePath('/students/requests')"
-        >
-          {{ t("pre_registration") }}
-        </UButton>
-      </template>
-    </UDashboardNavbar>
-
-    <UDashboardToolbar>
-      <template #left>
-        <UInput
-          ref="input"
-          v-model="q"
-          icon="i-heroicons-funnel"
-          autocomplete="off"
-          :placeholder="t('filter_users')"
-          class="hidden lg:block"
-          @keydown.esc="$event.target.blur()"
-        />
-        <!-- <USelectMenu
+          <!-- <USelectMenu
             v-model="selectedStatuses"
             icon="i-heroicons-check-circle"
             placeholder="Status"
@@ -62,67 +73,121 @@
             :options="defaultLocations"
             multiple
           /> -->
-      </template>
-
-    </UDashboardToolbar>
-
-    <UDashboardPanelContent class="p-0">
-      <UTable
-        v-model:sort="sort"
-        :rows="students ?? []"
-        :columns="columns"
-        :loading="status === 'pending'"
-        sort-mode="manual"
-        class="w-full"
-        :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
-      >
-        <template #name-data="{ row }">
-          <div class="flex items-center gap-3">
-            <UAvatar v-bind="row.avatar" :alt="row.name" size="xs" />
-            <span class="text-gray-900 dark:text-white font-medium">{{
-              row.name
-            }}</span>
-          </div>
         </template>
-        <template #status-data="{ row }">
-          <UBadge
-            :label="(row.subscriptions_count ?? 0 )? t('status_subscribed', { count: row.subscriptions_count }) : t('status_not_subscribed')"
-            :color="
-              (row.subscriptions_count ?? 0)
-                ? 'green'
-                : 'orange'
-            "
-            variant="subtle"
-            class="capitalize"
+        <template #right>
+          <UButton
+            color="gray"
+            size="xs"
+            icon="i-heroicons-arrow-path"
+            @click="refresh"
           />
         </template>
-        <template #actions-data="{ row }">
-          <div class="flex gap-2">
-            <UButton
-              color="gray"
-              variant="solid"
-              icon="i-heroicons-pencil"
-              @click="() => openStudentForm(row.id)"
+      </UDashboardToolbar>
+
+      <UDashboardPanelContent class="p-0">
+        <UTable
+          v-model:sort="sort"
+          :rows="students ?? []"
+          :columns="columns"
+          :loading="status === 'pending'"
+          sort-mode="manual"
+          class="w-full"
+          :ui="{ divide: 'divide-gray-200 dark:divide-gray-800' }"
+        >
+          <template #name-data="{ row }">
+            <div class="flex items-center gap-3">
+              <UAvatar
+                v-if="row.avatar_path"
+                :src="
+                  $publicStorageUrl('users_avatars', row.avatar_path) ??
+                  undefined
+                "
+                :alt="`${row.firstname} ${row.lastname}`"
+                size="xs"
+              />
+              <UAvatar
+                v-else
+                :alt="`${row.firstname} ${row.lastname}`"
+                size="xs"
+              />
+              <div class="flex flex-col">
+                <span class="text-md text-gray-900 dark:text-white font-medium">
+                  {{ row.firstname }} {{ row.lastname }}
+                </span>
+                <span class="text-gray-500 text-sm">{{ row.email }}</span>
+              </div>
+            </div>
+          </template>
+          <template #status-data="{ row }">
+            <UBadge
+              v-if="row.active_subscriptions.length === 0"
+              :label="t('status_not_subscribed')"
+              :color="'orange'"
+              variant="subtle"
+              class="capitalize"
             />
-            <UButton
-              color="gray"
-              variant="solid"
-              icon="i-heroicons-eye"
-              @click="() => openStudentSubscriptionsSlideOver(row.id)"
+            <UBadge
+              v-else-if="row.active_subscriptions.length > 0"
+              :label="
+                g(`course_types.${row.active_subscriptions[0].course.type}.name_full`)
+              "
+              :color="'green'"
+              variant="subtle"
+              class="capitalize"
             />
-          </div>
-        </template>
-      </UTable>
-    </UDashboardPanelContent>
-  </UDashboardPanel>
+            <!-- <UBadge
+                v-if="row.subscriptions_count > 0"
+                :label="t('status_subscribed', { count: row.subscriptions_count })"
+                :color="'green'"
+                variant="subtle"
+                class="capitalize"
+              />
+              <UBadge
+                v-else
+                :label="t('status_not_subscribed')"
+                :color="'orange'"
+                variant="subtle"
+                class="capitalize"
+              /> -->
+          </template>
+          <template #actions-data="{ row }">
+            <div class="flex gap-2">
+              <UButton
+                color="gray"
+                variant="solid"
+                icon="i-heroicons-pencil"
+                @click="() => openStudentForm(row.id)"
+              />
+              <UButton
+                color="gray"
+                variant="solid"
+                icon="i-heroicons-eye"
+                @click="() => openStudentProfileSlideover(row.id)"
+              />
+            </div>
+          </template>
+        </UTable>
+      </UDashboardPanelContent>
+      <div
+        class="flex justify-center p-4 border-t border-gray-200 dark:border-gray-800"
+      >
+        <UPagination
+          :active-button="{ variant: 'outline' }"
+          :inactive-button="{ color: 'gray' }"
+          :model-value="1"
+          :total="100"
+        />
+      </div>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
 
 <script setup lang="ts">
-import type { AppStudent } from "~/types/app.types";
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
 import AddStudentModal from "~/components/forms/AddStudentModal.vue";
 import OnboardingLinkModal from "~/components/students/OnboardingLinkModal.vue";
-import StudentSubscriptionsSlideover from "~/components/students/StudentSubscriptionsSlideover.vue";
+import StudentCourseProfileSlideover from "~/components/students/StudentCourseProfileSlideover.vue";
+import SubscribeStudentToCourseModal from "~/components/forms/SubscribeStudentToCourseModal.vue";
 
 definePageMeta({
   layout: "orgs",
@@ -132,7 +197,9 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const client = useSupabaseClient();
+const { t: g } = useI18n({ useScope: 'global' });
+
+const studentsStore = useStudentsStore();
 const slideover = useSlideover();
 const modal = useModal();
 const userOrganizationsStore = useUserOrganizationsStore();
@@ -153,6 +220,8 @@ const columns = [
     key: "actions",
   },
 ];
+
+const toast = useToast();
 const q = ref("");
 const sort = ref({ column: "id", direction: "asc" as const });
 
@@ -160,43 +229,23 @@ const {
   data: students,
   status,
   refresh,
+  error,
 } = await useAsyncData(
   "students",
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return null;
     }
-    const query = client
-      .from("students")
-      .select("*, course_subscriptions(*)")
-      .eq(
-        "organization_id",
-        userOrganizationsStore.selectedOrganization.organization_id
-      )
-      .is("course_subscriptions.archived_at", null)
-
-      if (q.value) {
-        query.or(`firstname.ilike.%${q.value}%,lastname.ilike.%${q.value}%,email.ilike.%${q.value}%`);
-      }
-
-    const { data } = await query;
-    return data;
+    return await studentsStore.queryStudents({
+      org_id: userOrganizationsStore.selectedOrganization.id,
+      search: q.value,
+    });
   },
   {
     watch: [q],
-    transform: (data) => {
-      return data
-        ? data.map((item) => {       
-            return {
-              ...item,
-              subscriptions_count: item.course_subscriptions?.length ?? 0,
-              name: `${item.firstname} ${item.lastname}`
-            };
-          })
-        : [];
-    },
   }
 );
+
 
 const createUserOptions = ref([
   [
@@ -208,7 +257,7 @@ const createUserOptions = ref([
           return;
         }
         modal.open(AddStudentModal, {
-          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          orgid: userOrganizationsStore.selectedOrganization.id,
           onClose: () => {
             modal.close();
           },
@@ -223,7 +272,7 @@ const createUserOptions = ref([
           return;
         }
         modal.open(OnboardingLinkModal, {
-          orgid: userOrganizationsStore.selectedOrganization.organization_id,
+          orgid: userOrganizationsStore.selectedOrganization.id,
           onClose: () => {
             modal.close();
           },
@@ -245,28 +294,83 @@ const openStudentForm = (id?: string) => {
     return;
   }
   slideover.open(EditStudentForm, {
-    organizationId: userOrganizationsStore.selectedOrganization.organization_id,
+    organizationId: userOrganizationsStore.selectedOrganization.id,
     studentId: id,
-    "onStudent-created": (student: AppStudent) => {
-      console.log("student created", student);
+    "onStudent-created": () => {
+      console.log("student created");
       refresh();
     },
-    "onStudent-updated": (student: AppStudent) => {
-      console.log("student updated", student);
+    "onStudent-updated": () => {
+      console.log("student updated");
       refresh();
     },
   });
 };
 
-const openStudentSubscriptionsSlideOver = (id: string) => {
-  slideover.open(StudentSubscriptionsSlideover, {
+const openStudentProfileSlideover = (id: string) => {
+  slideover.open(StudentCourseProfileSlideover, {
     studentId: id,
-    onClose: (path) => {
+    onClose: (shouldRefresh) => {
       slideover.close();
+      if (shouldRefresh) {
+        refresh();
+      }
+    },
+    "onClose-and-navigate": async (path: string) => {
+      await slideover.close();
       navigateTo(path);
+    },
+    "onClose-and-subscribe": async (studentId: string) => {
+      await slideover.close();
+      openSubscribeStudentToCourseModal(studentId);
     },
   });
 };
+
+const openSubscribeStudentToCourseModal = async (studentId: string) => {
+  const student = studentsStore.students.find((s) => s.id === studentId);
+  if (!student) {
+    console.error("Student not found");
+    return;
+  }
+
+  if (!userOrganizationsStore.selectedOrganization) {
+    console.error("No organization selected");
+    return;
+  }
+
+  modal.open(SubscribeStudentToCourseModal, {
+    student,
+    "onClose": () => {
+      modal.close();
+    },
+    "onSubscribe": async (courseId?: string) => {
+      modal.close();
+      if (!courseId || !student) return;
+      await handleSubscribeToCourse(courseId, student.id, student.organization_id);
+    },
+  });
+};
+
+const handleSubscribeToCourse = async (courseId: string, studentId: string, organizationId: string) => {
+  try {
+    await studentsStore.subscribeStudent(studentId, courseId, organizationId);
+    toast.add({
+      title: t("student_subscribed"),
+      description: t("student_subscribed_successfully"),
+      color: "green",
+    });
+    refresh();
+  } catch (err) {
+    toast.add({
+      title: t("error"),
+      description: t("error_subscribing_student"),
+      color: "red",
+    });
+    console.error(err);
+  }
+};
+
 </script>
 
 <style scoped>
@@ -337,6 +441,9 @@ const openStudentSubscriptionsSlideOver = (id: string) => {
     "manual_registration": "Manuelle Registrierung",
     "status_subscribed": "In {count} Kursen eingeschrieben",
     "status_not_subscribed": "Nicht eingeschrieben",
+    "student_subscribed": "Fahrschüler:in eingeschrieben",
+    "student_subscribed_successfully": "Der Fahrschüler:in wurde erfolgreich ingeschrieben.",
+    "error_subscribing_student": "Fehler beim Einschreiben des Fahrschülers:in.",
     "table": {
       "name": "Name",
       "email": "E-Mail",
@@ -354,6 +461,9 @@ const openStudentSubscriptionsSlideOver = (id: string) => {
     "manual_registration": "Manual registration",
     "status_subscribed": "Subscribed to {count} courses",
     "status_not_subscribed": "Not subscribed",
+    "student_subscribed": "Student subscribed",
+    "student_subscribed_successfully": "The student was successfully subscribed.",
+    "error_subscribing_student": "Error subscribing the student.",
     "table": {
       "name": "Name",
       "email": "Email",

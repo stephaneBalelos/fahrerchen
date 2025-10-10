@@ -31,11 +31,19 @@
 
         <template #right>
           <UColorModeButton />
-          <UButton :label="t('logout')" color="gray" @click="logout" />
+          <UButton
+            icon="i-heroicons-bell"
+            size="sm"
+            color="white"
+            square
+            variant="ghost"
+            @click="openNotificationsSlideover"
+          />
+          <UButton color="white" variant="ghost" :icon="'i-heroicons-arrow-left-start-on-rectangle'" @click="logout" />
         </template>
 
         <template #panel>
-          <UNavigationTree :links="links" default-open/>
+          <UNavigationTree :links="links" default-open />
         </template>
       </UHeader>
       <ClientOnly>
@@ -48,10 +56,12 @@
 <script setup lang="ts">
 import { computedAsync } from "@vueuse/core";
 import type { Database } from "~/types/app.types";
+import NotificationsSlideover from "~/components/account/NotificationsSlideover.vue";
 
 const client = useSupabaseClient<Database>();
 const userOrganizationsStore = useUserOrganizationsStore();
-const subscriptionStore = useSubscriptionStore();
+const studentStore = useStudentStore();
+const slideover = useSlideover();
 
 const { t } = useI18n({
   useScope: "local",
@@ -61,56 +71,51 @@ const organization = computedAsync(async () => {
   if (!userOrganizationsStore.selectedOrganization) {
     return null;
   }
-  const { data, error } = await client
-    .from("organizations")
-    .select("*")
-    .eq("id", userOrganizationsStore.selectedOrganization.organization_id)
-    .single();
-  if (error) {
-    console.log(error);
-    return null;
-  }
 
-  return data;
+  return userOrganizationsStore.selectedOrganization;
 });
 
-const links = computedAsync(async () => {
+const links = computed(() => {
   if (!userOrganizationsStore.selectedOrganization) {
     return [];
   }
 
-  if (!subscriptionStore.subscription) {
+  if (!studentStore.selectedSubscription) {
     return [];
   }
 
-  const subscription_id = subscriptionStore.subscription.id;
+  const subscription_id = studentStore.selectedSubscription.id;
   const l = [
     {
       label: t("overview"),
       icon: "i-heroicons-home",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}`,
       exact: true,
     },
     {
       label: t("course"),
       icon: "i-heroicons-book-open",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/course`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/course`,
     },
     {
       label: t("activity"),
       icon: "i-heroicons-calendar",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/activity`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/activity`,
       exact: true,
     },
     {
       label: t("bills"),
       icon: "i-heroicons-document",
-      to: `/students/${userOrganizationsStore.selectedOrganization.organization_id}/subscription/${subscription_id}/billing`,
+      to: `/students/${userOrganizationsStore.selectedOrganization.id}/subscription/${subscription_id}/billing`,
     },
   ];
 
   return l;
 });
+
+const openNotificationsSlideover = () => {
+  slideover.open(NotificationsSlideover);
+};
 
 async function logout() {
   await client.auth.signOut();

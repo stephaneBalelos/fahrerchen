@@ -13,7 +13,7 @@ export const useStripeStore = defineStore('stripe', () => {
                 return;
             }
             const account = await $fetch(
-                `/api/orgs/payments/stripe/accounts/${userOrganizationsStore.selectedOrganization.organization_id}`
+                `/api/orgs/payments/stripe/accounts/${userOrganizationsStore.selectedOrganization.id}`
             );
             if (account) {
                 stripeAccount.value = null;
@@ -30,7 +30,7 @@ export const useStripeStore = defineStore('stripe', () => {
         if (!userOrganizationsStore.selectedOrganization) {
             throw new Error('No organization selected');
         }
-        const session = await $fetch(`/api/orgs/payments/stripe/session/${userOrganizationsStore.selectedOrganization.organization_id}`);
+        const session = await $fetch(`/api/orgs/payments/stripe/session/${userOrganizationsStore.selectedOrganization.id}`);
         if (session) {
             return session.client_secret;
         } else {
@@ -43,7 +43,7 @@ export const useStripeStore = defineStore('stripe', () => {
             throw new Error('No organization selected');
         }
         try {
-            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", userOrganizationsStore.selectedOrganization.organization_id)
+            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", userOrganizationsStore.selectedOrganization.id)
             if (error) {
                 throw error;
             }
@@ -59,7 +59,7 @@ export const useStripeStore = defineStore('stripe', () => {
     }
 
     async function loadStripeAccount(orgid?: string): Promise<AppOrganizationsStripeAccount | null> {
-        const org = orgid || userOrganizationsStore.selectedOrganization?.organization_id;
+        const org = orgid || userOrganizationsStore.selectedOrganization?.id;
         try {
             if (!org) {
                 throw new Error('No organization selected');

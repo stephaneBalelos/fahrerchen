@@ -53,15 +53,14 @@
         >
           <USelectMenu
             v-model="state.activity_type"
-            :options="activity_types"
+            :options="ACTIVITY_TYPES.map((type) => ({ label: g('courses.activities.types.' + type), id: type }))"
             value-attribute="id"
             :leading-icon="selected_activity_type ? ACTIVITY_ICONS[selected_activity_type] : undefined"
           >
             <template #label>
-              <div v-if="state.activity_type && activity_types">
+              <div v-if="state.activity_type && ACTIVITY_TYPES">
                 <span class="truncate">{{
-                  activity_types.find((r) => r.id === state.activity_type)
-                    ?.type
+                  g('courses.activities.types.' + state.activity_type)
                 }}</span>
               </div>
               <div v-else>
@@ -69,7 +68,7 @@
               </div>
             </template>
             <template #option="{ option }">
-              <span class="truncate">{{ option.type }}</span>
+              <span class="truncate">{{ option.label }}</span>
             </template>
           </USelectMenu>
         </UFormGroup>
@@ -125,35 +124,18 @@
     </UForm>
 
     <template #footer>
-      <UButton
-        v-if="props.courseActivityId"
-        color="red"
-        variant="ghost"
-        @click="deleteCourseActivity(props.courseActivityId)"
-        >Delete</UButton
-      >
       <UButton @click="form?.submit()">Save</UButton>
     </template>
   </UDashboardSlideover>
 </template>
 
 <script setup lang="ts">
-import type { AppCourseActivity } from "~/types/app.types";
+import type { AppCourseActivity, CourseActivityEdit } from "~/types/app.types";
 import type { Form, FormSubmitEvent } from "#ui/types";
+import { ACTIVITY_ICONS, ACTIVITY_TYPES } from "~/constants";
 
-import { useCourseActivityTypes } from "~/composables/useCourseActivityTypes";
-
-import { ACTIVITY_ICONS } from "~/constants";
-
-type CourseActivityEdit = Omit<
-  AppCourseActivity,
-  "id" | "course_id" | "organization_id" | "sorting_order"
->;
 type Props = {
-  courseid: string;
-  orgid: string;
   courseActivityId?: string;
-  sortingOrder?: number;
 };
 
 type Emits = {
@@ -164,7 +146,10 @@ const { t } = useI18n({
   useScope: 'local'
 })
 
-const tutorialStore = useTutorialStore();
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
 
 const slideover = useSlideover();
 
@@ -174,46 +159,35 @@ const props = defineProps<Props>();
 
 const form = ref<Form<CourseActivityEdit> | null>(null);
 
-const client = useSupabaseClient();
+const courseActivitiesStore = useCourseActivitiesStore();
 
 const $emit = defineEmits<Emits>();
 
-const activity_types = await useCourseActivityTypes()
-
 const selected_activity_type = computed(() => {
-  return activity_types.find((r) => r.id === state.activity_type)?.type;
+  return ACTIVITY_TYPES.find((type) => type === state.activity_type);
 });
 
 
 const state = reactive<CourseActivityEdit>({
   name: "",
   description: "",
-  activity_type: 0,
   required: 0,
+  activity_type: "THEORY",
   price: 0,
   allow_self_registration: false,
   allow_requests: false,
+  sorting_order: 1,
 });
 
 onMounted(async () => {
   if (props.courseActivityId) {
     // load the course activity
     try {
-      const { data, error } = await client
-        .from("course_activities")
-        .select("*")
-        .eq("id", props.courseActivityId)
-        .single();
+      const data = await courseActivitiesStore.getCourseActivity(props.courseActivityId);
 
-      if (error) {
-        console.error(error);
-        toast.add({
-          title: "Error",
-          description: "An error occured while loading the activity",
-          color: "red",
-        });
-        throw error;
-      } else {
+      if (!data) {
+        throw new Error("Activity not found");
+      }
         state.name = data.name;
         state.description = data.description;
         state.price = data.price;
@@ -221,7 +195,7 @@ onMounted(async () => {
         state.required = data.required
         state.allow_self_registration = data.allow_self_registration;
         state.allow_requests = data.allow_requests;
-      }
+      
     } catch (error) {
       console.log(error);
       toast.add({
@@ -229,6 +203,7 @@ onMounted(async () => {
         description: "An error occured while loading the activity",
         color: "red",
       });
+      throw error;
     }
   }
 });
@@ -243,7 +218,7 @@ const validate = (state: CourseActivityEdit) => {
     errors.push({ path: "name", message: "Please enter a name" });
   if (!state.description)
     errors.push({ path: "description", message: "Please enter a description" });
-  if (!state.price)
+  if (!(state.price >= 0))
     errors.push({ path: "price", message: "Please enter a price" });
   return errors;
 };
@@ -259,14 +234,7 @@ async function saveCourseActivity(_event: FormSubmitEvent<CourseActivityEdit>) {
 async function updateCourseActivity(params: CourseActivityEdit) {
   if (!props.courseActivityId) return;
   try {
-    const { error } = await client
-      .from("course_activities")
-      .update({...params})
-      .eq("id", props.courseActivityId)
-    if (error) { 
-      console.error(error)
-      throw error
-    }
+    await courseActivitiesStore.updateCourseActivity(props.courseActivityId, params);
     $emit("activity-saved");
   } catch (error) {
     console.log(error);
@@ -279,17 +247,8 @@ async function updateCourseActivity(params: CourseActivityEdit) {
 }
 async function createCourseActivity(params: CourseActivityEdit) {
   try {
-    const { data, error } = await client
-      .from("course_activities")
-      .insert({...params, sorting_order: props.sortingOrder ?? 1, course_id: props.courseid, organization_id: props.orgid})
-      .select("*").single()
-    if (error) { 
-      console.error(error)
-      throw error
-    }
-    console.log(data);
+    await courseActivitiesStore.createCourseActivity(params);
     $emit("activity-saved");
-    tutorialStore.completeStep('course_activity_create')
   } catch (error) {
     console.log(error);
     toast.add({
@@ -299,28 +258,6 @@ async function createCourseActivity(params: CourseActivityEdit) {
     });
   }
 }
-
-const deleteCourseActivity = async (id: string) => {
-  try {
-    const { error } = await client
-      .from("course_activities")
-      .delete()
-      .eq("id", id).select()
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-
-    $emit("activity-deleted");
-  } catch (error) {
-    console.log(error);
-    toast.add({
-      title: "Error",
-      description: "An error occured while deleting the activity",
-      color: "red",
-    });
-  }
-};
 </script>
 
 <style scoped></style>

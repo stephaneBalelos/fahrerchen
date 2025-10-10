@@ -1,4 +1,3 @@
-import type { AppCourseSubscriptionBillsView } from "~/types/app.types";
 
 type CourseSubscriptionBillQuery = {
     student_id?: string;
@@ -6,6 +5,7 @@ type CourseSubscriptionBillQuery = {
     subscription_id?: string;
     paid?: boolean;
     ready_to_pay?: boolean;
+    organization_id: string;
 }
 
 export const useSubscriptionBills = () => {
@@ -36,22 +36,18 @@ export const useSubscriptionBills = () => {
         }
 
         const q = client
-            .from("course_subscription_bills_view")
-            .select("*")
+            .from("course_subscription_bills")
+            .select("*, cs:course_subscriptions!inner(*, student:students!inner(*), course:courses!inner(*))")
 
-        q.eq("organization_id", userOrganizationStore.selectedOrganization.organization_id)
+        q.eq("organization_id", query.organization_id)
 
         if (query.student_id) {
-            q.eq("student_id", query.student_id)
+            q.eq("cs.student.id", query.student_id)
         }
 
         if (query.course_id) {
-            q.eq("course_id", query.course_id)
+            q.eq("cs.course.id", query.course_id)
         }
-
-        // if (query.subscription_id) {
-        //     q.eq("subscription.id", query.subscription_id)
-        // }
 
         if (query.paid) {
             q.not("paid_at", "is", null)
@@ -61,13 +57,15 @@ export const useSubscriptionBills = () => {
             q.eq("ready_to_pay", query.ready_to_pay)
         }
 
-        const { data, error } = await q.overrideTypes<AppCourseSubscriptionBillsView[]>()
+        const { data, error } = await q.order('created_at', { ascending: false })
 
         if (error) {
             throw error
         }
 
-        return data
+        console.log("Fetched bills: ", data)
+
+        return data ?? []
     }
 
     return {

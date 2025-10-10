@@ -8,8 +8,6 @@ import { renderAsync } from 'npm:@react-email/components@0.0.22'
 import InvitationMail from '../_shared/_templates/InvitationMail.tsx'
 
 
-
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })

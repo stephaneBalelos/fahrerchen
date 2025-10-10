@@ -1,27 +1,30 @@
 <template>
   <UDashboardPanelContent class="p-0">
-    <UDashboardPanelContent>
-      <UContainer v-if="subscription && studentStore.student" class="w-full">
-        <StudentsStudentSubscriptionStats :subscription-id="subscription.id" />
+    <UDashboardPanelContent v-if="studentStore.selectedSubscription">
+      <UContainer v-if="studentStore.student" class="w-full">
+        <StudentsStudentSubscriptionStats :subscription-id="studentStore.selectedSubscription.id" />
       </UContainer>
       <UContainer
-        v-if="subscription && studentStore.student"
-        class="w-full pt-8"
+        class="w-full"
       >
-        <StudentCourseProfile
-          :title="t('progression')"
-          :description="t('progression_desc')"
-          :subscription-id="subscription.id"
-          :student="studentStore.student"
+      <StudentsCourseStudentProgression
+        :subscription="studentStore.selectedSubscription"
+      />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SchedulesSubscriptionScheduleList
+          v-if="studentStore.student"
+          :title="t('schedules_for_student', { student: studentStore.student.firstname })"
+          :description="t('schedules_for_student_description')"
+          :subscription-id="studentStore.selectedSubscription.id"
+          :start-at="new Date().toISOString()"
         />
+      </div>
       </UContainer>
     </UDashboardPanelContent>
   </UDashboardPanelContent>
 </template>
 
 <script setup lang="ts">
-import StudentCourseProfile from "~/components/courses/StudentCourseProfile.vue";
-import type { Database } from "~/types/app.types";
 
 const studentStore = useStudentStore();
 
@@ -29,26 +32,8 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const route = useRoute();
-const subscriptionId = route.params.s_id as string;
-const client = useSupabaseClient<Database>();
 
-const { data: subscription } = useAsyncData(
-  async () => {
-    const { data, error } = await client
-      .from("course_subscriptions_view")
-      .select("*")
-      .eq("id", subscriptionId)
-      .single();
-    if (error) {
-      console.error(error);
-      return null;
-    }
 
-    return data;
-  },
-  { immediate: true }
-);
 </script>
 
 <style scoped></style>
@@ -59,13 +44,17 @@ const { data: subscription } = useAsyncData(
     "hello": "Hallo {name}",
     "subscription_description": "Du bist angemeldet für den Kurs {course}",
     "progression": "Kursfortschritt",
-    "progression_desc": "Übersicht über deinen Kursfortschritt"
+    "progression_desc": "Übersicht über deinen Kursfortschritt",
+    "schedules_for_student": "Zeitpläne für {student}",
+    "schedules_for_student_description": "Hier sind die geplanten Termine für diesen Schüler."
   },
   "en": {
     "hello": "Hello {name}",
     "subscription_description": "You are subscribed to the course {course}",
     "progression": "Course Progression",
-    "progression_desc": "Overview of your course progression"
+    "progression_desc": "Overview of your course progression",
+    "schedules_for_student": "Schedules for {student}",
+    "schedules_for_student_description": "Here are the scheduled sessions for this student."
   }
 }
 </i18n>

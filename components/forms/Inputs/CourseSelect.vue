@@ -9,7 +9,7 @@
   >
     <template #label>
       <div v-if="selected">
-        <span class="truncate ms-3">{{ selected.name }}</span>
+        <span class="truncate ms-3">{{ g(`course_types.${selected.type}.name_full`) }}</span>
       </div>
       <div v-else>
         <span class="truncate ms-3">{{ t("select_a_course") }}</span>
@@ -17,7 +17,7 @@
     </template>
 
     <template #option="{ option: course }">
-      <span class="truncate">{{ course.name }}</span>
+      <span>{{ g(`course_types.${course.type}.name_full`) }}</span>
     </template>
 
     <template #option-empty="{ query }">
@@ -40,12 +40,15 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t: g } = useI18n({ useScope: 'global' });
+
 const model = defineModel<string>({ default: null });
+const coursesStore = useCoursesStore();
 
-const { data: courses } = useAsyncData(`courses_${props.orgid}`, async () => {
-  return await useCourses(props.orgid);
+const courses = computed(() => {
+  if (!props.orgid) return null;
+  return coursesStore.activeCourses
 });
-
 const selected = computed(() => {
   if (!courses.value) {
     return null;

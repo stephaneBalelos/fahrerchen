@@ -7,7 +7,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
         throw new Error('Pinia store is not provided')
     }
     const supabase = useSupabaseClient<Database>()
-    const organizationsStore = useUserOrganizationsStore($pinia)
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

@@ -4,7 +4,7 @@ create table public.course_activity_schedules_attendances (
   -- activity schedule data remains, in the case activity is deleted or edited
   activity_name  text not null,
   activity_description text not null,
-  activity_type  integer references public.course_activity_types not null,
+  activity_type  public.activity_types not null,
   activity_price        numeric default 0 not null check (activity_price >= 0),
   schedule_start_at     timestamp with time zone not null,
   schedule_end_at       timestamp with time zone not null,
@@ -45,82 +45,73 @@ create policy "student_can_see_their_own_course_activity_schedules_attendances" 
 create or replace function public.create_attendance_record_for_schedule()
 returns trigger as $$
 declare
-  c_activity_name text;
-  c_activity_description text;
-  c_activity_type integer;
+  r_attendee record;
+  v_activity record;
+  v_course_id uuid;
   c_activity_price numeric;
-  s_assigned_to_email text;
-  s_assigned_to_firstname text;
-  s_assigned_to_lastname text;
+  a_firstname text;
+  a_lastname text;
+  a_email text;
 begin
-    -- If Schedule ist Completed, generate Attendances for all attendees
-  if new.status = 'COMPLETED' then
-    -- No attendees, no attendance
-    if array_length(new.attendees, 1) = 0 then
-      return new;
-    end if;
-    -- if no assigned_to, prevent changing the status
-    if new.assigned_to is null then
-      raise exception 'Assigned to cannot be null';
-    end if;
 
-    -- get the course activity name, description, type and price
-    select ca.name, ca.description, ca.activity_type, ca.price
-    into c_activity_name, c_activity_description, c_activity_type, c_activity_price
-    from public.course_activities ca
-    where ca.id = new.activity_id;
-
-    -- get the assigned_to email, firstname and lastname
-    select u.email, u.firstname, u.lastname
-    into s_assigned_to_email, s_assigned_to_firstname, s_assigned_to_lastname
-    from public.users u
-    where u.id = new.assigned_to;
-
-    -- loop over the attendees and insert the attendance
-    for i in 1..array_length(new.attendees, 1) loop
-      -- check if the subscription is active
-      if public.is_subscription_active(new.attendees[i]) then
-        -- insert the attendance
-        insert into public.course_activity_schedules_attendances(
-          activity_name,
-          activity_description,
-          activity_type,
-          activity_price,
-          schedule_start_at,
-          schedule_end_at,
-          schedule_assigned_to_email,
-          schedule_assigned_to_firstname,
-          schedule_assigned_to_lastname,
-          successfully_completed,
-          course_activity_id,
-          course_activity_schedule_id,
-          schedule_assigned_to_id,
-          course_subscription_id,
-          organization_id
-        ) values (
-          c_activity_name,
-          c_activity_description,
-          c_activity_type,
-          c_activity_price,
-          new.start_at,
-          new.end_at,
-          s_assigned_to_email,
-          s_assigned_to_firstname,
-          s_assigned_to_lastname,
-          false, -- successfully_completed
-          new.activity_id,
-          new.id,
-          new.assigned_to,
-          new.attendees[i],
-          new.organization_id
-        );
-      end if;
-    end loop;
+  select firstname, lastname, email into a_firstname, a_lastname, a_email from public.users where id = new.assigned_to;
+  if a_firstname is null or a_lastname is null or a_email is null then
+    -- Throw an error if assigned_to user not found
+    raise exception 'Assigned to user not found for schedule %', new.id;
   end if;
+
+  for r_attendee in select * from public.course_activity_schedules_attendees where schedule_id = new.id loop
+    -- Get course id from subscription
+    select course_id into v_course_id from public.course_subscriptions where id = r_attendee.subscription_id;
+    if v_course_id is null then
+      raise exception 'Course subscription not found for attendance record creation, subscription id: %', r_attendee.subscription_id;
+    end if;
+
+    -- Get course activity combination to check if the activity belongs to the course and get the alternative price if set
+    select price into c_activity_price from public.course_activities_combinations where course_id = v_course_id and activity_id = new.activity_id;
+
+    -- If price is null in the combination, use the default activity price
+    if c_activity_price is null then
+      select price into c_activity_price from public.course_activities where id = new.activity_id;
+    end if;
+    
+    select * into v_activity from public.course_activities where id = new.activity_id;
+    insert into public.course_activity_schedules_attendances (
+      activity_name,
+      activity_description,
+      activity_type,
+      activity_price,
+      schedule_start_at,
+      schedule_end_at,
+      schedule_assigned_to_email,
+      schedule_assigned_to_firstname,
+      schedule_assigned_to_lastname,
+      course_activity_id,
+      course_activity_schedule_id,
+      schedule_assigned_to_id,
+      course_subscription_id,
+      organization_id
+    ) values (
+      v_activity.name,
+      v_activity.description,
+      v_activity.activity_type,
+      c_activity_price,
+      new.start_at,
+      new.start_at + (new.duration_minutes || ' minutes')::interval,
+      a_email,
+      a_firstname,
+      a_lastname,
+      new.activity_id,
+      new.id,
+      new.assigned_to,
+      r_attendee.subscription_id,
+      new.organization_id
+    );
+  end loop;
 
   return new;
 end;
-$$ language plpgsql security definer set search_path = '';
+$$ language plpgsql security invoker set search_path = '';
 create trigger create_attendance_record_for_schedule
 after update on public.course_activity_schedules
 for each row

@@ -10,27 +10,24 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute();
-const subscription_id = route.params.s_id as string;
-const org_id = route.params.org_id as string;
 const { t } = useI18n({
   useScope: "local",
 });
-const subscriptionStore = useSubscriptionStore();
+const studentStore = useStudentStore();
 
 const links = computed(() => {
-  if (!subscriptionStore.subscription) {
+  if (!studentStore.selectedSubscription) {
     return [];
   }
   const l = [
     {
       label: t("subscription_settlements"),
-      to: `/students/${org_id}/subscription/${subscription_id}/billing`,
+      to: `/students/${studentStore.selectedSubscription.organization_id}/subscription/${studentStore.selectedSubscription.id}/billing`,
         exact: true,
     },
     {
       label: t("subscription_bills"),
-      to: `/students/${org_id}/subscription/${subscription_id}/billing/bills`,
+      to: `/students/${studentStore.selectedSubscription.organization_id}/subscription/${studentStore.selectedSubscription.id}/billing/bills`,
     },
   ];
 

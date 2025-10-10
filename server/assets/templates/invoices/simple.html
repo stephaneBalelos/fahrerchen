@@ -141,8 +141,7 @@
                         <tr>
                             <td class="title">
                                 {{#if driving_school_logo}}
-                                <img src="{{driving_school_logo}}"
-                                    style="width: 100%; max-width: 150px" />
+                                <img src="{{driving_school_logo}}" style="width: 100%; max-width: 150px" />
                                 {{else}}
                                 <img src="https://www.karjolen.de/images/favicon.svg"
                                     style="width: 100%; max-width: 100px" />
@@ -246,28 +245,24 @@
                     {{invoice_footer}}
                 </td>
             </tr>
-
-            <tr class="bottom">
-                <td colspan="3">
-                    <table>
-                        <tr>
-                            <td colspan="2">
-                                Bankverbindung:
-                                <br>
-                                {{bill_settings_bank_account_name}} 
-                                <br>
-                                BIC: {{bill_settings_bank_account_bic}} | Konto-Nr.: {{bill_settings_bank_account_number}}
-                                <br>
-                                IBAN: {{bill_settings_bank_account_iban}}
-                            </td>
-                            <td>
-                                Steuernummer: {{bill_settings_tax_id}}
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
         </table>
+    <footer>
+        <div style="width: 100%; display: flex; font-size: 12px;">
+            <div style="flex: 1;">
+                Bankverbindung:
+                <p>{{bill_settings_bank_account_name}}</p>
+                <p>BIC: {{bill_settings_bank_account_bic}}</p>
+                <p>Konto-Nr.: {{bill_settings_bank_account_number}}</p>
+                <p>IBAN: {{bill_settings_bank_account_iban}}</p>
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <p>Steuernummer: {{bill_settings_tax_id}}</p>
+            </div>
+        </div>
+        <div style="width: 100%; font-size: 10px; text-align: center;">
+            <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+    </footer>
     </div>
 </body>
 

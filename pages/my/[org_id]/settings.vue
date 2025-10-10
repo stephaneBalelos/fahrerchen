@@ -10,28 +10,31 @@ const { t } = useI18n({
 });
 
 const links = computed(() => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return [];
+  }
   return [
     [
       {
         label: t("settings"),
         icon: "i-heroicons-cog",
-        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings`,
+        to: `/my/${userOrganizationsStore.selectedOrganization.id}/settings`,
         exact: true,
       },
       {
         label: t("members"),
         icon: "i-heroicons-user-group",
-        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/members`,
+        to: `/my/${userOrganizationsStore.selectedOrganization.id}/settings/members`,
       },
       {
         label: t("billing"),
         icon: "i-heroicons-document-text",
-        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/billing`,
+        to: `/my/${userOrganizationsStore.selectedOrganization.id}/settings/billing`,
       },
       {
         label: t("payments"),
         icon: "i-heroicons-credit-card",
-        to: `/my/${userOrganizationsStore.selectedOrganization?.organization_id}/settings/payments`,
+        to: `/my/${userOrganizationsStore.selectedOrganization.id}/settings/payments`,
       },
     ],
     [
@@ -48,6 +51,7 @@ const links = computed(() => {
 <template>
   <UDashboardPage>
     <UDashboardPanel grow>
+      <UDashboardNavbar :title="t('setting')" />
       <UDashboardToolbar class="py-0 px-1.5 overflow-x-auto">
         <UHorizontalNavigation :links="links" />
       </UDashboardToolbar>
@@ -59,6 +63,7 @@ const links = computed(() => {
 <i18n lang="json">
 {
   "de": {
+    "setting": "Einstellungen",
     "settings": "Allgemein",
     "members": "Mitglieder",
     "billing": "Abrechnung",
@@ -67,6 +72,7 @@ const links = computed(() => {
     "subscription": "Abonnement"
   },
   "en": {
+    "setting": "Settings",
     "settings": "General",
     "members": "Members",
     "billing": "Billing",

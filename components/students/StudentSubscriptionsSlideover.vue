@@ -24,8 +24,8 @@
       <div>
         <UDashboardCard
           v-if="activeSubsription"
-          :title="activeSubsription.course_name"
-          :description="activeSubsription.course_description"
+          :title="activeSubsription"
+          :description="activeSubsription.costs"
         >
           <template #links>
             <UButton
@@ -61,8 +61,8 @@
         <UDashboardCard
           v-for="sub in archivedSubscriptions"
           :key="sub.id"
-          :title="sub.course_name"
-          :description="sub.course_description"
+          :title="sub.student_lastname"
+          :description="sub.id"
         >
           <template #links>
             <UButton

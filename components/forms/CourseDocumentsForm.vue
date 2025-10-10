@@ -50,7 +50,7 @@
     <div class="mt-4">
         <FormsInputsFileUploader
           :bucket-id="'course_documents'"
-          :path="`${userOrganizationsStore.selectedOrganization?.organization_id}/${props.courseid}`"
+          :path="`${organizationid}/${props.courseid}`"
           @uploaded="refresh"
         />
     </div>
@@ -64,11 +64,11 @@ import DocumentPreview from "../files/DocumentPreview.vue";
 
 type Props = {
   courseid: string;
+  organizationid: string;
 };
 
 const props = defineProps<Props>();
 const client = useSupabaseClient<Database>();
-const userOrganizationsStore = useUserOrganizationsStore();
 const modal = useModal()
 
 const { t } = useI18n({

@@ -1,9 +1,12 @@
 <template>
-<UDashboardToolbar v-if="props.isNewMonth" class="sticky top-0 z-10 bg-white dark:bg-gray-900">
-  <span class="text-gray-900 dark:text-white font-bold text-lg">
-    {{  format(new Date(props.activitySchedule.start_at), "MMMM yyyy") }}
-  </span>
-</UDashboardToolbar> 
+  <UDashboardToolbar
+    v-if="props.isNewMonth"
+    class="sticky top-0 z-10 bg-white dark:bg-gray-900"
+  >
+    <span class="text-gray-900 dark:text-white font-bold text-lg">
+      {{ format(new Date(props.activitySchedule.start_at), "MMMM yyyy") }}
+    </span>
+  </UDashboardToolbar>
   <div
     v-if="courseActivity"
     class="py-2 px-4 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-3 relative"
@@ -62,10 +65,10 @@
         @click.stop="openAttendanceConfirmation"
       />
       <UButton
-      v-if="permissions.hasPermission('course_activity_schedules.update')"
+        v-if="permissions.hasPermission('course_activity_schedules.update')"
         color="white"
         :label="t('view_schedule')"
-        @click="() => $emits('open-edit-schedule')"
+        :to="userOrganizationsStore.relativePath(`/schedules?id=${props.activitySchedule.id}`)"
       />
     </p>
   </div>
@@ -82,8 +85,6 @@ type Props = {
   isNewMonth?: boolean;
 };
 
-const $emits = defineEmits(["open-edit-schedule"]);
-
 const props = defineProps<Props>();
 const { t } = useI18n({
   useScope: "local",
@@ -91,21 +92,24 @@ const { t } = useI18n({
 const client = useSupabaseClient();
 const slideover = useSlideover();
 const permissions = useUserPermissionsStore();
+const userOrganizationsStore = useUserOrganizationsStore();
 
-const courseActivity = await useCourseActivities(
-  props.activitySchedule.organization_id,
-  props.activitySchedule.course_id,
-  props.activitySchedule.activity_id
-);
+const courseActivitiesStore = useCourseActivitiesStore();
+const courseActivity = computed(() => {
+  return courseActivitiesStore.courseActivities.find(
+    (a) => a.id === props.activitySchedule.activity_id
+  );
+});
 
 const { data: scheduleAttendance } = useAsyncData(
-  `course_activity_schedule_attendance_${props.activitySchedule.id}_${props.subscriptionId}`,
+  `schedule-attendance-${props.subscriptionId}-${props.activitySchedule.id}`,
   async () => {
     const { data, error } = await client
       .from("course_activity_schedules_attendances")
-      .select("*")
+      .select("*, subscription:course_subscription_id(*, student:students(*))")
       .eq("course_activity_schedule_id", props.activitySchedule.id)
-      .eq("course_subscription_id", props.subscriptionId);
+      .eq("course_subscription_id", props.subscriptionId)
+      .eq("organization_id", props.activitySchedule.organization_id);
 
     if (error) {
       console.error(error);

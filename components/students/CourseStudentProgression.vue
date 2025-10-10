@@ -1,27 +1,57 @@
 <template>
   <UDashboardCard
-    v-if="data"
+    v-if="data && status === 'success'"
     class="mb-4"
     :title="t('course_activity_attendances')"
     :description="t('course_activity_attendances_description')"
   >
     <StudentsCourseStudentProgressionItem
-      v-for="activity in data.course?.course_activities"
+      v-for="activity in data"
       :key="activity.id"
-      :subscription-id="props.subscriptionId"
+      :subscription-id="props.subscription.id"
       :activity-id="activity.id"
       :activity-name="activity.name"
       :activity-required="activity.required"
-      :org-id="data.organization_id"
+      :org-id="activity.organization_id"
     />
   </UDashboardCard>
+  <UDashboardCard v-else-if="status === 'pending'" class="mb-4">
+    <USkeleton class="h-4 w-1/3 mb-4" />
+    <div class="space-y-2">
+      <div class="flex items-center space-x-2">
+        <USkeleton class="h-10 w-10 rounded-full" />
+        <div class="flex-1">
+          <USkeleton class="h-4 w-full mb-2" />
+          <USkeleton class="h-4 w-1/2" />
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <USkeleton class="h-10 w-10 rounded-full" />
+        <div class="flex-1">
+          <USkeleton class="h-4 w-full mb-2" />
+          <USkeleton class="h-4 w-1/2" />
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <USkeleton class="h-10 w-10 rounded-full" />
+        <div class="flex-1">
+          <USkeleton class="h-4 w-full mb-2" />
+          <USkeleton class="h-4 w-1/2" />
+        </div>
+      </div>
+    </div>
+  </UDashboardCard>
+  <div v-else class="text-center text-gray-500 dark:text-gray-400">
+    <UAlert v-if="!error" :title="t('no_activities_found')" type="amber" :icon="'heroicons-outline:exclamation-circle'" />
+    <UAlert v-if="error" :title="t('error_loading_activities')" type="red" :icon="'heroicons-outline:exclamation-circle'" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import type { Database } from "~/types/app.types";
+import type { AppCourseSubscription } from "~/types/app.types";
 
 type Props = {
-  subscriptionId: string;
+  subscription: AppCourseSubscription;
 };
 
 const props = defineProps<Props>();
@@ -30,24 +60,14 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const supabase = useSupabaseClient<Database>();
+const courseActivitiesStore = useCourseActivitiesStore();
 
-const { data } = useAsyncData(
-  `course_progression_${props.subscriptionId}`,
-  async () => {
-    const { data, error } = await supabase
-      .from("course_subscriptions")
-      .select("*, course:courses(id, course_activities(*))")
-      .eq("id", props.subscriptionId)
-      .single();
 
-    if (error) {
-      console.error(error);
-      throw error;
-    }
-    return data;
-  }
-);
+const { data, error, status } = useAsyncData(async () => {
+  return await courseActivitiesStore.getActivitiesForCourse(
+    props.subscription.course_id
+  );
+});
 </script>
 
 <style scoped></style>

@@ -1,10 +1,10 @@
-import type { NotificationView } from "~/types/app.types";
+import type { AppOrganizationNotification } from "~/types/app.types";
 
 export const useNotificationsStore = defineStore('notifications', () => {
     const client = useSupabaseClient();
     const userStore = useUserStore()
-    const notifications = ref<NotificationView[]>([])
     const organizationsStore = useUserOrganizationsStore()
+    const notifications = ref<AppOrganizationNotification[]>([])
 
     async function loadNotifications() {
         if (!userStore.user) {
@@ -13,50 +13,41 @@ export const useNotificationsStore = defineStore('notifications', () => {
         if (!organizationsStore.selectedOrganization) {
             return
         }
-        const { data, error } = await client.from('notifications_view').select('*')
-        .eq('organization_id', organizationsStore.selectedOrganization.organization_id)
-        .neq('actor_id', userStore.user.id)
-        .order('date', { ascending: false })
-        .overrideTypes<Array<NotificationView>, { merge: false }>()
+        const { data, error } = await client.from('organization_notifications').select('*')
+        .eq('organization_id', organizationsStore.selectedOrganization.id)
+        .contains('target_user_ids', [userStore.user.id])
+        .order('created_at', { ascending: false })
+        
         if (error) {
             console.error(error)
             return
         }
-        console.log(data)
+
+        console.log('Loaded notifications:', data)
+
         notifications.value = data
+        return data
     }
 
     async function markAsRead(id: string) {
-        if (!userStore.user) {
-            return
-        }
-        const n = notifications.value.find(n => n.id === id)
-        if (!n || n.read_at) {
-            // console.warn('Notification not found or already read')
-            return
-        }
-        const { error } = await client.from('notifications_read_status').insert({
-            notification_id: id,
-            user_id: userStore.user.id
-        })
-        if (error) {
-            console.error(error)
-            return
-        }
-        await loadNotifications()
+
+        console.log('Marking notification as read:', id)
 
     }
 
-    watch(() => userStore.user, async () => {
-        if (userStore.user) {
-            await loadNotifications()
-        }
-    }, {
-        immediate: true
-    })
+    // watch(() => userStore.user, async () => {
+    //     if (userStore.user) {
+    //         await loadNotifications()
+    //     }
+    // }, {
+    //     immediate: true
+    // })
+
     watch(() => organizationsStore.selectedOrganization, async () => {
         if (organizationsStore.selectedOrganization) {
             await loadNotifications()
+        } else {
+            notifications.value = []
         }
     }, {
         immediate: true

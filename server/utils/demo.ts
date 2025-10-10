@@ -3,12 +3,12 @@ import { randomNumber } from "./utilities"
 import type { AppCourseActivitySchedule } from "~/types/app.types"
 import { SCHEDULES_STATUS } from "~/constants"
 import type { H3Event } from 'h3';
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseServiceRole } from '#supabase/server'
 
 
 
 export const createSchedule = async (event: H3Event, course_id: string, activity_id: string, org_id: string, start_date?: Date, start_time?: number, duration?: number) => {
-    const client = await serverSupabaseClient(event)
+    const client = await serverSupabaseServiceRole(event)
     const currentDate = new Date()
     const dateStart = start_date ?? addDays(currentDate, randomNumber(-30, 30)) // 30 days before or after
     dateStart.setHours(start_time ?? randomNumber(8, 18)) // between 8 and 18
@@ -33,7 +33,7 @@ export const createSchedule = async (event: H3Event, course_id: string, activity
 
 export const generateStudentPersona = async (event: H3Event, org_id: string, student_id: string, course_id: string) => {
 
-    const client = await serverSupabaseClient(event)
+    const client = await serverSupabaseServiceRole(event)
 
     const subscriptionDate = randomDate(addMonths(new Date(), -5), new Date())
 

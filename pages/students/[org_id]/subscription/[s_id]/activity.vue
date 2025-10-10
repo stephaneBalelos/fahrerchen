@@ -1,5 +1,5 @@
 <template>
-  <UDashboardPanelContent v-if="subscriptionStore.subscription" class="p-0">
+  <UDashboardPanelContent v-if="studentStore.selectedSubscription" class="p-0">
     <UDashboardToolbar>
       <template #left>
         <UButtonGroup size="sm" orientation="horizontal">
@@ -65,10 +65,10 @@
 
         <UButtonGroup size="sm" orientation="horizontal">
           <FormsInputsCourseActivitySelect
-            v-if="subscriptionStore.subscription.course_id"
+            v-if="studentStore.selectedSubscription"
             v-model="filterForm.activityId"
-            :org-id="subscriptionStore.subscription.organization_id"
-            :course-id="subscriptionStore.subscription.course_id"
+            :org-id="studentStore.selectedSubscription.organization_id"
+            :course-id="studentStore.selectedSubscription.course_id"
           />
           <UButton
             v-if="filterForm.activityId"
@@ -81,7 +81,7 @@
       </template>
       <template #right>
         <UButton
-          v-if="subscriptionStore.subscription"
+          v-if="studentStore.selectedSubscription"
           :loading="isDownloadingCertificate"
           variant="soft"
           color="primary"
@@ -92,7 +92,7 @@
       </template>
     </UDashboardToolbar>
     <UDashboardPanelContent>
-      <UContainer class="w-full relative h-full">
+      <UContainer v-if="studentStore.selectedSubscription" class="w-full relative h-full">
         <div class="absolute inset-0 overflow-y-auto">
           <div v-if="status === 'pending'">Loading...</div>
           <div v-else-if="status === 'error'">Error: {{ error }}</div>
@@ -104,7 +104,7 @@
               <StudentsStudentActivityItem
                 v-for="(schedule, index) in schedules"
                 :key="index"
-                :subscription-id="subscriptionStore.subscription.id"
+                :subscription-id="studentStore.selectedSubscription.id"
                 :activity-schedule="schedule"
                 :is-new-month="
                   isNewMonth(
@@ -124,7 +124,7 @@
 <script setup lang="ts">
 import { format } from "date-fns";
 import { SCHEDULES_STATUS } from "~/constants";
-import type { AppOrganizationSchedulesView, Database } from "~/types/app.types";
+import type { Database } from "~/types/app.types";
 
 const { t } = useI18n({
   useScope: "local",
@@ -140,9 +140,10 @@ const filterForm = ref({
     | undefined,
 });
 
-const subscriptionStore = useSubscriptionStore();
+const studentStore = useStudentStore();
 const isDownloadingCertificate = ref(false);
-const client = useSupabaseClient();
+const $courseActivitySchedules = useCourseActivitySchedules();
+
 
 const {
   data: schedules,
@@ -150,36 +151,25 @@ const {
   status,
 } = useAsyncData(
   async () => {
-    if (!subscriptionStore.subscription) {
+    if (!studentStore.selectedSubscription) {
       return [];
     }
-    const q = client
-      .from("course_activity_schedules")
-      .select("*")
-      .contains("attendees", [subscriptionStore.subscription.id])
-      .eq("organization_id", subscriptionStore.subscription.organization_id)
-
-    if (filterForm.value.activityId) {
-      q.eq("activity_id", filterForm.value.activityId);
-    }
-    if (filterForm.value.activityStatus) {
-      q.eq("status", filterForm.value.activityStatus);
-    }
-
-    const { data, error } = await q.order("start_at", { ascending: false }).overrideTypes<AppOrganizationSchedulesView[]>();
-
-    if (error) {
-      throw error;
-    }
-    return data;
+    return $courseActivitySchedules.fetchCourseActivitySchedules({
+      subscription_id: studentStore.selectedSubscription.id,
+      activity_id: filterForm.value.activityId || undefined,
+      status: filterForm.value.activityStatus || undefined,
+    })
   },
   {
-    watch: [filterForm.value],
+    watch: [filterForm.value, () => studentStore.selectedSubscription],
   }
 );
 
 async function generateCertificate() {
-  if (!subscriptionStore.subscription) {
+  if (!studentStore.selectedSubscription) {
+    return;
+  }
+  if (!studentStore.student) {
     return;
   }
   if (isDownloadingCertificate.value) {
@@ -188,7 +178,7 @@ async function generateCertificate() {
   isDownloadingCertificate.value = true;
   try {
     const res = await $fetch<Blob>(
-      `/api/orgs/subscriptions/${subscriptionStore.subscription.id}/generate-certificate`,
+      `/api/orgs/subscriptions/${studentStore.selectedSubscription.id}/generate-certificate`,
       {
         method: "GET",
       }
@@ -199,7 +189,7 @@ async function generateCertificate() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `ausbildungsnachweis-b-${subscriptionStore.subscription.student_firstname}-${subscriptionStore.subscription.student_lastname}-${date}.pdf`;
+    a.download = `ausbildungsnachweis-b-${studentStore.student.firstname}-${studentStore.student.lastname}-${date}.pdf`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

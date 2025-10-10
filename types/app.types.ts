@@ -7,25 +7,50 @@ export type RolePermission = DatabaseGenerated['public']['Enums']['app_permissio
 export type AppUser = DatabaseGenerated['public']['Tables']['users']['Row']
 export type AppUserWithRole = DatabaseGenerated['public']['Tables']['users']['Row'] & { role: UserRole }
 export type AppOrganization = DatabaseGenerated['public']['Tables']['organizations']['Row']
+export type OrganizationEdit = Omit<AppOrganization, 'id' | 'description' | 'inserted_at' | 'updated_at' | 'setup_completed' | 'allow_self_registration' | 'avatar_path'>
 export type AppOrganizationMember = DatabaseGenerated['public']['Tables']['organization_members']['Row']
+export type AppOrganizationsInvitation = DatabaseGenerated['public']['Tables']['organizations_invitations']['Row']
 export type AppStudent = DatabaseGenerated['public']['Tables']['students']['Row']
-export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
-export type AppCourseCost = DatabaseGenerated['public']['Tables']['course_costs']['Row']
+export type StudentEdit = Omit<AppStudent, 'id' | 'organization_id' | 'created_at' | 'avatar_path' | 'updated_at' | 'user_id' | 'full_name'>
 export type AppCourseType = DatabaseGenerated['public']['Enums']['course_type']
+export type AppCourse = DatabaseGenerated['public']['Tables']['courses']['Row']
+
+export type AppCourseCost = DatabaseGenerated['public']['Tables']['course_costs']['Row']
+export type CourseCostEdit = Omit<AppCourseCost, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
+export type AppCourseCostsCombination = DatabaseGenerated['public']['Tables']['course_costs_combinations']['Row']
+
+export type AppCourseActivityType = DatabaseGenerated['public']['Enums']['activity_types']
+
 export type AppCourseActivity = DatabaseGenerated['public']['Tables']['course_activities']['Row']
-export type AppCourseActivityType = DatabaseGenerated['public']['Tables']['course_activity_types']['Row']
+export type CourseActivityEdit = Omit<AppCourseActivity, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
+export type AppCourseActivitiesCombination = DatabaseGenerated['public']['Tables']['course_activities_combinations']['Row']
+
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
+export type CourseActivityScheduleEdit = Omit<AppCourseActivitySchedule, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'  | 'attendees'>
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
+
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
+
+export type CourseActivitySchedulesAttendee = DatabaseGenerated['public']['Tables']['course_activity_schedules_attendees']['Row']
 
 export type AppCourseSubscriptionBill = DatabaseGenerated['public']['Tables']['course_subscription_bills']['Row']
 export type AppCourseSubscriptionBillItem = DatabaseGenerated['public']['Tables']['course_subscription_bill_items']['Row']
 
 export type AppCourseDocument = DatabaseGenerated['public']['Tables']['course_documents']['Row']
+export type CourseDocumentEdit = Omit<AppCourseDocument, 'id' | 'organization_id' | 'inserted_at' | 'updated_at' | 'path'>
+export type AppCourseDocumentCombination = DatabaseGenerated['public']['Tables']['course_documents_combinations']['Row']
+
 export type AppCourseRequiredDocument = DatabaseGenerated['public']['Tables']['course_required_documents']['Row']
+export type CourseRequiredDocumentEdit = Omit<AppCourseRequiredDocument, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'>
+export type AppCourseRequiredDocumentCombination = DatabaseGenerated['public']['Tables']['course_required_documents_combinations']['Row']
 
 export type AppStudentRegistrationRequest = DatabaseGenerated['public']['Tables']['students_registration_requests']['Row']
+
 export type AppOrganizationBillingSettings = DatabaseGenerated['public']['Tables']['organization_billing_settings']['Row']
+export type OrganizationBillingSettingsEdit = Omit<AppOrganizationBillingSettings, 'id' | 'organization_id' | 'created_at' | 'updated_at'>
+
+export type NotificationType = DatabaseGenerated['public']['Enums']['notification_type']
+export type AppOrganizationNotification = DatabaseGenerated['public']['Tables']['organization_notifications']['Row']
 
 export type AppStripeAccountPaymentMethodSettings = {
   credit_card: {
@@ -44,6 +69,7 @@ export type AppStripeAccountPaymentMethodSettings = {
 
 export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
 
+
 export type StripeConnectPostBody = {
   org_id: string
 }
@@ -52,92 +78,7 @@ export type StripeConnectLinkAccountPostBody = {
   org_id: string
 }
 
-export type AppUserOrganizationsView = Database["public"]["Views"]["users_organizations_view"]["Row"]
-export type AppOrganizationSchedulesView = Database["public"]["Views"]["organizations_schedules_view"]["Row"]
-export type AppCourseSubscriptionsView = Database["public"]["Views"]["course_subscriptions_view"]["Row"]
-export type AppCourseSubscriptionBillsView = Database["public"]["Views"]["course_subscription_bills_view"]["Row"]
-
 export type Database = MergeDeep<DatabaseGenerated, {
-  public: {
-    Views: {
-      users_organizations_view: {
-        Row: {
-          user_id: string
-          user_email: string
-          user_firstname: string | null
-          user_lastname: string | null
-          user_fullname: string | null
-          organization_id: string,
-          organization_handle: string
-          organization_name: string
-          organization_description: string | null
-          organization_avatar_path: string | null
-          organization_preferred_language: string
-          organization_role: UserRole
-          organization_membership_inserted_at: string
-        }
-      },
-      organizations_schedules_view: {
-        Row: {
-          schedule_id: string
-          schedule_organization_id: string
-          schedule_start_at: string
-          schedule_end_at: string
-          schedule_attendees: string[]
-          schedule_status: DatabaseGenerated["public"]["Enums"]["schedule_status"]
-          schedule_assigned_to: string
-          activity_id: string
-          activity_name: string
-          activity_description: string
-          activity_type: DatabaseGenerated["public"]["Enums"]["activity_types"]
-          course_id: string
-          course_name: string
-          course_description: string
-        }
-      },
-      course_subscriptions_view: {
-        Row: {
-          id: string
-          student_id: string
-          inserted_at: string
-          archived_at: string | null
-          costs: number
-          organization_id: string
-          student_firstname: string
-          student_lastname: string
-          student_email: string
-          student_full_name: string
-          student_avatar_path: string | null
-          course_name: string
-          course_description: string
-          course_id: string
-          course_type: AppCourseType
-        }
-      },
-      course_subscription_bills_view: {
-        Row: {
-          id: string,
-          bill_number: string,
-          organization_id: string,
-          total: number,
-          vat_rate: number,
-          vat_amount: number,
-          total_with_vat: number,
-          paid_at: string | null,
-          canceled_at: string | null,
-          created_at: string,
-          course_subscription_id: string,
-          course_id: string,
-          student_id: string,
-          student_firstname: string,
-          student_lastname: string,
-          student_email: string,
-          course_name: string,
-          course_description: string,
-        }
-      }
-    };
-  };
   storage: {
     Tables: {
       objects: {

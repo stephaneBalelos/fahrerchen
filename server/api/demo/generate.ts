@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     const faker_base_url = 'https://fakerapi.it/api/v2'
 
     const client = serverSupabaseServiceRole(event)
-
+    
     // Get Current User name
     const { data: user_data } = await client.from('users').select('firstname, lastname').eq('id', user.id).single()
 

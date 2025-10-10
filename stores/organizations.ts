@@ -1,74 +1,182 @@
-import type { Database, AppOrganization, AppUserOrganizationsView } from "~/types/app.types"
+import type { Database, AppOrganization, OrganizationEdit, AppOrganizationBillingSettings, OrganizationBillingSettingsEdit, UserRole, AppUser } from "~/types/app.types"
 import { useUserStore } from "./user"
 
+export type UserOrganization = AppOrganization & { organization_role: UserRole }
+export type OrganizationMember = (AppUser & { organization_role: UserRole, organization_member_id: string })
 export const useUserOrganizationsStore = defineStore('userOrganizations', () => {
     const supabase = useSupabaseClient<Database>()
     const userStore = useUserStore()
-    const organizations = ref<AppUserOrganizationsView[]>([])
+    const organizations = ref<UserOrganization[]>([])
+    const selectedOrganizationMembers = ref<OrganizationMember[]>([])
+    const config = useRuntimeConfig().public
+
     const isLoading = ref(true)
-    const selectedOrganizationId = ref<string | null>(null)
+    const route = useRoute()
 
+    // Selected organization based on route param org_id
     const selectedOrganization = computed(() => {
-        if (!selectedOrganizationId.value) {
-            return null
+        if (route.params.org_id && organizations.value.length > 0) {
+            return organizations.value.find(o => o.id === route.params.org_id) || null
         }
-        return organizations.value.find(org => org.organization_id === selectedOrganizationId.value) || null
-    })
+        return null
+    });
 
-
-    async function createOrganization(organization: AppOrganization) {
-        if (!userStore.user) {
-            return
+    function relativePath(path: string) {
+        if (!selectedOrganization.value) {
+            return '/my'
         }
-        try {
-            const { error } = await supabase.from('organizations').insert({
-                name: organization.name,
-                owner_id: userStore.user.id
-            })
-            if (error) {
-                console.error(error)
-                return
-            }
-            await loadOrganizationsMemberships()
-        } catch (error) {
-            console.error(error)
-        }
+        return `/my/${selectedOrganization.value.id}${path}`
     }
 
-    async function loadOrganizationsMemberships() {
-        if (!userStore.user) {
-            return
-        }
+
+    const loadOrganizationsMemberships = async () => {
         isLoading.value = true
-        const { data, error } = await supabase.from('users_organizations_view').select('*').eq('user_id', userStore.user.id).order('organization_name', { ascending: true })
-        if (error) {
-            console.error(error)
+        if (!userStore.user) {
+            organizations.value = []
+            isLoading.value = false
             return
         }
-        organizations.value = data
+        const { data, error } = await supabase
+            .from('organization_members')
+            .select('id, role, organization:organization_id(*)')
+            .eq('user_id', userStore.user.id)
+        if (error) {
+            console.error("Error loading organizations memberships:", error)
+            organizations.value = []
+        } else {
+            organizations.value = data ? data.map(d => {
+                return { 
+                    ...d.organization, 
+                    organization_role: d.role, 
+                    avatar_path: d.organization.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.organization.avatar_path}` : null,
+                }
+            }) : []
+        }
         isLoading.value = false
     }
 
-    function relativePath(path: string) {
-        if (!selectedOrganizationId.value) {
-            return '/my'
+    const getOrganizationById = async (id: string) => {
+        console.log("Get organization by ID:", id)
+        if (organizations.value.length === 0) {
+            await loadOrganizationsMemberships()
         }
-        return `/my/${selectedOrganizationId.value}${path}`
+        const org = organizations.value.find(o => o.id === id)
+        if (!org) {
+            await loadOrganizationsMemberships()
+        }
+        return organizations.value.find(o => o.id === id) || null
     }
 
-    async function selectOrganization(org_id: string) {
+    const updateOrganizationById = async (id: string, updates: Partial<AppOrganization>) => {
+        const { error } = await supabase
+            .from('organizations')
+            .update(updates)
+            .eq('id', id)
+        if (error) {
+            throw error
+        }
         await loadOrganizationsMemberships()
-        const organization = organizations.value.find(org => org.organization_id === org_id)
-        if (!organization) {
-            console.error(`Organization with id ${org_id} not found`)
-            return
-        }
-        selectedOrganizationId.value = organization.organization_id
     }
 
-    function clearSelectedOrganization() {
-        selectedOrganizationId.value = null
+    const createOrganization = async (data: OrganizationEdit) => {
+        const { error } = await supabase
+            .from('organizations')
+            .insert(data)
+        if (error) {
+            throw error
+        }
+        await loadOrganizationsMemberships()
     }
+
+    const getOrganizationBillingSettings = async (orgId: string): Promise<AppOrganizationBillingSettings | null> => {
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .select('*')
+            .eq('id', orgId)
+        if (error) {
+            return null
+        } else {
+            return data[0] || null
+        }
+    }
+
+
+    const createBillingSettings = async (settings: OrganizationBillingSettingsEdit): Promise<AppOrganizationBillingSettings | null> => {
+        if (!selectedOrganization.value) {
+            throw new Error("No organization selected")
+        }
+        const orgId = selectedOrganization.value.id
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .insert({
+                ...settings,
+                id: orgId
+            })
+            .select('*')
+            .single()
+        if (error) {
+            console.error("Error saving billing settings:", error)
+            throw error
+        }
+        return data
+    }
+
+    const updateBillingSettings = async (settings: Partial<OrganizationBillingSettingsEdit>): Promise<AppOrganizationBillingSettings | null> => {
+        if (!selectedOrganization.value) {
+            throw new Error("No organization selected")
+        }
+        const orgId = selectedOrganization.value.id
+        const { data, error } = await supabase
+            .from('organization_billing_settings')
+            .update(settings)
+            .eq('id', orgId)
+            .select('*')
+            .single()
+        if (error) {
+            console.error("Error updating billing settings:", error)
+            throw error
+        }
+        return data
+    }
+
+    const getOrganizationMembers = async (orgId: string, roles: UserRole[] = [], search: string = ""): Promise<OrganizationMember[]> => {
+        let query = supabase
+            .from('organization_members')
+            .select('id, role, user:users!user_id(*)')
+
+        if (roles.length > 0) {
+            query = query.in('role', roles)
+        }
+        if (search) {
+            query = query.or(`email.ilike.%${search}%,firstname.ilike.%${search}%,lastname.ilike.%${search}%`, {
+                referencedTable: 'users'
+            })
+        }
+        query = query.eq('organization_id', orgId)
+
+        const { data, error } = await query
+        if (error) {
+            console.error("Error loading organization members:", error)
+            return []
+        }
+        return data ? data.map(d => {
+            return {
+                ...d.user,
+                organization_role: d.role,
+                organization_member_id: d.id
+            }
+        }) : []
+    }
+
+    watch(() => route.params.org_id, async (newOrgId, oldOrgId) => {
+        if (newOrgId && newOrgId !== oldOrgId) {
+            try {
+                selectedOrganizationMembers.value = await getOrganizationMembers(newOrgId as string)
+            } catch (error) {
+                console.error("Error loading organization members:", error)
+            }
+        }
+    }, { immediate: true })
 
     watch(() => userStore.user, async () => {
         if (!userStore.user) {
@@ -78,7 +186,10 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         await loadOrganizationsMemberships()
     }, { immediate: true })
 
-    return { organizations, selectedOrganization, isLoading, relativePath, loadOrganizationsMemberships, createOrganization, selectOrganization, clearSelectedOrganization }
+    return {
+        organizations, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+        getOrganizationBillingSettings, createBillingSettings, updateBillingSettings, getOrganizationMembers
+    }
 
-    
+
 })

@@ -32,9 +32,12 @@
             </template>
             <template #footer>
               <i18n-t keypath="terms_text" tag="div" for="terms_of_service">
-                <NuxtLink to="https://www.karjolen.de/legal/terms" target="_blank" class="text-primary font-medium">{{
-                  t("terms_of_service")
-                }}</NuxtLink>
+                <NuxtLink
+                  to="https://www.karjolen.de/legal/terms"
+                  target="_blank"
+                  class="text-primary font-medium"
+                  >{{ t("terms_of_service") }}</NuxtLink
+                >
               </i18n-t>
             </template>
           </UAuthForm>
@@ -98,12 +101,15 @@ onMounted(() => {
 });
 
 async function onSubmit(credentials: Schema) {
+  const cookieName = useRuntimeConfig().public.supabase.cookieName;
+  const redirectCookie = useCookie(`${cookieName}-redirect-path`);
+  redirectCookie.value = "/account?redirect=/my";
   isLoading.value = true;
   const { error } = await supabase.auth.signUp({
     email: credentials.email,
     password: credentials.password,
     options: {
-      emailRedirectTo: `${window.location.origin}/account`,
+      emailRedirectTo: `${window.location.origin}/confirm`,
       data: {
         name: credentials.name,
         preferred_language: locale.value,

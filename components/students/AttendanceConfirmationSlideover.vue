@@ -13,7 +13,7 @@
           </p>
           <div class="flex items-center gap-2">
             <p class="text-gray-500 dark:text-gray-400 text-md">
-              {{ data.subscription.course.name }}
+              {{ g(`course_types.${data.subscription.course.type}.name_full`) }}
             </p>
           </div>
         </div>
@@ -103,6 +103,10 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
 const client = useSupabaseClient();
 
 const { data } = useAsyncData(
@@ -125,7 +129,7 @@ const activityIcon = computed(() => {
   if (!data.value) {
     return undefined;
   }
-  return Object.values(ACTIVITY_ICONS)[data.value.activity_type];
+  return ACTIVITY_ICONS[data.value.activity_type];
 });
 
 const deleteAttendance = async () => {

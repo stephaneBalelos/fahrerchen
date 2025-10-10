@@ -1,45 +1,71 @@
 <script setup lang="ts">
-import AddMemberForm from '~/components/forms/AddMemberForm.vue';
-import InvitationList from '~/components/settings/InvitationList.vue';
-import type { AppUserWithRole, Database } from '~/types/app.types';
+import AddMemberForm from "~/components/forms/AddMemberForm.vue";
+import InvitationList from "~/components/settings/InvitationList.vue";
+import type { AppOrganizationsInvitation } from "~/types/app.types";
 
-const client = useSupabaseClient<Database>()
-const userOrganizationsStore = useUserOrganizationsStore()
+const userOrganizationsStore = useUserOrganizationsStore();
 
 const { t } = useI18n({
-  useScope: 'local'
-})
+  useScope: "local",
+});
 
-const { data, refresh } = await useAsyncData('members', async () => {
-  if (!userOrganizationsStore.selectedOrganization) {
-    return null
-  }
-  const { data, error } = await client.from('organization_members').select('role, users(*)')
-  .eq('organization_id', userOrganizationsStore.selectedOrganization.organization_id)
-  .neq('role', 'student')
-  if (error) {
-    throw error
-  }
-  return data.map((m) => {
-    return {
-      role: m.role,
-      ...m.users
-    } as AppUserWithRole
-  })
-})
-const q = ref('')
-const isInviteModalOpen = ref(false)
+const organizationStore = useUserOrganizationsStore();
+const client = useSupabaseClient();
+const q = ref("");
+const isInviteModalOpen = ref(false);
+
+const invitations = ref<AppOrganizationsInvitation[]>([]);
 
 const filteredMembers = computed(() => {
-    if (!data.value) return []
-    return data.value.filter((member) => {
-        return member.firstname?.search(new RegExp(q.value, 'i')) !== -1 || member.lastname?.search(new RegExp(q.value, 'i')) !== -1
-    })
-})
+  return organizationStore.selectedOrganizationMembers
+  .filter((member) => member.id !== userOrganizationsStore.selectedOrganization?.owner_id)
+  .filter((member) => member.organization_role !== "student")
+  .filter((member) => {
+    return (
+      member.firstname?.search(new RegExp(q.value, "i")) !== -1 ||
+      member.lastname?.search(new RegExp(q.value, "i")) !== -1
+    );
+  });
+});
+
+const fetchInvitations = async () => {
+  if (!userOrganizationsStore.selectedOrganization?.id) {
+    invitations.value = [];
+    return;
+  }
+  const org_id = userOrganizationsStore.selectedOrganization.id;
+  try {
+    const { data, error } = await client
+      .from("organizations_invitations")
+      .select("*")
+      .eq("organization_id", org_id);
+    if (error) {
+      throw error;
+    } else {
+      invitations.value = data || [];
+    }
+  } catch (error) {
+    console.error("Error fetching invitations:", error);
+    invitations.value = [];
+  }
+};
+
+watch(
+  () => userOrganizationsStore.selectedOrganization,
+  async (newOrg, oldOrg) => {
+    if (newOrg && newOrg.id !== oldOrg?.id) {
+      await fetchInvitations();
+    } else {
+      invitations.value = [];
+    }
+  },
+  { immediate: true }
+);
+
 
 async function onClose() {
-  refresh()
-  isInviteModalOpen.value = false
+  isInviteModalOpen.value = false;
+  await fetchInvitations();
 }
 </script>
 
@@ -73,10 +99,9 @@ async function onClose() {
                 autofocus
               />
             </template>
-            <!-- ~/components/settings/MembersList.vue -->
             <SettingsMembersList :members="filteredMembers" />
           </UCard>
-          <InvitationList v-if="userOrganizationsStore.selectedOrganization" :orgid="userOrganizationsStore.selectedOrganization.organization_id" />
+          <InvitationList :invitations="invitations" @deleted="fetchInvitations()" />
         </div>
       </UDashboardSection>
       <UDashboardModal
@@ -86,7 +111,11 @@ async function onClose() {
         :ui="{ width: 'sm:max-w-md', height: 'h-auto' }"
       >
         <!-- ~/components/settings/MembersForm.vue -->
-        <AddMemberForm v-if="userOrganizationsStore.selectedOrganization?.organization_id" :orgid="userOrganizationsStore.selectedOrganization.organization_id" @close="onClose" />
+        <AddMemberForm
+          v-if="userOrganizationsStore.selectedOrganization?.id"
+          :orgid="userOrganizationsStore.selectedOrganization.id"
+          @close="onClose"
+        />
       </UDashboardModal>
     </div>
   </UDashboardPanelContent>
@@ -106,5 +135,5 @@ async function onClose() {
     "invite_people": "Invite people",
     "search_members": "Search members"
   }
-} 
+}
 </i18n>

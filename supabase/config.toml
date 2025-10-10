@@ -133,9 +133,6 @@ verify_jwt = false
 [functions.send-auth-mails]
 verify_jwt = false
 
-[functions.send-notifications]
-verify_jwt = false
-
 # Configure one of the supported SMS providers: `twilio`, `twilio_verify`, `messagebird`, `textlocal`, `vonage`.
 [auth.sms.twilio]
 enabled = false

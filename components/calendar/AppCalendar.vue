@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import { useScroll } from "@vueuse/core";
 import AppCalendarBlock from "./AppCalendarBlock.vue";
-import type { CourseActivityScheduleView } from "~/types/app.types";
+import type { AppCourseActivitySchedule } from "~/types/app.types";
 
 type AppCalendarProps = {
   selectedDate: Date;
@@ -37,7 +37,7 @@ type AppCalendarProps = {
     date: Date;
     start: Date;
     end: Date;
-    schedule: CourseActivityScheduleView;
+    schedule: AppCourseActivitySchedule;
   }[];
   refreshEvents?: () => Promise<void>;
 };
