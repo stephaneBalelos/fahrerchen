@@ -1,109 +1,65 @@
 <template>
-  <div ref="calendarEl" class="absolute inset-0 overflow-y-auto p-4 pt-8">
-    <div class="calendar-bg">
-      <div
-        v-for="hour in HoursBlocks"
-        :key="hour"
-        class="calendar-hour h-24 flex items-start gap-2"
-      >
-        <div class="w-full flex items-start justify-center gap-2">
-          <div class="calendar-hour-label -translate-y-3">{{ hour }}</div>
-          <UDivider />
-        </div>
-      </div>
-    </div>
-    <div class="calendar-fg absolute top-4 bottom-0 left-20 right-4">
-      <AppCalendarBlock
-        v-for="(block, idx) in HoursBlocks"
-        :key="idx"
-        :block-index="idx"
-        :events="calendarEvents.filter((event) => event.start_hour == idx)"
-        @update="refreshEvents"
+  <section class="relative h-full">
+    <div class="w-full overflow-hidden h-full">
+      <AppCalendarWeekView 
+      :selected-date="props.selectedDate" :events="calendarEvents"
+      @create-schedule="$date => $emit('createSchedule', $date)"
+      @select-date="$date => $emit('selectDate', $date)"
+      @edit-schedule="$id => $emit('editSchedule', $id)"
       />
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { useScroll } from "@vueuse/core";
-import AppCalendarBlock from "./AppCalendarBlock.vue";
+// import { useScroll } from "@vueuse/core";
+import AppCalendarWeekView from "./views/AppCalendarWeekView.vue";
 import type { AppCourseActivitySchedule } from "~/types/app.types";
+
+export type AppCalendarEvent = {
+  id: string;
+  label: string;
+  date: Date;
+  duration: number; // in minutes
+  schedule: AppCourseActivitySchedule;
+};
 
 type AppCalendarProps = {
   selectedDate: Date;
-  events: {
-    id: string;
-    label: string;
-    date: Date;
-    start: Date;
-    end: Date;
-    schedule: AppCourseActivitySchedule;
-  }[];
+  events: AppCalendarEvent[];
   refreshEvents?: () => Promise<void>;
 };
+
+const $emit = defineEmits<{
+  (e: "createSchedule" | "selectDate", value: Date): void;
+  (e: "editSchedule", scheduleId: string): void;
+}>();
+
 
 const props = defineProps<AppCalendarProps>();
 
 const calendarEvents = computed(() => {
-  return props.events
-    .map((event) => {
-      return {
-        id: event.id,
-        label: event.label,
-        date: event.date,
-        start_hour: event.start.getHours(),
-        start_minute: event.start.getMinutes(),
-        end_hour: event.end.getHours(),
-        end_minute: event.end.getMinutes(),
-        schedule: event.schedule,
-      };
-    })
-    .sort((a, b) => a.start_hour - b.start_hour);
+  const $events = props.events || [];
+  return $events.sort((a, b) => a.date.getTime() - b.date.getTime());
 });
 
-const HoursBlocks = [
-  "00:00",
-  "01:00",
-  "02:00",
-  "03:00",
-  "04:00",
-  "05:00",
-  "06:00",
-  "07:00",
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "12:00",
-  "13:00",
-  "14:00",
-  "15:00",
-  "16:00",
-  "17:00",
-  "18:00",
-  "19:00",
-  "20:00",
-  "21:00",
-  "22:00",
-  "23:00",
-];
 
-const calendarEl = ref<HTMLElement | null>(null);
-const { y } = useScroll(calendarEl);
+const _calendarEl = ref<HTMLElement | null>(null);
+// const { y } = useScroll(calendarEl);
 
-watch(calendarEvents, () => {
-  // scroll to earliest event of the day
-  const earliestEvent = calendarEvents.value[0];
+// watch(calendarEvents, () => {
+//   // scroll to earliest event of the day
+//   const earliestEvent = calendarEvents.value[0];
 
-  if (earliestEvent) {
-    y.value = 6 * 16 * earliestEvent.start_hour;
-  }
-});
+//   if (earliestEvent) {
+//     y.value = 6 * 16 * earliestEvent.start_hour;
+//   }
+// });
 
-onMounted(() => {
-  // Scroll to the current hour
-  y.value = 6 * 16 * new Date().getHours();
-});
+// onMounted(() => {
+//   // Scroll to the current hour
+//   y.value = 6 * 16 * new Date().getHours();
+// });
 </script>
 
 <style scoped></style>

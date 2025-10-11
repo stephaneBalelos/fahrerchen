@@ -1,22 +1,6 @@
 <template>
   <UDashboardPage>
-    <UDashboardPanel id="filter-panel" :width="panelWWidth" resizable>
-      <UDashboardNavbar :title="t('schedules')">
-        <template #right>
-          <!-- <UButtonGroup v-model="selectedView" :options="views" size="sm" /> -->
-        </template>
-      </UDashboardNavbar>
-      <UDashboardPanelContent class="p-0">
-        {{ panelWWidth }}
-      </UDashboardPanelContent>
-    </UDashboardPanel>
-    <UDashboardPanel
-      id="schedule-details"
-      :model-value="selectedScheduleId ? true : false"
-      grow
-      collapsible
-      side="right"
-    >
+    <UDashboardPanel id="schedule-details" grow>
       <template v-if="selectedScheduleId">
         <UDashboardNavbar>
           <template #toggle>
@@ -35,7 +19,9 @@
               <UButton
                 icon="i-heroicons-pencil-square"
                 color="white"
-                @click="openEditScheduleSlideover(selectedScheduleId)"
+                @click="
+                  openEditScheduleSlideover({ scheduleId: selectedScheduleId })
+                "
               />
               <UButton
                 color="red"
@@ -63,16 +49,14 @@
             />
           </template>
         </UDashboardNavbar>
-        <UDashboardPanelContent>
-          <div class="bg-cyan-400">
-            <div
-              v-for="(schedule, index) in schedules"
-              :key="index"
-              @click="selectedScheduleId = schedule.id"
-            >
-              {{ schedule.id }} - {{ schedule.status }}
-            </div>
-          </div>
+        <UDashboardPanelContent class="p-0">
+          <CalendarAppCalendar
+            :selected-date="selectedDate"
+            :events="schedules || []"
+            @create-schedule="(date) => openEditScheduleSlideover({ date })"
+            @select-date="(date) => (selectedDate = date)"
+            @edit-schedule="(id) => navigateTo({ query: { id } })"
+          />
         </UDashboardPanelContent>
       </template>
     </UDashboardPanel>
@@ -81,6 +65,7 @@
 
 <script setup lang="ts">
 import * as z from "zod";
+import type { AppCalendarEvent } from "~/components/calendar/AppCalendar.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
 import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
@@ -88,14 +73,13 @@ import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
 const { t } = useI18n({
   useScope: "local",
 });
-
-const panelWWidth = ref(350);
-
 const route = useRoute();
 // const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
 const modal = useModal();
 const slideover = useSlideover();
+
+const selectedDate = ref(new Date());
 
 const selectedScheduleId = computed<string | null>({
   get() {
@@ -136,12 +120,29 @@ const { data: schedules, refresh } = useAsyncData(
     }),
   {
     watch: [filterForm],
+    transform: (data) => {
+      if (!data) return [];
+      return data?.map((s) => {
+        const event: AppCalendarEvent = {
+          id: s.id,
+          label: s.activity.name,
+          date: new Date(s.start_at),
+          duration: s.duration_minutes,
+          schedule: s,
+        };
+        return event;
+      });
+    },
   }
 );
 
-const openEditScheduleSlideover = (scheduleId?: string) => {
+const openEditScheduleSlideover = ({
+  scheduleId,
+  date,
+}: { scheduleId?: string; date?: Date } = {}) => {
   slideover.open(EditCourseActivitySchedule, {
     scheduleId: scheduleId || undefined,
+    date,
     "onSchedule-deleted": () => {
       refresh();
     },
