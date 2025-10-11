@@ -1,5 +1,5 @@
 import { getStandardCourseActivitiesTemplate, type StandardCourseActivitiesTemplate } from "~/constants"
-import type { AppCourseActivitiesCombination, AppCourseActivity, CourseActivityEdit } from "~/types/app.types"
+import type { AppCourseActivity, CourseActivitiesCombinationEdit, CourseActivityEdit } from "~/types/app.types"
 
 export const useCourseActivitiesStore = defineStore('courseActivities', () => {
     const supabase = useSupabaseClient()
@@ -114,10 +114,10 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         await loadCourseActivities()
     }
 
-    const getAllowedCourseForActivity = async (id: string, course_id?: string): Promise<AppCourseActivitiesCombination[]> => {
+    const getAllowedCourseForActivity = async (id: string, course_id?: string) => {
         let query = supabase
             .from('course_activities_combinations')
-            .select('*')
+            .select('*, activity:course_activities(*)')
             .eq('activity_id', id)
 
         if (course_id) {
@@ -194,6 +194,17 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         }
     }
 
+    const updateCourseActivityCombination = async (combination_id: string, data: Partial<CourseActivitiesCombinationEdit>) => {
+        const { error } = await supabase
+            .from('course_activities_combinations')
+            .update(data)
+            .eq('id', combination_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseActivities()
     }, { immediate: true })
@@ -212,5 +223,6 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         getActivitiesForCourse,
         addCourseToAllowedCourses,
         removeCourseFromAllowedCourses,
+        updateCourseActivityCombination
     }
 })
