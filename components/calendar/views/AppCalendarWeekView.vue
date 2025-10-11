@@ -1,28 +1,5 @@
 <template>
   <div class="relative flex flex-col h-full">
-    <UDashboardToolbar>
-      <div class="flex items-center space-x-4">
-        <div class="flex flex-col">
-          <span class="text-lg font-semibold">
-            {{ t("calendar_week", { week: getWeek(selectedDate) }) }}
-          </span>
-        </div>
-        <div class="flex gap-2">
-          <UButton
-            :icon="`i-heroicons-chevron-left-solid`"
-            variant="ghost"
-            color="gray"
-            @click="() => $emits('selectDate', subDays(selectedDate, 7))"
-          />
-          <UButton
-            :icon="`i-heroicons-chevron-right-solid`"
-            variant="ghost"
-            color="gray"
-            @click="() => $emits('selectDate', addDays(selectedDate, 7))"
-          />
-        </div>
-      </div>
-    </UDashboardToolbar>
     <div class="grid grid-cols-7 sticky top-0 left-0 w-full">
       <div
         v-for="(date, index) in DatesBlocks"
@@ -50,12 +27,12 @@
       <div
         v-for="event in eventBlocks"
         :key="event.id"
-        :class="`absolute top-[${event.style.top}] left-[${event.style.left}] h-[${event.style.height}] w-[${event.style.width}] p-1.5 m-1 rounded border-l-2 border-blue-600 bg-blue-50 shadow cursor-pointer hover:bg-blue-100 cursor-pointer`"
+        :class="`absolute top-[${event.style.top}] left-[${event.style.left}] h-[${event.style.height}] w-[${event.style.width}] p-1 m-1 rounded border-l-2 border-${event.style.color}-600 bg-${event.style.color}-50 shadow cursor-pointer hover:bg-${event.style.color}-100 cursor-pointer`"
         :style="event.style"
         @click="() => $emits('editSchedule', event.id)"
       >
-        <p class="text-xs font-normal text-gray-900 mb-px">{{ event.label }}</p>
-        <p class="text-xs font-semibold text-blue-600">
+        <p :class="`text-sm font-semibold text-gray-900`">{{ event.label }}</p>
+        <p :class="`text-xs font-semibold text-${event.style.color}-900`">
           {{ format(event.date, "HH:mm") }} -
           {{ format(addMinutes(event.date, event.duration), "HH:mm") }}
         </p>
@@ -77,12 +54,18 @@
 </template>
 
 <script setup lang="ts">
-import { format, setHours, startOfWeek, addMinutes, getWeek, subDays, addDays } from "date-fns";
+import {
+  format,
+  setHours,
+  startOfWeek,
+  addMinutes,
+} from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import type { AppCalendarEvent } from "../AppCalendar.vue";
 import { useElementBounding, useScroll } from "@vueuse/core";
+import { ACTIVITY_COLORS } from "~/constants";
 
-const { t, locale } = useI18n({
+const { locale } = useI18n({
   useScope: "local",
 });
 
@@ -175,6 +158,7 @@ const eventBlocks = computed(() => {
     return {
       ...event,
       style: {
+        color: ACTIVITY_COLORS[event.type] || "primary",
         top: `${top}px`,
         left: `${adjustedLeft}px`,
         height: `${eventHeight}px`,

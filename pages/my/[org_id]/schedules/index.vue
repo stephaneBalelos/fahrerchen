@@ -129,6 +129,7 @@ const { data: schedules, refresh } = useAsyncData(
           date: new Date(s.start_at),
           duration: s.duration_minutes,
           schedule: s,
+          type: s.activity.activity_type,
         };
         return event;
       });
