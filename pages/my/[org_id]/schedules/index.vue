@@ -49,6 +49,19 @@
             />
           </template>
         </UDashboardNavbar>
+
+        <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
+          <template #left> View Select </template>
+          <template #right>
+            <UButton
+              :label="t('filter_schedules')"
+              icon="i-heroicons-funnel-solid"
+              color="primary"
+              variant="outline"
+              @click="() => {openScheduleFilterSlideover()}"
+            />
+          </template>
+        </UDashboardToolbar>
         <UDashboardPanelContent class="p-0">
           <CalendarAppCalendar
             :selected-date="selectedDate"
@@ -64,11 +77,11 @@
 </template>
 
 <script setup lang="ts">
-import * as z from "zod";
 import type { AppCalendarEvent } from "~/components/calendar/AppCalendar.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
 import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
+import ScheduleFilterSlideover from "~/components/schedules/ScheduleFilterSlideover.vue";
 
 const { t } = useI18n({
   useScope: "local",
@@ -76,6 +89,8 @@ const { t } = useI18n({
 const route = useRoute();
 // const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
+const userOrganizationsStore = useUserOrganizationsStore();
+
 const modal = useModal();
 const slideover = useSlideover();
 
@@ -96,31 +111,21 @@ const selectedScheduleId = computed<string | null>({
   },
 });
 
-const _schema = z.object({
-  assigned_to: z.string().uuid().optional(),
-  course_id: z.string().uuid().optional(),
-  student_id: z.string().uuid().optional(),
-  status: z.enum(["PLANNED", "CANCELED", "COMPLETED"]).optional(),
-});
 
-type FilterForm = z.infer<typeof _schema>;
 
-const filterForm = ref<FilterForm>({
-  assigned_to: undefined,
-  course_id: undefined,
-  student_id: undefined,
-  status: undefined,
-});
+const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({});
 
 const { data: schedules, refresh } = useAsyncData(
-  "course-activity-schedules",
-  async () =>
-    await $courseActivitySchedules.fetchCourseActivitySchedules({
-      ...filterForm.value,
-    }),
+  async () => {
+    console.log("Fetching schedules with filter", filterQuery.value);
+    return await $courseActivitySchedules.fetchCourseActivitySchedules({
+      ...filterQuery.value
+    });
+  },
   {
-    watch: [filterForm],
+    watch: [filterQuery.value, selectedDate],
     transform: (data) => {
+      console.log("Fetched schedules", data?.length);
       if (!data) return [];
       return data?.map((s) => {
         const event: AppCalendarEvent = {
@@ -169,9 +174,11 @@ const deleteSchedule = async (scheduleId: string) => {
   });
 };
 
-watch(selectedScheduleId, async () => {
-  await refresh();
-});
+const openScheduleFilterSlideover = () => {
+  slideover.open(ScheduleFilterSlideover, {
+    form: filterQuery.value
+  });
+}
 </script>
 
 <style scoped></style>
@@ -180,6 +187,7 @@ watch(selectedScheduleId, async () => {
 {
   "de": {
     "list_view": "Liste Ansicht",
+    "filter_schedules": "Termine filtern",
     "calendar_view": "Kalender Ansicht",
     "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
@@ -211,6 +219,7 @@ watch(selectedScheduleId, async () => {
   },
   "en": {
     "list_view": "List view",
+    "filter_schedules": "Filter Schedules",
     "calendar_view": "Calendar view",
     "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
