@@ -51,14 +51,32 @@
         </UDashboardNavbar>
 
         <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
-          <template #left> View Select </template>
+          <template #left>
+            <div class="flex items-center space-x-2">
+              <UButton
+                :label="t('week_view')"
+                :color="selectedView === 'week' ? 'primary' : 'white'"
+                variant="solid"
+                @click="() => (selectedView = 'week')"
+              />
+              <UButton
+                :label="t('day_view')"
+                :color="selectedView === 'day' ? 'primary' : 'white'"
+                variant="solid"
+                @click="() => (selectedView = 'day')"
+              />
+            </div>
+          </template>
           <template #right>
             <UButton
-              :label="t('filter_schedules')"
               icon="i-heroicons-funnel-solid"
               color="primary"
               variant="outline"
-              @click="() => {openScheduleFilterSlideover()}"
+              @click="
+                () => {
+                  openScheduleFilterSlideover();
+                }
+              "
             />
           </template>
         </UDashboardToolbar>
@@ -66,6 +84,7 @@
           <CalendarAppCalendar
             :selected-date="selectedDate"
             :events="schedules || []"
+            :view-type="selectedView"
             @create-schedule="(date) => openEditScheduleSlideover({ date })"
             @select-date="(date) => (selectedDate = date)"
             @edit-schedule="(id) => navigateTo({ query: { id } })"
@@ -77,7 +96,10 @@
 </template>
 
 <script setup lang="ts">
-import type { AppCalendarEvent } from "~/components/calendar/AppCalendar.vue";
+import type {
+  AppCalendarViewType,
+  AppCalendarEvent,
+} from "~/components/calendar/AppCalendar.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
 import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
@@ -95,6 +117,7 @@ const modal = useModal();
 const slideover = useSlideover();
 
 const selectedDate = ref(new Date());
+const selectedView = ref<AppCalendarViewType>("week");
 
 const selectedScheduleId = computed<string | null>({
   get() {
@@ -111,15 +134,13 @@ const selectedScheduleId = computed<string | null>({
   },
 });
 
-
-
 const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({});
 
 const { data: schedules, refresh } = useAsyncData(
   async () => {
     console.log("Fetching schedules with filter", filterQuery.value);
     return await $courseActivitySchedules.fetchCourseActivitySchedules({
-      ...filterQuery.value
+      ...filterQuery.value,
     });
   },
   {
@@ -176,9 +197,9 @@ const deleteSchedule = async (scheduleId: string) => {
 
 const openScheduleFilterSlideover = () => {
   slideover.open(ScheduleFilterSlideover, {
-    form: filterQuery.value
+    form: filterQuery.value,
   });
-}
+};
 </script>
 
 <style scoped></style>
@@ -186,9 +207,9 @@ const openScheduleFilterSlideover = () => {
 <i18n lang="json">
 {
   "de": {
-    "list_view": "Liste Ansicht",
+    "day_view": "Tagesansicht",
+    "week_view": "Wochenansicht",
     "filter_schedules": "Termine filtern",
-    "calendar_view": "Kalender Ansicht",
     "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
     "schedule_details": "Termin Details",
@@ -218,9 +239,9 @@ const openScheduleFilterSlideover = () => {
     }
   },
   "en": {
-    "list_view": "List view",
+    "day_view": "Day View",
+    "week_view": "Week View",
     "filter_schedules": "Filter Schedules",
-    "calendar_view": "Calendar view",
     "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
     "schedule_details": "Schedule Details",

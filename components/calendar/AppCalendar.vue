@@ -1,7 +1,7 @@
 <template>
   <section class="relative h-full">
     <div class="w-full overflow-hidden h-full">
-      <UDashboardToolbar>
+      <UDashboardToolbar v-if="activeView === 'week'">
         <div class="flex justify-between items-center space-x-4 w-full">
           <div class="flex flex-col">
             <span class="text-lg font-semibold">
@@ -24,7 +24,40 @@
           </div>
         </div>
       </UDashboardToolbar>
+      <UDashboardToolbar v-if="activeView === 'day'">
+        <div class="flex justify-between items-center space-x-4 w-full">
+          <div class="flex flex-col">
+            <span class="text-lg font-semibold">
+              {{ format(selectedDate, 'EEEE, dd.MM.yyyy', { locale: currentLocale }) }}
+            </span>
+          </div>
+          <div class="flex gap-2">
+            <UButton
+              :icon="`i-heroicons-chevron-left-solid`"
+              variant="ghost"
+              color="gray"
+              @click="() => $emits('selectDate', subDays(selectedDate, 1))"
+            />
+            <UButton
+              :icon="`i-heroicons-chevron-right-solid`"
+              variant="ghost"
+              color="gray"
+              @click="() => $emits('selectDate', addDays(selectedDate, 1))"
+            />
+          </div>
+        </div>
+      </UDashboardToolbar>
+      
+      <AppCalendarDayView
+        v-if="activeView === 'day'"
+        :selected-date="props.selectedDate"
+        :events="calendarEvents"
+        @create-schedule="($date) => $emit('createSchedule', $date)"
+        @select-date="($date) => $emit('selectDate', $date)"
+        @edit-schedule="($id) => $emit('editSchedule', $id)"
+      />
       <AppCalendarWeekView
+        v-else
         :selected-date="props.selectedDate"
         :events="calendarEvents"
         @create-schedule="($date) => $emit('createSchedule', $date)"
@@ -37,12 +70,15 @@
 
 <script setup lang="ts">
 // import { useScroll } from "@vueuse/core";
-import { getWeek, subDays, addDays } from "date-fns";
+import { getWeek, subDays, addDays, format } from "date-fns";
+import { de, enUS } from "date-fns/locale";
 import AppCalendarWeekView from "./views/AppCalendarWeekView.vue";
+import AppCalendarDayView from "./views/AppCalendarDayView.vue";
 import type {
   AppCourseActivitySchedule,
   AppCourseActivityType,
 } from "~/types/app.types";
+import { useMediaQuery } from "@vueuse/core";
 
 export type AppCalendarEvent = {
   id: string;
@@ -53,14 +89,21 @@ export type AppCalendarEvent = {
   type: AppCourseActivityType;
 };
 
+export type AppCalendarViewType = "month" | "week" | "day";
+
 type AppCalendarProps = {
   selectedDate: Date;
   events: AppCalendarEvent[];
+  viewType?: AppCalendarViewType;
   refreshEvents?: () => Promise<void>;
 };
 
-const { t } = useI18n({
+const { t, locale } = useI18n({
   useScope: "local",
+});
+
+const currentLocale = computed(() => {
+  return locale.value === "de" ? de : enUS;
 });
 
 const $emits = defineEmits<{
@@ -75,22 +118,10 @@ const calendarEvents = computed(() => {
   return $events.sort((a, b) => a.date.getTime() - b.date.getTime());
 });
 
-const _calendarEl = ref<HTMLElement | null>(null);
-// const { y } = useScroll(calendarEl);
+const isMobile = useMediaQuery("(max-width: 768px)");
+const activeView = computed(() => (isMobile.value ? "day" : props.viewType || "week"));
 
-// watch(calendarEvents, () => {
-//   // scroll to earliest event of the day
-//   const earliestEvent = calendarEvents.value[0];
 
-//   if (earliestEvent) {
-//     y.value = 6 * 16 * earliestEvent.start_hour;
-//   }
-// });
-
-// onMounted(() => {
-//   // Scroll to the current hour
-//   y.value = 6 * 16 * new Date().getHours();
-// });
 </script>
 
 <style scoped></style>
