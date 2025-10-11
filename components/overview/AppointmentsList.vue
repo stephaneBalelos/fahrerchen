@@ -105,7 +105,7 @@ const slideover = useSlideover();
 
 const { data: schedules } = useAsyncData(async () => {
   return await $courseActivitySchedules.fetchCourseActivitySchedules({
-    start_at: new Date().toISOString(),
+    start_at: new Date(),
     limit: 10,
   });
 });
