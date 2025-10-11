@@ -180,7 +180,6 @@ watch(props.events, () => {
 onMounted(() => {
   // Scroll to the 7th hour (7 AM)
   y.value = (height.value / 24) * 7;
-  console.log("y", y.value);
 });
 </script>
 
