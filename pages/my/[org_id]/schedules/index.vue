@@ -39,7 +39,7 @@
         </UDashboardPanelContent>
       </template>
       <template v-else>
-        <UDashboardNavbar :title="'Calendar View'">
+        <UDashboardNavbar :title="t('schedules_planning')" class="mb-2">
           <template #right>
             <UButton
               icon="i-heroicons-plus-circle-solid"
@@ -207,6 +207,7 @@ const openScheduleFilterSlideover = () => {
 <i18n lang="json">
 {
   "de": {
+    "schedules_planning": "Terminplanung",
     "day_view": "Tagesansicht",
     "week_view": "Wochenansicht",
     "filter_schedules": "Termine filtern",
@@ -239,6 +240,7 @@ const openScheduleFilterSlideover = () => {
     }
   },
   "en": {
+    "schedules_planning": "Schedules Planning",
     "day_view": "Day View",
     "week_view": "Week View",
     "filter_schedules": "Filter Schedules",
