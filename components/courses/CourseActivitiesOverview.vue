@@ -59,7 +59,14 @@ const activities = computed(() => {
     for(const d of data.value) {
         const activity = courseActivitiesStore.courseActivities.find((c) => c.id === d.activity_id)
         if(activity) {
-            activities.push(activity)
+            const a = {
+                id: d.id,
+                name: activity.name,
+                description: activity.description,
+                price: d.price ? d.price : activity.price,
+                required: d.required ? d.required : activity.required
+            }
+            activities.push(a)
         }
     }
     return activities
