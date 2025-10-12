@@ -1,10 +1,10 @@
 import type { AppCourseActivitySchedule, CourseActivityScheduleEdit, Database } from "~/types/app.types";
 
-type CourseActivityScheduleQuery = {
+export type CourseActivityScheduleQuery = {
     activity_id?: string;
     status?: Database["public"]["Enums"]["schedule_status"];
     assigned_to?: string;
-    start_at?: string;
+    start_at?: Date;
     subscription_id?: string;
     limit?: number;
 }
@@ -79,7 +79,7 @@ export const useCourseActivitySchedules = () => {
         return true
     }
 
-    const fetchCourseActivitySchedules = async (query: CourseActivityScheduleQuery) => {
+    const fetchCourseActivitySchedules = async (query: Partial<CourseActivityScheduleQuery>) => {
         if (!userOrganizationStore.selectedOrganization) {
             console.error("No organization selected");
             return null;
@@ -104,7 +104,7 @@ export const useCourseActivitySchedules = () => {
         }
 
         if (query.start_at) {
-            q.gte("start_at", query.start_at)
+            q.gte("start_at", query.start_at.toISOString())
         }
         if (query.limit) {
             q.limit(query.limit)

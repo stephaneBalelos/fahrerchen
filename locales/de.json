@@ -146,7 +146,7 @@
                 "description": "Sonstige Aktivitäten"
             }
         },
-        "allowed_classes": "Erlaubte Klassen",
+        "allowed_classes": "Betroffene Klassen",
         "allowed_classes_help": "Wählen Sie die Fahrzeugklassen aus, für die diese Aktivität verfügbar sein soll. Wenn keine Klasse ausgewählt ist, ist die Aktivität für alle Klassen verfügbar.",
         "required_attendance": "Erforderliche Teilnahme",
         "required_attendance_help": "Wie oft muss der Schüler an dieser Aktivität teilnehmen, um sie abzuschließen?",

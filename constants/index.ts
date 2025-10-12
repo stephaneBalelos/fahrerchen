@@ -38,6 +38,13 @@ export const ACTIVITY_ICONS = {
     'OTHER': 'ri-file-list-line'
 }
 
+export const ACTIVITY_COLORS = {
+    'THEORY': 'green',
+    'PRACTICE': 'orange',
+    'EXAM': 'red',
+    'OTHER': 'blue'
+}
+
 export type StandardCourseActivitiesTemplate = {
     costs: CourseCostEdit[];
     activities: CourseActivityEdit[];

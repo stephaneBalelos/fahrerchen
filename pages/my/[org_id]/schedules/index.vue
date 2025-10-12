@@ -1,22 +1,6 @@
 <template>
   <UDashboardPage>
-    <UDashboardPanel id="filter-panel" :width="panelWWidth" resizable>
-      <UDashboardNavbar :title="t('schedules')">
-        <template #right>
-          <!-- <UButtonGroup v-model="selectedView" :options="views" size="sm" /> -->
-        </template>
-      </UDashboardNavbar>
-      <UDashboardPanelContent class="p-0">
-        {{ panelWWidth }}
-      </UDashboardPanelContent>
-    </UDashboardPanel>
-    <UDashboardPanel
-      id="schedule-details"
-      :model-value="selectedScheduleId ? true : false"
-      grow
-      collapsible
-      side="right"
-    >
+    <UDashboardPanel id="schedule-details" grow>
       <template v-if="selectedScheduleId">
         <UDashboardNavbar>
           <template #toggle>
@@ -35,7 +19,9 @@
               <UButton
                 icon="i-heroicons-pencil-square"
                 color="white"
-                @click="openEditScheduleSlideover(selectedScheduleId)"
+                @click="
+                  openEditScheduleSlideover({ scheduleId: selectedScheduleId })
+                "
               />
               <UButton
                 color="red"
@@ -63,16 +49,46 @@
             />
           </template>
         </UDashboardNavbar>
-        <UDashboardPanelContent>
-          <div class="bg-cyan-400">
-            <div
-              v-for="(schedule, index) in schedules"
-              :key="index"
-              @click="selectedScheduleId = schedule.id"
-            >
-              {{ schedule.id }} - {{ schedule.status }}
+
+        <UDashboardToolbar v-if="userOrganizationsStore.selectedOrganization">
+          <template #left>
+            <div class="flex items-center space-x-2">
+              <UButton
+                :label="t('week_view')"
+                :color="selectedView === 'week' ? 'primary' : 'white'"
+                variant="solid"
+                @click="() => (selectedView = 'week')"
+              />
+              <UButton
+                :label="t('day_view')"
+                :color="selectedView === 'day' ? 'primary' : 'white'"
+                variant="solid"
+                @click="() => (selectedView = 'day')"
+              />
             </div>
-          </div>
+          </template>
+          <template #right>
+            <UButton
+              icon="i-heroicons-funnel-solid"
+              color="primary"
+              variant="outline"
+              @click="
+                () => {
+                  openScheduleFilterSlideover();
+                }
+              "
+            />
+          </template>
+        </UDashboardToolbar>
+        <UDashboardPanelContent class="p-0">
+          <CalendarAppCalendar
+            :selected-date="selectedDate"
+            :events="schedules || []"
+            :view-type="selectedView"
+            @create-schedule="(date) => openEditScheduleSlideover({ date })"
+            @select-date="(date) => (selectedDate = date)"
+            @edit-schedule="(id) => navigateTo({ query: { id } })"
+          />
         </UDashboardPanelContent>
       </template>
     </UDashboardPanel>
@@ -80,22 +96,28 @@
 </template>
 
 <script setup lang="ts">
-import * as z from "zod";
+import type {
+  AppCalendarViewType,
+  AppCalendarEvent,
+} from "~/components/calendar/AppCalendar.vue";
 import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySchedule.vue";
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
 import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
+import ScheduleFilterSlideover from "~/components/schedules/ScheduleFilterSlideover.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
-
-const panelWWidth = ref(350);
-
 const route = useRoute();
 // const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
+const userOrganizationsStore = useUserOrganizationsStore();
+
 const modal = useModal();
 const slideover = useSlideover();
+
+const selectedDate = ref(new Date());
+const selectedView = ref<AppCalendarViewType>("week");
 
 const selectedScheduleId = computed<string | null>({
   get() {
@@ -112,36 +134,42 @@ const selectedScheduleId = computed<string | null>({
   },
 });
 
-const _schema = z.object({
-  assigned_to: z.string().uuid().optional(),
-  course_id: z.string().uuid().optional(),
-  student_id: z.string().uuid().optional(),
-  status: z.enum(["PLANNED", "CANCELED", "COMPLETED"]).optional(),
-});
-
-type FilterForm = z.infer<typeof _schema>;
-
-const filterForm = ref<FilterForm>({
-  assigned_to: undefined,
-  course_id: undefined,
-  student_id: undefined,
-  status: undefined,
-});
+const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({});
 
 const { data: schedules, refresh } = useAsyncData(
-  "course-activity-schedules",
-  async () =>
-    await $courseActivitySchedules.fetchCourseActivitySchedules({
-      ...filterForm.value,
-    }),
+  async () => {
+    console.log("Fetching schedules with filter", filterQuery.value);
+    return await $courseActivitySchedules.fetchCourseActivitySchedules({
+      ...filterQuery.value,
+    });
+  },
   {
-    watch: [filterForm],
+    watch: [filterQuery.value, selectedDate],
+    transform: (data) => {
+      console.log("Fetched schedules", data?.length);
+      if (!data) return [];
+      return data?.map((s) => {
+        const event: AppCalendarEvent = {
+          id: s.id,
+          label: s.activity.name,
+          date: new Date(s.start_at),
+          duration: s.duration_minutes,
+          schedule: s,
+          type: s.activity.activity_type,
+        };
+        return event;
+      });
+    },
   }
 );
 
-const openEditScheduleSlideover = (scheduleId?: string) => {
+const openEditScheduleSlideover = ({
+  scheduleId,
+  date,
+}: { scheduleId?: string; date?: Date } = {}) => {
   slideover.open(EditCourseActivitySchedule, {
     scheduleId: scheduleId || undefined,
+    date,
     "onSchedule-deleted": () => {
       refresh();
     },
@@ -167,9 +195,11 @@ const deleteSchedule = async (scheduleId: string) => {
   });
 };
 
-watch(selectedScheduleId, async () => {
-  await refresh();
-});
+const openScheduleFilterSlideover = () => {
+  slideover.open(ScheduleFilterSlideover, {
+    form: filterQuery.value,
+  });
+};
 </script>
 
 <style scoped></style>
@@ -177,8 +207,9 @@ watch(selectedScheduleId, async () => {
 <i18n lang="json">
 {
   "de": {
-    "list_view": "Liste Ansicht",
-    "calendar_view": "Kalender Ansicht",
+    "day_view": "Tagesansicht",
+    "week_view": "Wochenansicht",
+    "filter_schedules": "Termine filtern",
     "schedules": "Alle Termine",
     "no_schedule_found": "Keine Termine gefunden",
     "schedule_details": "Termin Details",
@@ -208,8 +239,9 @@ watch(selectedScheduleId, async () => {
     }
   },
   "en": {
-    "list_view": "List view",
-    "calendar_view": "Calendar view",
+    "day_view": "Day View",
+    "week_view": "Week View",
+    "filter_schedules": "Filter Schedules",
     "schedules": "All Schedules",
     "no_schedule_found": "No schedules found",
     "schedule_details": "Schedule Details",

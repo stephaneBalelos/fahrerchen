@@ -1,5 +1,5 @@
 import { getStandardCourseActivitiesTemplate, type StandardCourseActivitiesTemplate } from "~/constants"
-import type { AppCourseCost, AppCourseCostsCombination, CourseCostEdit } from "~/types/app.types"
+import type { AppCourseCost, CourseCostEdit } from "~/types/app.types"
 
 export const useCourseCostsStore = defineStore('courseCosts', () => {
     const supabase = useSupabaseClient()
@@ -111,10 +111,10 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         await loadCourseCosts()
     }
 
-    const getAllowedCourseForCost = async (id: string, courseId?: string): Promise<AppCourseCostsCombination[]> => {
+    const getAllowedCourseForCost = async (id: string, courseId?: string)=> {
         let query = supabase
             .from('course_costs_combinations')
-            .select('*')
+            .select('*, cost:course_costs(*)')
             .eq('cost_id', id)
             
         if (courseId) {
@@ -125,7 +125,6 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
             console.error("Error loading allowed course for cost:", error)
             throw error
         }
-        console.log("Allowed courses for cost:", data)
         return data || []
     }
 
@@ -158,6 +157,17 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         }
     }
 
+    const updateCourseCostCombination = async (combination_id: string, data: Partial<CourseCostEdit>) => {
+        const { error } = await supabase
+            .from('course_costs_combinations')
+            .update(data)
+            .eq('id', combination_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseCosts()
     }, { immediate: true })
@@ -173,6 +183,7 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         deleteCourseCost,
         getAllowedCourseForCost,
         addCostToCourse,
-        removeCostFromCourse
+        removeCostFromCourse,
+        updateCourseCostCombination
     }
 })

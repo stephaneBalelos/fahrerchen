@@ -65,7 +65,7 @@ const { data, error, status } = useAsyncData(async () => {
     return await $courseActivitySchedules.fetchCourseActivitySchedules({
         activity_id: props.activityId,
         subscription_id: props.subscriptionId,
-        start_at: props.startAt,
+        start_at: (props.startAt ? new Date(props.startAt) : undefined),
     })
 });
 

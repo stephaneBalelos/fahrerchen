@@ -1517,6 +1517,8 @@ export type Database = {
         | "organization_billing_settings.create"
         | "organization_billing_settings.update"
         | "organization_billing_settings.delete"
+        | "course_costs_combinations.update"
+        | "course_activities_combinations.update"
       app_role: "owner" | "manager" | "teacher" | "student"
       course_type:
         | "AM"
@@ -2293,6 +2295,8 @@ export const Constants = {
         "organization_billing_settings.create",
         "organization_billing_settings.update",
         "organization_billing_settings.delete",
+        "course_costs_combinations.update",
+        "course_activities_combinations.update",
       ],
       app_role: ["owner", "manager", "teacher", "student"],
       course_type: [
