@@ -1,15 +1,18 @@
 <template>
   <UDashboardPanelContent>
-    <UContainer
-      v-if="studentStore.student"
-      class="w-full">
-      <UDashboardSection :description="studentStore.student?.email">
+    <UContainer v-if="studentStore.student" class="w-full">
+      <UDashboardSection
+        :description="studentStore.student?.email"
+        class="mb-16"
+      >
         <template #title>
-          {{
-            t("hello_student", {
-              student: `${studentStore.student?.firstname} ${studentStore.student?.lastname}`,
-            })
-          }}
+          <p class="text-xl">
+            {{
+              t("hello_student", {
+                student: `${studentStore.student?.firstname} ${studentStore.student?.lastname}`,
+              })
+            }}
+          </p>
         </template>
         <template #links>
           <UButton
@@ -22,12 +25,45 @@
           <div
             v-for="subscription in studentSubscription"
             :key="subscription.id"
+            class="grid grid-cols-1 lg:grid-cols-2 gap-4"
           >
-            <UButton
-              :to="`/students/${studentStore.student?.organization_id}/subscription/${subscription.id}`"
-            >
-              {{ g(`course_types.${subscription.course.type}.name_full`) }}
-            </UButton>
+            <UCard>
+              <template #header>
+                <div class="flex items-center gap-4">
+                  <UAvatar
+                    v-if="COURSE_ICONS[subscription.course.type]"
+                    :icon="COURSE_ICONS[subscription.course.type]"
+                  />
+                  <div class="flex flex-col flex-1">
+                    <p class="text-lg font-semibold">{{ g(`course_types.${subscription.course.type}.name_full`) }}</p>
+                  </div>
+                  <UBadge
+                    v-if="subscription.archived_at"
+                    color="white"
+                    :title="t('archived_at', { date: formatDate(subscription.archived_at)})"
+                    />
+                </div>
+              </template>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1">
+                  <p class="text-xs text-gray-500">{{ t('subscription_costs') }}</p>
+                  <p class="text-sm font-medium">
+                    {{ formatCurrency(subscription.costs) }}
+                  </p>
+                </div>
+              </div>
+              <template #footer>
+                <div class="flex justify-between items-center">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ t('subscribed_at', { date: formatDate(subscription.inserted_at)}) }}
+                  </div>
+                  <UButton
+                    :to="`/students/${studentStore.student?.organization_id}/subscription/${subscription.id}`"
+                    icon="i-heroicons-arrow-right-solid"
+                  />
+                </div>
+              </template>
+            </UCard>
           </div>
         </div>
         <div v-else>
@@ -101,8 +137,12 @@
             <div class="grid grid-cols-2 gap-4 mt-4">
               <UCard v-for="course in studentStore.courses" :key="course.id">
                 <div class="flex flex-col space-y-2">
-                  <div class="text-lg font-semibold">{{ g(`course_types.${course.type}.name_full`) }}</div>
-                  <div class="text-sm">{{ g(`course_types.${course.type}.description`) }}</div>
+                  <div class="text-lg font-semibold">
+                    {{ g(`course_types.${course.type}.name_full`) }}
+                  </div>
+                  <div class="text-sm">
+                    {{ g(`course_types.${course.type}.description`) }}
+                  </div>
                 </div>
               </UCard>
             </div>
@@ -115,7 +155,8 @@
 
 <script setup lang="ts">
 import EditStudentForm from "~/components/forms/EditStudentForm.vue";
-
+import { COURSE_ICONS } from "~/constants";
+import { formatCurrency, formatDate } from "~/utils/formatters";
 
 const { t } = useI18n({
   useScope: "local",
@@ -135,14 +176,19 @@ const organizationData = computed(() => {
 });
 
 const studentSubscription = computed(() => {
-  return studentStore.subscriptions.map((sub) => {
-    const course = studentStore.courses.find(
-      (course) => course.id === sub.course_id
-    );
-    return { ...sub, course: course };
-  }).filter(sub => sub.course !== undefined) as (typeof studentStore.subscriptions[0] & { course: typeof studentStore.courses[0] })[];
+  return studentStore.subscriptions
+    .map((sub) => {
+      const course = studentStore.courses.find(
+        (course) => course.id === sub.course_id
+      );
+      return { ...sub, course: course };
+    })
+    .filter(
+      (sub) => sub.course !== undefined
+    ) as ((typeof studentStore.subscriptions)[0] & {
+    course: (typeof studentStore.courses)[0];
+  })[];
 });
-
 
 async function openEditStudent() {
   if (!studentStore.student) {
@@ -153,7 +199,10 @@ async function openEditStudent() {
     organizationId: studentStore.student.organization_id,
     "onStudent-updated": () => {
       if (studentStore.student?.user_id) {
-        studentStore.loadStudent(studentStore.student.organization_id, studentStore.student.user_id);
+        studentStore.loadStudent(
+          studentStore.student.organization_id,
+          studentStore.student.user_id
+        );
       }
       slideover.close();
 
@@ -174,6 +223,10 @@ async function openEditStudent() {
   "de": {
     "hello_student": "Hallo {student}",
     "edit_profile": "Profil bearbeiten",
+    "subscription_costs": "Kosten",
+    "subscribed_at": "Angefangen am {date}",
+    "archived_at": "Archiviert am {date}",
+    "archived": "Archiviert",
     "my_driving_school": "Über Meine Fahrschule",
     "my_driving_school_description": "Hier findest du alle Informationen zu deiner Fahrschule",
     "org_address": "Adresse",
@@ -191,6 +244,10 @@ async function openEditStudent() {
   "en": {
     "hello_student": "Hello {student}",
     "edit_profile": "Edit Profile",
+    "subscription_costs": "Costs",
+    "subscribed_at": "Started at {date}",
+    "archived_at": "Archived at {date}",
+    "archived": "Archived",
     "my_driving_school": "About My Driving School",
     "my_driving_school_description": "Here you can find all information about your driving school",
     "org_address": "Address",
