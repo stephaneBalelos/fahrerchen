@@ -110,13 +110,13 @@ const $fetchTotalPrice = async (courseId: string) => {
   if (data.course_activities_combinations) {
     for (const a of data.course_activities_combinations) {
       total +=
-        (a.price ? a.price : a.course_activities.price) *
-        (a.required ? a.required : a.course_activities.required);
+        (a.price !== null ? a.price : a.course_activities.price) *
+        (a.required !== null ? a.required : a.course_activities.required);
     }
   }
   if (data.course_costs_combinations) {
     for (const c of data.course_costs_combinations) {
-      total += c.price ? c.price : c.course_costs ? c.course_costs.price : 0;
+      total += c.price !== null ? c.price : c.course_costs.price;
     }
   }
   return total;

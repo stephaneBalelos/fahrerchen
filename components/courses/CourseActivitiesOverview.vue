@@ -9,12 +9,12 @@
                 <p class="font-medium">{{ a.name }}</p>
                 <p class="text-sm text-gray-500">{{ a.description }}</p>
             </div>
-            <div v-if="a.required" class="flex flex-col items-end">
+            <div class="flex flex-col items-end">
                 <p class="font-medium">{{ a.required }} </p>
                 <p class="text-sm text-gray-500">{{ t('minimum_required') }}</p>
             </div>
             <div class="flex flex-col items-end">
-                <p class="font-medium">{{ formatCurrency(a.price) }} </p>
+                <p class="font-medium">{{ a.price === 0 ? t('free') : formatCurrency(a.price) }} </p>
                 <p class="text-sm text-gray-500 ml-1">{{ t('price') }}</p>
             </div>
         </div>
@@ -63,8 +63,8 @@ const activities = computed(() => {
                 id: d.id,
                 name: activity.name,
                 description: activity.description,
-                price: d.price ? d.price : activity.price,
-                required: d.required ? d.required : activity.required
+                price: d.price !== null ? d.price : activity.price,
+                required: d.required !== null ? d.required : activity.required
             }
             activities.push(a)
         }
@@ -83,11 +83,13 @@ const activities = computed(() => {
   "de": {
     "title": "Kursaktivitäten",
     "minimum_required": "Min. Teilnahme",
-    "price": "Preis"
+    "price": "Preis",
+    "free": "kostenlos"
   },
   "en": {
     "title": "Course activities",
     "minimum_required": "Min. participation",
-    "price": "Price"
+    "price": "Price",
+    "free": "Free"
   }
 }</i18n>

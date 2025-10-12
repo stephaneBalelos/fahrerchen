@@ -13,7 +13,7 @@
           <p class="font-medium">{{ c.name }}</p>
           <p class="text-sm text-gray-500">{{ c.description }}</p>
         </div>
-        <p class="font-medium">{{ formatCurrency(c.price) }}</p>
+        <p class="font-medium">{{ c.price === 0 ? t('free') : formatCurrency(c.price) }}</p>
       </div>
     </div>
   </div>
@@ -59,7 +59,7 @@ const courseCosts = computed(() => {
         id: d.id,
         name: cost.name,
         description: cost.description,
-        price: d.price ? d.price : cost.price,
+        price: d.price !== null ? d.price : cost.price,
       };
       costs.push(c);
     }
@@ -73,10 +73,12 @@ const courseCosts = computed(() => {
 <i18n lang="json">
 {
   "en": {
-    "title": "Course Costs"
+    "title": "Course Costs",
+    "free": "Free"
   },
   "de": {
-    "title": "Kurskosten"
+    "title": "Kurskosten",
+    "free": "Kostenlos"
   }
 }
 </i18n>

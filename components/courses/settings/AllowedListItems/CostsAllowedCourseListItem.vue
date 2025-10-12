@@ -91,7 +91,7 @@ const schema = z.object({
 
 type Schema = z.infer<typeof schema>;
 const state = reactive<Schema>({
-  price: data.value?.price || undefined,
+  price: (data.value && data.value.price !== null) ? data.value.price : undefined,
 });
 const isUpdating = ref(false);
 
