@@ -80,13 +80,13 @@ const props = defineProps<Props>();
 <i18n lang="json">
 {
   "en": {
-    "course_allowed": "Course allowed",
-    "course_not_allowed": "Course not allowed",
+    "course_allowed": "Applied to class",
+    "course_not_allowed": "Not applied",
     "driving_license_of_type": "Driving license of type {type}"
   },
   "de": {
-    "course_allowed": "Kurs erlaubt",
-    "course_not_allowed": "Kurs nicht erlaubt",
+    "course_allowed": "Auf der Klasse angewendet",
+    "course_not_allowed": "Nicht angewendet",
     "driving_license_of_type": "Führerschein der Klasse {type}"
   }
 }

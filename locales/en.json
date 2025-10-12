@@ -152,7 +152,7 @@
                 "description": "Other activities"
             }
         },
-        "allowed_classes": "Allowed Classes",
+        "allowed_classes": "Affected Classes",
         "allowed_classes_help": "Select the vehicle classes for which this activity should be available. If no class is selected, the activity is available for all classes.",
         "required_attendance": "Required Attendance",
         "required_attendance_help": "How often must the student participate in this activity to complete it?",
