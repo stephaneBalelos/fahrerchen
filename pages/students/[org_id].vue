@@ -18,7 +18,8 @@ const route = useRoute();
 
 await useAsyncData('userOrganizations', async () => {
     await userOrganizationsStore.loadOrganizationsMemberships();
-    return true;
+    console.log("userOrganizationsStore.organizations", userOrganizationsStore.selectedOrganization?.id);
+    return true
 });
 
 await useAsyncData('permissions', async () => {

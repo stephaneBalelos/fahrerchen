@@ -85,31 +85,35 @@ export const useCourseActivitySchedules = () => {
             return null;
         }
 
-        const q = client
+        let q = client
             .from("course_activity_schedules")
             .select("*, course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
 
-        q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
+        q = q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
 
         if (query.activity_id) {
-            q.eq("activity_id", query.activity_id)
+            q = q.eq("activity_id", query.activity_id)
         }
 
         if (query.status) {
-            q.eq("status", query.status)
+            q = q.eq("status", query.status)
         }
 
         if (query.assigned_to) {
-            q.eq("assigned_to", query.assigned_to)
+            q = q.eq("assigned_to", query.assigned_to)
+        }
+
+        if (query.subscription_id) {
+            q = q.eq("course_activity_schedules_attendees.subscription_id", query.subscription_id)
         }
 
         if (query.start_at) {
-            q.gte("start_at", query.start_at.toISOString())
+            q = q.gte("start_at", query.start_at.toISOString())
         }
         if (query.limit) {
-            q.limit(query.limit)
+            q = q.limit(query.limit)
         } else {
-            q.limit(100) // default limit to 100
+            q = q.limit(100) // default limit to 100
         }
 
         const { data, error } = await q
