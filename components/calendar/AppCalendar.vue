@@ -52,17 +52,17 @@
         v-if="activeView === 'day'"
         :selected-date="props.selectedDate"
         :events="calendarEvents"
-        @create-schedule="($date) => $emit('createSchedule', $date)"
+        @date-block-click="($date) => $emit('date-block-click', $date)"
         @select-date="($date) => $emit('selectDate', $date)"
-        @edit-schedule="($id) => $emit('editSchedule', $id)"
+        @event-click="($id) => $emit('event-click', $id)"
       />
       <AppCalendarWeekView
         v-else
         :selected-date="props.selectedDate"
         :events="calendarEvents"
-        @create-schedule="($date) => $emit('createSchedule', $date)"
+        @date-block-click="($date) => $emit('date-block-click', $date)"
         @select-date="($date) => $emit('selectDate', $date)"
-        @edit-schedule="($id) => $emit('editSchedule', $id)"
+        @event-click="($id) => $emit('event-click', $id)"
       />
     </div>
   </section>
@@ -77,6 +77,7 @@ import AppCalendarDayView from "./views/AppCalendarDayView.vue";
 import type {
   AppCourseActivitySchedule,
   AppCourseActivityType,
+  AppUser,
 } from "~/types/app.types";
 import { useMediaQuery } from "@vueuse/core";
 
@@ -86,6 +87,8 @@ export type AppCalendarEvent = {
   date: Date;
   duration: number; // in minutes
   schedule: AppCourseActivitySchedule;
+  assigned_to: AppUser | null;
+  activity_attendees_count: number;
   type: AppCourseActivityType;
 };
 
@@ -107,8 +110,8 @@ const currentLocale = computed(() => {
 });
 
 const $emits = defineEmits<{
-  (e: "createSchedule" | "selectDate", value: Date): void;
-  (e: "editSchedule", scheduleId: string): void;
+  (e: "date-block-click" | "selectDate", value: Date): void;
+  (e: "event-click", scheduleId: string): void;
 }>();
 
 const props = defineProps<AppCalendarProps>();

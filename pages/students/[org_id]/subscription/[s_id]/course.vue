@@ -54,6 +54,7 @@
         :view-type="selectedView"
         :selected-date="selectedDate"
         @select-date="(date) => (selectedDate = date)"
+        @event-click="console.log('event click', $event)"
       />
     </UContainer>
     <UContainer
@@ -119,6 +120,8 @@ const {
           type: schedule.activity.activity_type,
           duration: schedule.duration_minutes,
           schedule: schedule,
+          assigned_to: schedule.user,
+          activity_attendees_count: schedule.course_activity_schedules_attendees.length,
         };
         return event;
       });

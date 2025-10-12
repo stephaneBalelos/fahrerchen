@@ -87,7 +87,7 @@ export const useCourseActivitySchedules = () => {
 
         let q = client
             .from("course_activity_schedules")
-            .select("*, course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
+            .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
 
         q = q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
 

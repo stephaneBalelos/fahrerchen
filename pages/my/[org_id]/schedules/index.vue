@@ -85,9 +85,9 @@
             :selected-date="selectedDate"
             :events="schedules || []"
             :view-type="selectedView"
-            @create-schedule="(date) => openEditScheduleSlideover({ date })"
+            @date-block-click="(date) => openEditScheduleSlideover({ date })"
             @select-date="(date) => (selectedDate = date)"
-            @edit-schedule="(id) => navigateTo({ query: { id } })"
+            @event-click="(id) => navigateTo({ query: { id } })"
           />
         </UDashboardPanelContent>
       </template>
@@ -155,6 +155,8 @@ const { data: schedules, refresh } = useAsyncData(
           date: new Date(s.start_at),
           duration: s.duration_minutes,
           schedule: s,
+          assigned_to: s.user,
+          activity_attendees_count: s.course_activity_schedules_attendees.length,
           type: s.activity.activity_type,
         };
         return event;
