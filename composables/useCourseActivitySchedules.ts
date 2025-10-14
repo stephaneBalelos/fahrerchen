@@ -17,7 +17,7 @@ export const useCourseActivitySchedules = () => {
 
         const { data, error } = await client
             .from("course_activity_schedules")
-            .select("*")
+            .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
             .eq("id", id)
             .single()
 

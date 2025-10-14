@@ -54,7 +54,7 @@
         :view-type="selectedView"
         :selected-date="selectedDate"
         @select-date="(date) => (selectedDate = date)"
-        @event-click="console.log('event click', $event)"
+        @event-click="(id) => openScheduleViewStudentSlideover(id)"
       />
     </UContainer>
     <UContainer
@@ -74,10 +74,13 @@ import type {
   AppCalendarEvent,
   AppCalendarViewType,
 } from "~/components/calendar/AppCalendar.vue";
+import ScheduleViewStudentSlideover from "~/components/schedules/ScheduleViewStudentSlideover.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
+
+const slideover = useSlideover();
 
 const userOrganizationsStore = useUserOrganizationsStore();
 const selectedDate = ref(new Date());
@@ -128,6 +131,12 @@ const {
     },
   }
 );
+
+const openScheduleViewStudentSlideover = (scheduleId: string) => {
+  slideover.open(ScheduleViewStudentSlideover, {
+    scheduleId,
+  });
+};
 </script>
 
 <style scoped></style>

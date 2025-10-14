@@ -18,7 +18,13 @@
             variant="solid"
             size="xs"
             :label="t('course_profile')"
-            @click="closeAndNavigateTo(userOrganizationsStore.relativePath(`/students/${student.activeSubscription.id}`))"
+            @click="
+              closeAndNavigateTo(
+                userOrganizationsStore.relativePath(
+                  `/students/${student.activeSubscription.id}`
+                )
+              )
+            "
           />
           <UButton
             v-if="!student.activeSubscription"
@@ -114,6 +120,11 @@
             </address>
           </div>
         </div>
+        <div class="mt-4">
+          <StudentsStudentDashboardAccessCard
+            :student-id="student.id"
+          />
+        </div>
       </UDashboardSection>
     </template>
     <div v-else>
@@ -194,7 +205,6 @@ const {
   }
 );
 
-
 const deleteStudent = async (studentId: string) => {
   modal.open(ConfirmModal, {
     title: t("confirm_delete_student"),
@@ -230,6 +240,7 @@ const subscribeStudent = async () => {
 const closeAndNavigateTo = (path: string) => {
   $emit("close-and-navigate", path);
 };
+
 </script>
 
 <style scoped></style>
@@ -247,12 +258,16 @@ const closeAndNavigateTo = (path: string) => {
     "address": "Adresse",
     "confirm_delete_student": "Schüler löschen",
     "confirm_delete_student_description": "Möchten Sie diesen Schüler wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "send_invitation_link": "Einladungslink an '{email}' senden",
+    "student_not_linked_to_user": "Der Schüler ist nicht mit einem Benutzerkonto verknüpft.",
+    "student_not_linked_to_user_description": "Der Schüler kann sich nicht in das System einloggen, bis er mit einem Benutzerkonto verknüpft ist.",
     "delete": "Löschen",
     "cancel": "Abbrechen",
     "student_deleted": "Schüler gelöscht",
     "student_deleted_successfully": "Der Schüler wurde erfolgreich gelöscht.",
     "error": "Fehler",
     "error_deleting_student": "Fehler beim Löschen des Schülers.",
+    "error_linking_student": "Fehler beim Verknüpfen des Schülers mit einem Benutzerkonto.",
     "student_not_found": "Schüler nicht gefunden.",
     "no_courses_available": "Keine Kurse verfügbar.",
     "course_not_found": "Kurs nicht gefunden.",
@@ -271,12 +286,16 @@ const closeAndNavigateTo = (path: string) => {
     "address": "Address",
     "confirm_delete_student": "Delete student",
     "confirm_delete_student_description": "Are you sure you want to delete this student? This action cannot be undone.",
+    "send_invitation_link": "Send invitation link to '{email}'",
+    "student_not_linked_to_user": "The student is not linked to a user account.",
+    "student_not_linked_to_user_description": "The student cannot log in to the system until they are linked to a user account.",
     "delete": "Delete",
     "cancel": "Cancel",
     "student_deleted": "Student deleted",
     "student_deleted_successfully": "The student has been successfully deleted.",
     "error": "Error",
     "error_deleting_student": "Error deleting the student.",
+    "error_linking_student": "Error linking the student to a user account.",
     "student_not_found": "Student not found.",
     "no_courses_available": "No courses available.",
     "course_not_found": "Course not found.",

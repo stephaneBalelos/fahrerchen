@@ -38,7 +38,9 @@ export const ACTIVITY_ICONS = {
     'OTHER': 'ri-file-list-line'
 }
 
-export const ACTIVITY_COLORS = {
+export type ActivityColor = 'green' | 'orange' | 'red' | 'blue';
+
+export const ACTIVITY_COLORS: Record<string, ActivityColor> = {
     'THEORY': 'green',
     'PRACTICE': 'orange',
     'EXAM': 'red',
