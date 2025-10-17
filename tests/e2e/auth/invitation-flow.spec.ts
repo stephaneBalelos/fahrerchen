@@ -16,29 +16,31 @@ test.describe("Invite Team Member in organization", () => {
         
     })
 
-    test('Authenticated User should have a default organization on the home page', async ({page, context}) => {
-        expect(page).toHaveURL('http://localhost:3000')
+    test('Authenticated User should have a default organization on the home page', async ({page, context: _}) => {
+        expect(page).toHaveURL('http://localhost:3000/my');
         const orgCards = page.locator('.org-card')
-        await expect(orgCards).toHaveCount(2)
+        await expect(orgCards).toHaveCount(1)
         const orgCard = orgCards.first()
-        await expect(orgCard.locator('p').first()).toHaveText('My Org')
-        orgCard.click()
-        await page.waitForURL('http://localhost:3000/my/')
-        await expect(page).toHaveURL('http://localhost:3000/my/')
+        await expect(orgCard.locator('p').first()).toHaveText('Fahrschule Weser')
+        await orgCard.locator('.org-card-action').click()
+        await page.waitForURL(/http:\/\/localhost:3000\/my\/.+/)
 
-        const orgName = page.locator('.org-dropdown')
-        await expect(orgName).toHaveText('My Org')
+        const orgDropdown = page.locator('#teams-dropdown')
+        await expect(orgDropdown).toBeAttached()
+
+        const orgName = orgDropdown.locator('span.truncate').first()
+        await expect(orgName).toHaveText('Fahrschule Weser')
     })
 
-    test('Authenticated User should be able to invite a team member to the organization', async ({page, context}) => {
-        expect(page).toHaveURL('http://localhost:3000')
-        page.locator('.org-card').first().click()
-        await page.waitForURL('http://localhost:3000/my/')
-        await expect(page).toHaveURL('http://localhost:3000/my/')
+    test('Authenticated User should be able to invite a team member to the organization', async ({page, context: _}) => {
+        expect(page).toHaveURL('http://localhost:3000/my');
+        const orgCard = page.locator('.org-card').first()
+        const buttonLink = orgCard.locator('.org-card-action')
+        await expect(buttonLink).toBeAttached()
+        await buttonLink.click()
+        await page.waitForURL(/http:\/\/localhost:3000\/my\/.+/)
 
-        await page.goto('http://localhost:3000/my/settings/members')
-        await page.waitForURL('http://localhost:3000/my/settings/members')
-        await expect(page).toHaveURL('http://localhost:3000/my/settings/members')
+        
 
         await page.locator('#invite-people').click()
 

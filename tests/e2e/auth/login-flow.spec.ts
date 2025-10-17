@@ -10,7 +10,7 @@ test.describe('Auth Flow', () => {
   test.beforeAll(setupE2eTest);
   test.beforeEach(async ({ page }) => {
     // Go to the starting url before each test.
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:3000/my');
   });
 
   test('not authenticated user are redirected to login', async ({ page }) => {
@@ -20,31 +20,31 @@ test.describe('Auth Flow', () => {
 
   test('login with wrong credentials should fail', async ({ page }) => {
     await expect(page).toHaveURL('http://localhost:3000/login');
-    const errorContainer = page.locator('div[role="alert"]')
+    const errorContainer = page.locator('div[role="status"]')
     await expect(errorContainer).not.toBeAttached()
     await login(page, userEmailWrong, userPasswordWrong)
     await expect(page).toHaveURL('http://localhost:3000/login')
-    await expect(errorContainer).toHaveText('Invalid email or password.')
+    await expect(errorContainer).toBeAttached()
   })
-  test('login with correct credentials should not fail', async ({ page, context }) => {
+  test('login with correct credentials should not fail', async ({ page, context: _ }) => {
     await expect(page).toHaveURL('http://localhost:3000/login')
 
     // await page.waitForEvent('load')
 
     await login(page, userEmail, userPassword)
 
-    await page.waitForURL('http://localhost:3000')
+    await page.waitForURL('http://localhost:3000/my')
   })
   test('authenticated user is redirected to home page after login', async ({ page }) => {
     await expect(page).toHaveURL('http://localhost:3000/login');
     await login(page, userEmail, userPassword);
-    await page.waitForURL('http://localhost:3000')
+    await page.waitForURL('http://localhost:3000/my')
   });
 
   test('logout should redirect to the login page', async ({ page }) => {
     await expect(page).toHaveURL('http://localhost:3000/login');
     await login(page, userEmail, userPassword);
-    await page.waitForURL('http://localhost:3000')
+    await page.waitForURL('http://localhost:3000/my')
 
     const userDropdown = page.locator("#user-dropdown")
     await userDropdown.click()

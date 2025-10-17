@@ -4,15 +4,10 @@ import detect from "detect-port";
 
 export const testConstants = {
   usersEmails: [
-    'owner1@organization1.com',
-    'owner2@organization2.com',
-    'manager1@organization1.com',
-    'manager2@organization2.com',
+    'stephanedondyas2@gmail.com',
+
   ],
   usersPasswords: [
-    'password',
-    'password',
-    'password',
     'password',
   ]
 }
@@ -34,7 +29,7 @@ async function startSupabase() {
 
 }
 
-function reseedDb() {
+function _reseedDb() {
   execSync("supabase db reset");
 
   // const cp = exec("supabase db reset");

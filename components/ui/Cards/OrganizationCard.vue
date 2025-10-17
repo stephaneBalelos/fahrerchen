@@ -20,6 +20,7 @@
     <template #links>
       <UButton
         v-if="organization.setup_completed"
+        class="org-card-action"
         size="sm"
         color="primary"
         :to="`/my/${organization.id}`"
