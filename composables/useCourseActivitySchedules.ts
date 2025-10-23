@@ -1,4 +1,4 @@
-import type { AppCourseActivitySchedule, CourseActivityScheduleEdit, Database } from "~/types/app.types";
+import type { AppCourseActivitySchedule, AppCourseActivityScheduleRequest, CourseActivityScheduleEdit, CourseActivityScheduleRequestEdit, Database } from "~/types/app.types";
 
 export type CourseActivityScheduleQuery = {
     activity_id?: string;
@@ -7,6 +7,13 @@ export type CourseActivityScheduleQuery = {
     start_at?: Date;
     subscription_id?: string;
     limit?: number;
+}
+
+export type CourseActivitySchedulesRequestQuery = {
+    organization_id: string;
+    subscription_id?: string;
+    activity_id?: string;
+    status: Database["public"]["Enums"]["schedule_request_statuses"];
 }
 
 export const useCourseActivitySchedules = () => {
@@ -201,7 +208,51 @@ export const useCourseActivitySchedules = () => {
         return data || []
     }
 
+    const fetchCourseActivitySchedulesRequests = async (query: CourseActivitySchedulesRequestQuery) => {
+        let q = client
+            .from("course_activity_schedule_requests")
+            .select("*, user:requested_by(*), subscription:subscription_id(*, student:students(*), course:courses(*)), activity:activity_id(*)")
+            .eq("organization_id", query.organization_id)
+            .eq("status", query.status)
 
+        if (query.subscription_id) {
+            q = q.eq("subscription_id", query.subscription_id)
+        }
+
+        if (query.activity_id) {
+            q = q.eq("activity_id", query.activity_id)
+        }
+
+        const { data, error } = await q
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
+    const createCourseActivityScheduleRequest = async (data: Omit<AppCourseActivityScheduleRequest, 'id' | 'inserted_at' | 'status'>) => {
+        const { error } = await client
+            .from("course_activity_schedule_requests")
+            .insert({
+                ...data
+            })
+
+        if (error) {
+            throw error
+        }
+    }
+
+    const updateCourseActivityScheduleRequest = async (id: string, data: Partial<CourseActivityScheduleRequestEdit>) => {
+        const { error } = await client
+            .from("course_activity_schedule_requests")
+            .update(data)
+            .eq("id", id)
+
+        if (error) {
+            throw error
+        }
+    }
 
     return {
         fetchCourseActivitySchedules,
@@ -212,7 +263,10 @@ export const useCourseActivitySchedules = () => {
         addAttendeesToSchedule,
         removeAttendeeFromSchedule,
         fetchAttendeesForSchedule,
-        fetchScheduleAttendancesForSchedule
+        fetchScheduleAttendancesForSchedule,
+        fetchCourseActivitySchedulesRequests,
+        createCourseActivityScheduleRequest,
+        updateCourseActivityScheduleRequest
     }
 
 }

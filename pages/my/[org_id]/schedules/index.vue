@@ -154,7 +154,7 @@ const { data: schedules, refresh } = useAsyncData(
           label: s.activity.name,
           date: new Date(s.start_at),
           duration: s.duration_minutes,
-          schedule: s,
+          status: s.status,
           assigned_to: s.user,
           activity_attendees_count: s.course_activity_schedules_attendees.length,
           type: s.activity.activity_type,

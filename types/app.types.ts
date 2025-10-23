@@ -30,6 +30,10 @@ export type CourseActivitiesCombinationEdit = Omit<AppCourseActivitiesCombinatio
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type CourseActivityScheduleEdit = Omit<AppCourseActivitySchedule, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'  | 'attendees'>
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
+export type AppScheduleStatus = DatabaseGenerated['public']['Enums']['schedule_status']
+
+export type AppCourseActivityScheduleRequest = DatabaseGenerated['public']['Tables']['course_activity_schedule_requests']['Row']
+export type CourseActivityScheduleRequestEdit = Omit<AppCourseActivityScheduleRequest, 'id' | 'organization_id' | 'inserted_at' | 'requested_by' | 'subscription_id' | 'activity_id'>
 
 export type AppCourseSubscription = DatabaseGenerated['public']['Tables']['course_subscriptions']['Row']
 

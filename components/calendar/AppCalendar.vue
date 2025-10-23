@@ -75,8 +75,8 @@ import { de, enUS } from "date-fns/locale";
 import AppCalendarWeekView from "./views/AppCalendarWeekView.vue";
 import AppCalendarDayView from "./views/AppCalendarDayView.vue";
 import type {
-  AppCourseActivitySchedule,
   AppCourseActivityType,
+  AppScheduleStatus,
   AppUser,
 } from "~/types/app.types";
 import { useMediaQuery } from "@vueuse/core";
@@ -86,7 +86,7 @@ export type AppCalendarEvent = {
   label: string;
   date: Date;
   duration: number; // in minutes
-  schedule: AppCourseActivitySchedule;
+  status: AppScheduleStatus | 'REQUESTED';
   assigned_to: AppUser | null;
   activity_attendees_count: number;
   type: AppCourseActivityType;
