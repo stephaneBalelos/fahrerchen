@@ -48,12 +48,12 @@ export const SCHEDULE_STATUS_COLORS: Record<string, ScheduleStatusColor> = {
 }
 
 
-export type ActivityColor = 'green' | 'orange' | 'red' | 'blue';
+export type ActivityColor = 'green' | 'orange' | 'rose' | 'blue';
 
 export const ACTIVITY_COLORS: Record<string, ActivityColor> = {
     'THEORY': 'green',
     'PRACTICE': 'orange',
-    'EXAM': 'red',
+    'EXAM': 'rose',
     'OTHER': 'blue'
 }
 

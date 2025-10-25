@@ -119,7 +119,7 @@ function onContextMenu() {
 
 const classes = computed(() => {
   const colors: Record<ActivityColor, string> = {
-    red: "bg-red-500 border-red-600 hover:bg-red-600",
+    rose: "border-l-4 bg-rose-500 border-rose-600 hover:bg-rose-600",
     blue: "border-l-4 bg-blue-500 border-blue-900 hover:bg-blue-600",
     orange: "border-l-4 bg-orange-500 border-orange-900 hover:bg-orange-600",
     green: "border-l-4 bg-green-500 border-green-900 hover:bg-green-600",
