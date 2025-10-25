@@ -1,5 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
-import Stripe from "npm:stripe@16.12.0"
+import { createClient } from '@supabase/supabase-js'
+import Stripe from "npm:stripe@19.1.0"
 import type { Database } from "../_shared/types/database.types.ts";
 
 const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY') ?? ''
@@ -58,10 +58,10 @@ Deno.serve(async (req) => {
       const billId = metadata.bill_id
 
       // Get Organization ID form metadata
-      const organizationId = metadata.organization_id
+      // const organizationId = metadata.organization_id
 
       // Get User ID form metadata
-      const userId = metadata.user_id
+      // const userId = metadata.user_id
 
       const supabaseAdmin = createClient<Database>(
         Deno.env.get('SUPABASE_URL') ?? '',
@@ -76,16 +76,7 @@ Deno.serve(async (req) => {
 
       // update the bill with the payment intent id
       const { error } = await supabaseAdmin.from("course_subscription_bills").update({ paid_at: new Date().toISOString() }).eq('id', billId).single()
-      const { error: errorInsert } = await supabaseAdmin.from("course_subscription_bill_history").insert({
-        bill_id: billId,
-        activity: 'BILL_PAID',
-        actor_id: userId,
-        item_price: 0,
-        item_description: '',
-        organization_id: organizationId
-      })
       console.log("Error: ", error)
-      console.log("Error Insert: ", errorInsert)
     }
 
   } catch (error) {
