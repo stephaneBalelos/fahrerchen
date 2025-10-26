@@ -5,6 +5,7 @@
   >
     <div>
       <UCard
+        v-if="status == 'success' && stripeStore.stripeAppSettings"
         :ui="{
           body: {
             base: 'divide-y divide-gray-200 dark:divide-gray-800 gap-4 flex flex-col',
@@ -13,7 +14,21 @@
       >
         <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
           <div class="mr-2">
-            <UIcon name="i-heroicons-credit-card" class="w-5 h-5" />
+            <UIcon name="i-simple-icons-sepa" class="w-10 h-10" />
+          </div>
+          <div class="flex flex-col gap-1 grow">
+            <div class="flex justify-start gap-1">
+              <p class="font-semibold me-2">{{ t("sepa_debit.title") }}</p>
+            </div>
+            <span class="text-sm text-gray-500">{{
+              t("sepa_debit.description")
+            }}</span>
+          </div>
+          <UToggle disabled :model-value="true" />
+        </div>
+        <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
+          <div class="mr-2">
+            <UIcon name="i-heroicons-credit-card" class="w-10 h-10" />
           </div>
           <div class="flex flex-col gap-1 grow">
             <div class="flex justify-start gap-1">
@@ -23,25 +38,11 @@
               t("card_payment.description")
             }}</span>
           </div>
-          <UToggle v-model="form.credit_card.enabled" @change="onChange"/>
+          <UToggle v-model="form.credit_card.enabled" @change="onChange" />
         </div>
         <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
           <div class="mr-2">
-            <UIcon name="i-simple-icons-paypal" class="w-5 h-5" />
-          </div>
-          <div class="flex flex-col gap-1 grow">
-            <div class="flex justify-start gap-1">
-              <p class="font-semibold me-2">{{ t("paypal.title") }}</p>
-            </div>
-            <span class="text-sm text-gray-500">{{
-              t("paypal.description")
-            }}</span>
-          </div>
-          <UToggle v-model="form.paypal.enabled"  @change="onChange"/>
-        </div>
-        <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
-          <div class="mr-2">
-            <UIcon name="i-simple-icons-klarna" class="w-5 h-5" />
+            <UIcon name="i-simple-icons-klarna" class="w-10 h-10" />
           </div>
           <div class="flex flex-col gap-1 grow">
             <div class="flex justify-start gap-1">
@@ -51,7 +52,7 @@
               t("klarna.description")
             }}</span>
           </div>
-          <UToggle v-model="form.klarna.enabled" @change="onChange"/>
+          <UToggle v-model="form.klarna.enabled" @change="onChange" />
         </div>
       </UCard>
     </div>
@@ -59,65 +60,59 @@
 </template>
 
 <script setup lang="ts">
-import type Stripe from 'stripe';
-import type { AppStripeAccountPaymentMethodSettings, Database } from '~/types/app.types';
+import type { AppStripeAccountPaymentMethodSettings } from "~/types/app.types";
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-
 const stripeStore = useStripeStore();
 const userOrganizationStore = useUserOrganizationsStore();
-const client = useSupabaseClient<Database>();
 
-const { data, error, status, refresh } = await useAsyncData(``, async () => {
-  if(!userOrganizationStore.selectedOrganization) {
-    return null;
+if (!userOrganizationStore.selectedOrganization) {
+  throw new Error("No organization selected");
+}
+
+const { status, refresh } = await useAsyncData(
+  `organizations_stripe_account_${userOrganizationStore.selectedOrganization?.id}`,
+  async () => {
+    if (!userOrganizationStore.selectedOrganization) {
+      return null;
+    }
+    await stripeStore.getStripeAppSettings();
   }
-  const { data, error } = await client.from("organizations_stripe_accounts").select("payment_methods").eq("id", userOrganizationStore.selectedOrganization.organization_id).single()
-  if (error) {
-    console.error(error);
-    
-  }
-  return data?.payment_methods as unknown as AppStripeAccountPaymentMethodSettings;
-})
+);
+
+const paymentMethods = computed(() => {
+  return stripeStore.stripeAppSettings?.payment_methods;
+});
 
 const form = reactive<AppStripeAccountPaymentMethodSettings>({
   credit_card: {
-    payment_method_id: 'card',
-    enabled: data.value?.credit_card.enabled ?? false,
-  },
-  paypal: {
-    payment_method_id: 'paypal',
-    enabled: data.value?.paypal.enabled ?? false,
+    payment_method_id: "card",
+    enabled: paymentMethods.value?.credit_card.enabled ?? false,
   },
   klarna: {
-    payment_method_id: 'klarna',
-    enabled: data.value?.klarna.enabled ?? false,
+    payment_method_id: "klarna",
+    enabled: paymentMethods.value?.klarna.enabled ?? false,
   },
 });
 
-const onChange = async ($event: any) => {
-  if(!userOrganizationStore.selectedOrganization) {
+const onChange = async () => {
+  if (!userOrganizationStore.selectedOrganization) {
     return;
   }
   try {
-    const { data, error } = await client.from("organizations_stripe_accounts").update({
-      payment_methods: form
-    }).eq("id", userOrganizationStore.selectedOrganization.organization_id)
-    if (error) {
-      throw error;
-    }
-
+    await stripeStore.updateStripeAppSettings(
+      userOrganizationStore.selectedOrganization.id,
+      form
+    );
   } catch (error) {
     console.error(error);
   } finally {
-     refresh()
+    refresh();
   }
-}
-
-
+};
 </script>
 
 <style scoped></style>
@@ -127,34 +122,34 @@ const onChange = async ($event: any) => {
   "de": {
     "payments-title": "Zahlungs Methoden",
     "payments-description": "Zahlungsmethoden verwalten. SEPAs Direct Debit sind standardmäßig aktiviert.",
+    "sepa_debit": {
+      "title": "Sepa Lastschrift",
+      "description": "Zahlungen per Sepa Lastschrift akzeptieren."
+    },
     "card_payment": {
       "title": "Kreditkartenzahlung",
       "description": "Zahlungen per Kreditkarte (Visa, Mastercard, American Express) akzeptieren."
-    },
-    "paypal": {
-      "title": "PayPal",
-      "description": "Zahlungen per PayPal akzeptieren."
     },
     "klarna": {
       "title": "Klarna",
       "description": "Zahlungen per Klarna akzeptieren."
     }
   },
-    "en": {
-        "payments-title": "Payment Methods",
-        "payments-description": "Manage payment methods. SEPA Direct Debit is enabled by default.",
-        "card_payment": {
-        "title": "Credit Card Payment",
-        "description": "Accept payments by credit card (Visa, Mastercard, American Express)."
-        },
-        "paypal": {
-        "title": "PayPal",
-        "description": "Accept payments by PayPal."
-        },
-        "klarna": {
-        "title": "Klarna",
-        "description": "Accept payments by Klarna."
-        }
+  "en": {
+    "payments-title": "Payment Methods",
+    "payments-description": "Manage payment methods. SEPA Direct Debit is enabled by default.",
+    "sepa_debit": {
+      "title": "Sepa Direct Debit",
+      "description": "Accept payments by Sepa Direct Debit."
+    },
+    "card_payment": {
+      "title": "Credit Card Payment",
+      "description": "Accept payments by credit card (Visa, Mastercard, American Express)."
+    },
+    "klarna": {
+      "title": "Klarna",
+      "description": "Accept payments by Klarna."
     }
+  }
 }
 </i18n>

@@ -39,7 +39,7 @@
         </UDashboardPanelContent>
       </template>
       <template v-else>
-        <UDashboardNavbar :title="'Calendar View'">
+        <UDashboardNavbar :title="t('schedules_planning')" class="mb-2">
           <template #right>
             <UButton
               icon="i-heroicons-plus-circle-solid"
@@ -85,9 +85,9 @@
             :selected-date="selectedDate"
             :events="schedules || []"
             :view-type="selectedView"
-            @create-schedule="(date) => openEditScheduleSlideover({ date })"
+            @date-block-click="(date) => openEditScheduleSlideover({ date })"
             @select-date="(date) => (selectedDate = date)"
-            @edit-schedule="(id) => navigateTo({ query: { id } })"
+            @event-click="(id) => navigateTo({ query: { id } })"
           />
         </UDashboardPanelContent>
       </template>
@@ -154,7 +154,9 @@ const { data: schedules, refresh } = useAsyncData(
           label: s.activity.name,
           date: new Date(s.start_at),
           duration: s.duration_minutes,
-          schedule: s,
+          status: s.status,
+          assigned_to: s.user,
+          activity_attendees_count: s.course_activity_schedules_attendees.length,
           type: s.activity.activity_type,
         };
         return event;
@@ -207,6 +209,7 @@ const openScheduleFilterSlideover = () => {
 <i18n lang="json">
 {
   "de": {
+    "schedules_planning": "Terminplanung",
     "day_view": "Tagesansicht",
     "week_view": "Wochenansicht",
     "filter_schedules": "Termine filtern",
@@ -239,6 +242,7 @@ const openScheduleFilterSlideover = () => {
     }
   },
   "en": {
+    "schedules_planning": "Schedules Planning",
     "day_view": "Day View",
     "week_view": "Week View",
     "filter_schedules": "Filter Schedules",

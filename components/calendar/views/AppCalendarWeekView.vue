@@ -18,25 +18,18 @@
             <div
               class="h-32 lg:h-28 p-0.5 md:p-3.5 border-t border-r border-gray-200 dark:border-gray-800 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
               @click="
-                () => $emits('createSchedule', setHours(date.date, hour.hour))
+                () => $emits('date-block-click', setHours(date.date, hour.hour))
               "
             />
           </template>
         </template>
       </div>
-      <div
+      <AppCalendarEventBlock
         v-for="event in eventBlocks"
         :key="event.id"
-        :class="`absolute top-[${event.style.top}] left-[${event.style.left}] h-[${event.style.height}] w-[${event.style.width}] p-1 m-1 rounded border-l-2 border-${event.style.color}-600 bg-${event.style.color}-50 shadow cursor-pointer hover:bg-${event.style.color}-100 cursor-pointer`"
-        :style="event.style"
-        @click="() => $emits('editSchedule', event.id)"
-      >
-        <p :class="`text-sm font-semibold text-gray-900`">{{ event.label }}</p>
-        <p :class="`text-xs font-semibold text-${event.style.color}-900`">
-          {{ format(event.date, "HH:mm") }} -
-          {{ format(addMinutes(event.date, event.duration), "HH:mm") }}
-        </p>
-      </div>
+        :event="event"
+        @event-click="(id) => $emits('event-click', id)"
+      />
 
       <div class="absolute left-0 top-0 w-16 h-full grid">
         <div
@@ -54,16 +47,12 @@
 </template>
 
 <script setup lang="ts">
-import {
-  format,
-  setHours,
-  startOfWeek,
-  addMinutes,
-} from "date-fns";
+import { format, setHours, startOfWeek, addMinutes } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import type { AppCalendarEvent } from "../AppCalendar.vue";
 import { useElementBounding, useScroll } from "@vueuse/core";
 import { ACTIVITY_COLORS } from "~/constants";
+import AppCalendarEventBlock from "../templates/AppCalendarEventBlock.vue";
 
 const { locale } = useI18n({
   useScope: "local",
@@ -88,8 +77,8 @@ const HoursBlocks = computed(() => {
 });
 
 const $emits = defineEmits<{
-  (e: "createSchedule" | "selectDate", date: Date): void;
-  (e: "editSchedule", scheduleId: string): void;
+  (e: "date-block-click" | "selectDate", date: Date): void;
+  (e: "event-click", scheduleId: string): void;
 }>();
 
 const DatesBlocks = computed(() => {

@@ -159,6 +159,7 @@
     },
     "schedules": {
         "status": {
+            "REQUESTED": "Angefragt",
             "PLANNED": "Geplant",
             "CANCELED": "Abgesagt",
             "COMPLETED": "Abgeschlossen"

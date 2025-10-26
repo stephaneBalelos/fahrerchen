@@ -1,13 +1,14 @@
 <template>
-  <div
-    :id="`stripe-onboarding-element-onboarding`"
-    ref="stripeOnboardingElement"
-    :class="`${isVisible ? 'visible' : 'invisible'}`"
-  >
+  <div class="grid">
+    <div
+      :id="`stripe-onboarding-element-onboarding`"
+      ref="stripeOnboardingElement"
+      :class="`${isVisible ? 'visible' : 'invisible'}`"
+    />
     <div v-if="!isVisible" class="grid gap-2">
-      <USkeleton class="h-4 w-full" />
-      <USkeleton class="h-60 w-full" />
-      <USkeleton class="h-60 w-full" />
+      <USkeleton class="h-6 w-full" />
+      <USkeleton class="h-24 w-full" />
+      <USkeleton class="h-24 w-full" />
     </div>
   </div>
 </template>

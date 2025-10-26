@@ -4,21 +4,12 @@
       ref="calendarContainerEl"
       class="relative overflow-auto"
     >
-      <div
+      <AppCalendarEventBlock
         v-for="event in eventBlocks"
         :key="event.id"
-        :class="`absolute top-[${event.style.top}] left-[${event.style.left}] h-[${event.style.height}] w-[${event.style.width}] p-1 m-1 rounded border-l-2 border-${event.style.color}-600 bg-${event.style.color}-50 shadow cursor-pointer hover:bg-${event.style.color}-100 cursor-pointer`"
-        :style="event.style"
-        @click="() => $emits('editSchedule', event.id)"
-      >
-        <p :class="`text-sm font-semibold text-gray-900`">
-          {{ event.label }}
-        </p>
-        <p :class="`text-xs font-semibold text-${event.style.color}-900`">
-          {{ format(event.date, "HH:mm") }} -
-          {{ format(addMinutes(event.date, event.duration), "HH:mm") }}
-        </p>
-      </div>
+        :event="event"
+        @event-click="(id) => $emits('event-click', id)"
+      />
       <div class="absolute top-0 left-0 flex flex-col">
         <div
           v-for="hour in HoursBlocks"
@@ -36,18 +27,9 @@
           :key="`block-${hour}`"
           class="w-full h-20 p-1.5 border-t border-gray-200 dark:border-gray-800 transition-all cursor-pointer"
           @click="
-            () => $emits('createSchedule', setHours(selectedDate, hour.hour))
+            () => $emits('date-block-click', setHours(selectedDate, hour.hour))
           "
-        >
-          <div
-            class="hidden w-full h-full rounded p-1.5 border-l-2 border-purple-600 bg-purple-50"
-          >
-            <p class="text-xs font-normal text-gray-900 mb-px">
-              Pickup the grandmother
-            </p>
-            <p class="text-xs font-semibold text-purple-600">06:00 - 07:30</p>
-          </div>
-        </div>
+        />
       </div>
     </div>
   </div>
@@ -58,6 +40,7 @@ import { format, setHours, addMinutes } from "date-fns";
 import type { AppCalendarEvent } from "../AppCalendar.vue";
 import { useElementBounding, useScroll } from "@vueuse/core";
 import { ACTIVITY_COLORS } from "~/constants";
+import AppCalendarEventBlock from "../templates/AppCalendarEventBlock.vue";
 
 type Props = {
   selectedDate: Date;
@@ -65,8 +48,8 @@ type Props = {
 };
 
 const $emits = defineEmits<{
-  (e: "createSchedule" | "selectDate", date: Date): void;
-  (e: "editSchedule", id: string): void;
+  (e: "date-block-click" | "selectDate", date: Date): void;
+  (e: "event-click", id: string): void;
 }>();
 
 const props = defineProps<Props>();

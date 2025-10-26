@@ -13,7 +13,10 @@
       <UNavigationTree :links="links" />
     </div>
 
-    <div v-if="stripeStore.stripeAccount.details_submitted" class="grow relative">
+    <div
+      v-if="stripeStore.stripeAccount.details_submitted"
+      class="grow relative"
+    >
       <div class="absolute inset-0 overflow-y-auto p-4">
         <div class="pb-4">
           <StripeEmbeddedComponent :component="'notification-banner'" />
@@ -28,10 +31,10 @@
           variant="soft"
           @click="openDeleteStripeAccountModal"
         >
-          {{ t('remove_stripe') }}
+          {{ t("remove_stripe") }}
         </UButton>
       </div>
-      <StripeOnboarding @exit="onOnboardingExit"/>
+      <StripeOnboarding @exit="onOnboardingExit" />
     </div>
 
     <!-- <StripeOnboarding /> -->
@@ -43,31 +46,28 @@
       wrapper: 'flex-row',
     }"
   >
-  <div class="w-full grid justify-center">
-      <UPageHero
-        icon="i-simple-icons-stripe"
-        :title="t('title')"
-        :description="t('description')"
-        align="center"
-        :links="[
-          {
-            label: t('connect_stripe'),
-            click: connectStripe,
-            loading: connectIsLoading,
-            color: 'primary',
-            variant: 'solid',
-          },
-        ]"
-      />
-    </div>
+    <UPageHero
+      icon="i-simple-icons-stripe"
+      :title="t('title')"
+      :description="t('description')"
+      align="center"
+      class="max-w-5xl mx-auto"
+      :links="[
+        {
+          label: t('connect_stripe'),
+          click: connectStripe,
+          loading: connectIsLoading,
+          color: 'primary',
+          variant: 'solid',
+        },
+      ]"
+    />
   </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
 import StripeEmbeddedComponent from "~/components/settings/stripe/StripeEmbeddedComponent.vue";
 import StripeOnboarding from "~/components/settings/stripe/StripeOnboarding.vue";
-import type { StripeConnectPostResponse } from "~/server/api/orgs/payments/stripe/connect/index.post";
-import type { StripeConnectPostBody } from "~/types/app.types";
 import StripeDeleteAccountModal from "~/components/settings/stripe/StripeDeleteAccountModal.vue";
 
 const userOrganizationStore = useUserOrganizationsStore();
@@ -77,46 +77,34 @@ const { t } = useI18n({
 });
 
 const connectIsLoading = ref(false);
-const tutorialStore = useTutorialStore();
 const modal = useModal();
 
 const links = [
   {
     label: "Zahlungen",
-    to: `/my/${userOrganizationStore.selectedOrganization?.organization_id}/settings/payments`,
+    to: userOrganizationStore.relativePath("/settings/payments"),
     exact: true,
   },
   {
     label: "Auszahlungen",
-    to: `/my/${userOrganizationStore.selectedOrganization?.organization_id}/settings/payments/payouts`,
+    to: userOrganizationStore.relativePath("/settings/payments/payouts"),
   },
   {
     label: "Zahlungseinstellungen",
-    to: `/my/${userOrganizationStore.selectedOrganization?.organization_id}/settings/payments/payments-settings`,
+    to: userOrganizationStore.relativePath(
+      "/settings/payments/payments-settings"
+    ),
   },
   {
     label: "Stripe Anbindung",
-    to: `/my/${userOrganizationStore.selectedOrganization?.organization_id}/settings/payments/account`,
+    to: userOrganizationStore.relativePath("/settings/payments/account"),
   },
 ];
 
 async function connectStripe() {
-  if (!userOrganizationStore.selectedOrganization) {
-    return;
-  }
-  const body: StripeConnectPostBody = {
-    org_id: userOrganizationStore.selectedOrganization.organization_id,
-  };
   connectIsLoading.value = true;
   try {
-    const { accountId } = await $fetch<StripeConnectPostResponse>("/api/orgs/payments/stripe/connect", {
-      cache: "no-cache",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
+    const accountId = await stripeStore.connectStripeAccount()
     if (accountId) {
       await stripeStore.fetchStripeAccount();
     }
@@ -129,13 +117,23 @@ async function connectStripe() {
 
 async function onOnboardingExit() {
   await stripeStore.fetchStripeAccount();
-  if (stripeStore.stripeAccount?.details_submitted) {
-    tutorialStore.completeStep('enable_payment')
-  }
 }
 
 function openDeleteStripeAccountModal() {
-  modal.open(StripeDeleteAccountModal);
+  if (!stripeStore.stripeAccount) return;
+
+  if (!userOrganizationStore.selectedOrganization) return;
+
+  modal.open(StripeDeleteAccountModal, {
+    orgId: userOrganizationStore.selectedOrganization.id,
+    onClose: () => {
+      modal.close();
+    },
+    onDeleted: async () => {
+      await stripeStore.fetchStripeAccount();
+      modal.close();
+    },
+  });
 }
 </script>
 

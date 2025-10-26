@@ -136,6 +136,68 @@ export type Database = {
           },
         ]
       }
+      course_activity_schedule_requests: {
+        Row: {
+          activity_id: string
+          id: string
+          inserted_at: string
+          organization_id: string
+          requested_by: string | null
+          start_at: string
+          status: Database["public"]["Enums"]["schedule_request_statuses"]
+          subscription_id: string
+        }
+        Insert: {
+          activity_id: string
+          id?: string
+          inserted_at?: string
+          organization_id: string
+          requested_by?: string | null
+          start_at: string
+          status?: Database["public"]["Enums"]["schedule_request_statuses"]
+          subscription_id: string
+        }
+        Update: {
+          activity_id?: string
+          id?: string
+          inserted_at?: string
+          organization_id?: string
+          requested_by?: string | null
+          start_at?: string
+          status?: Database["public"]["Enums"]["schedule_request_statuses"]
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_activity_schedule_requests_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_requests_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_activity_schedules: {
         Row: {
           activity_id: string
@@ -1373,6 +1435,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activity_allows_requests: {
+        Args: { activity_id: string }
+        Returns: boolean
+      }
       add_course_to_allowed_courses: {
         Args: { activity_id: string; course_id: string }
         Returns: undefined
@@ -1386,6 +1452,10 @@ export type Database = {
           org_id: string
           requested_permission: Database["public"]["Enums"]["app_permission"]
         }
+        Returns: boolean
+      }
+      can_student_insert_schedule_attendee: {
+        Args: { schedule_id: string; subscription_id: string }
         Returns: boolean
       }
       check_subscription_organization: {
@@ -1519,6 +1589,10 @@ export type Database = {
         | "organization_billing_settings.delete"
         | "course_costs_combinations.update"
         | "course_activities_combinations.update"
+        | "course_activity_schedule_requests.read"
+        | "course_activity_schedule_requests.create"
+        | "course_activity_schedule_requests.update"
+        | "course_activity_schedule_requests.delete"
       app_role: "owner" | "manager" | "teacher" | "student"
       course_type:
         | "AM"
@@ -1551,6 +1625,7 @@ export type Database = {
         | "course_subscription_bills.ready_to_pay.updated"
         | "course_subscription_bills.canceled_at.updated"
         | "students_registration_requests.inserted"
+      schedule_request_statuses: "pending" | "approved" | "rejected"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
       user_status: "ONLINE" | "OFFLINE"
@@ -2297,6 +2372,10 @@ export const Constants = {
         "organization_billing_settings.delete",
         "course_costs_combinations.update",
         "course_activities_combinations.update",
+        "course_activity_schedule_requests.read",
+        "course_activity_schedule_requests.create",
+        "course_activity_schedule_requests.update",
+        "course_activity_schedule_requests.delete",
       ],
       app_role: ["owner", "manager", "teacher", "student"],
       course_type: [
@@ -2332,6 +2411,7 @@ export const Constants = {
         "course_subscription_bills.canceled_at.updated",
         "students_registration_requests.inserted",
       ],
+      schedule_request_statuses: ["pending", "approved", "rejected"],
       schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],
       schedule_type: ["ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY"],
       user_status: ["ONLINE", "OFFLINE"],

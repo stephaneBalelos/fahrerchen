@@ -164,6 +164,7 @@
     },
     "schedules": {
         "status": {
+            "REQUESTED": "Requested",
             "PLANNED": "Planned",
             "CANCELED": "Canceled",
             "COMPLETED": "Completed"

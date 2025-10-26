@@ -38,10 +38,22 @@ export const ACTIVITY_ICONS = {
     'OTHER': 'ri-file-list-line'
 }
 
-export const ACTIVITY_COLORS = {
+export type ScheduleStatusColor = 'primary' | 'red' | 'green';
+
+export const SCHEDULE_STATUS_COLORS: Record<string, ScheduleStatusColor> = {
+    'REQUESTED': 'primary',
+    'PLANNED': 'primary',
+    'CANCELED': 'red',
+    'COMPLETED': 'green'
+}
+
+
+export type ActivityColor = 'green' | 'orange' | 'rose' | 'blue';
+
+export const ACTIVITY_COLORS: Record<string, ActivityColor> = {
     'THEORY': 'green',
     'PRACTICE': 'orange',
-    'EXAM': 'red',
+    'EXAM': 'rose',
     'OTHER': 'blue'
 }
 
