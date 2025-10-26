@@ -1,7 +1,6 @@
 <template>
     <UDashboardSection :title="t('payouts-title')" :description="t('payouts-description')">
         <StripeEmbeddedComponent :component="'payouts'" />
-
     </UDashboardSection>
 </template>
 

@@ -63,21 +63,23 @@ export type AppStripeAccountPaymentMethodSettings = {
     payment_method_id: Stripe.PaymentMethod.Type
     enabled: boolean
   },
-  paypal: {
-    payment_method_id: Stripe.PaymentMethod.Type
-    enabled: boolean
-  },
   klarna: {
     payment_method_id: Stripe.PaymentMethod.Type
     enabled: boolean
   }
 }
 
-export type AppOrganizationsStripeAccount = DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row']
+export type AppOrganizationsStripeAccount = Omit<DatabaseGenerated['public']['Tables']['organizations_stripe_accounts']['Row'], 'payment_methods'> & {
+    payment_methods: AppStripeAccountPaymentMethodSettings
+}
 
 
 export type StripeConnectPostBody = {
   org_id: string
+}
+
+export type StripeConnectPostResponse = {
+    accountId: string
 }
 
 export type StripeConnectLinkAccountPostBody = {

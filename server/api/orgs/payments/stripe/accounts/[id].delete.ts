@@ -6,6 +6,12 @@ import type { Database } from '~/types/app.types'
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
     const stripe = await stripeClient(config.stripe_sk)
+    if (!stripe) {
+        throw createError({
+            status: 500,
+            message: "Stripe client could not be initialized",
+        });
+    }
     const user = event.context.auth as User
     if (!user) {
         throw createError({
@@ -52,8 +58,6 @@ export default defineEventHandler(async (event) => {
 
         const { error } = await client.from('organizations_stripe_accounts').delete().eq('id', orgid)
 
-        console.log('delete account sb')
-
         if (error) {
             console.error(error)
             throw createError({
@@ -64,7 +68,6 @@ export default defineEventHandler(async (event) => {
 
         const res = await stripe.accounts.del(stripeAccount.stripe_account_id)
 
-        console.log('delete account stripe', res)
         if (!res.deleted) {
             throw createError({
                 status: 500,

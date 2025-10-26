@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import Stripe from "npm:stripe@19.1.0"
 import type { Database } from "../_shared/types/database.types.ts";
 

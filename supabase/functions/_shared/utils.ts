@@ -3,6 +3,15 @@ import type { Database } from "../_shared/types/database.types.ts"
 import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
 import NewSubscriptionEmail, { NewSubscriptionEmailSubject } from "./_templates/NewSubscriptionMail.tsx";
 
+
+export async function getAuthUserWithToken(supabase: SupabaseClient<Database>, token: string) {
+    const { data, error } = await supabase.auth.getUser(token)
+    if (error || !data) {
+        return null
+    }
+    return data.user
+}
+
 export async function hasUserOrganisationMembership(supabase: SupabaseClient<Database>, user_id: string, orgid: string): Promise<Database['public']['Tables']['organization_members']['Row'] | null> {
     const { data, error } = await supabase.from('organization_members').select('*').eq('organization_id', orgid).eq('user_id', user_id).single()
     if (error || !data) {
@@ -31,6 +40,14 @@ export async function getOrganizationMembers(supabase: SupabaseClient<Database>,
     const { data, error } = await supabase.from('organization_members')
         .select('*, user:users(id, email, firstname, lastname, email)')
         .eq('organization_id', orgid)
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getOrganizationStripeAccount(supabase: SupabaseClient<Database>, orgid: string): Promise<Database['public']['Tables']['organizations_stripe_accounts']['Row'] | null> {
+    const { data, error } = await supabase.from('organizations_stripe_accounts').select('*').eq('id', orgid).single()
     if (error || !data) {
         return null
     }

@@ -1,12 +1,12 @@
 <template>
-    <UModal :visible="true" @close="close">
+    <UModal :visible="true" @close="() => $emits('close')">
         <UCard :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
         <template #header>
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
               {{ t('title') }}
             </h3>
-            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="close" />
+            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="() => $emits('close')" />
           </div>
         </template>
 
@@ -19,7 +19,7 @@
 
         <template #footer>
           <div class="flex justify-end space-x-4">
-            <UButton color="gray" variant="ghost" :disabled="isDeleting" @click="close">{{ t('cancel') }}</UButton>
+            <UButton color="gray" variant="ghost" :disabled="isDeleting" @click="() => $emits('close')">{{ t('cancel') }}</UButton>
             <UButton color="red" :disabled="isDeleting" :loading="isDeleting" @click="deleteStripeAccount">{{ t('delete') }}</UButton>
           </div>
         </template>
@@ -29,22 +29,24 @@
 
 <script setup lang="ts">
 
+type Props = {
+    orgId: string;
+}
+
+const props = defineProps<Props>();
+
 const { t } = useI18n({
     useScope: 'local'
 });
-const isDeleting = ref(false);
-const modal = useModal();
-const toast = useToast();
 
-const userOrganizationsStore = useUserOrganizationsStore();
+const isDeleting = ref(false);
+const toast = useToast();
+const $emits = defineEmits(["close", "deleted"]);
+
 const stripeStore = useStripeStore();
 
-function close() {
-    modal.close();
-}
-
 async function deleteStripeAccount() {
-    const orgId = userOrganizationsStore.selectedOrganization?.organization_id
+    const orgId = props.orgId;
     if (!orgId) return;
     if (isDeleting.value) return;
     isDeleting.value = true;
@@ -61,7 +63,7 @@ async function deleteStripeAccount() {
                 color: 'green',
             })
             await stripeStore.fetchStripeAccount();
-            close();
+            $emits("deleted")
         } else {
             toast.add({
                 title: t('error'),

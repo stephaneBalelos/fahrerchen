@@ -1,5 +1,5 @@
 import type { User } from "@supabase/supabase-js";
-import { getBillById } from "~/server/utils/supabase";
+import { getBillById, updateBillPaymentIntentId } from "~/server/utils/supabase";
 import type { AppStripeAccountPaymentMethodSettings } from "~/types/app.types";
 
 
@@ -65,6 +65,18 @@ export default defineEventHandler(async (event) => {
 
     const config = useRuntimeConfig()
     const stripe = await stripeClient(config.stripe_sk)
+    if (!stripe) {
+        throw createError({
+            status: 500,
+            message: "Stripe client could not be initialized",
+        });
+    }
+
+    const enabledPaymentMethods = ['sepa_debit']
+    const orgsPaymentMethods = orgStripeAccount.payment_methods as AppStripeAccountPaymentMethodSettings
+    if (orgsPaymentMethods) {
+        Object.values(orgsPaymentMethods).filter(pm => pm.enabled).forEach(pm => enabledPaymentMethods.push(pm.payment_method_id))
+    }
 
     // check if the bill already has a payment intent
     if (bill.stripe_payment_intent_id) {
@@ -80,23 +92,41 @@ export default defineEventHandler(async (event) => {
             }, { stripeAccount: orgStripeAccount.stripe_account_id });
         }
 
+        // Update payment method types if they have changed
+        intent = await stripe.paymentIntents.update(bill.stripe_payment_intent_id, {
+            payment_method_types: enabledPaymentMethods
+        }, { stripeAccount: orgStripeAccount.stripe_account_id });
+
         // check has already been paid
         if (intent.status === 'succeeded') {
-            console.log('Payment intent already succeeded');
+            // save the paid at date
             throw createError({
                 status: 400,
                 message: 'Payment intent already succeeded'
             });
         }
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
+        return { clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100 };
     } else {
-        // create a new payment intent
-        const enabledPaymentMethods = ['giropay']
-        const orgsPaymentMethods = orgStripeAccount.payment_methods as AppStripeAccountPaymentMethodSettings
-        if (orgsPaymentMethods) {
-            Object.values(orgsPaymentMethods).filter(pm => pm.enabled).forEach(pm => enabledPaymentMethods.push(pm.payment_method_id))
+        // Check if the intent exists in Stripe to avoid duplicates
+        const intents = await stripe.paymentIntents.search({
+            query: `metadata["bill_id"]:"${bill.id}" AND metadata["organization_id"]:"${bill.organization_id}"`,
+        }, {
+            stripeAccount: orgStripeAccount.stripe_account_id
+        })
+        if (intents.data.length > 0) {
+            const intent = intents.data[0];
+            // save the payment intent id to the bill
+            const paymentIntentUpdateError = await updateBillPaymentIntentId(event, bill.id, intent.id);
+            if (paymentIntentUpdateError) {
+                throw createError({
+                    status: 500,
+                    message: 'Failed to save payment intent id to bill'
+                });
+            }
+            return { clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100 };
         }
+        // create a new payment intent
 
         const intent = await stripe.paymentIntents.create({
             amount: (bill.total_with_vat || bill.total) * 100,
@@ -110,10 +140,10 @@ export default defineEventHandler(async (event) => {
         }, {
             stripeAccount: orgStripeAccount.stripe_account_id,
             idempotencyKey: bill.id,
-            
+
         })
 
-        return {clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100};
+        return { clientSecret: intent.client_secret, stripeAccountId: orgStripeAccount.stripe_account_id, total: intent.amount / 100 };
     };
 
 });

@@ -1,4 +1,4 @@
-import { serverSupabaseClient } from '#supabase/server'
+import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 import type { AppOrganization, Database } from "~/types/app.types";
 import type { H3Event } from 'h3';
 import { arrayFillWithNullValues } from './utilities';
@@ -132,6 +132,14 @@ export const getBillDataById = async (event: H3Event, id: string) => {
         return null
     }
     return data
+}
+
+export const updateBillPaymentIntentId = async (event: H3Event, billId: string, paymentIntentId: string) => {
+    const client = serverSupabaseServiceRole<Database>(event)
+    const { error } = await client.from('course_subscription_bills').update({
+        stripe_payment_intent_id: paymentIntentId
+    }).eq('id', billId)
+    return error
 }
 
 export const getBillItemsByBillId = async (event: H3Event, billId: string) => {

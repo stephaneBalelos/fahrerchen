@@ -5,6 +5,13 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig()
     const stripe = await stripeClient(config.stripe_sk)
 
+    if (!stripe) {
+        throw createError({
+            status: 500,
+            message: "Stripe client could not be initialized",
+        });
+    }
+
 
     const orgid = getRouterParam(event, 'id')
 

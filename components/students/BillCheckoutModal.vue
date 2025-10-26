@@ -20,53 +20,75 @@
         </div>
       </template>
 
-      <div class="absulute inset-0 overflow-y-auto">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
-          <div class="w-full">
-            <StudentsStudentProfileCard
-              v-if="studentStore.student"
-              :student-id="studentStore.student.id"
-            />
-            <UCard class="mb-4">
-              <p
-                class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"
-              >
-                {{ t("review") }}
-              </p>
-              <BillsBillingList :bill-id="props.billId" />
-            </UCard>
-          </div>
-          <div class="w-full">
-            <form @submit="handleSubmit">
-              <div ref="paymentElement">
-                <!-- A Stripe Element will be inserted here. -->
-              </div>
-              <UCard class="mt-4">
-                <div class="flex justify-between items-center">
-                  <div class="flex flex-col">
-                    <div
-                      class="text-sm font-semibold text-gray-500 dark:text-gray-400"
-                    >
-                      {{ t("total") }}
-                    </div>
-                    <div
-                      class="text-lg font-bold text-gray-900 dark:text-gray-100"
-                    >
-                      {{ formatCurrency(billTotal) }}
-                    </div>
-                  </div>
-
-                  <UButton
-                    :loading="loading"
-                    :disabled="loading"
-                    color="primary"
-                    type="submit"
-                  >
-                    {{ t("pay_now") }}
-                  </UButton>
-                </div>
+      <div class="relative h-full">
+        <div class="absolute inset-0 overflow-y-auto">
+          <div v-if="!hasError" class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+            <div class="w-full">
+              <StudentsStudentProfileCard
+                v-if="studentStore.student"
+                :student-id="studentStore.student.id"
+              />
+              <UCard class="mb-4">
+                <p
+                  class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"
+                >
+                  {{ t("review") }}
+                </p>
+                <BillsBillingList :bill-id="props.billId" />
               </UCard>
-            </form>
+            </div>
+            <div class="w-full">
+              <form @submit="handleSubmit">
+                <div ref="paymentElement">
+                  <!-- A Stripe Element will be inserted here. -->
+                </div>
+                <UCard class="mt-4">
+                  <div class="flex justify-between items-center">
+                    <div class="flex flex-col">
+                      <div
+                        class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+                      >
+                        {{ t("total") }}
+                      </div>
+                      <div
+                        class="text-lg font-bold text-gray-900 dark:text-gray-100"
+                      >
+                        {{ formatCurrency(billTotal) }}
+                      </div>
+                    </div>
+                    <UButton
+                      :loading="loading"
+                      :disabled="loading"
+                      color="primary"
+                      type="submit"
+                    >
+                      {{ t("pay_now") }}
+                    </UButton>
+                  </div>
+                </UCard>
+              </form>
+            </div>
+          </div>
+          <div
+            v-else
+            class="flex flex-col items-center justify-center p-8 space-y-4"
+          >
+            <UAlert
+              color="red"
+              variant="soft"
+              class="w-full max-w-md"
+        
+              :title="t('error_title')"
+              :description="t('error_description')"
+              :actions="[
+                {
+                  label: t('close'),
+                  click: () => $emit('close'),
+                  color: 'red',
+                  variant: 'solid',
+                },
+              ]"
+            />
           </div>
         </div>
       </div>
@@ -93,8 +115,7 @@ import {
   type StripeElements,
 } from "@stripe/stripe-js";
 import { formatCurrency } from "~/utils/formatters";
-import { useCssVar } from '@vueuse/core';
-
+import { useCssVar } from "@vueuse/core";
 
 type Props = {
   billId: string;
@@ -103,11 +124,12 @@ type Props = {
 const props = defineProps<Props>();
 const $emit = defineEmits(["close"]);
 const toast = useToast();
-const { t } = useI18n({
+const { t, locale } = useI18n({
   useScope: "local",
 });
 
 const loading = ref(false);
+const hasError = ref(false);
 
 const config = useRuntimeConfig();
 
@@ -160,6 +182,7 @@ onMounted(async () => {
     elements.value = stripe.value.elements({
       clientSecret: clientSecret,
       appearance: appearance,
+      locale: locale.value,
     });
 
     const paymentEl = elements.value.create("payment", {
@@ -173,6 +196,7 @@ onMounted(async () => {
     paymentEl.mount(paymentElement.value);
   } catch (error) {
     console.error(error);
+    hasError.value = true;
   }
 });
 
@@ -232,7 +256,9 @@ async function handleSubmit(event: Event) {
       "payment_intent_payment_canceled": "Die Zahlung wurde abgebrochen.",
       "payment_intent_unknown_error": "Ein unbekannter Fehler ist aufgetreten. Bitte versuche es erneut.",
       "card_declined": "Die Karte wurde abgelehnt. Bitte versuche es mit einer anderen Karte."
-    }
+    },
+    "error_title": "Es tut uns leid",
+    "error_description": "Es gab ein Problem beim Laden der Zahlungsinformationen. Wir sind dabei, das Problem zu beheben. Bitte versuche es später erneut."
   },
   "en": {
     "checkout": "Checkout",
@@ -246,7 +272,9 @@ async function handleSubmit(event: Event) {
       "payment_intent_payment_canceled": "Payment was canceled.",
       "payment_intent_unknown_error": "An unknown error occurred. Please try again.",
       "card_declined": "Card was declined. Please try again with another card."
-    }
+    },
+    "error_title": "We're sorry",
+    "error_description": "There was a problem loading the payment information. We are working to fix the issue. Please try again later."
   }
 }
 </i18n>

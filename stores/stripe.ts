@@ -1,11 +1,35 @@
 import type Stripe from "stripe"
-import type { AppOrganizationsStripeAccount, Database } from "~/types/app.types"
+import type { AppOrganizationsStripeAccount, AppStripeAccountPaymentMethodSettings, Database, StripeConnectPostBody, StripeConnectPostResponse } from "~/types/app.types"
+
+
 
 export const useStripeStore = defineStore('stripe', () => {
     const client = useSupabaseClient<Database>()
     const userOrganizationsStore = useUserOrganizationsStore()
     const stripeAccount = ref<Stripe.Response<Stripe.Account> | null>(null)
     const stripeAppSettings = ref<AppOrganizationsStripeAccount | null>(null)
+
+    async function connectStripeAccount() {
+        if (!userOrganizationsStore.selectedOrganization) {
+            throw new Error('No organization selected');
+        }
+
+        const body: StripeConnectPostBody = {
+            org_id: userOrganizationsStore.selectedOrganization.id
+        };
+
+        const { data, error } = await client.functions.invoke<StripeConnectPostResponse>('stripe-connect', {
+            method: 'POST',
+            body
+        })
+        if (error) {
+            throw error;
+        }
+
+        console.log("Stripe Connect Data: ", data);
+
+        return data as { accountId: string };
+    }
 
     async function fetchStripeAccount() {
         try {
@@ -17,7 +41,6 @@ export const useStripeStore = defineStore('stripe', () => {
             );
             if (account) {
                 stripeAccount.value = null;
-                await nextTick();
                 stripeAccount.value = account;
                 await getStripeAppSettings();
             }
@@ -48,7 +71,7 @@ export const useStripeStore = defineStore('stripe', () => {
                 throw error;
             }
             if (data) {
-                stripeAppSettings.value = data[0];
+                stripeAppSettings.value = data[0] as AppOrganizationsStripeAccount;
             } else {
                 stripeAppSettings.value = null;
             }
@@ -58,25 +81,13 @@ export const useStripeStore = defineStore('stripe', () => {
         }
     }
 
-    async function loadStripeAccount(orgid?: string): Promise<AppOrganizationsStripeAccount | null> {
-        const org = orgid || userOrganizationsStore.selectedOrganization?.id;
-        try {
-            if (!org) {
-                throw new Error('No organization selected');
-            }
-    
-            const { data, error } = await client.from("organizations_stripe_accounts").select().eq("id", org)
-            if (error) {
-                throw error;
-            }
-            if (data) {
-                return data[0];
-            } else {
-                return null;
-            }
-        } catch (error) {
-            console.log(error);
-            return null;
+    async function updateStripeAppSettings(orgId: string, settings: AppStripeAccountPaymentMethodSettings): Promise<void> {
+        const { error } = await client.from("organizations_stripe_accounts").update({
+            payment_methods: settings
+        }).eq("id", orgId);
+
+        if (error) {
+            throw error;
         }
     }
 
@@ -87,6 +98,6 @@ export const useStripeStore = defineStore('stripe', () => {
     }, { immediate: true })
 
     return {
-        stripeAccount, stripeAppSettings, getStripeSessionSecret, fetchStripeAccount, getStripeAppSettings, loadStripeAccount
+        stripeAccount, stripeAppSettings, connectStripeAccount, getStripeSessionSecret, fetchStripeAccount, getStripeAppSettings, updateStripeAppSettings
     }
 })
