@@ -22,7 +22,13 @@ const modal = useModal();
 function openDeleteStripeAccountModal() {
     if (!stripeStore.stripeAppSettings?.id) return;
     modal.open(StripeDeleteAccountModal, {
-        orgId: stripeStore.stripeAppSettings?.id
+        orgId: stripeStore.stripeAppSettings?.id,
+        onDeleted: () => {
+            modal.close();
+        },
+        onClose: () => {
+            modal.close();
+        }
     });
 }
 
