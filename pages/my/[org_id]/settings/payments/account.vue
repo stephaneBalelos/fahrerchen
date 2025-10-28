@@ -15,10 +15,15 @@ const { t } = useI18n({
     useScope: "local",
 });
 
+const stripeStore = useStripeStore();
+
 const modal = useModal();
 
 function openDeleteStripeAccountModal() {
-    modal.open(StripeDeleteAccountModal);
+    if (!stripeStore.stripeAppSettings?.id) return;
+    modal.open(StripeDeleteAccountModal, {
+        orgId: stripeStore.stripeAppSettings?.id
+    });
 }
 
 </script>
