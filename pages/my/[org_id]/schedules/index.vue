@@ -83,7 +83,7 @@
         <UDashboardPanelContent class="p-0">
           <CalendarAppCalendar
             :selected-date="selectedDate"
-            :events="schedules || []"
+            :events="[...schedules, ...schedulesRequests]"
             :view-type="selectedView"
             @date-block-click="(date) => openEditScheduleSlideover({ date })"
             @select-date="(date) => (selectedDate = date)"
@@ -138,7 +138,6 @@ const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({});
 
 const { data: schedules, refresh } = useAsyncData(
   async () => {
-    console.log("Fetching schedules with filter", filterQuery.value);
     return await $courseActivitySchedules.fetchCourseActivitySchedules({
       ...filterQuery.value,
     });
@@ -146,9 +145,8 @@ const { data: schedules, refresh } = useAsyncData(
   {
     watch: [filterQuery.value, selectedDate],
     transform: (data) => {
-      console.log("Fetched schedules", data?.length);
       if (!data) return [];
-      return data?.map((s) => {
+      return data.map((s) => {
         const event: AppCalendarEvent = {
           id: s.id,
           label: s.activity.name,
@@ -158,6 +156,40 @@ const { data: schedules, refresh } = useAsyncData(
           assigned_to: s.user,
           activity_attendees_count: s.course_activity_schedules_attendees.length,
           type: s.activity.activity_type,
+        };
+        return event;
+      });
+    },
+  }
+);
+
+const { data: schedulesRequests } = await useAsyncData(
+  async () => {
+    if (!userOrganizationsStore.selectedOrganization) {
+      return [];
+    }
+    return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
+      status: 'pending',
+      organization_id: userOrganizationsStore.selectedOrganization.id,
+    });
+  },
+  {
+    watch: [() => userOrganizationsStore.selectedOrganization],
+    transform: (data) => {
+      console.log("fetched schedule requests", data);
+      if (!data) {
+        return [];
+      }
+      return data.map((request) => {
+        const event: AppCalendarEvent = {
+          id: request.id,
+          label: `${request.activity.name}`,
+          date: new Date(request.start_at),
+          type: request.activity.activity_type,
+          duration: 45,
+          status: 'REQUESTED',
+          assigned_to: null,
+          activity_attendees_count: 0,
         };
         return event;
       });
