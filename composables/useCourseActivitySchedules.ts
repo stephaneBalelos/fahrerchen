@@ -1,18 +1,20 @@
 import type { AppCourseActivitySchedule, AppCourseActivityScheduleRequest, CourseActivityScheduleEdit, CourseActivityScheduleRequestEdit, Database } from "~/types/app.types";
 
 export type CourseActivityScheduleQuery = {
-    activity_id?: string;
-    status?: Database["public"]["Enums"]["schedule_status"];
-    assigned_to?: string;
+    organization_id?: string;
+    activity_ids?: string[];
+    statuses?: Database["public"]["Enums"]["schedule_status"][];
+    assigned_to_ids: string[];
     start_at?: Date;
-    subscription_id?: string;
+    end_at?: Date;
+    subscription_ids?: string[];
     limit?: number;
 }
 
 export type CourseActivitySchedulesRequestQuery = {
     organization_id: string;
-    subscription_id?: string;
-    activity_id?: string;
+    subscription_ids?: string[];
+    activity_ids?: string[];
     status: Database["public"]["Enums"]["schedule_request_statuses"];
 }
 
@@ -87,35 +89,37 @@ export const useCourseActivitySchedules = () => {
     }
 
     const fetchCourseActivitySchedules = async (query: Partial<CourseActivityScheduleQuery>) => {
-        if (!userOrganizationStore.selectedOrganization) {
-            console.error("No organization selected");
-            return null;
+        if (!query.organization_id) {
+            throw new Error("organization_id is required to fetch course activity schedules");
         }
 
         let q = client
             .from("course_activity_schedules")
             .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
 
-        q = q.eq("organization_id", userOrganizationStore.selectedOrganization.id)
+        q = q.eq("organization_id", query.organization_id)
 
-        if (query.activity_id) {
-            q = q.eq("activity_id", query.activity_id)
+        if (query.activity_ids && query.activity_ids.length > 0) {
+            q = q.in("activity_id", query.activity_ids)
         }
 
-        if (query.status) {
-            q = q.eq("status", query.status)
+        if (query.statuses && query.statuses.length > 0) {
+            q = q.in("status", query.statuses)
         }
 
-        if (query.assigned_to) {
-            q = q.eq("assigned_to", query.assigned_to)
+        if (query.assigned_to_ids && query.assigned_to_ids.length > 0) {
+            q = q.in("assigned_to", query.assigned_to_ids)
         }
 
-        if (query.subscription_id) {
-            q = q.eq("course_activity_schedules_attendees.subscription_id", query.subscription_id)
+        if (query.subscription_ids && query.subscription_ids.length > 0) {
+            q = q.in("course_activity_schedules_attendees.subscription_id", query.subscription_ids)
         }
 
         if (query.start_at) {
             q = q.gte("start_at", query.start_at.toISOString())
+        }
+        if (query.end_at) {
+            q = q.lte("start_at", query.end_at.toISOString())
         }
         if (query.limit) {
             q = q.limit(query.limit)
@@ -127,14 +131,6 @@ export const useCourseActivitySchedules = () => {
 
         if (error) {
             throw error
-        }
-
-        if (query.subscription_id) {
-            // filter the schedules that have the subscription_id in their attendees
-            return data?.filter(schedule => {
-                const attendees = schedule.course_activity_schedules_attendees || []
-                return attendees.some(attendee => attendee.subscription_id === query.subscription_id)
-            }) || []
         }
 
         return data || []
@@ -228,12 +224,12 @@ export const useCourseActivitySchedules = () => {
             .eq("organization_id", query.organization_id)
             .eq("status", query.status)
 
-        if (query.subscription_id) {
-            q = q.eq("subscription_id", query.subscription_id)
+        if (query.subscription_ids && query.subscription_ids.length > 0) {
+            q = q.in("subscription_id", query.subscription_ids)
         }
 
-        if (query.activity_id) {
-            q = q.eq("activity_id", query.activity_id)
+        if (query.activity_ids && query.activity_ids.length > 0) {
+            q = q.in("activity_id", query.activity_ids)
         }
 
         const { data, error } = await q

@@ -94,25 +94,35 @@
               <AppCalendarEventContextMenuRequest
                 v-if="selectedEvent && selectedEvent.status === 'REQUESTED'"
                 :event="selectedEvent"
-                @accept-request="(id) => {
-                  console.log('accept request', id);
-                }"
-                @reject-request="(id) => {
-                  console.log('reject request', id);
-                }"
-                @edit-request="(id) => { 
-                  openEditScheduleRequestForm(id);
-                }"
-                @delete-request="(id) => {
-                  console.log('delete request', id)
-                }"
+                @accept-request="
+                  (id) => {
+                    console.log('accept request', id);
+                  }
+                "
+                @reject-request="
+                  (id) => {
+                    console.log('reject request', id);
+                  }
+                "
+                @edit-request="
+                  (id) => {
+                    openEditScheduleRequestForm(id);
+                  }
+                "
+                @delete-request="
+                  (id) => {
+                    console.log('delete request', id);
+                  }
+                "
               />
               <AppCalendarEventContextMenu
                 v-else-if="selectedEvent"
                 :event="selectedEvent"
-                @view-details="(id) => {
-                  navigateTo({ query: {id} });
-                }"
+                @view-details="
+                  (id) => {
+                    navigateTo({ query: { id } });
+                  }
+                "
               />
             </template>
           </CalendarAppCalendar>
@@ -134,11 +144,18 @@ import ScheduleFilterSlideover from "~/components/schedules/ScheduleFilterSlideo
 import AppCalendarEventContextMenu from "~/components/calendar/templates/AppCalendarEventContextMenu.vue";
 import AppCalendarEventContextMenuRequest from "~/components/calendar/templates/AppCalendarEventContextMenuRequest.vue";
 import EditScheduleRequestForm from "~/components/forms/EditScheduleRequestForm.vue";
+import {
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+} from "date-fns";
 
 const { t } = useI18n({
   useScope: "local",
 });
-
 
 const route = useRoute();
 const $courseActivitySchedules = useCourseActivitySchedules();
@@ -165,16 +182,29 @@ const selectedScheduleId = computed<string | null>({
   },
 });
 
-const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({});
+const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({
+  organization_id: userOrganizationsStore.selectedOrganization
+    ? userOrganizationsStore.selectedOrganization.id
+    : undefined,
+  statuses: [],
+  assigned_to_ids: [],
+  subscription_ids: [],
+  activity_ids: [],
+});
 
 const { data: schedules, refresh } = useAsyncData(
   async () => {
+    if (!filterQuery.value.organization_id) {
+      return [];
+    }
     return await $courseActivitySchedules.fetchCourseActivitySchedules({
       ...filterQuery.value,
     });
   },
   {
-    watch: [filterQuery.value, selectedDate],
+    default: () => [],
+    watch: [filterQuery.value],
+    immediate: false,
     transform: (data) => {
       if (!data) return [];
       return data.map((s) => {
@@ -197,21 +227,24 @@ const { data: schedules, refresh } = useAsyncData(
 
 const { data: schedulesRequests } = await useAsyncData(
   async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
+    if (!filterQuery.value.organization_id) {
       return [];
     }
+
+
     return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
-      status: "pending",
-      organization_id: userOrganizationsStore.selectedOrganization.id,
+      status: "rejected",
+      organization_id: filterQuery.value.organization_id,
     });
   },
   {
-    watch: [() => userOrganizationsStore.selectedOrganization],
+    default: () => [],
+    watch: [filterQuery.value],
     transform: (data) => {
-      console.log("fetched schedule requests", data);
       if (!data) {
         return [];
       }
+      console.log("Fetched schedule requests:", data.length);
       return data.map((request) => {
         const event: AppCalendarEvent = {
           id: request.id,
@@ -276,6 +309,32 @@ const openScheduleFilterSlideover = () => {
     form: filterQuery.value,
   });
 };
+
+watch(
+  [selectedDate, selectedView],
+  () => {
+    const { start, end } = getCalendarDateRange();
+    filterQuery.value.start_at = start;
+    filterQuery.value.end_at = end;
+  },
+  { immediate: true }
+);
+
+function getCalendarDateRange() {
+  let start = new Date(selectedDate.value);
+  let end = new Date(selectedDate.value);
+  if (selectedView.value === "day") {
+    start = startOfDay(start);
+    end = endOfDay(end);
+  } else if (selectedView.value === "week") {
+    start = startOfWeek(start, { weekStartsOn: 1 }); // week starts on Monday
+    end = endOfWeek(end, { weekStartsOn: 1 }); // week ends on Sunday
+  } else {
+    start = startOfMonth(start);
+    end = endOfMonth(end);
+  }
+  return { start, end };
+}
 </script>
 
 <style scoped></style>
