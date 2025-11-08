@@ -48,14 +48,19 @@
         </div>
       </UContainer>
     </UDashboardToolbar>
-    <UContainer v-if="status == 'success'" class="w-full max-w-7xl" style="height: 75dvh">
+    <UContainer
+      v-if="status == 'success'"
+      class="w-full max-w-7xl"
+      style="height: 75dvh"
+    >
       <CalendarAppCalendar
+        v-if="schedules && schedulesRequests"
         :events="[...schedules, ...schedulesRequests]"
         :view-type="selectedView"
         :selected-date="selectedDate"
         @select-date="(date) => (selectedDate = date)"
-        @event-click="(id) => openScheduleViewStudentSlideover(id)"
-        @date-block-click="(date) => openEditScheduleRequestForm(date)"
+        @date-block-click="(date) => openEditScheduleRequestForm(undefined, date)"
+        @event-click="(event) => handleEventClick(event)"
       />
     </UContainer>
     <UContainer
@@ -94,10 +99,7 @@ const query = ref<Partial<CourseActivityScheduleQuery>>({
   subscription_id: undefined,
 });
 
-const {
-  data: schedules,
-  status,
-} = await useAsyncData(
+const { data: schedules, status } = await useAsyncData(
   `schedules-for-subscription-${studentStore.selectedSubscription?.id}`,
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
@@ -126,7 +128,8 @@ const {
           duration: schedule.duration_minutes,
           status: schedule.status,
           assigned_to: schedule.user,
-          activity_attendees_count: schedule.course_activity_schedules_attendees.length,
+          activity_attendees_count:
+            schedule.course_activity_schedules_attendees.length,
         };
         return event;
       });
@@ -141,13 +144,16 @@ const { data: schedulesRequests } = await useAsyncData(
       return [];
     }
     return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
-      status: 'pending',
+      status: "pending",
       subscription_id: studentStore.selectedSubscription?.id,
       organization_id: userOrganizationsStore.selectedOrganization.id,
     });
   },
   {
-    watch: [() => studentStore.selectedSubscription, () => userOrganizationsStore.selectedOrganization],
+    watch: [
+      () => studentStore.selectedSubscription,
+      () => userOrganizationsStore.selectedOrganization,
+    ],
     transform: (data) => {
       console.log("fetched schedule requests", data);
       if (!data) {
@@ -160,7 +166,7 @@ const { data: schedulesRequests } = await useAsyncData(
           date: new Date(request.start_at),
           type: request.activity.activity_type,
           duration: 45,
-          status: 'REQUESTED',
+          status: "REQUESTED",
           assigned_to: null,
           activity_attendees_count: 0,
         };
@@ -170,14 +176,30 @@ const { data: schedulesRequests } = await useAsyncData(
   }
 );
 
+const handleEventClick = (event: AppCalendarEvent) => {
+  if(event.status === 'REQUESTED') {
+    openEditScheduleRequestForm(event.id);
+  } else {
+    openScheduleViewStudentSlideover(event.id);
+  }
+};
+
 const openScheduleViewStudentSlideover = (scheduleId: string) => {
   slideover.open(ScheduleViewStudentSlideover, {
     scheduleId,
   });
 };
 
-const openEditScheduleRequestForm = (date: Date) => {
+const openEditScheduleRequestForm = (request_id?: string, date?: Date) => {
   if (!studentStore.selectedSubscription) {
+    return;
+  }
+  if (request_id) {
+    slideover.open(EditScheduleRequestForm, {
+      organizationId: studentStore.selectedSubscription.organization_id,
+      subscriptionId: studentStore.selectedSubscription.id,
+      requestId: request_id,
+    });
     return;
   }
   slideover.open(EditScheduleRequestForm, {

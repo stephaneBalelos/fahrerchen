@@ -82,13 +82,40 @@
         </UDashboardToolbar>
         <UDashboardPanelContent class="p-0">
           <CalendarAppCalendar
+            v-if="schedules && schedulesRequests"
             :selected-date="selectedDate"
             :events="[...schedules, ...schedulesRequests]"
             :view-type="selectedView"
             @date-block-click="(date) => openEditScheduleSlideover({ date })"
             @select-date="(date) => (selectedDate = date)"
-            @event-click="(id) => navigateTo({ query: { id } })"
-          />
+            @event-click="(event) => {}"
+          >
+            <template #context-menu="{ selectedEvent }">
+              <AppCalendarEventContextMenuRequest
+                v-if="selectedEvent && selectedEvent.status === 'REQUESTED'"
+                :event="selectedEvent"
+                @accept-request="(id) => {
+                  console.log('accept request', id);
+                }"
+                @reject-request="(id) => {
+                  console.log('reject request', id);
+                }"
+                @edit-request="(id) => { 
+                  openEditScheduleRequestForm(id);
+                }"
+                @delete-request="(id) => {
+                  console.log('delete request', id)
+                }"
+              />
+              <AppCalendarEventContextMenu
+                v-else-if="selectedEvent"
+                :event="selectedEvent"
+                @view-details="(id) => {
+                  navigateTo({ query: {id} });
+                }"
+              />
+            </template>
+          </CalendarAppCalendar>
         </UDashboardPanelContent>
       </template>
     </UDashboardPanel>
@@ -104,12 +131,16 @@ import EditCourseActivitySchedule from "~/components/forms/EditCourseActivitySch
 import ScheduleView from "~/components/schedules/ScheduleView.vue";
 import ConfirmModal from "~/components/ui/Modals/ConfirmModal.vue";
 import ScheduleFilterSlideover from "~/components/schedules/ScheduleFilterSlideover.vue";
+import AppCalendarEventContextMenu from "~/components/calendar/templates/AppCalendarEventContextMenu.vue";
+import AppCalendarEventContextMenuRequest from "~/components/calendar/templates/AppCalendarEventContextMenuRequest.vue";
+import EditScheduleRequestForm from "~/components/forms/EditScheduleRequestForm.vue";
 
 const { t } = useI18n({
   useScope: "local",
 });
+
+
 const route = useRoute();
-// const isPanelOpen = ref(true);
 const $courseActivitySchedules = useCourseActivitySchedules();
 const userOrganizationsStore = useUserOrganizationsStore();
 
@@ -154,7 +185,8 @@ const { data: schedules, refresh } = useAsyncData(
           duration: s.duration_minutes,
           status: s.status,
           assigned_to: s.user,
-          activity_attendees_count: s.course_activity_schedules_attendees.length,
+          activity_attendees_count:
+            s.course_activity_schedules_attendees.length,
           type: s.activity.activity_type,
         };
         return event;
@@ -169,7 +201,7 @@ const { data: schedulesRequests } = await useAsyncData(
       return [];
     }
     return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
-      status: 'pending',
+      status: "pending",
       organization_id: userOrganizationsStore.selectedOrganization.id,
     });
   },
@@ -187,7 +219,7 @@ const { data: schedulesRequests } = await useAsyncData(
           date: new Date(request.start_at),
           type: request.activity.activity_type,
           duration: 45,
-          status: 'REQUESTED',
+          status: "REQUESTED",
           assigned_to: null,
           activity_attendees_count: 0,
         };
@@ -196,6 +228,16 @@ const { data: schedulesRequests } = await useAsyncData(
     },
   }
 );
+
+const openEditScheduleRequestForm = (request_id?: string) => {
+  if (!userOrganizationsStore.selectedOrganization) {
+    return;
+  }
+  slideover.open(EditScheduleRequestForm, {
+    organizationId: userOrganizationsStore.selectedOrganization.id,
+    requestId: request_id,
+  });
+};
 
 const openEditScheduleSlideover = ({
   scheduleId,
@@ -252,26 +294,7 @@ const openScheduleFilterSlideover = () => {
     "delete_schedule_confirm_title": "Termin löschen",
     "delete_schedule_confirm_description": "Sind Sie sicher, dass Sie diesen Termin löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "delete": "Löschen",
-    "cancel": "Abbrechen",
-    "form": {
-      "assigned_to": {
-        "label": "Zugewiesen an",
-        "description": "Filtern Sie nach dem Benutzer, dem der Termin zugewiesen ist."
-      },
-      "status": {
-        "label": "Status",
-        "placeholder": "Status auswählen",
-        "description": "Filtern Sie nach dem Status."
-      },
-      "course": {
-        "label": "Kurs",
-        "description": "Filtern Sie nach dem Kurs."
-      },
-      "student": {
-        "label": "Schüler",
-        "description": "Filtern Sie nach dem Schüler."
-      }
-    }
+    "cancel": "Abbrechen"
   },
   "en": {
     "schedules_planning": "Schedules Planning",
@@ -285,26 +308,7 @@ const openScheduleFilterSlideover = () => {
     "delete_schedule_confirm_title": "Delete Schedule",
     "delete_schedule_confirm_description": "Are you sure you want to delete this schedule? This action cannot be undone.",
     "delete": "Delete",
-    "cancel": "Cancel",
-    "form": {
-      "assigned_to": {
-        "label": "Assigned to",
-        "description": "Filter by the user the schedule is assigned to."
-      },
-      "status": {
-        "label": "Status",
-        "placeholder": "Choose a Status",
-        "description": "Filter by the status."
-      },
-      "course": {
-        "label": "Course",
-        "description": "Filter by the course."
-      },
-      "student": {
-        "label": "Student",
-        "description": "Filter by the student."
-      }
-    }
+    "cancel": "Cancel"
   }
 }
 </i18n>

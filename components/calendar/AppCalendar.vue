@@ -28,7 +28,11 @@
         <div class="flex justify-between items-center space-x-4 w-full">
           <div class="flex flex-col">
             <span class="text-lg font-semibold">
-              {{ format(selectedDate, 'EEEE, dd.MM.yyyy', { locale: currentLocale }) }}
+              {{
+                format(selectedDate, "EEEE, dd.MM.yyyy", {
+                  locale: currentLocale,
+                })
+              }}
             </span>
           </div>
           <div class="flex gap-2">
@@ -47,14 +51,13 @@
           </div>
         </div>
       </UDashboardToolbar>
-      
+
       <AppCalendarDayView
         v-if="activeView === 'day'"
         :selected-date="props.selectedDate"
         :events="calendarEvents"
         @date-block-click="($date) => $emit('date-block-click', $date)"
         @select-date="($date) => $emit('selectDate', $date)"
-        @event-click="($id) => $emit('event-click', $id)"
       />
       <AppCalendarWeekView
         v-else
@@ -62,8 +65,10 @@
         :events="calendarEvents"
         @date-block-click="($date) => $emit('date-block-click', $date)"
         @select-date="($date) => $emit('selectDate', $date)"
-        @event-click="($id) => $emit('event-click', $id)"
       />
+      <UContextMenu v-model="isOpen" :virtual-element="virtualElement">
+        <slot v-if="selectedEvent" name="context-menu" :selected-event="selectedEvent" />
+      </UContextMenu>
     </div>
   </section>
 </template>
@@ -79,14 +84,15 @@ import type {
   AppScheduleStatus,
   AppUser,
 } from "~/types/app.types";
-import { useMediaQuery } from "@vueuse/core";
+import { useMediaQuery, useMouse, useWindowScroll } from "@vueuse/core";
+import { AppCalenderProviderKey } from "./AppCalendarProvider";
 
 export type AppCalendarEvent = {
   id: string;
   label: string;
   date: Date;
   duration: number; // in minutes
-  status: AppScheduleStatus | 'REQUESTED';
+  status: AppScheduleStatus | "REQUESTED";
   assigned_to: AppUser | null;
   activity_attendees_count: number;
   type: AppCourseActivityType;
@@ -111,7 +117,7 @@ const currentLocale = computed(() => {
 
 const $emits = defineEmits<{
   (e: "date-block-click" | "selectDate", value: Date): void;
-  (e: "event-click", scheduleId: string): void;
+  (e: "event-click", event: AppCalendarEvent): void;
 }>();
 
 const props = defineProps<AppCalendarProps>();
@@ -122,9 +128,44 @@ const calendarEvents = computed(() => {
 });
 
 const isMobile = useMediaQuery("(max-width: 768px)");
-const activeView = computed(() => (isMobile.value ? "day" : props.viewType || "week"));
+const activeView = computed(() =>
+  isMobile.value ? "day" : props.viewType || "week"
+);
 
+// Context Menu Logic
+provide(AppCalenderProviderKey, {
+  onClick: (event: MouseEvent, calendarEvent: AppCalendarEvent) => {
+    onContextMenu(event, calendarEvent);
+    $emits("event-click", calendarEvent);
+  },
+});
 
+const { x, y } = useMouse();
+const { y: windowY } = useWindowScroll();
+const isOpen = ref(false);
+const selectedEvent = ref<AppCalendarEvent | null>(null);
+const virtualElement = ref({ getBoundingClientRect: () => ({}) });
+
+function onContextMenu(event: MouseEvent, calendarEvent: AppCalendarEvent) {
+  event.preventDefault();
+  if (isOpen.value) {
+    isOpen.value = false;
+    selectedEvent.value = null;
+    return;
+  }
+  const top = unref(y) - unref(windowY);
+  const left = unref(x);
+
+  virtualElement.value.getBoundingClientRect = () => ({
+    width: 0,
+    height: 0,
+    top,
+    left,
+  });
+
+  isOpen.value = true;
+  selectedEvent.value = calendarEvent;
+}
 </script>
 
 <style scoped></style>

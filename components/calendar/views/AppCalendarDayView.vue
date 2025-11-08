@@ -8,7 +8,6 @@
         v-for="event in eventBlocks"
         :key="event.id"
         :event="event"
-        @event-click="(id) => $emits('event-click', id)"
       />
       <div class="absolute top-0 left-0 flex flex-col">
         <div
@@ -49,7 +48,6 @@ type Props = {
 
 const $emits = defineEmits<{
   (e: "date-block-click" | "selectDate", date: Date): void;
-  (e: "event-click", id: string): void;
 }>();
 
 const props = defineProps<Props>();

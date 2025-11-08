@@ -208,6 +208,19 @@ export const useCourseActivitySchedules = () => {
         return data || []
     }
 
+    const getCourseActivitySchedulesRequestById = async (id: string) => {
+        const { data, error } = await client
+            .from("course_activity_schedule_requests")
+            .select("*, user:requested_by(*), subscription:subscription_id(*, student:students(*), course:courses(*)), activity:activity_id(*)")
+            .eq("id", id)
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data
+    }
+
     const fetchCourseActivitySchedulesRequests = async (query: CourseActivitySchedulesRequestQuery) => {
         let q = client
             .from("course_activity_schedule_requests")
@@ -263,6 +276,7 @@ export const useCourseActivitySchedules = () => {
         addAttendeesToSchedule,
         removeAttendeeFromSchedule,
         fetchAttendeesForSchedule,
+        getCourseActivitySchedulesRequestById,
         fetchScheduleAttendancesForSchedule,
         fetchCourseActivitySchedulesRequests,
         createCourseActivityScheduleRequest,

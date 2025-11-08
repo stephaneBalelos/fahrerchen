@@ -28,7 +28,6 @@
         v-for="event in eventBlocks"
         :key="event.id"
         :event="event"
-        @event-click="(id) => $emits('event-click', id)"
       />
 
       <div class="absolute left-0 top-0 w-16 h-full grid">
@@ -78,7 +77,6 @@ const HoursBlocks = computed(() => {
 
 const $emits = defineEmits<{
   (e: "date-block-click" | "selectDate", date: Date): void;
-  (e: "event-click", scheduleId: string): void;
 }>();
 
 const DatesBlocks = computed(() => {
