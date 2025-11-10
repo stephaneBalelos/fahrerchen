@@ -252,6 +252,19 @@ export const useCourseActivitySchedules = () => {
         }
     }
 
+    const deleteCourseActivityScheduleRequest = async (id: string) => {
+        const { error } = await client
+            .from("course_activity_schedule_requests")
+            .delete()
+            .eq("id", id)
+
+        if (error) {
+            throw error
+        }
+
+        return true
+    }
+
     const updateCourseActivityScheduleRequest = async (id: string, data: Partial<CourseActivityScheduleRequestEdit>) => {
         const { error } = await client
             .from("course_activity_schedule_requests")
@@ -261,6 +274,16 @@ export const useCourseActivitySchedules = () => {
         if (error) {
             throw error
         }
+    }
+
+    const approveScheduleRequest = async (id: string) => {
+        const { data, error } = await client
+            .rpc('approve_schedule_request', { request_id: id })
+
+        if (error) {
+            throw error
+        }
+        return data
     }
 
     return {
@@ -276,7 +299,9 @@ export const useCourseActivitySchedules = () => {
         fetchScheduleAttendancesForSchedule,
         fetchCourseActivitySchedulesRequests,
         createCourseActivityScheduleRequest,
-        updateCourseActivityScheduleRequest
+        deleteCourseActivityScheduleRequest,
+        updateCourseActivityScheduleRequest,
+        approveScheduleRequest,
     }
 
 }

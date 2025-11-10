@@ -143,6 +143,7 @@ export type Database = {
           inserted_at: string
           organization_id: string
           requested_by: string | null
+          schedule_id: string | null
           start_at: string
           status: Database["public"]["Enums"]["schedule_request_statuses"]
           subscription_id: string
@@ -153,6 +154,7 @@ export type Database = {
           inserted_at?: string
           organization_id: string
           requested_by?: string | null
+          schedule_id?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
           subscription_id: string
@@ -163,6 +165,7 @@ export type Database = {
           inserted_at?: string
           organization_id?: string
           requested_by?: string | null
+          schedule_id?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
           subscription_id?: string
@@ -187,6 +190,13 @@ export type Database = {
             columns: ["requested_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_requests_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
             referencedColumns: ["id"]
           },
           {
@@ -1443,6 +1453,10 @@ export type Database = {
         Args: { activity_id: string; course_id: string }
         Returns: undefined
       }
+      approve_schedule_request: {
+        Args: { request_id: string }
+        Returns: string
+      }
       are_users_in_same_organization: {
         Args: { user_id_1: string; user_id_2: string }
         Returns: boolean
@@ -1625,6 +1639,9 @@ export type Database = {
         | "course_subscription_bills.ready_to_pay.updated"
         | "course_subscription_bills.canceled_at.updated"
         | "students_registration_requests.inserted"
+        | "course_activity_schedule_requests.inserted"
+        | "course_activity_schedule_requests.status.updated"
+        | "course_activity_schedule_requests.deleted"
       schedule_request_statuses: "pending" | "approved" | "rejected"
       schedule_status: "PLANNED" | "COMPLETED" | "CANCELED"
       schedule_type: "ONCE" | "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY"
@@ -2410,6 +2427,9 @@ export const Constants = {
         "course_subscription_bills.ready_to_pay.updated",
         "course_subscription_bills.canceled_at.updated",
         "students_registration_requests.inserted",
+        "course_activity_schedule_requests.inserted",
+        "course_activity_schedule_requests.status.updated",
+        "course_activity_schedule_requests.deleted",
       ],
       schedule_request_statuses: ["pending", "approved", "rejected"],
       schedule_status: ["PLANNED", "COMPLETED", "CANCELED"],

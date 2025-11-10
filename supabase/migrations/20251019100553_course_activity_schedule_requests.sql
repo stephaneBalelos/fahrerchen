@@ -1,6 +1,10 @@
 -- 20251019093717_course_activity_schedule_requests.sql
 -- Migration: Add course_activity_schedule_requests table
 
+alter type public.notification_type add value if not exists 'course_activity_schedule_requests.inserted';
+alter type public.notification_type add value if not exists 'course_activity_schedule_requests.status.updated';
+alter type public.notification_type add value if not exists 'course_activity_schedule_requests.deleted';
+
 create table course_activity_schedule_requests (
     id            uuid default uuid_generate_v4() primary key,
     activity_id   uuid references public.course_activities on delete cascade not null,
@@ -9,6 +13,7 @@ create table course_activity_schedule_requests (
     start_at     timestamp with time zone not null,
     inserted_at  timestamp with time zone default now() not null,
     status       public.schedule_request_statuses default 'pending'::public.schedule_request_statuses not null,
+    schedule_id uuid references public.course_activity_schedules on delete cascade,
     organization_id uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_activity_schedule_requests is 'Requests for scheduling course activities.';
@@ -16,6 +21,12 @@ alter table public.course_activity_schedule_requests enable row level security;
 revoke all on table public.course_activity_schedule_requests from authenticated, anon;
 grant select, insert, delete on table public.course_activity_schedule_requests to authenticated;
 grant update (start_at, status) on table public.course_activity_schedule_requests to authenticated;
+
+-- Constrain to ensure that a schedule is linked only when the request is approved
+alter table public.course_activity_schedule_requests
+add constraint chk_course_activity_schedule_requests_schedule_id_required_if_approved
+check ((status = 'approved' and schedule_id is not null) or (status <> 'approved' and schedule_id is null));
+
 
 -- Check if activity allows requests
 create or replace function public.activity_allows_requests(activity_id uuid)
@@ -45,22 +56,56 @@ create index idx_course_activity_schedule_requests_subscription_id on public.cou
 create index idx_course_activity_schedule_requests_requested_by on public.course_activity_schedule_requests (requested_by);
 create index idx_course_activity_schedule_requests_organization_id on public.course_activity_schedule_requests (organization_id);
 
--- Handle status changes
-create or replace function public.handle_course_activity_schedule_request_status_change()
-returns trigger as $$
-begin
 
-    if new.status = 'approved' then
-        -- Create a course activity schedule when the request is approved
-        insert into public.course_activity_schedules (activity_id, subscription_id, start_at, organization_id)
-        values (new.activity_id, new.subscription_id, new.start_at, new.organization_id);
+create or replace function public.approve_schedule_request(request_id uuid)
+returns uuid as $$
+declare
+    s_id uuid;
+    request_record record;
+begin
+    -- Fetch the request details
+    select * into request_record from public.course_activity_schedule_requests where id = request_id;
+    if request_record is null then
+        raise exception 'Schedule request not found';
     end if;
-    return new;
+    
+    -- Check if the request is already processed
+    if request_record.status <> 'pending' then
+        raise exception 'Schedule request is already processed';
+    end if;
+
+    -- Check if the request start_at is in the future
+    if request_record.start_at <= now() then
+        raise exception 'Cannot approve a schedule request for a past time';
+    end if;
+
+    -- Create a new schedule for the approved request
+    insert into public.course_activity_schedules (activity_id, organization_id, start_at, assigned_to, duration_minutes)
+    values (request_record.activity_id, request_record.organization_id, request_record.start_at, (select auth.uid()), 45)
+    returning id into s_id;
+
+    -- Link the created schedule to the request
+    update public.course_activity_schedule_requests
+    set schedule_id = s_id,
+        status = 'approved'
+    where id = request_id;
+
+    return s_id;
+
 end;
 $$ language plpgsql security definer set search_path = '';
-create trigger trg_handle_course_activity_schedule_request_status_change
-after update of status on public.course_activity_schedule_requests
-for each row execute function public.handle_course_activity_schedule_request_status_change();
+
+-- Trigger for course_activity_schedule_requests to create notifications when new request is made
+create trigger notify_on_new_course_activity_schedule_request_trigger
+    after insert on public.course_activity_schedule_requests
+    for each row execute procedure  public.enqueue_notification_job('course_activity_schedule_requests.inserted');
+
+-- Trigger for course_activity_schedule_requests to create notifications when request status is updated
+create trigger notify_on_update_course_activity_schedule_request_trigger
+    after update on public.course_activity_schedule_requests
+    for each row when (old.status <> new.status)
+    execute procedure  public.enqueue_notification_job('course_activity_schedule_requests.status.updated');
+
 
 
 

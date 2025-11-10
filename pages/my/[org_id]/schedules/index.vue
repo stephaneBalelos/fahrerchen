@@ -96,7 +96,21 @@
                 :event="selectedEvent"
                 @accept-request="
                   (id) => {
-                    console.log('accept request', id);
+                    approveScheduleRequest(id).then(() => {
+                      toast.add({
+                        title: t('request_accepted'),
+                        description: t('request_accepted_description'),
+                        color: 'green',
+                      });
+                      refresh();
+                      refreshRequests();
+                    }).catch(() => {
+                      toast.add({
+                        title: t('accept_request_failed'),
+                        description: t('accept_request_failed_description'),
+                        color: 'red',
+                      });
+                    });
                   }
                 "
                 @reject-request="
@@ -111,7 +125,14 @@
                 "
                 @delete-request="
                   (id) => {
-                    console.log('delete request', id);
+                    $courseActivitySchedules.deleteCourseActivityScheduleRequest(id).then(() => {
+                      toast.add({
+                        title: t('request_rejected'),
+                        description: t('request_rejected_description'),
+                        color: 'green',
+                      });
+                      refresh();
+                    });
                   }
                 "
               />
@@ -163,6 +184,7 @@ const userOrganizationsStore = useUserOrganizationsStore();
 
 const modal = useModal();
 const slideover = useSlideover();
+const toast = useToast();
 
 const selectedDate = ref(new Date());
 const selectedView = ref<AppCalendarViewType>("week");
@@ -225,15 +247,14 @@ const { data: schedules, refresh } = useAsyncData(
   }
 );
 
-const { data: schedulesRequests } = await useAsyncData(
+const { data: schedulesRequests, refresh: refreshRequests } = await useAsyncData(
   async () => {
     if (!filterQuery.value.organization_id) {
       return [];
     }
 
-
     return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
-      status: "rejected",
+      status: "pending",
       organization_id: filterQuery.value.organization_id,
     });
   },
@@ -310,6 +331,12 @@ const openScheduleFilterSlideover = () => {
   });
 };
 
+const approveScheduleRequest = async (
+  id: string
+) => {
+  await $courseActivitySchedules.approveScheduleRequest(id);
+};
+
 watch(
   [selectedDate, selectedView],
   () => {
@@ -353,7 +380,19 @@ function getCalendarDateRange() {
     "delete_schedule_confirm_title": "Termin löschen",
     "delete_schedule_confirm_description": "Sind Sie sicher, dass Sie diesen Termin löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
     "delete": "Löschen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "accepting_request": "Anfrage wird akzeptiert",
+    "accepting_request_description": "Die Termin-Anfrage wird bearbeitet.",
+    "rejecting_request": "Anfrage wird abgelehnt",
+    "rejecting_request_description": "Die Termin-Anfrage wird abgelehnt.",
+    "request_accepted": "Anfrage akzeptiert",
+    "request_accepted_description": "Die Termin-Anfrage wurde erfolgreich akzeptiert.",
+    "request_rejected": "Anfrage abgelehnt",
+    "request_rejected_description": "Die Termin-Anfrage wurde erfolgreich abgelehnt.",
+    "accept_request_failed": "Anfrage konnte nicht akzeptiert werden",
+    "accept_request_failed_description": "Beim Akzeptieren der Termin-Anfrage ist ein Fehler aufgetreten.",
+    "reject_request_failed": "Anfrage konnte nicht abgelehnt werden",
+    "reject_request_failed_description": "Beim Ablehnen der Termin-Anfrage ist ein Fehler aufgetreten."
   },
   "en": {
     "schedules_planning": "Schedules Planning",
@@ -367,7 +406,19 @@ function getCalendarDateRange() {
     "delete_schedule_confirm_title": "Delete Schedule",
     "delete_schedule_confirm_description": "Are you sure you want to delete this schedule? This action cannot be undone.",
     "delete": "Delete",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "accepting_request": "Accepting Request",
+    "accepting_request_description": "The schedule request is being processed.",
+    "rejecting_request": "Rejecting Request",
+    "rejecting_request_description": "The schedule request is being rejected.",
+    "request_accepted": "Request Accepted",
+    "request_accepted_description": "The schedule request has been successfully accepted.",
+    "request_rejected": "Request Rejected",
+    "request_rejected_description": "The schedule request has been successfully rejected.",
+    "accept_request_failed": "Accept Request Failed",
+    "accept_request_failed_description": "An error occurred while accepting the schedule request.",
+    "reject_request_failed": "Reject Request Failed",
+    "reject_request_failed_description": "An error occurred while rejecting the schedule request."
   }
 }
 </i18n>

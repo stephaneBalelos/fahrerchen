@@ -1,6 +1,6 @@
 <template>
   <UDashboardPanelContent class="p-0">
-    <UDashboardToolbar v-if="status == 'success'">
+    <UDashboardToolbar>
       <UContainer class="w-full max-w-7xl">
         <div class="flex justify-between items-center space-x-4 w-full">
           <div class="flex items-center space-x-2">
@@ -19,7 +19,7 @@
           </div>
           <div class="flex items-center">
             <UButton
-              v-if="query.subscription_id"
+              v-if="query.subscription_ids && query.subscription_ids.length > 0"
               icon="i-heroicons-check-circle-20-solid"
               color="primary"
               variant="outline"
@@ -27,7 +27,7 @@
               :label="t('only_show_mine')"
               @click="
                 () => {
-                  query.subscription_id = undefined;
+                  query.subscription_ids = [];
                 }
               "
             />
@@ -40,7 +40,9 @@
               :label="t('only_show_mine')"
               @click="
                 () => {
-                  query.subscription_id = studentStore.selectedSubscription?.id;
+                  if (studentStore.selectedSubscription) {
+                    query.subscription_ids = [studentStore.selectedSubscription.id];
+                  }
                 }
               "
             />
@@ -49,12 +51,11 @@
       </UContainer>
     </UDashboardToolbar>
     <UContainer
-      v-if="status == 'success'"
+      v-if="status === 'success'"
       class="w-full max-w-7xl"
       style="height: 75dvh"
     >
       <CalendarAppCalendar
-        v-if="schedules && schedulesRequests"
         :events="[...schedules, ...schedulesRequests]"
         :view-type="selectedView"
         :selected-date="selectedDate"
@@ -96,15 +97,17 @@ const studentStore = useStudentStore();
 const $courseActivitySchedules = useCourseActivitySchedules();
 
 const query = ref<Partial<CourseActivityScheduleQuery>>({
-  subscription_id: undefined,
+  subscription_ids: [],
+  organization_id: userOrganizationsStore.selectedOrganization?.id,
 });
 
 const { data: schedules, status } = await useAsyncData(
-  `schedules-for-subscription-${studentStore.selectedSubscription?.id}`,
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
+    query.value.organization_id =
+      userOrganizationsStore.selectedOrganization.id;
     return await $courseActivitySchedules.fetchCourseActivitySchedules({
       ...query.value,
     });
@@ -114,6 +117,7 @@ const { data: schedules, status } = await useAsyncData(
     default() {
       return [];
     },
+    immediate: true,
     transform: (data) => {
       console.log("fetched schedules", data);
       if (!data) {
@@ -143,9 +147,12 @@ const { data: schedulesRequests } = await useAsyncData(
     if (!userOrganizationsStore.selectedOrganization) {
       return [];
     }
+    if (!studentStore.selectedSubscription) {
+      return [];
+    }
     return await $courseActivitySchedules.fetchCourseActivitySchedulesRequests({
       status: "pending",
-      subscription_id: studentStore.selectedSubscription?.id,
+      subscription_ids: [studentStore.selectedSubscription?.id],
       organization_id: userOrganizationsStore.selectedOrganization.id,
     });
   },
@@ -154,6 +161,9 @@ const { data: schedulesRequests } = await useAsyncData(
       () => studentStore.selectedSubscription,
       () => userOrganizationsStore.selectedOrganization,
     ],
+    default() {
+      return [];
+    },
     transform: (data) => {
       console.log("fetched schedule requests", data);
       if (!data) {

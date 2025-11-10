@@ -100,6 +100,7 @@ const createCreateCourseActivityScheduleRequest = async (data: Schema) => {
       start_at: data.start_at.toISOString(),
       organization_id: props.organizationId,
       requested_by: userStore.user.id,
+      schedule_id: null,
     });
     $emits("request-saved");
   } catch (error) {
