@@ -73,10 +73,29 @@ const _schema = z.object({
 
 type Schema = z.infer<typeof _schema>;
 
+const { data: existingRequest } = await useAsyncData(
+  `existing-schedule-request-${props.requestId}`,
+  async () => {
+    if (props.requestId) {
+      return await $courseActivitySchedules.getCourseActivitySchedulesRequestById(
+        props.requestId
+      );
+    }
+    return null;
+  },
+  { immediate: true }
+);
+
 const form = ref<Schema>({
-  activityId: "",
-  subscriptionId: props.subscriptionId || "",
-  start_at: props.startAt || new Date(),
+  activityId: existingRequest.value
+    ? existingRequest.value.activity.id
+    : "",
+  subscriptionId: existingRequest.value
+    ? existingRequest.value.subscription.id
+    : props.subscriptionId || "",
+  start_at: existingRequest.value
+    ? new Date(existingRequest.value.start_at)
+    : props.startAt || new Date(),
 });
 
 const onSubmit = async ($event: FormSubmitEvent<Schema>) => {
@@ -113,6 +132,7 @@ const updateCourseActivityScheduleRequest = async (data: Schema) => {
     throw new Error("No request ID provided for update");
   }
   try {
+    console.log("updating schedule request", data.start_at);
     await $courseActivitySchedules.updateCourseActivityScheduleRequest(
       props.requestId,
       {

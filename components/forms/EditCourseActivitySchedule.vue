@@ -267,7 +267,11 @@ async function updateCourseActivitySchedule(
 ) {
   try {
     const schedule =
-      await $courseActivitySchedules.updateCourseActivitySchedule(id, data);
+      await $courseActivitySchedules.updateCourseActivitySchedule(id, {
+        assigned_to: data.assigned_to,
+        start_at: data.start_at,
+        duration_minutes: data.duration_minutes
+      });
 
     if (!schedule) {
       throw new Error("Failed to update course activity schedule");

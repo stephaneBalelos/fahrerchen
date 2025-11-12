@@ -141,7 +141,7 @@ const { data: schedules, status } = await useAsyncData(
   }
 );
 
-const { data: schedulesRequests } = await useAsyncData(
+const { data: schedulesRequests, refresh: refreshRequests } = await useAsyncData(
   `schedule-requests-for-subscription-${studentStore.selectedSubscription?.id}`,
   async () => {
     if (!userOrganizationsStore.selectedOrganization) {
@@ -209,6 +209,12 @@ const openEditScheduleRequestForm = (request_id?: string, date?: Date) => {
       organizationId: studentStore.selectedSubscription.organization_id,
       subscriptionId: studentStore.selectedSubscription.id,
       requestId: request_id,
+      "onRequest-saved": () => {
+        closeAndRefreshRequests();
+      },
+      "onRequest-deleted": () => {
+        closeAndRefreshRequests();
+      },
     });
     return;
   }
@@ -216,8 +222,16 @@ const openEditScheduleRequestForm = (request_id?: string, date?: Date) => {
     organizationId: studentStore.selectedSubscription.organization_id,
     subscriptionId: studentStore.selectedSubscription.id,
     startAt: date,
+    "onRequest-saved": () => {
+      closeAndRefreshRequests();
+    },
   });
 };
+
+function closeAndRefreshRequests() {
+  refreshRequests();
+  slideover.close();
+}
 </script>
 
 <style scoped></style>

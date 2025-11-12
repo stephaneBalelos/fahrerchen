@@ -90,7 +90,7 @@
             @select-date="(date) => (selectedDate = date)"
             @event-click="(event) => {}"
           >
-            <template #context-menu="{ selectedEvent }">
+            <template #context-menu="{ selectedEvent, close }">
               <AppCalendarEventContextMenuRequest
                 v-if="selectedEvent && selectedEvent.status === 'REQUESTED'"
                 :event="selectedEvent"
@@ -104,6 +104,7 @@
                       });
                       refresh();
                       refreshRequests();
+                      close();
                     }).catch(() => {
                       toast.add({
                         title: t('accept_request_failed'),
@@ -115,12 +116,28 @@
                 "
                 @reject-request="
                   (id) => {
-                    console.log('reject request', id);
+                    $courseActivitySchedules.updateCourseActivityScheduleRequest(id, { status: 'rejected' }).then(() => {
+                      toast.add({
+                        title: t('request_rejected'),
+                        description: t('request_rejected_description'),
+                        color: 'green',
+                      });
+                      refresh();
+                      refreshRequests();
+                      close();
+                    }).catch(() => {
+                      toast.add({
+                        title: t('reject_request_failed'),
+                        description: t('reject_request_failed_description'),
+                        color: 'red',
+                      });
+                    });
                   }
                 "
                 @edit-request="
                   (id) => {
                     openEditScheduleRequestForm(id);
+                    close();
                   }
                 "
                 @delete-request="
@@ -132,6 +149,14 @@
                         color: 'green',
                       });
                       refresh();
+                      refreshRequests();
+                      close();
+                    }).catch(() => {
+                      toast.add({
+                        title: t('reject_request_failed'),
+                        description: t('reject_request_failed_description'),
+                        color: 'red',
+                      });
                     });
                   }
                 "
@@ -290,6 +315,14 @@ const openEditScheduleRequestForm = (request_id?: string) => {
   slideover.open(EditScheduleRequestForm, {
     organizationId: userOrganizationsStore.selectedOrganization.id,
     requestId: request_id,
+    "onRequest-saved": () => {
+      refreshRequests();
+      slideover.close();
+    },
+    "onRequest-deleted": () => {
+      refreshRequests();
+      slideover.close();
+    },
   });
 };
 
@@ -302,9 +335,11 @@ const openEditScheduleSlideover = ({
     date,
     "onSchedule-deleted": () => {
       refresh();
+      slideover.close();
     },
     "onSchedule-saved": () => {
       refresh();
+      slideover.close();
     },
   });
 };

@@ -1,12 +1,30 @@
 <template>
   <div class="p-4 w-80 space-y-4">
     <div class="flex justify-between items-center">
-      <p class="font-semibold text-lg text-gray-900 dark:text-gray-200">
-        {{ props.event.label }}
-      </p>
-      <UBadge size="xs" variant="soft">{{
-        g(`schedules.status.${props.event.status}`)
-      }}</UBadge>
+      <div class="flex flex-col space-y-1 items-start">
+        <UBadge size="xs" variant="soft">{{
+          g(`schedules.status.${props.event.status}`)
+        }}</UBadge>
+        <p class="font-semibold text-lg text-gray-900 dark:text-gray-200">
+          {{ props.event.label }}
+        </p>
+      </div>
+      <div class="flex gap-2">
+        <UButton
+          icon="i-heroicons-pencil-square"
+          variant="ghost"
+          size="sm"
+          color="gray"
+          @click="() => $emits('edit-request', props.event.id)"
+        />
+        <UButton
+          icon="i-heroicons-trash-solid"
+          variant="ghost"
+          size="sm"
+          color="red"
+          @click="() => $emits('delete-request', props.event.id)"
+        />
+      </div>
     </div>
     <div class="flex flex-col items-start">
       <div class="flex items-center space-x-2">
@@ -32,7 +50,10 @@
         {{ scheduleRequest.user.lastname }}
       </p>
     </div>
-    <div v-if="scheduleRequest?.subscription" class="flex items-center space-x-2">
+    <div
+      v-if="scheduleRequest?.subscription"
+      class="flex items-center space-x-2"
+    >
       <UAvatar size="sm" :icon="'i-heroicons-user'" />
       <p class="font-semibold text-gray-700 dark:text-gray-300">
         {{ scheduleRequest.subscription.student.firstname }}
@@ -83,7 +104,10 @@ const currentLocale = computed(() => {
 });
 
 const $emits = defineEmits<{
-  (e: "accept-request" | "reject-request" | "delete-request" | "edit-request", id: string): void;
+  (
+    e: "accept-request" | "reject-request" | "delete-request" | "edit-request",
+    id: string
+  ): void;
 }>();
 
 const { getCourseActivitySchedulesRequestById } = useCourseActivitySchedules();

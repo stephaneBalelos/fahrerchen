@@ -67,7 +67,7 @@
         @select-date="($date) => $emit('selectDate', $date)"
       />
       <UContextMenu v-model="isOpen" :virtual-element="virtualElement">
-        <slot v-if="selectedEvent" name="context-menu" :selected-event="selectedEvent" />
+        <slot v-if="selectedEvent" name="context-menu" :selected-event="selectedEvent" :close="closeContextMenu" />
       </UContextMenu>
     </div>
   </section>
@@ -165,6 +165,11 @@ function onContextMenu(event: MouseEvent, calendarEvent: AppCalendarEvent) {
 
   isOpen.value = true;
   selectedEvent.value = calendarEvent;
+}
+
+function closeContextMenu() {
+  isOpen.value = false;
+  selectedEvent.value = null;
 }
 </script>
 
