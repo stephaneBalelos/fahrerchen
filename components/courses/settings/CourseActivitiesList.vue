@@ -83,6 +83,14 @@
                 {{ field.required > 0 ? field.required : "-" }}
               </p>
             </div>
+            <div class="flex flex-col gap-1">
+              <CoursesSettingsCourseActivitiesRecurrenceWidget
+                :activity-id="field.id"
+                :activity-name="field.name"
+                :activity-description="field.description"
+                :organization-id="field.organization_id"
+              />
+            </div>
           </div>
           <div class="flex flex-col gap-1 lg:col-span-2">
             <p class="text-sm text-gray-500 mb-2">
@@ -210,6 +218,7 @@ const createActivitiesFromTemplate = async () => {
     "no_activities": "Keine Aktivitäten",
     "no_activities_description": "Es gibt keine Aktivitäten für diesen Kurs. Fügen Sie Aktivitäten hinzu.",
     "edit": "Bearbeiten",
+    "edit_recurrence_rules": "Wiederholungsregeln bearbeiten",
     "activity_saved": "Aktivität gespeichert",
     "activity_saved_description": "Die Aktivität wurde erfolgreich gespeichert.",
     "activity_deleted": "Aktivität gelöscht",
@@ -224,6 +233,7 @@ const createActivitiesFromTemplate = async () => {
     "no_activities": "No activities",
     "no_activities_description": "There are no activities for this course. Add activities.",
     "edit": "Edit",
+    "edit_recurrence_rules": "Edit Recurrence Rules",
     "activity_saved": "Activity saved",
     "activity_saved_description": "The Activity has been saved successfully.",
     "activity_deleted": "Activity deleted",

@@ -205,6 +205,73 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         }
     }
 
+    const getRecurrenceRulesForActivity = async (activity_id: string) => {
+        const { data, error } = await supabase
+            .from('activity_recurrence_rules')
+            .select('*')
+            .eq('activity_id', activity_id)
+
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
+    const getRecurrenceRuleById = async (recurrence_rule_id: string) => {
+        const { data, error } = await supabase
+            .from('activity_recurrence_rules')
+            .select('*')
+            .eq('id', recurrence_rule_id)
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data || null
+    }
+
+    const createRecurrenceRule = async (organization_id: string, activity_id: string, rrule: string) => {
+        const { data, error } = await supabase
+            .from('activity_recurrence_rules')
+            .insert({
+                organization_id,
+                activity_id,
+                rrule
+            })
+            .select('*')
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data
+    }
+
+    const updateRecurrenceRule = async (recurrence_rule_id: string, rrule: string) => {
+        const { data, error } = await supabase
+            .from('activity_recurrence_rules')
+            .update({ rrule })
+            .eq('id', recurrence_rule_id)
+            .select('*')
+            .single()
+
+        if (error) {
+            throw error
+        }
+        return data || null
+    }
+
+    const deleteRecurrenceRule = async (recurrence_rule_id: string) => {
+        const { error } = await supabase
+            .from('activity_recurrence_rules')
+            .delete()
+            .eq('id', recurrence_rule_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseActivities()
     }, { immediate: true })
@@ -223,6 +290,11 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         getActivitiesForCourse,
         addCourseToAllowedCourses,
         removeCourseFromAllowedCourses,
-        updateCourseActivityCombination
+        updateCourseActivityCombination,
+        getRecurrenceRulesForActivity,
+        getRecurrenceRuleById,
+        createRecurrenceRule,
+        updateRecurrenceRule,
+        deleteRecurrenceRule
     }
 })

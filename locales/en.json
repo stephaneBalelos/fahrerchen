@@ -160,7 +160,10 @@
         "allow_self_registration_help": "Allows students to register themselves for this activity.",
         "allow_requests": "Allow Requests",
         "allow_requests_help": "Allows students to make requests for this activity.",
-        "duration_minutes": "Duration (Minutes)"
+        "duration_minutes": "Duration (Minutes)",
+        "duration_minutes_help": "The duration of this activity in minutes.",
+        "recurrence_rules": "Recurrence Rules",
+        "recurrence_rules_help": "Define how often and on which days this activity should recur."
     },
     "schedules": {
         "status": {

@@ -34,6 +34,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_recurrence_rules: {
+        Row: {
+          activity_id: string
+          id: string
+          inserted_at: string
+          is_valid: boolean
+          organization_id: string
+          rrule: string
+          updated_at: string
+        }
+        Insert: {
+          activity_id: string
+          id?: string
+          inserted_at?: string
+          is_valid?: boolean
+          organization_id: string
+          rrule: string
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string
+          id?: string
+          inserted_at?: string
+          is_valid?: boolean
+          organization_id?: string
+          rrule?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_recurrence_rules_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_recurrence_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       course_activities: {
         Row: {
           activity_type: Database["public"]["Enums"]["activity_types"]
@@ -1578,6 +1623,10 @@ export type Database = {
         | "course_activities.create"
         | "course_activities.update"
         | "course_activities.delete"
+        | "course_activities_recurrence_rules.read"
+        | "course_activities_recurrence_rules.create"
+        | "course_activities_recurrence_rules.update"
+        | "course_activities_recurrence_rules.delete"
         | "course_activities_combinations.read"
         | "course_activities_combinations.create"
         | "course_activities_combinations.delete"
@@ -2364,6 +2413,10 @@ export const Constants = {
         "course_activities.create",
         "course_activities.update",
         "course_activities.delete",
+        "course_activities_recurrence_rules.read",
+        "course_activities_recurrence_rules.create",
+        "course_activities_recurrence_rules.update",
+        "course_activities_recurrence_rules.delete",
         "course_activities_combinations.read",
         "course_activities_combinations.create",
         "course_activities_combinations.delete",

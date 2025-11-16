@@ -154,8 +154,10 @@
         "allow_self_registration_help": "Ermöglicht es Schüler:innen, sich selbst für diese Aktivität anzumelden.",
         "allow_requests": "Anfragen erlauben",
         "allow_requests_help": "Ermöglicht es Schüler:innen, Anfragen für diese Aktivität zu stellen.",
-        "duration_minutes": "Dauer (Minuten)"
-
+        "duration_minutes": "Dauer (Minuten)",
+        "duration_minutes_help": "Die Dauer dieser Aktivität in Minuten.",
+        "recurrence_rules": "Wiederholungsregeln",
+        "recurrence_rules_help": "Legen Sie fest, wie oft und an welchen Tagen diese Aktivität wiederholt werden soll."
     },
     "schedules": {
         "status": {

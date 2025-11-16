@@ -109,3 +109,33 @@ create trigger trg_populate_allowed_courses_on_activity_insert
 after insert on public.course_activities
 for each row
 execute function public.populate_allowed_courses_on_activity_insert();
+
+
+-- Activities Recurrence Rules
+create table public.activity_recurrence_rules (
+  id            uuid default uuid_generate_v4() primary key,
+  activity_id    uuid references public.course_activities on delete cascade not null,
+  rrule         text not null, -- iCal RRULE format
+  is_valid     boolean default true not null, -- Indicates if the recurrence rule is valid, will be set to false if parsing fails when trying to generate occurrences
+  organization_id    uuid references public.organizations on delete cascade not null,
+  inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null
+);
+comment on table public.activity_recurrence_rules is 'Recurrence rules for course activities.';
+alter table public.activity_recurrence_rules enable row level security;
+revoke update on table public.activity_recurrence_rules from authenticated, anon;
+grant update (rrule, updated_at) on table public.activity_recurrence_rules to authenticated;
+
+
+-- ACTIVITY RECURRENCE RULES POLICIES
+create policy "owner_manager_teacher_student_can_see_activity_recurrence_rules" on public.activity_recurrence_rules for select to authenticated using (public.authorize('course_activities_recurrence_rules.read', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activities_recurrence_rules.read'), ('manager', 'course_activities_recurrence_rules.read'), ('teacher', 'course_activities_recurrence_rules.read'), ('student', 'course_activities_recurrence_rules.read');
+
+create policy "owner_manager_can_create_activity_recurrence_rules" on public.activity_recurrence_rules for insert to authenticated with check (public.authorize('course_activities_recurrence_rules.create', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activities_recurrence_rules.create'), ('manager', 'course_activities_recurrence_rules.create');
+
+create policy "owner_manager_can_update_activity_recurrence_rules" on public.activity_recurrence_rules for update to authenticated using (public.authorize('course_activities_recurrence_rules.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activities_recurrence_rules.update'), ('manager', 'course_activities_recurrence_rules.update');
+
+create policy "owner_manager_can_delete_activity_recurrence_rules" on public.activity_recurrence_rules for delete to authenticated using (public.authorize('course_activities_recurrence_rules.delete', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activities_recurrence_rules.delete'), ('manager', 'course_activities_recurrence_rules.delete');

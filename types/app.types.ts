@@ -27,6 +27,8 @@ export type CourseActivityEdit = Omit<AppCourseActivity, 'id' | 'organization_id
 export type AppCourseActivitiesCombination = DatabaseGenerated['public']['Tables']['course_activities_combinations']['Row']
 export type CourseActivitiesCombinationEdit = Omit<AppCourseActivitiesCombination, 'id' | 'organization_id' | 'activity_id' | 'course_id'>
 
+export type AppCourseActivityRecurrenceRule = DatabaseGenerated['public']['Tables']['activity_recurrence_rules']['Row']
+
 export type AppCourseActivitySchedule = DatabaseGenerated['public']['Tables']['course_activity_schedules']['Row']
 export type CourseActivityScheduleEdit = Omit<AppCourseActivitySchedule, 'id' | 'organization_id' | 'inserted_at' | 'updated_at'  | 'attendees'>
 export type AppScheduleType = DatabaseGenerated['public']['Enums']['schedule_type']
