@@ -1,16 +1,18 @@
+create or replace function process_notifications_job()
+returns void as $$
+begin
+  perform private.call_edge_function(
+    'process_notifications',
+    jsonb_build_object(
+      'timestamp', now()
+    )
+  );
+end;
+$$ language plpgsql security definer set search_path = '';
+
 select
   cron.schedule(
     'process_notifications_job',
     '30 seconds', -- Every 30 seconds
-    $$
-    select
-      net.http_post(
-          url:= (select decrypted_secret from vault.decrypted_secrets where name = 'project_url') || '/functions/v1/process_notifications',
-          headers:=jsonb_build_object(
-            'Content-type', 'application/json',
-            'Authorization', 'Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name = 'anon_key')
-          ),
-          body:=concat('{"time": "', now(), '"}')::jsonb
-      ) as request_id;
-    $$
+    $$ select process_notifications_job(); $$
   );

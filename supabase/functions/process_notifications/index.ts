@@ -17,6 +17,11 @@ Deno.serve(async (req) => {
         return new Response('not allowed', { status: 400 })
     }
 
+    const hookSecret = req.headers.get('X-DB-Webhook-Secret')
+    if (!hookSecret || hookSecret !== Deno.env.get('DB_WEBHOOK_SECRET')) {
+        return new Response('unauthorized', { status: 401 })
+    }
+
     const supabase = createClient<Database>(
         Deno.env.get('SUPABASE_URL')!,
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -34,8 +39,6 @@ Deno.serve(async (req) => {
 
         // Set Jobs status to processing
         await supabase.from('notifications_jobs').update({ status: 'PROCESSING' }).in('id', data.map(j => j.id))
-
-        console.log('Processing jobs:', data.map(j => j.id))
 
         // Process Jobs in the background return early
         await processJobs(supabase, data)
