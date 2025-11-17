@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
 import type { Database } from "../_shared/types/database.types.ts"
 import { decodeBase64, encodeBase64 } from "jsr:@std/encoding/base64";
@@ -73,6 +74,15 @@ export async function getCourseActivityById(supabase: SupabaseClient<Database>, 
 export async function getCourseActivityScheduleById(supabase: SupabaseClient<Database>, scheduleId: string) {
     const { data, error } = await supabase.from('course_activity_schedules')
         .select('*, activity:course_activities(id, name)').eq('id', scheduleId).single()
+    if (error || !data) {
+        return null
+    }
+    return data
+}
+
+export async function getCourseActivityRecurrenceRuleById(supabase: SupabaseClient<Database>, ruleId: string) {
+    const { data, error } = await supabase.from('activity_recurrence_rules')
+        .select('*').eq('id', ruleId).single()
     if (error || !data) {
         return null
     }

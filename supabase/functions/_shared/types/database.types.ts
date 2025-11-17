@@ -85,6 +85,7 @@ export type Database = {
           allow_requests: boolean
           allow_self_registration: boolean
           description: string
+          duration_minutes: number
           id: string
           inserted_at: string
           name: string
@@ -99,6 +100,7 @@ export type Database = {
           allow_requests?: boolean
           allow_self_registration?: boolean
           description: string
+          duration_minutes?: number
           id?: string
           inserted_at?: string
           name: string
@@ -113,6 +115,7 @@ export type Database = {
           allow_requests?: boolean
           allow_self_registration?: boolean
           description?: string
+          duration_minutes?: number
           id?: string
           inserted_at?: string
           name?: string
@@ -257,29 +260,41 @@ export type Database = {
         Row: {
           activity_id: string
           assigned_to: string | null
+          attendees_count: number
           duration_minutes: number
           id: string
+          inserted_at: string
           organization_id: string
+          recurrence_rule_id: string | null
           start_at: string
           status: Database["public"]["Enums"]["schedule_status"]
+          updated_at: string
         }
         Insert: {
           activity_id: string
           assigned_to?: string | null
-          duration_minutes: number
+          attendees_count?: number
+          duration_minutes?: number
           id?: string
+          inserted_at?: string
           organization_id: string
+          recurrence_rule_id?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
         }
         Update: {
           activity_id?: string
           assigned_to?: string | null
+          attendees_count?: number
           duration_minutes?: number
           id?: string
+          inserted_at?: string
           organization_id?: string
+          recurrence_rule_id?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["schedule_status"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -301,6 +316,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_recurrence_rule_id_fkey"
+            columns: ["recurrence_rule_id"]
+            isOneToOne: false
+            referencedRelation: "activity_recurrence_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -1544,6 +1566,10 @@ export type Database = {
       is_subscription_active: {
         Args: { subscription_id: string }
         Returns: boolean
+      }
+      process_notifications_job: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       slugify: {
         Args: { value: string }

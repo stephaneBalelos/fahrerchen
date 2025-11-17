@@ -101,39 +101,43 @@ const { t } = useI18n({
   useScope: "local",
 });
 
+const { t: g } = useI18n({
+  useScope: "global",
+});
+
 const dayOfWeekOption = [
   {
-    label: t("form.daysOfWeek.options.monday"),
+    label: g("dates.weekdays.monday"),
     value: 1,
     rruleValue: RRule.MO,
   },
   {
-    label: t("form.daysOfWeek.options.tuesday"),
+    label: g("dates.weekdays.tuesday"),
     value: 2,
     rruleValue: RRule.TU,
   },
   {
-    label: t("form.daysOfWeek.options.wednesday"),
+    label: g("dates.weekdays.wednesday"),
     value: 3,
     rruleValue: RRule.WE,
   },
   {
-    label: t("form.daysOfWeek.options.thursday"),
+    label: g("dates.weekdays.thursday"),
     value: 4,
     rruleValue: RRule.TH,
   },
   {
-    label: t("form.daysOfWeek.options.friday"),
+    label: g("dates.weekdays.friday"),
     value: 5,
     rruleValue: RRule.FR,
   },
   {
-    label: t("form.daysOfWeek.options.saturday"),
+    label: g("dates.weekdays.saturday"),
     value: 6,
     rruleValue: RRule.SA,
   },
   {
-    label: t("form.daysOfWeek.options.sunday"),
+    label: g("dates.weekdays.sunday"),
     value: 7,
     rruleValue: RRule.SU,
   },
@@ -176,7 +180,6 @@ const state = ref<FormSchema>({
 
 const onSubmit = (_data: FormSubmitEvent<FormSchema>) => {
     const rruleString = rule.value.toString();
-    console.log("RRULE String:", rruleString);
     if (props.activityRecurrenceRuleId) {
         courseActivitiesStore
         .updateRecurrenceRule(props.activityRecurrenceRuleId, rruleString)

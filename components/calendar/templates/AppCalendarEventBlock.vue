@@ -3,12 +3,13 @@
     :class="`absolute top-[${event.style.top}] left-[${event.style.left}] h-[${event.style.height}] w-[${event.style.width}] p-1 m-1 rounded ${classes} cursor-pointer`"
     :style="event.style"
     @click="
-      ($event) => eventBlockActions.onClick && eventBlockActions.onClick($event, event)
+      ($event) =>
+        eventBlockActions.onClick && eventBlockActions.onClick($event, event)
     "
   >
-    <UBadge size="xs" :color="SCHEDULE_STATUS_COLORS[event.status]">{{
+    <!-- <UBadge size="xs" :color="SCHEDULE_STATUS_COLORS[event.status]">{{
       g(`schedules.status.${event.status}`)
-    }}</UBadge>
+    }}</UBadge> -->
 
     <p :class="`text-sm font-semibold text-gray-900`">{{ event.label }}</p>
     <p :class="`text-xs font-semibold text-gray-900`">
@@ -21,7 +22,7 @@
 <script setup lang="ts">
 import type { AppCalendarEvent } from "../AppCalendar.vue";
 import { format, addMinutes } from "date-fns";
-import { SCHEDULE_STATUS_COLORS, type ActivityColor } from "~/constants";
+import type { ActivityColor } from "~/constants";
 import { AppCalenderProviderKey } from "../AppCalendarProvider";
 
 export type AppCalendarEventBlock = AppCalendarEvent & {
@@ -36,9 +37,9 @@ export type AppCalendarEventBlock = AppCalendarEvent & {
 
 const eventBlockActions = inject(AppCalenderProviderKey, {});
 
-const { t: g } = useI18n({
-  useScope: "global",
-});
+// const { t: g } = useI18n({
+//   useScope: "global",
+// });
 
 const props = defineProps<{
   event: AppCalendarEventBlock;
@@ -58,4 +59,3 @@ const classes = computed(() => {
 </script>
 
 <style scoped></style>
-

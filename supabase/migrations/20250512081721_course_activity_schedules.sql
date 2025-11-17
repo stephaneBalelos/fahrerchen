@@ -6,12 +6,16 @@ create table public.course_activity_schedules (
   organization_id    uuid references public.organizations on delete cascade not null,
   status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
   start_at     timestamp with time zone not null,
-  duration_minutes int not null
+  duration_minutes int not null default 45,
+  inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  recurrence_rule_id uuid references public.activity_recurrence_rules on delete set null,
+  attendees_count int default 0 not null
 );
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 alter table public.course_activity_schedules enable row level security;
 revoke update on table public.course_activity_schedules from authenticated, anon;
-grant update (assigned_to, status, start_at, duration_minutes) on table public.course_activity_schedules to authenticated;
+grant update (assigned_to, status, start_at, duration_minutes, updated_at) on table public.course_activity_schedules to authenticated;
 
 
 -- COURSE ACTIVITY SCHEDULES ATTENDEES
@@ -66,6 +70,29 @@ create policy "owner_manager_teacher_can_delete_course_activity_schedules_attend
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendees.delete'), ('manager', 'course_activity_schedules_attendees.delete'), ('teacher', 'course_activity_schedules_attendees.delete');
 
 
+-- Aggregate trigger to update attendees_count on course_activity_schedules
+create or replace function public.update_attendees_count_on_schedule_change()
+returns trigger as $$
+begin
+  if (tg_op = 'INSERT') then
+    update public.course_activity_schedules
+    set attendees_count = attendees_count + 1
+    where id = new.schedule_id;
+    return new;
+  elsif (tg_op = 'DELETE') then
+    update public.course_activity_schedules
+    set attendees_count = attendees_count - 1
+    where id = old.schedule_id;
+    return old;
+  end if;
+  return null;
+end;
+$$ language plpgsql security definer set search_path = '';
+create trigger trg_update_attendees_count_on_schedule_change
+after insert or delete on public.course_activity_schedules_attendees
+for each row
+execute function public.update_attendees_count_on_schedule_change();
+
 -- When a Course Subscription is Archived, remove it from all active schedules
 create or replace function public.remove_archived_subscription_from_schedules()
 returns trigger as $$
@@ -87,4 +114,63 @@ for each row
 when (old.archived_at is null and new.archived_at is not null)
 execute function public.remove_archived_subscription_from_schedules();
 
+-- Update the updated_at timestamp on activity schedules when certain fields are updated
+create or replace function public.update_activity_schedule_timestamp()
+returns trigger as $$
+begin
+  new.updated_at = timezone('utc'::text, now());
+  -- Detach from recurrence rule if any of the key fields are changed
+  if old.start_at is distinct from new.start_at
+     or old.duration_minutes is distinct from new.duration_minutes then
+    new.recurrence_rule_id = null;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer set search_path = '';
+create trigger trg_update_activity_schedule_timestamp
+before update on public.course_activity_schedules
+for each row
+when (old.assigned_to is distinct from new.assigned_to
+      or old.status is distinct from new.status
+      or old.start_at is distinct from new.start_at
+      or old.duration_minutes is distinct from new.duration_minutes)
+execute function public.update_activity_schedule_timestamp();
 
+-- Recreate Activity Schedules when the Occurrence Rule is Updated
+create or replace function public.recreate_schedules_on_recurrence_rule_update()
+returns trigger as $$
+begin
+  -- Delete existing PLANNED with no attendees schedules linked to this recurrence rule that are in the future
+  delete from public.course_activity_schedules
+  where recurrence_rule_id = old.id and status = 'PLANNED' and start_at > timezone('utc'::text, now()) and attendees_count = 0;
+
+  -- Notify the edge function to recreate schedules
+  perform private.call_edge_function(
+    'extend-activity-schedules-occurences',
+    jsonb_build_object(
+      'recurrence_rule_id', new.id
+    )
+  );
+  return old;
+end;
+$$ language plpgsql security invoker set search_path = '';
+create trigger trg_recreate_schedules_on_recurrence_rule_update
+after update on public.activity_recurrence_rules
+for each row
+when (old.rrule is distinct from new.rrule)
+execute function public.recreate_schedules_on_recurrence_rule_update();
+
+-- Delete Linked Incoming Schedules with no attendees when the Occurrence Rule is Deleted
+create or replace function public.delete_schedules_on_recurrence_rule_delete()
+returns trigger as $$
+begin
+  delete from public.course_activity_schedules
+  where recurrence_rule_id = old.id and status = 'PLANNED' and start_at > timezone('utc'::text, now()) and attendees_count = 0;
+
+  return old;
+end;
+$$ language plpgsql security invoker set search_path = '';
+create trigger trg_delete_schedules_on_recurrence_rule_delete
+before delete on public.activity_recurrence_rules
+for each row
+execute function public.delete_schedules_on_recurrence_rule_delete();

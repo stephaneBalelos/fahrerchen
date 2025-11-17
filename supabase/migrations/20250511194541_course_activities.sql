@@ -11,6 +11,7 @@ create table public.course_activities (
   allow_requests boolean default false not null,
   inserted_at  timestamptz default now() not null,
   updated_at  timestamptz default now() not null,
+  duration_minutes int default 45 not null,
   organization_id    uuid references public.organizations on delete cascade not null
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
@@ -139,3 +140,22 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 
 create policy "owner_manager_can_delete_activity_recurrence_rules" on public.activity_recurrence_rules for delete to authenticated using (public.authorize('course_activities_recurrence_rules.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities_recurrence_rules.delete'), ('manager', 'course_activities_recurrence_rules.delete');
+
+-- Call Edge Function to extend occurrences when a recurrence rule is created
+create or replace function public.extend_activity_schedules_occurrences() returns trigger as $$
+begin
+  perform private.call_edge_function(
+    'extend-activity-schedules-occurences',
+    jsonb_build_object(
+      'recurrence_rule_id', new.id
+    )
+  );
+  return new;
+end;
+$$ language plpgsql security invoker set search_path = '';
+
+create trigger trg_extend_activity_schedules_occurrences
+after insert on public.activity_recurrence_rules
+for each row
+execute function public.extend_activity_schedules_occurrences();
+

@@ -96,6 +96,7 @@ export type AppCalendarEvent = {
   assigned_to: AppUser | null;
   activity_attendees_count: number;
   type: AppCourseActivityType;
+  is_recurring?: boolean;
 };
 
 export type AppCalendarViewType = "month" | "week" | "day";

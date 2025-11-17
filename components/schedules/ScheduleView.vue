@@ -75,44 +75,51 @@
         <UFormGroup
           :label="t('form.start_at.label')"
           :description="t('form.start_at.description')"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-4"
           :ui="{
-            container: 'flex flex-wrap items-center gap-3 col-span-2',
+            container: 'col-span-2 grid items-center gap-4',
             help: 'mt-0',
           }"
         >
-          <UPopover
-            v-if="schedule.status === 'PLANNED'"
-            :popper="{ placement: 'bottom-start' }"
-            @update:open="
-              (open) => {
-                if (!open) saveState();
-              }
-            "
-          >
-            <UButton
-              color="white"
-              variant="solid"
-              :size="'md'"
-              :label="getLocalizedDateTimeString(state.start_at)"
-            />
-            <template #panel="">
-              <Datepicker
-                v-model="state.start_at"
-                is-required
-                :mode="'dateTime'"
+          <div class="flex flex-col justify-start items-start gap-4">
+            <UPopover
+              v-if="schedule.status === 'PLANNED'"
+              :popper="{ placement: 'bottom-start' }"
+              @update:open="
+                (open) => {
+                  if (!open) saveState();
+                }
+              "
+            >
+              <UButton
+                color="white"
+                variant="solid"
+                :size="'xl'"
+                :label="getLocalizedDateTimeString(state.start_at)"
               />
-            </template>
-          </UPopover>
-          <div v-else>
-            {{ getLocalizedDateTimeString(new Date(schedule.start_at)) }}
+              <template #panel="">
+                <Datepicker
+                  v-model="state.start_at"
+                  is-required
+                  :mode="'dateTime'"
+                />
+              </template>
+            </UPopover>
+            <div v-else>
+              {{ getLocalizedDateTimeString(new Date(schedule.start_at)) }}
+            </div>
+            <div v-if="schedule.recurrence_rule_id">
+              <CourseActivityRecurrenceRulePreview
+                :activity-recurrence-rule-id="schedule.recurrence_rule_id"
+              />
+            </div>
           </div>
         </UFormGroup>
         <UFormGroup
           name="assigned_to"
           :label="t('form.assigned_to.label')"
           :description="t('form.assigned_to.description')"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-4"
           :ui="{
             container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
@@ -131,7 +138,7 @@
           name="allowed_courses"
           :label="t('form.allowed_courses.label')"
           :description="t('form.allowed_courses.description')"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-4"
           :ui="{
             container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
@@ -146,7 +153,7 @@
           name="attendees"
           :label="t('form.attendees.label')"
           :description="t('form.attendees.description')"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 py-4"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-4"
           :ui="{
             container: 'flex flex-wrap items-center gap-3 col-span-2',
             help: 'mt-0',
@@ -173,6 +180,7 @@ import { getLocalizedDateTimeString } from "~/utils/formatters";
 import { z } from "zod";
 import type { AppCourseActivitySchedule } from "~/types/app.types";
 import ConfirmModal from "../ui/Modals/ConfirmModal.vue";
+import CourseActivityRecurrenceRulePreview from "../courses/settings/CourseActivityRecurrenceRulePreview.vue";
 
 type Props = {
   scheduleId: string;
@@ -343,8 +351,8 @@ const markAsCanceled = async (scheduleId: string) => {
         "description": "Der Benutzer, der diesem Aktivitätsplan zugewiesen ist."
       },
       "allowed_courses": {
-        "label": "Erlaubte Kurse",
-        "description": "Kurse, die auf diesen Aktivitätsplan zugreifen dürfen."
+        "label": "Führerschein-Klassen",
+        "description": "Führerschein-Klassen, für die dieser Aktivitätsplan bestimmt ist."
       },
       "attendees": {
         "label": "Teilnehmer",

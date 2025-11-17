@@ -26,7 +26,21 @@
         "yesterday": "Yesterday",
         "yesterday_at": "Yesterday at {time}",
         "tomorrow": "Tomorrow",
-        "tomorrow_at": "Tomorrow at {time}"
+        "tomorrow_at": "Tomorrow at {time}",
+        "weekdays": {
+            "monday": "Monday",
+            "tuesday": "Tuesday",
+            "wednesday": "Wednesday",
+            "thursday": "Thursday",
+            "friday": "Friday",
+            "saturday": "Saturday",
+            "sunday": "Sunday"
+        },
+        "everyday": "Every day",
+        "every_weekday": "Every weekday",
+        "weekly_on_days": "Weekly on {days}",
+        "monthly_on_day": "Monthly on day {day}",
+        "yearly_on_date": "Yearly on {date}"
     },
     "courses": {
         "activities": {
@@ -166,6 +180,7 @@
         "recurrence_rules_help": "Define how often and on which days this activity should recur."
     },
     "schedules": {
+        "recurring_event": "Recurring Activity",
         "status": {
             "REQUESTED": "Requested",
             "PLANNED": "Planned",

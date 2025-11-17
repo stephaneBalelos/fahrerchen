@@ -220,7 +220,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
     const getRecurrenceRuleById = async (recurrence_rule_id: string) => {
         const { data, error } = await supabase
             .from('activity_recurrence_rules')
-            .select('*')
+            .select('*, activity:course_activities(*)')
             .eq('id', recurrence_rule_id)
             .single()
 

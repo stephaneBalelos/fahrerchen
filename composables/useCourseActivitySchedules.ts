@@ -26,7 +26,7 @@ export const useCourseActivitySchedules = () => {
 
         const { data, error } = await client
             .from("course_activity_schedules")
-            .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
+            .select("*, recurrence_rule:recurrence_rule_id(*), user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
             .eq("id", id)
             .single()
 

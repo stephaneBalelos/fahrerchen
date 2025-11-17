@@ -2,6 +2,16 @@ import type { AppCourseActivityType, AppCourseType, CourseActivityEdit, CourseCo
 
 export const USER_ROLES: UserRole[] = ['owner', 'manager', 'teacher', 'student']
 
+export const WEEKDAYS = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday'
+]
+
 export const SCHEDULES_STATUS: Database["public"]["Enums"]["schedule_status"][] = [
     "PLANNED", "CANCELED", "COMPLETED"
 ]
@@ -89,6 +99,7 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
                 allow_requests: false,
                 allow_self_registration: true,
                 sorting_order: 1,
+                duration_minutes: 90,
             },
             {
                 name: "Zusatzstoff Motorrad",
@@ -99,6 +110,7 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
                 allow_requests: false,
                 allow_self_registration: true,
                 sorting_order: 3,
+                duration_minutes: 90,
             },
             {
                 name: "Sonderfahrten",
@@ -109,6 +121,7 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
                 allow_requests: true,
                 allow_self_registration: true,
                 sorting_order: 2,
+                duration_minutes: 45,
             },
             {
                 name: "Praktische Prüfung",
@@ -119,6 +132,7 @@ export const getStandardCourseActivitiesTemplate = (): StandardCourseActivitiesT
                 allow_requests: false,
                 allow_self_registration: false,
                 sorting_order: 4,
+                duration_minutes: 60,
             }
         ],
         required_documents: [

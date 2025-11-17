@@ -263,8 +263,9 @@ const { data: schedules, refresh } = useAsyncData(
           status: s.status,
           assigned_to: s.user,
           activity_attendees_count:
-            s.course_activity_schedules_attendees.length,
+            s.attendees_count,
           type: s.activity.activity_type,
+          is_recurring: !!s.recurrence_rule_id,
         };
         return event;
       });

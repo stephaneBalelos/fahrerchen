@@ -14,6 +14,16 @@
         <p class="text-sm text-gray-700 dark:text-gray-300">
           {{ format(props.event.date, "PPPP", { locale: currentLocale }) }}
         </p>
+        <UTooltip
+          v-if="props.event.is_recurring"
+          :text="g('schedules.recurring_event')"
+        >
+          <UButton
+            variant="ghost"
+            icon="i-heroicons-arrow-path"
+            :color="'black'"
+          />
+        </UTooltip>
       </div>
       <div class="flex items-center space-x-2">
         <UIcon name="i-heroicons-clock-solid" class="text-gray-500" />
