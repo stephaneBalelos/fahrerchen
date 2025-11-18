@@ -16,17 +16,37 @@ create table if not exists public.organization_billing_settings (
     invoice_footer text default '',
     template_name varchar(255) not null default 'default' check (template_name ~ '^[a-zA-Z0-9_]+$'),
     created_at timestamp with time zone default now() not null,
-    updated_at timestamp with time zone default now() not null
+    updated_at timestamp with time zone default now() not null,
+    auto_generate_invoices boolean default false not null -- Whether to automatically generate invoices for this organization
 );
 comment on table public.organization_billing_settings is 'Stores billing settings for each organization, including VAT rates and bank account details.';
 alter table public.organization_billing_settings enable row level security;
 revoke update on table public.organization_billing_settings from authenticated, anon;
-grant update (id, vat_rate, vat_exempt, bank_account_name, bank_account_number, bank_account_iban, bank_account_bic, tax_id, invoice_title, invoice_subtitle, invoice_message, invoice_footer, template_name) on table public.organization_billing_settings to authenticated;
+grant update (id, vat_rate, vat_exempt, bank_account_name, bank_account_number, bank_account_iban, bank_account_bic, tax_id, invoice_title, invoice_subtitle, invoice_message, invoice_footer, template_name, auto_generate_invoices) on table public.organization_billing_settings to authenticated;
 
 alter type public.app_permission add value if not exists 'organization_billing_settings.read';
 alter type public.app_permission add value if not exists 'organization_billing_settings.create';
 alter type public.app_permission add value if not exists 'organization_billing_settings.update';
 alter type public.app_permission add value if not exists 'organization_billing_settings.delete';
+
+-- Job for generating bill for subscriptions if auto_generate_invoices is true
+create or replace function public.generate_invoices_for_organizations()
+returns void as $$
+declare
+    sub_record record;
+begin
+    -- Loop through all active subscriptions
+    for sub_record in
+        select s.id, s.organization_id, obs.auto_generate_invoices
+        from public.subscriptions s
+        join public.organization_billing_settings obs on s.organization_id = obs.id
+        where public.is_subscription_active(s.id) and obs.auto_generate_invoices = true
+    loop
+        -- Call the invoice generation function (assumed to exist)
+        perform public.generate_bill_for_subscription(sub_record.id);
+    end loop;
+end;
+$$ language plpgsql security definer set search_path = 'public';
 
 
 

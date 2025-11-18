@@ -114,6 +114,50 @@ for each row
 when (old.archived_at is null and new.archived_at is not null)
 execute function public.remove_archived_subscription_from_schedules();
 
+-- Automatically Updated past Schedule Status to Completed or Canceled
+-- If the schedule is in the past and still PLANNED, we update its status
+-- If the past schedule has attendees, set to COMPLETED, else CANCELED
+-- If no one is assigned and no attendees, delete the schedule
+create or replace function auto_update_past_schedule_status()
+returns void as $$
+declare
+  rec record;
+begin
+
+  for rec in
+    select id, attendees_count from public.course_activity_schedules
+    where start_at + (duration_minutes || ' minutes')::interval < timezone('utc'::text, now())
+      and status = 'PLANNED'
+  loop
+    if rec.attendees_count > 0 then
+      update public.course_activity_schedules
+      set status = 'COMPLETED', updated_at = timezone('utc'::text, now())
+      where id = rec.id;
+    else
+      update public.course_activity_schedules
+      set status = 'CANCELED', updated_at = timezone('utc'::text, now())
+      where id = rec.id;
+    end if;
+
+    -- If no one is assigned and no attendees, delete the schedule
+    if rec.attendees_count = 0 then
+      delete from public.course_activity_schedules
+      where id = rec.id and assigned_to is null;
+    end if;
+  end loop;
+
+end;
+$$ language plpgsql security definer set search_path = '';
+
+-- Run the auto update function every hour
+select cron.schedule(
+  'auto_update_past_activity_schedules_status',
+  '5 * * * *',  -- Every hour at minute 5
+  $$ select auto_update_past_schedule_status() $$
+);
+
+
+
 -- Update the updated_at timestamp on activity schedules when certain fields are updated
 create or replace function public.update_activity_schedule_timestamp()
 returns trigger as $$
