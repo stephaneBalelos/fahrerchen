@@ -159,3 +159,36 @@ after insert on public.activity_recurrence_rules
 for each row
 execute function public.extend_activity_schedules_occurrences();
 
+-- Set Cron Job every day at 2 AM to extend activity schedules occurrences if the last linked occurrence is within 1 Month
+create or replace function extend_activity_schedules_occurrences_job()
+returns void as $$
+declare
+  rec record;
+begin
+  -- Loop through all active recurrence rules
+  for rec in
+    select arr.id
+    from public.activity_recurrence_rules arr
+    join public.course_activities ca on ca.id = arr.activity_id
+    where arr.is_valid = true
+  loop
+    -- Call Edge Function to extend occurrences
+    perform private.call_edge_function(
+      'extend-activity-schedules-occurences',
+      jsonb_build_object(
+        'recurrence_rule_id', rec.id
+      )
+    );
+  end loop;
+end;
+$$ language plpgsql security definer set search_path = '';
+
+select
+  cron.schedule(
+    'extend_activity_schedules_occurrences_job',
+    '0 1 * * *', -- Every day at 1 AM
+    $$ select extend_activity_schedules_occurrences_job(); $$
+  );
+
+
+

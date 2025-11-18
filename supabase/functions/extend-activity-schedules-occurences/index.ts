@@ -1,8 +1,8 @@
 /// <reference lib="deno.ns" />
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.1"
-import { getCourseActivityById, getCourseActivityRecurrenceRuleById } from "../_shared/utils.ts";
+import { getCourseActivityById, getCourseActivityRecurrenceRuleById, getLastScheduleOccurenceDate } from "../_shared/utils.ts";
 import rrule from "npm:rrule@2.7.0";
-import { addDays } from "npm:date-fns"
+import { addDays, addMinutes } from "npm:date-fns"
 import type { Database } from "../_shared/types/database.types.ts";
 
 type ScheduleEdit = Omit<Database['public']['Tables']['course_activity_schedules']['Row'], 'id' | 'status' | 'assigned_to' | 'inserted_at' | 'updated_at'>;
@@ -25,6 +25,8 @@ Deno.serve(async (req) => {
   }
 
   const activityRecurenceRuleId = body.payload.recurrence_rule_id
+
+  console.log(body)
 
   if (!activityRecurenceRuleId) {
     return new Response(
@@ -55,9 +57,25 @@ Deno.serve(async (req) => {
 
   try {
     const rRule = rrule.RRule.fromString(recurrenceRule.rrule)
-    rRule.options.until = new Date(addDays(rRule.options.dtstart!, 60)) // Extend by 60 days;
 
-    console.log(rRule.all());
+    // Get the last scheduled occurence date
+    const lastOccurenceDate = await getLastScheduleOccurenceDate(supabase, recurrenceRule.id, new Date(body.timestamp))
+
+    if (lastOccurenceDate) {
+      // Check if the last occurence date is in the next 60 days
+      const sixtyDaysFromNow = addDays(new Date(body.timestamp), 60)
+      if (lastOccurenceDate >= sixtyDaysFromNow) {
+        console.log(`No need to extend schedules for recurrence rule ${recurrenceRule.id}, last occurence is beyond 60 days`)
+        return new Response(
+          "OK",
+          { headers: { "Content-Type": "application/json" } },
+        )
+      }
+      // Set the rRule's after date to the last occurence date to avoid duplicates
+      rRule.options.dtstart = addMinutes(lastOccurenceDate, 1)
+    }
+
+    rRule.options.until = new Date(addDays(rRule.options.dtstart!, 30)) // Extend by 30 days;
 
     const schedules = rRule.all().map(date => {
       const schedule: ScheduleEdit = {
@@ -79,6 +97,8 @@ Deno.serve(async (req) => {
       )
     }
 
+    console.log(`Inserted ${schedules.length} new schedules for recurrence rule ${recurrenceRule.id}`)
+
   } catch (error) {
     console.error("Failed to parse RRule:", error)
     // Set the recurrence rule as invalid
@@ -89,11 +109,8 @@ Deno.serve(async (req) => {
     )
   }
 
-  console.log(`Successfully extended schedules for recurrence rule ${recurrenceRule.id}`)
-
   return new Response(
     "OK",
     { headers: { "Content-Type": "application/json" } },
   )
 })
-

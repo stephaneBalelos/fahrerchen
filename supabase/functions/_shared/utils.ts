@@ -89,6 +89,28 @@ export async function getCourseActivityRecurrenceRuleById(supabase: SupabaseClie
     return data
 }
 
+export async function getLastScheduleOccurenceDate(supabase: SupabaseClient<Database>, recurrence_rule_id: string, timestamp: Date): Promise<Date | null> {
+  const { data, error } = await supabase
+    .from('course_activity_schedules')
+    .select('*')
+    .eq('recurrence_rule_id', recurrence_rule_id)
+    .gte('start_at', timestamp.toISOString())
+    .order('start_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error) {
+    console.error("Error fetching last schedule occurence:", error)
+    return null
+  }
+
+  if (data && data.start_at) {
+    return new Date(data.start_at)
+  }
+
+  return null
+}
+
 export async function getCourseSubscriptionById(supabase: SupabaseClient<Database>, subscriptionId: string) {
     const { data, error } = await supabase.from('course_subscriptions')
         .select('*, c:courses(id, type), s:students(id, firstname, lastname, email, user_id)').eq('id', subscriptionId).single()
