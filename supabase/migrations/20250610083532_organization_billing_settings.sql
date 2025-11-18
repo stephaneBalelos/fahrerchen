@@ -30,7 +30,7 @@ alter type public.app_permission add value if not exists 'organization_billing_s
 alter type public.app_permission add value if not exists 'organization_billing_settings.delete';
 
 -- Job for generating bill for subscriptions if auto_generate_invoices is true
-create or replace function public.generate_invoices_for_organizations()
+create or replace function generate_invoices_for_organizations()
 returns void as $$
 declare
     sub_record record;
@@ -48,6 +48,9 @@ begin
 end;
 $$ language plpgsql security definer set search_path = 'public';
 
-
-
-
+-- Schedule the invoice generation function to run every month at 2 AM on the 1st day of the month
+select cron.schedule(
+    'Generate Invoices for Organizations',
+    '0 2 1 * *',
+    $$ select generate_invoices_for_organizations(); $$
+);
