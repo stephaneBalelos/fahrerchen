@@ -54,12 +54,12 @@ Deno.serve(async (req) => {
       { status: 404, headers: { "Content-Type": "application/json" } },
     )
   }
+  const lastOccurenceDate = await getLastScheduleOccurenceDate(supabase, recurrenceRule.id, new Date(body.timestamp))
 
   try {
     const rRule = rrule.RRule.fromString(recurrenceRule.rrule)
 
     // Get the last scheduled occurence date
-    const lastOccurenceDate = await getLastScheduleOccurenceDate(supabase, recurrenceRule.id, new Date(body.timestamp))
 
     if (lastOccurenceDate) {
       // Check if the last occurence date is in the next 60 days
