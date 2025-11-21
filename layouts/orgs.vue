@@ -45,7 +45,9 @@
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
-    <slot/>
+    <ClientOnly>
+      <slot/>
+    </ClientOnly>
   </UDashboardLayout>
 </template>
 
