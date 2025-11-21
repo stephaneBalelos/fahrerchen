@@ -14,11 +14,12 @@ const userOrganizationsStore = useUserOrganizationsStore();
 const userStore = useUserStore();
 const userPermissionStore = useUserPermissionsStore();
 const studentStore = useStudentStore();
-const route = useRoute();
+const router = useRouter();
 
 await useAsyncData('userOrganizations', async () => {
     await userOrganizationsStore.loadOrganizationsMemberships();
-    console.log("userOrganizationsStore.organizations", userOrganizationsStore.selectedOrganization?.id);
+    userOrganizationsStore.selectedOrganizationId = router.currentRoute.value.params.org_id as string;
+
     return true
 });
 
@@ -30,7 +31,7 @@ await useAsyncData('permissions', async () => {
 
 await useAsyncData('student', async () => {
     if(!userStore.user) return false;
-    await studentStore.loadStudent(route.params.org_id as string, userStore.user.id);
+    await studentStore.loadStudent(router.currentRoute.value.params.org_id as string, userStore.user.id);
     return true;
 });
 

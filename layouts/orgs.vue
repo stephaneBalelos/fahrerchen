@@ -45,13 +45,7 @@
         </template>
       </UDashboardSidebar>
     </UDashboardPanel>
-    <ClientOnly v-if="userOrganizationStore.selectedOrganization">
-      <slot/>
-      <!-- <LazyUiAppSearchComponent /> -->
-    </ClientOnly>
-    <div v-else class="">
-        ..loading
-    </div>
+    <slot/>
   </UDashboardLayout>
 </template>
 
@@ -65,9 +59,6 @@ const slideover = useSlideover();
 const openNotificationsSlideover = () => {
   slideover.open(NotificationsSlideover)
 };
-
-const userOrganizationStore = useUserOrganizationsStore();
-
 
 // const footerLinks = [
 //   {

@@ -46,15 +46,12 @@
           <UNavigationTree :links="links" default-open />
         </template>
       </UHeader>
-      <ClientOnly>
-        <slot />
-      </ClientOnly>
+      <slot />
     </UDashboardPanel>
   </UDashboardLayout>
 </template>
 
 <script setup lang="ts">
-import { computedAsync } from "@vueuse/core";
 import type { Database } from "~/types/app.types";
 import NotificationsSlideover from "~/components/account/NotificationsSlideover.vue";
 
@@ -67,11 +64,7 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const organization = computedAsync(async () => {
-  if (!userOrganizationsStore.selectedOrganization) {
-    return null;
-  }
-
+const organization = computed(() => {
   return userOrganizationsStore.selectedOrganization;
 });
 

@@ -9,14 +9,14 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const organizations = ref<UserOrganization[]>([])
     const selectedOrganizationMembers = ref<OrganizationMember[]>([])
     const config = useRuntimeConfig().public
+    const selectedOrganizationId = ref<string | null>(null)
 
     const isLoading = ref(true)
-    const route = useRoute()
 
     // Selected organization based on route param org_id
     const selectedOrganization = computed(() => {
-        if (route.params.org_id && organizations.value.length > 0) {
-            return organizations.value.find(o => o.id === route.params.org_id) || null
+        if (selectedOrganizationId.value) {
+            return organizations.value.find(o => o.id === selectedOrganizationId.value) || null
         }
         return null
     });
@@ -168,10 +168,10 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         }) : []
     }
 
-    watch(() => route.params.org_id, async (newOrgId, oldOrgId) => {
-        if (newOrgId && newOrgId !== oldOrgId) {
+    watch(() => selectedOrganizationId.value, async (org_id) => {
+        if (org_id) {
             try {
-                selectedOrganizationMembers.value = await getOrganizationMembers(newOrgId as string)
+                selectedOrganizationMembers.value = await getOrganizationMembers(org_id as string)
             } catch (error) {
                 console.error("Error loading organization members:", error)
             }
@@ -187,7 +187,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     }, { immediate: true })
 
     return {
-        organizations, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+        organizations, selectedOrganizationId, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
         getOrganizationBillingSettings, createBillingSettings, updateBillingSettings, getOrganizationMembers
     }
 
