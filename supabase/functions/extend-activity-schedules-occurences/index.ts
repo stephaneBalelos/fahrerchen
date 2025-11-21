@@ -5,7 +5,7 @@ import rrule from "npm:rrule@2.7.0";
 import { addDays, addMinutes } from "npm:date-fns"
 import type { Database } from "../_shared/types/database.types.ts";
 
-type ScheduleEdit = Omit<Database['public']['Tables']['course_activity_schedules']['Row'], 'id' | 'status' | 'assigned_to' | 'inserted_at' | 'updated_at'>;
+type ScheduleEdit = Omit<Database['public']['Tables']['course_activity_schedules']['Row'], 'id' | 'status' | 'assigned_to' | 'inserted_at' | 'updated_at' | 'attendees_count'>;
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") {
