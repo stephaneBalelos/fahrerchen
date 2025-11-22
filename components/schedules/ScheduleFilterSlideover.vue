@@ -60,12 +60,14 @@ const _schema = z.object({
   start_at: z.coerce.date().optional(),
 });
 
-const _filterForm = ref<z.infer<typeof _schema>>({
-  activity_id: props.form.activity_id,
-  status: props.form.status,
-  assigned_to: props.form.assigned_to,
-  start_at: props.form.start_at,
-});
+console.log(props.form);
+
+// const _filterForm = ref<z.infer<typeof _schema>>({
+//   activity_id: props.form.activity_id,
+//   status: props.form.status,
+//   assigned_to: props.form.assigned_to,
+//   start_at: props.form.start_at,
+// });
 
 const items = [
   {

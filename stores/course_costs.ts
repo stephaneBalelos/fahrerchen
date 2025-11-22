@@ -128,6 +128,18 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         return data || []
     }
 
+    const getCourseCostsForCourse = async (courseId: string) => {
+        const { data, error } = await supabase
+            .from('course_costs_combinations')
+            .select('*, cost:course_costs(*), course:courses(*)')
+            .eq('course_id', courseId)
+        if (error) {
+            console.error("Error loading costs for course:", error)
+            throw error
+        }
+        return data || []
+    }
+
     const addCostToCourse = async (cost_id: string, course_id: string): Promise<void> => {
         if (!userOrganizationsStore.selectedOrganization) {
             throw new Error("No organization selected")
@@ -182,6 +194,7 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         getCourseCost,
         deleteCourseCost,
         getAllowedCourseForCost,
+        getCourseCostsForCourse,
         addCostToCourse,
         removeCostFromCourse,
         updateCourseCostCombination

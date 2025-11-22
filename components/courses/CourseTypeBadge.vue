@@ -4,23 +4,19 @@
     size="xs"
     color="primary"
     :variant="'soft'"
-  >Class {{ props.type }}</UBadge>
-
+    >Class {{ props.type }}</UBadge
+  >
 </template>
 
 <script setup lang="ts">
-import { COURSE_ICONS } from '~/constants';
-import type { AppCourseType } from '~/types/app.types';
-
+import { COURSE_ICONS } from "~/constants";
+import type { AppCourseType } from "~/types/app.types";
 
 type Props = {
-    type: AppCourseType
-}
+  type: AppCourseType;
+};
 
-const props = defineProps<Props>()
-
+const props = defineProps<Props>();
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -233,11 +233,11 @@ const {
 } = await useAsyncData(
   "students",
   async () => {
-    if (!userOrganizationsStore.selectedOrganization) {
+    if (!userOrganizationsStore.selectedOrganizationId) {
       return null;
     }
     return await studentsStore.queryStudents({
-      org_id: userOrganizationsStore.selectedOrganization.id,
+      org_id: userOrganizationsStore.selectedOrganizationId,
       search: q.value,
     });
   },

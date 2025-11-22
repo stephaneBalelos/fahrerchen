@@ -10,13 +10,14 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const selectedOrganizationMembers = ref<OrganizationMember[]>([])
     const config = useRuntimeConfig().public
     const selectedOrganizationId = ref<string | null>(null)
+    const route = useRoute()
 
     const isLoading = ref(true)
 
     // Selected organization based on route param org_id
     const selectedOrganization = computed(() => {
         if (selectedOrganizationId.value) {
-            return organizations.value.find(o => o.id === selectedOrganizationId.value) || null
+            return organizations.value.filter(o => o.id === selectedOrganizationId.value)[0] || null
         }
         return null
     });
@@ -45,9 +46,9 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             organizations.value = []
         } else {
             organizations.value = data ? data.map(d => {
-                return { 
-                    ...d.organization, 
-                    organization_role: d.role, 
+                return {
+                    ...d.organization,
+                    organization_role: d.role,
                     avatar_path: d.organization.avatar_path ? `${config.supabase_storage_url}/object/public/organizations_avatars/${d.organization.avatar_path}` : null,
                 }
             }) : []
@@ -167,6 +168,11 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
             }
         }) : []
     }
+
+    watchEffect(async () => {
+        console.log("Route org_id changed:", route.params.org_id);
+        selectedOrganizationId.value = route.params.org_id as string;
+    });
 
     watch(() => selectedOrganizationId.value, async (org_id) => {
         if (org_id) {

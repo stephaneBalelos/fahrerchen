@@ -59,9 +59,10 @@ const {
 } = useAsyncData(async () => {
 
   return $courseActivitySchedules.fetchCourseActivitySchedules({
-    subscription_id: props.subscriptionId,
-    activity_id: props.filters?.activityId,
-    status: props.filters?.activityStatus,
+    subscription_ids: props.subscriptionId ? [props.subscriptionId] : [],
+    activity_ids: props.filters?.activityId ? [props.filters.activityId] : undefined,
+    statuses: props.filters?.activityStatus ? [props.filters.activityStatus] : undefined,
+    organization_id: props.orgId,
   });
 }, {
   watch: [props.filters],

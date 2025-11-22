@@ -91,6 +91,12 @@
 import { formatDate } from "~/utils/formatters";
 import EditCourseActivitySchedule from "../forms/EditCourseActivitySchedule.vue";
 
+type Props = {
+    orgId: string
+}
+
+const props = defineProps<Props>();
+
 const { t } = useI18n({
   useScope: "local",
 });
@@ -105,6 +111,7 @@ const slideover = useSlideover();
 
 const { data: schedules } = useAsyncData(async () => {
   return await $courseActivitySchedules.fetchCourseActivitySchedules({
+    organization_id: props.orgId,
     start_at: new Date(),
     limit: 10,
   });

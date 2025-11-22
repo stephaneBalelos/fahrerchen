@@ -32,19 +32,10 @@ const { t } = useI18n({
 
 const props = defineProps<Props>();
 
-const client = useSupabaseClient();
 const courseCostsStore = useCourseCostsStore();
 
 const { data } = useAsyncData(`course-costs-${props.courseId}`, async () => {
-  const { data, error } = await client
-    .from("course_costs_combinations")
-    .select("*")
-    .eq("course_id", props.courseId);
-  if (error) {
-    console.error("Error loading course costs:", error);
-    return [];
-  }
-  return data || [];
+  return await courseCostsStore.getCourseCostsForCourse(props.courseId);
 });
 
 const courseCosts = computed(() => {

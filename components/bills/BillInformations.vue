@@ -12,7 +12,7 @@
     <div class="flex flex-col gap-2">
       <div class="flex flex-col flex-1 items-start">
         <span class="text-sm text-gray-500">{{ t('course') }}</span>
-        <span class="text-lg font-bold">{{ course.name }}</span>
+        <span class="text-lg font-bold">{{ g(`course_types.${course.type}.name_full`) }}</span>
       </div>
       <div class="flex flex-col flex-1 items-start">
         <span class="text-sm text-gray-500">{{ t('subscribed_on') }}</span>
@@ -47,6 +47,7 @@ type Props = {
 const props = defineProps<Props>();
 
 const { t } = useI18n({ useScope: "local" });
+const { t: g } = useI18n({ useScope: "global" });
 
 const courseSubscription = await useCourseSubscription(
   props.bill.course_subscription_id

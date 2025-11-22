@@ -63,10 +63,10 @@ async function deleteOrganization() {
             description: t('success.description'),
             color: 'green'
         })
-        userOrganizationsStore.clearSelectedOrganization();
-        await userOrganizationsStore.loadOrganizationsMemberships();
-        modal.close();
+        userOrganizationsStore.selectedOrganizationId = null;
+        // await userOrganizationsStore.loadOrganizationsMemberships();
         navigateTo('/my');
+        modal.close();
     } catch (error) {
         console.error('Error deleting organization', error);
         toast.add({

@@ -95,7 +95,7 @@ const {
 
     return d.map((doc: AppCourseDocument) => {
       const extension = doc.path.split(".").pop();
-      const date = formatDateTime(doc.created_at);
+      const date = formatDateTime(doc.inserted_at);
       const document = {
         ...doc,
         extension_icon: extension == 'pdf' ? 'i-heroicons-document-text' : extension == 'mp4' ? 'i-heroicons-video-camera' : 'i-heroicons-photo',

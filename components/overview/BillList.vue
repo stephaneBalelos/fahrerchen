@@ -8,7 +8,7 @@
       <UButton
         color="gray"
         variant="solid"
-        :to="`/my/${userOrganizationsStore.selectedOrganization?.organization_id}/bills`"
+        :to="`/my/${props.orgId}/bills`"
       >
         {{ t("view_all") }}
       </UButton>
@@ -18,13 +18,13 @@
         v-for="(bill, index) in bills"
         :key="index"
         class="px-3 py-2 -mx-2 last:-mb-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer flex items-center gap-3 relative"
-        :to="`/my/${userOrganizationsStore.selectedOrganization?.organization_id}/bills/${bill.id}`"
+        :to="`/my/${props.orgId}/bills/${bill.id}`"
       >
         <div class="text-sm flex-1">
           <div>
             <p class="text-gray-900 dark:text-white font-medium">
               {{ bill.sub?.student?.firstname }}
-              {{ bill.sub?.student?.lastname }} | {{ bill.sub?.course?.name }}
+              {{ bill.sub?.student?.lastname }} | {{ bill.sub.course.type }}
 
               <UBadge
                 v-if="bill.ready_to_pay"
@@ -59,6 +59,12 @@
 import type { Database } from "~/types/app.types";
 import { formatCurrency, formatDate } from "~/utils/formatters";
 
+type Props = {
+  orgId: string
+};
+
+const props = defineProps<Props>();
+
 const { t } = useI18n({
   useScope: "local",
 });
@@ -79,7 +85,7 @@ const { data: bills } = useAsyncData(async () => {
     .is("canceled_at", null)
     .eq(
       "organization_id",
-      userOrganizationsStore.selectedOrganization.organization_id
+      props.orgId
     )
     .order("created_at", { ascending: false })
     .limit(10);

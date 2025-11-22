@@ -82,8 +82,9 @@ const userOrganizationsStore = useUserOrganizationsStore();
 
 const { data, error, status } = useAsyncData(async () => {
   return await $courseActivitySchedules.fetchCourseActivitySchedules({
-    activity_id: props.activityId,
-    subscription_id: props.subscriptionId,
+    organization_id: userOrganizationsStore.selectedOrganizationId || undefined,
+    activity_ids: props.activityId ? [props.activityId] : [],
+    subscription_ids: props.subscriptionId ? [props.subscriptionId] : [],
     start_at: props.startAt ? new Date(props.startAt) : undefined,
   });
 });

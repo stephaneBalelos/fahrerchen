@@ -155,9 +155,10 @@ const {
       return [];
     }
     return $courseActivitySchedules.fetchCourseActivitySchedules({
-      subscription_id: studentStore.selectedSubscription.id,
-      activity_id: filterForm.value.activityId || undefined,
-      status: filterForm.value.activityStatus || undefined,
+      organization_id: studentStore.selectedSubscription.organization_id,
+      subscription_ids: [studentStore.selectedSubscription.id],
+      activity_ids: filterForm.value.activityId ? [filterForm.value.activityId] : undefined,
+      statuses: filterForm.value.activityStatus ? [filterForm.value.activityStatus] : undefined,
     })
   },
   {

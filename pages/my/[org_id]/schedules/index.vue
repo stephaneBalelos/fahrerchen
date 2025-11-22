@@ -230,9 +230,7 @@ const selectedScheduleId = computed<string | null>({
 });
 
 const filterQuery = ref<Partial<CourseActivityScheduleQuery>>({
-  organization_id: userOrganizationsStore.selectedOrganization
-    ? userOrganizationsStore.selectedOrganization.id
-    : undefined,
+  organization_id: userOrganizationsStore.selectedOrganizationId || undefined,
   statuses: [],
   assigned_to_ids: [],
   subscription_ids: [],
@@ -251,7 +249,7 @@ const { data: schedules, refresh } = useAsyncData(
   {
     default: () => [],
     watch: [filterQuery.value],
-    immediate: false,
+    immediate: true,
     transform: (data) => {
       if (!data) return [];
       return data.map((s) => {

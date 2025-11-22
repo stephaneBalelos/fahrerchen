@@ -16,7 +16,7 @@ const slideover = useSlideover();
 const notificationsStore = useNotificationsStore();
 
 const notificationsCount = computed(
-  () => notificationsStore.notifications.filter((n) => !n.read_at).length
+  () => notificationsStore.notifications.length
 );
 
 const openNotificationsSlideover = () => {

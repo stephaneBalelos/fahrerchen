@@ -17,6 +17,12 @@
 <script setup lang="ts">
 import type { Database } from "~/types/app.types";
 
+type Props = {
+  orgId: string
+};
+
+const props = defineProps<Props>();
+
 const { t } = useI18n({
   useScope: "local",
 });
@@ -33,7 +39,7 @@ const { data: openRegCount } = useAsyncData(async () => {
   const { count, error } = await client
     .from("students_registration_requests")
     .select("*", { count: "exact", head: true }).eq('status', 0)
-    .eq("organization_id", userOrganizationsStore.selectedOrganization.organization_id);
+    .eq("organization_id", props.orgId);
 
   if (error) {
     throw error;

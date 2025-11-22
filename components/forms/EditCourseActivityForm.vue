@@ -176,6 +176,7 @@ const state = reactive<CourseActivityEdit>({
   price: 0,
   allow_self_registration: false,
   allow_requests: false,
+  duration_minutes: 45,
   sorting_order: 1,
 });
 
