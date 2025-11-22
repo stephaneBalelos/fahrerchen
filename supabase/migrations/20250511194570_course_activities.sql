@@ -46,6 +46,7 @@ create table public.course_activities_combinations (
 comment on table public.course_activities_combinations is 'COURSE ACTIVITIES COMBINATIONS.';
 alter table public.course_activities_combinations enable row level security;
 revoke update on table public.course_activities_combinations from authenticated, anon;
+grant update (price, required) on table public.course_activities_combinations to authenticated;
 
 -- Indexes for faster lookups
 create index idx_course_activities_combinations_organization_id on public.course_activities_combinations(organization_id);
@@ -56,6 +57,9 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 
 create policy "owner_can_create_course_activities_combinations" on public.course_activities_combinations for insert to authenticated with check (public.authorize('course_activities_combinations.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities_combinations.create');
+
+create policy "owner_manager_can_update_course_activities_combinations" on public.course_activities_combinations for update to authenticated using (public.authorize('course_activities_combinations.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_activities_combinations.update'), ('manager', 'course_activities_combinations.update');
 
 create policy "owner_can_delete_course_activities_combinations" on public.course_activities_combinations for delete to authenticated using (public.authorize('course_activities_combinations.delete', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities_combinations.delete');

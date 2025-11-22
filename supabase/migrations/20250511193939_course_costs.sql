@@ -42,6 +42,7 @@ create table public.course_costs_combinations (
 comment on table public.course_costs_combinations is 'COURSE COSTS COMBINATIONS.';
 alter table public.course_costs_combinations enable row level security;
 revoke update on table public.course_costs_combinations from authenticated, anon;
+grant update (price) on table public.course_costs_combinations to authenticated;
 
 -- Indexes for faster lookups
 create index idx_course_costs_combinations_organization_id on public.course_costs_combinations(organization_id);
@@ -49,6 +50,9 @@ create index idx_course_costs_combinations_organization_id on public.course_cost
 -- COURSE COSTS COMBINATIONS POLICIES
 create policy "owner_manager_teacher_student_can_see_course_costs_combinations" on public.course_costs_combinations for select to authenticated using (public.authorize('course_costs_combinations.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_costs_combinations.read'), ('manager', 'course_costs_combinations.read'), ('teacher', 'course_costs_combinations.read'), ('student', 'course_costs_combinations.read');
+
+create policy "owner_manager_can_update_course_costs_combinations" on public.course_costs_combinations for update to authenticated using (public.authorize('course_costs_combinations.update', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'course_costs_combinations.update'), ('manager', 'course_costs_combinations.update');
 
 create policy "owner_can_create_course_costs_combinations" on public.course_costs_combinations for insert to authenticated with check (public.authorize('course_costs_combinations.create', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_costs_combinations.create');

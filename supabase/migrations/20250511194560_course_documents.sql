@@ -31,8 +31,8 @@ create policy "owner_manager_teacher_can_update_course_documents" on public.cour
 create policy "owner_manager_teacher_can_update_course_documents_storage" on storage.objects for update to authenticated using (public.authorize('course_documents.update', ((storage.foldername(name))[1])::uuid)) with check (public.authorize('course_documents.update', ((storage.foldername(name))[1])::uuid));
 insert into public.role_permissions (role, permission) values ('owner', 'course_documents.update'), ('manager', 'course_documents.update'), ('teacher', 'course_documents.update');
 
-create policy "owner_manager_can_delete_course_documents_storage" on storage.objects for delete to authenticated using (public.authorize('courses.delete', ((storage.foldername(name))[1])::uuid));
-
+create policy "owner_manager_can_delete_course_documents_storage" on storage.objects for delete to authenticated using (public.authorize('course_documents.delete', ((storage.foldername(name))[1])::uuid));
+insert into public.role_permissions (role, permission) values ('owner', 'course_documents.delete'), ('manager', 'course_documents.delete');
 
 -- Create bucket for course documents
     -- course Documents

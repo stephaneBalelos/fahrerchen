@@ -46,6 +46,39 @@ begin
 end;
 $$ language plpgsql security definer set search_path = '';
 
+-- Allow students to insert themselves as attendees to schedules if the activity allows self-registration
+create or replace function public.can_student_insert_itself(schedule_id uuid, subscription_id uuid)
+returns boolean as $$
+declare org_id uuid;
+        a_id uuid;
+        a_allow_self_registration boolean;
+        u_role public.app_role;
+        u_id uuid;
+begin
+
+    select auth.uid() into u_id;
+
+    select organization_id, activity_id into org_id, a_id from public.course_activity_schedules where id = schedule_id;
+    select allow_self_registration into a_allow_self_registration from public.course_activities where id = a_id;
+
+    select role into u_role from public.organization_members
+    where organization_id = org_id and user_id = u_id;
+
+    if u_role != 'student' then
+        return false;
+    end if;
+
+    if not a_allow_self_registration then
+        return false;
+    end if;
+    if not public.course_subscription_belongs_to_student_user(subscription_id) then
+        return false;
+    end if;
+
+    return true;
+end;
+$$ language plpgsql security definer set search_path = '';
+
 -- COURSE ACTIVITY SCHEDULES POLICIES
 create policy "owner_manager_teacher_student_can_see_course_activity_schedules" on public.course_activity_schedules for select to authenticated using (public.authorize('course_activity_schedules.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules.read'), ('manager', 'course_activity_schedules.read'), ('teacher', 'course_activity_schedules.read'), ('student', 'course_activity_schedules.read');
@@ -63,7 +96,7 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 create policy "owner_manager_teacher_student_can_see_course_activity_schedules_attendees" on public.course_activity_schedules_attendees for select to authenticated using (public.authorize('course_activity_schedules_attendees.read', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendees.read'), ('manager', 'course_activity_schedules_attendees.read'), ('teacher', 'course_activity_schedules_attendees.read'), ('student', 'course_activity_schedules_attendees.read');
 
-create policy "owner_manager_teacher_can_create_course_activity_schedules_attendees" on public.course_activity_schedules_attendees for insert to authenticated with check (public.authorize('course_activity_schedules_attendees.create', organization_id) and public.is_schedule_active(schedule_id) and public.is_subscription_active(subscription_id));
+create policy "owner_manager_teacher_student_can_create_course_activity_schedules_attendees" on public.course_activity_schedules_attendees for insert to authenticated with check ((public.authorize('course_activity_schedules_attendees.create', organization_id) or (public.can_student_insert_itself(schedule_id, subscription_id))) and public.is_schedule_active(schedule_id) and public.is_subscription_active(subscription_id));
 insert into public.role_permissions (role, permission) values ('owner', 'course_activity_schedules_attendees.create'), ('manager', 'course_activity_schedules_attendees.create'), ('teacher', 'course_activity_schedules_attendees.create');
 
 create policy "owner_manager_teacher_can_delete_course_activity_schedules_attendees" on public.course_activity_schedules_attendees for delete to authenticated using (public.authorize('course_activity_schedules_attendees.delete', organization_id) and public.is_schedule_active(schedule_id) and public.is_subscription_active(subscription_id));

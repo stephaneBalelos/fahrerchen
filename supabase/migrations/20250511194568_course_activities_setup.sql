@@ -1,0 +1,12 @@
+alter type public.app_permission add value 'course_activities.read';
+alter type public.app_permission add value 'course_activities.create';
+alter type public.app_permission add value 'course_activities.update';
+alter type public.app_permission add value 'course_activities.delete';
+alter type public.app_permission add value 'course_activities_combinations.read';
+alter type public.app_permission add value 'course_activities_combinations.create';
+alter type public.app_permission add value 'course_activities_combinations.update';
+alter type public.app_permission add value 'course_activities_combinations.delete';
+alter type public.app_permission add value 'course_activities_recurrence_rules.read';
+alter type public.app_permission add value 'course_activities_recurrence_rules.create';
+alter type public.app_permission add value 'course_activities_recurrence_rules.update';
+alter type public.app_permission add value 'course_activities_recurrence_rules.delete';

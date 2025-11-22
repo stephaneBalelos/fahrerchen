@@ -1036,6 +1036,7 @@ export type Database = {
       }
       organization_billing_settings: {
         Row: {
+          auto_generate_invoices: boolean
           bank_account_bic: string
           bank_account_iban: string
           bank_account_name: string
@@ -1053,6 +1054,7 @@ export type Database = {
           vat_rate: number
         }
         Insert: {
+          auto_generate_invoices?: boolean
           bank_account_bic: string
           bank_account_iban: string
           bank_account_name: string
@@ -1070,6 +1072,7 @@ export type Database = {
           vat_rate?: number
         }
         Update: {
+          auto_generate_invoices?: boolean
           bank_account_bic?: string
           bank_account_iban?: string
           bank_account_name?: string
@@ -1535,7 +1538,18 @@ export type Database = {
         }
         Returns: boolean
       }
-      can_student_insert_schedule_attendee: {
+      auto_update_past_schedule_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      can_manager_invite_role: {
+        Args: {
+          org_id: string
+          role_to_invite: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      can_student_insert_itself: {
         Args: { schedule_id: string; subscription_id: string }
         Returns: boolean
       }
@@ -1547,9 +1561,17 @@ export type Database = {
         Args: { course_subscription_id: string }
         Returns: boolean
       }
+      extend_activity_schedules_occurrences_job: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       generate_bill_for_subscription: {
         Args: { subscription_id: string }
         Returns: string
+      }
+      generate_invoices_for_organizations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       is_bill_active: {
         Args: { bill_id: string }
@@ -1591,34 +1613,28 @@ export type Database = {
         | "organizations.update"
         | "organizations.delete"
         | "organizations_stripe_accounts.read"
-        | "organizations_stripe_accounts.create"
         | "organizations_stripe_accounts.update"
         | "organization_members.read"
-        | "organization_members.create"
+        | "organization_members.insert"
         | "organization_members.update"
         | "organization_members.delete"
         | "organization_invitations.read"
         | "organization_invitations.create"
-        | "organization_invitations.update"
         | "organization_invitations.delete"
         | "students.read"
         | "students.create"
         | "students.update"
         | "students.delete"
-        | "students_registration_requests.read"
-        | "students_registration_requests.create"
-        | "students_registration_requests.update"
-        | "students_registration_requests.delete"
         | "courses.read"
         | "courses.create"
         | "courses.update"
-        | "courses.delete"
         | "course_costs.read"
         | "course_costs.create"
         | "course_costs.update"
         | "course_costs.delete"
         | "course_costs_combinations.read"
         | "course_costs_combinations.create"
+        | "course_costs_combinations.update"
         | "course_costs_combinations.delete"
         | "course_required_documents.read"
         | "course_required_documents.create"
@@ -1626,6 +1642,7 @@ export type Database = {
         | "course_required_documents.delete"
         | "course_required_documents_combinations.read"
         | "course_required_documents_combinations.create"
+        | "course_required_documents_combinations.update"
         | "course_required_documents_combinations.delete"
         | "course_documents.read"
         | "course_documents.create"
@@ -1633,7 +1650,20 @@ export type Database = {
         | "course_documents.delete"
         | "course_documents_combinations.read"
         | "course_documents_combinations.create"
+        | "course_documents_combinations.update"
         | "course_documents_combinations.delete"
+        | "course_activities.read"
+        | "course_activities.create"
+        | "course_activities.update"
+        | "course_activities.delete"
+        | "course_activities_combinations.read"
+        | "course_activities_combinations.create"
+        | "course_activities_combinations.update"
+        | "course_activities_combinations.delete"
+        | "course_activities_recurrence_rules.read"
+        | "course_activities_recurrence_rules.create"
+        | "course_activities_recurrence_rules.update"
+        | "course_activities_recurrence_rules.delete"
         | "course_subscriptions.read"
         | "course_subscriptions.create"
         | "course_subscriptions.update"
@@ -1642,28 +1672,18 @@ export type Database = {
         | "course_subscription_documents.create"
         | "course_subscription_documents.update"
         | "course_subscription_documents.delete"
-        | "course_activity_schedules_attendees.read"
-        | "course_activity_schedules_attendees.create"
-        | "course_activity_schedules_attendees.delete"
-        | "course_activities.read"
-        | "course_activities.create"
-        | "course_activities.update"
-        | "course_activities.delete"
-        | "course_activities_recurrence_rules.read"
-        | "course_activities_recurrence_rules.create"
-        | "course_activities_recurrence_rules.update"
-        | "course_activities_recurrence_rules.delete"
-        | "course_activities_combinations.read"
-        | "course_activities_combinations.create"
-        | "course_activities_combinations.delete"
-        | "course_activity_schedules_attendances.read"
-        | "course_activity_schedules_attendances.create"
-        | "course_activity_schedules_attendances.update"
-        | "course_activity_schedules_attendances.delete"
         | "course_activity_schedules.read"
         | "course_activity_schedules.create"
         | "course_activity_schedules.update"
         | "course_activity_schedules.delete"
+        | "course_activity_schedules_attendees.read"
+        | "course_activity_schedules_attendees.create"
+        | "course_activity_schedules_attendees.update"
+        | "course_activity_schedules_attendees.delete"
+        | "course_activity_schedules_attendances.read"
+        | "course_activity_schedules_attendances.create"
+        | "course_activity_schedules_attendances.update"
+        | "course_activity_schedules_attendances.delete"
         | "course_subscription_bills.read"
         | "course_subscription_bills.create"
         | "course_subscription_bills.update"
@@ -1672,12 +1692,14 @@ export type Database = {
         | "course_subscription_bill_items.create"
         | "course_subscription_bill_items.update"
         | "course_subscription_bill_items.delete"
+        | "students_registration_requests.read"
+        | "students_registration_requests.create"
+        | "students_registration_requests.update"
+        | "students_registration_requests.delete"
         | "organization_billing_settings.read"
         | "organization_billing_settings.create"
         | "organization_billing_settings.update"
         | "organization_billing_settings.delete"
-        | "course_costs_combinations.update"
-        | "course_activities_combinations.update"
         | "course_activity_schedule_requests.read"
         | "course_activity_schedule_requests.create"
         | "course_activity_schedule_requests.update"
@@ -2381,34 +2403,28 @@ export const Constants = {
         "organizations.update",
         "organizations.delete",
         "organizations_stripe_accounts.read",
-        "organizations_stripe_accounts.create",
         "organizations_stripe_accounts.update",
         "organization_members.read",
-        "organization_members.create",
+        "organization_members.insert",
         "organization_members.update",
         "organization_members.delete",
         "organization_invitations.read",
         "organization_invitations.create",
-        "organization_invitations.update",
         "organization_invitations.delete",
         "students.read",
         "students.create",
         "students.update",
         "students.delete",
-        "students_registration_requests.read",
-        "students_registration_requests.create",
-        "students_registration_requests.update",
-        "students_registration_requests.delete",
         "courses.read",
         "courses.create",
         "courses.update",
-        "courses.delete",
         "course_costs.read",
         "course_costs.create",
         "course_costs.update",
         "course_costs.delete",
         "course_costs_combinations.read",
         "course_costs_combinations.create",
+        "course_costs_combinations.update",
         "course_costs_combinations.delete",
         "course_required_documents.read",
         "course_required_documents.create",
@@ -2416,6 +2432,7 @@ export const Constants = {
         "course_required_documents.delete",
         "course_required_documents_combinations.read",
         "course_required_documents_combinations.create",
+        "course_required_documents_combinations.update",
         "course_required_documents_combinations.delete",
         "course_documents.read",
         "course_documents.create",
@@ -2423,7 +2440,20 @@ export const Constants = {
         "course_documents.delete",
         "course_documents_combinations.read",
         "course_documents_combinations.create",
+        "course_documents_combinations.update",
         "course_documents_combinations.delete",
+        "course_activities.read",
+        "course_activities.create",
+        "course_activities.update",
+        "course_activities.delete",
+        "course_activities_combinations.read",
+        "course_activities_combinations.create",
+        "course_activities_combinations.update",
+        "course_activities_combinations.delete",
+        "course_activities_recurrence_rules.read",
+        "course_activities_recurrence_rules.create",
+        "course_activities_recurrence_rules.update",
+        "course_activities_recurrence_rules.delete",
         "course_subscriptions.read",
         "course_subscriptions.create",
         "course_subscriptions.update",
@@ -2432,28 +2462,18 @@ export const Constants = {
         "course_subscription_documents.create",
         "course_subscription_documents.update",
         "course_subscription_documents.delete",
-        "course_activity_schedules_attendees.read",
-        "course_activity_schedules_attendees.create",
-        "course_activity_schedules_attendees.delete",
-        "course_activities.read",
-        "course_activities.create",
-        "course_activities.update",
-        "course_activities.delete",
-        "course_activities_recurrence_rules.read",
-        "course_activities_recurrence_rules.create",
-        "course_activities_recurrence_rules.update",
-        "course_activities_recurrence_rules.delete",
-        "course_activities_combinations.read",
-        "course_activities_combinations.create",
-        "course_activities_combinations.delete",
-        "course_activity_schedules_attendances.read",
-        "course_activity_schedules_attendances.create",
-        "course_activity_schedules_attendances.update",
-        "course_activity_schedules_attendances.delete",
         "course_activity_schedules.read",
         "course_activity_schedules.create",
         "course_activity_schedules.update",
         "course_activity_schedules.delete",
+        "course_activity_schedules_attendees.read",
+        "course_activity_schedules_attendees.create",
+        "course_activity_schedules_attendees.update",
+        "course_activity_schedules_attendees.delete",
+        "course_activity_schedules_attendances.read",
+        "course_activity_schedules_attendances.create",
+        "course_activity_schedules_attendances.update",
+        "course_activity_schedules_attendances.delete",
         "course_subscription_bills.read",
         "course_subscription_bills.create",
         "course_subscription_bills.update",
@@ -2462,12 +2482,14 @@ export const Constants = {
         "course_subscription_bill_items.create",
         "course_subscription_bill_items.update",
         "course_subscription_bill_items.delete",
+        "students_registration_requests.read",
+        "students_registration_requests.create",
+        "students_registration_requests.update",
+        "students_registration_requests.delete",
         "organization_billing_settings.read",
         "organization_billing_settings.create",
         "organization_billing_settings.update",
         "organization_billing_settings.delete",
-        "course_costs_combinations.update",
-        "course_activities_combinations.update",
         "course_activity_schedule_requests.read",
         "course_activity_schedule_requests.create",
         "course_activity_schedule_requests.update",

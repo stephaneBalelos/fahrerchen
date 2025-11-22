@@ -1,3 +1,5 @@
+create type public.user_status as enum ('ONLINE', 'OFFLINE');
+
 -- USERS
 create table if not exists public.users (
   id          uuid references auth.users on delete cascade not null primary key, -- UUID from auth.users
@@ -15,7 +17,22 @@ alter table public.users enable row level security;
 revoke update on table public.users from authenticated, anon;
 grant update (firstname, lastname, avatar_path, updated_at) on table public.users to authenticated;
 
--- -- Handle USER UPDATES
+-- Handle email updates from auth.users
+create or replace function public.update_user_email()
+returns trigger
+language plpgsql
+as $$
+begin
+  update public.users set email = new.email where id = new.id;
+  return new;
+end;
+$$ security definer set search_path = '';
+create trigger on_auth_user_email_update
+after update of email on auth.users
+for each row
+execute procedure public.update_user_email();
+
+-- Handle USER UPDATES
 create or replace function public.update_user_updated_at()
 returns trigger
 language plpgsql

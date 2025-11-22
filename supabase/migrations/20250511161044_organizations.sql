@@ -76,8 +76,6 @@ grant update (role) on table public.organization_members to authenticated;
 create index idx_organization_members_organization_id on public.organization_members(organization_id);
 create index idx_organization_members_user_id on public.organization_members(user_id);
 
-
-
 -- Helpers Functions
 -- Check if the user is the main owner of the organization
 create or replace function is_main_owner(
@@ -174,8 +172,8 @@ values
     ('manager', 'organizations.update');
 
 create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check (owner_id = (select auth.uid()));
-
 create policy "main_owner_can_delete_organizations" on public.organizations for delete to authenticated using (public.is_main_owner(id));
+
 
 -- Organizations Stripe Accounts Policies
 create policy "members_can_read_their_organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
@@ -209,17 +207,49 @@ values
     ('teacher', 'organization_members.read'),
     ('student', 'organization_members.read');
 
+create policy "owners_can_insert_organizations_memberships" on public.organization_members for insert to authenticated with check (public.authorize('organization_members.insert', organization_id));
+insert into public.role_permissions (role, permission) values ('owner', 'organization_members.insert');
+
 create policy "owners_can_update_organizations_memberships" on public.organization_members for update to authenticated using (public.authorize('organization_members.update', organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.update');
 
-create policy "owner_can_delete_organizations_memberships" on public.organization_members for delete to authenticated using (public.authorize('organization_members.delete', organization_id));
+create policy "owner_can_delete_organizations_memberships_members_can_delete_their_own" on public.organization_members for delete to authenticated using ((public.authorize('organization_members.delete', organization_id) or user_id = (select auth.uid())));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_members.delete');
 
-create policy "users_can_insert_their_own_membership" on public.organization_members for insert to authenticated with check (user_id = (select auth.uid()));
+-- -- Prevent owners from deleting their own membership
+create or replace function prevent_owners_from_deleting_their_own_membership()
+returns trigger as $$
+begin
+  if public.is_main_owner(old.organization_id) and old.user_id = (select auth.uid()) then
+    raise exception 'Main Owners cannot delete their own membership';
+  end if;
 
-create policy "users_can_update_their_own_membership" on public.organization_members for update to authenticated using (user_id = (select auth.uid()));
+  return old;
+end;
+$$ language plpgsql security definer set search_path = '';
+create trigger prevent_owners_from_deleting_their_own_membership_trigger
+  before delete on public.organization_members
+  for each row execute procedure prevent_owners_from_deleting_their_own_membership();
 
-create policy "users_can_delete_their_own_membership" on public.organization_members for delete to authenticated using (user_id = (select auth.uid()));
+-- allow manager to insert invitations if role is 'teacher' or 'student'
+create or replace function public.can_manager_invite_role(role_to_invite app_role, org_id uuid)
+returns boolean as $$
+declare
+  u_id uuid;
+  u_role public.app_role;
+begin
+
+  select auth.uid() into u_id;
+  select role into u_role from public.organization_members where organization_id = org_id and user_id = u_id limit 1;
+  if u_role != 'manager' then
+    return false;
+  end if;
+  if role_to_invite in ('teacher', 'student') then
+    return true;
+  end if;
+  return false;
+end;
+$$ language plpgsql security definer set search_path = '';
 
 -- Organizations Invitations Policies
 create policy "owners_and_manager_can_read_organizations_invitations" on public.organizations_invitations for select to authenticated using (public.authorize('organization_invitations.read', organization_id));
@@ -229,7 +259,7 @@ values
     ('owner', 'organization_invitations.read'),
     ('manager', 'organization_invitations.read');
 
-create policy "owners_can_insert_organizations_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id));
+create policy "owners_can_insert_organizations_invitations" on public.organizations_invitations for insert to authenticated with check (public.authorize('organization_invitations.create', organization_id) or public.can_manager_invite_role(role, organization_id));
 insert into public.role_permissions (role, permission) values ('owner', 'organization_invitations.create');
 
 create policy "owners_and_manager_can_delete_organizations_invitations" on public.organizations_invitations for delete to authenticated using (public.authorize('organization_invitations.delete', organization_id));
