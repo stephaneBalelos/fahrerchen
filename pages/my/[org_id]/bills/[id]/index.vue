@@ -182,7 +182,7 @@ const { data: bill, refresh } = await useAsyncData(`bills_${id}`, async () => {
     throw error;
   }
 
-  const subscription = await useCourseSubscription(data.course_subscription_id);
+  const subscription = await useCourseSubscription(data.course_subscription_id ?? undefined);
 
   return {
     data,

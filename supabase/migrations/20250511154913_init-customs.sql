@@ -1,5 +1,7 @@
 create schema if not exists private;
 grant usage on schema private to anon, authenticated, service_role, postgres;
+alter default privileges in schema public revoke execute on functions from public;
+alter default privileges in schema public revoke execute on functions from anon, authenticated;
 
 create extension if not exists "unaccent" with schema private;
 

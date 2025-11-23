@@ -46,7 +46,7 @@ begin
         perform public.generate_bill_for_subscription(sub_record.id);
     end loop;
 end;
-$$ language plpgsql security definer set search_path = 'public';
+$$ language plpgsql security definer set search_path = '';
 
 -- Add permissions for the organization_billing_settings table
 create policy "members_can_read_organization_billing_settings" on public.organization_billing_settings 

@@ -114,7 +114,3 @@ create trigger notify_on_update_course_activity_schedule_request_trigger
     execute procedure  public.enqueue_notification_job('course_activity_schedule_requests.status.updated');
 
 
-
-
-
-

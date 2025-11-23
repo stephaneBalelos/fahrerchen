@@ -41,8 +41,6 @@ const { t } = useI18n({
   useScope: "local",
 });
 
-const tutorialStore = useTutorialStore();
-
 const props = defineProps<Props>();
 const toasts = useToast();
 const isSendingInvitation = ref(false);
@@ -96,7 +94,6 @@ async function sendInvitation() {
       description: "student invited",
       color: "green",
     });
-    tutorialStore.completeStep('tutorial_continue_as_student');
   } catch (error) {
     console.error(error);
   } finally {

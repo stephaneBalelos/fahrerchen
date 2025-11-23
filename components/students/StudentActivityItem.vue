@@ -106,7 +106,7 @@ const { data: scheduleAttendance } = useAsyncData(
   async () => {
     const { data, error } = await client
       .from("course_activity_schedules_attendances")
-      .select("*, subscription:course_subscription_id(*, student:students(*))")
+      .select("*, subscription:course_subscriptions(*, student:students(*))")
       .eq("course_activity_schedule_id", props.activitySchedule.id)
       .eq("course_subscription_id", props.subscriptionId)
       .eq("organization_id", props.activitySchedule.organization_id);

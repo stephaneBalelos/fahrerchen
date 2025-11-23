@@ -69,30 +69,6 @@ create policy "owner_can_delete_course_activities_combinations" on public.course
 insert into public.role_permissions (role, permission) values ('owner', 'course_activities_combinations.delete');
 
 
--- FUNCTION TO ADD A COURSE TO ALLOWED COURSES FOR AN ACTIVITY
-create or replace function public.add_course_to_allowed_courses(activity_id uuid, course_id uuid) returns void as $$
-declare
-    course_org_id uuid;
-    activity_org_id uuid;
-begin
-    select organization_id into course_org_id from public.courses where id = course_id;
-    if course_org_id is null then
-        raise exception 'Course not found' using errcode = 'P0002';
-    end if;
-
-    select organization_id into activity_org_id from public.course_activities where id = activity_id;
-    if activity_org_id is null then
-        raise exception 'Activity not found' using errcode = 'P0002';
-    end if;
-
-    if course_org_id <> activity_org_id then
-        raise exception 'Course and activity must belong to the same organization' using errcode = 'P0002';
-    end if;
-
-    insert into public.course_activities_combinations (course_id, activity_id, organization_id)
-    values (course_id, activity_id, course_org_id);
-end $$ language plpgsql security invoker set search_path = 'public';
-
 -- Trigger to populate allowed courses when a new activity is created
 create or replace function public.populate_allowed_courses_on_activity_insert() returns trigger as $$
 declare

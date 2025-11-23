@@ -38,7 +38,6 @@ export default defineNuxtConfig({
       stripe_pk: process.env.STRIPE_PK,
       base_url: process.env.BASE_URL,
       is_demo: process.env.NUXT_PUBLIC_IS_DEMO,
-      show_tutorial: process.env.NUXT_PUBLIC_SHOW_TUTORIAL,
     }
   },
 

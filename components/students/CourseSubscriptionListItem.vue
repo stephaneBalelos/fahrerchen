@@ -1,7 +1,7 @@
 <template>
   <div>
     <UAlert
-      v-if="subscription && status === 'success'"
+      v-if="subscription && subscription.student && subscription.course && status === 'success'"
       :avatar="{
         src: undefined,
         alt: `${subscription.student.firstname} ${subscription.student.lastname}`,
@@ -54,7 +54,7 @@ const { data: subscription, status } = useAsyncData(async () => {
   const { data, error } = await client
     .from("course_subscriptions")
     .select(
-      "*, course:course_id(*), student:student_id(firstname, lastname, email)"
+      "*, course:courses(*), student:students(firstname, lastname, email)"
     )
     .eq("id", props.subscriptionId)
     .single();

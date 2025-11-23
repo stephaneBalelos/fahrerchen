@@ -26,7 +26,7 @@ export const useCourseActivitySchedules = () => {
 
         const { data, error } = await client
             .from("course_activity_schedules")
-            .select("*, recurrence_rule:recurrence_rule_id(*), user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
+            .select("*, recurrence_rule:activity_recurrence_rules(*), user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:course_activities(*)")
             .eq("id", id)
             .single()
 
@@ -177,7 +177,7 @@ export const useCourseActivitySchedules = () => {
         }
         const { data, error } = await client
             .from("course_activity_schedules_attendees")
-            .select("*, course_subscriptions:subscription_id(*, student:students(*), course:courses(*))")
+            .select("*, course_subscriptions(*, student:students(*), course:courses(*))")
             .eq("schedule_id", schedule_id)
             .eq("organization_id", userOrganizationStore.selectedOrganization.id)
 
@@ -194,7 +194,7 @@ export const useCourseActivitySchedules = () => {
         }
         const { data, error } = await client
             .from("course_activity_schedules_attendances")
-            .select("*, subscription:course_subscription_id(*, student:students(*))")
+            .select("*, subscription:course_subscriptions(*, student:students(*))")
             .eq("course_activity_schedule_id", schedule_id)
             .eq("organization_id", userOrganizationStore.selectedOrganization.id)
 

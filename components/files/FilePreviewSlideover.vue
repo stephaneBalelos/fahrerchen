@@ -5,7 +5,7 @@
       :state="state"
       :schema="schema"
       :validate-on="['submit']"
-      :onSubmit="saveFileMetadata"
+      @submit="_saveFileMetadata"
     >
       <UDashboardSection
         icon="i-heroicons-document-text"
@@ -13,7 +13,7 @@
         description="This information will be displayed publicly."
         orientation="vertical"
       >
-        <img v-if="url" :src="url" class="w-full rounded-md" />
+        <!-- <img v-if="url" :src="url" class="w-full rounded-md" > -->
       </UDashboardSection>
 
       <UFormGroup
@@ -39,13 +39,13 @@
     </UForm>
     <template #title>
       <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-        {{ filename }}
+        <!-- {{ filename }} -->
       </h2>
     </template>
     <template #footer>
-      <UButton v-if="file" @click="deleteFile" color="red" variant="ghost"
+      <!-- <UButton v-if="file" @click="deleteFile" color="red" variant="ghost"
         >Delete</UButton
-      >
+      > -->
       <UButton @click="form?.submit()">Save</UButton>
       <UButton
         icon="i-heroicons-arrow-down-tray-solid"
@@ -60,8 +60,7 @@
 
 <script setup lang="ts">
 import { z } from "zod";
-import { useSupabaseFile } from "~/composables/useSupabaseFile";
-import type { AppFileObject, Database } from "~/types/app.types";
+import type { Database } from "~/types/app.types";
 
 type Props = {
   id: string;
@@ -81,23 +80,20 @@ const schema = z.object({
 type Schema = z.infer<typeof schema>;
 
 const form = ref();
-const props = defineProps<Props>();
+const _props = defineProps<Props>();
 const slideover = useSlideover();
 const toast = useToast();
 const client = useSupabaseClient<Database>();
-const { file, url } = useSupabaseFile(props.id, props.bucketId, props.path);
-const filename = computed(() => {
-  return file.value?.name.split("/").pop();
-});
+
 
 const state = reactive<Schema>({
   name: "",
   description: "",
 });
 
-async function deleteFile() {
+async function _deleteFile() {
   try {
-    const { data, error } = await client.storage
+    const { error } = await client.storage
       .from("avatars")
       .remove(["folder/avatar1.png"]);
       if (error) {
@@ -119,11 +115,11 @@ async function deleteFile() {
   }
 }
 
-function saveFileMetadata() {
-  try {
-  } catch (error) {
+function _saveFileMetadata() {
+  // try {
+  // } catch (error) {
     
-  }
+  // }
   
 }
 

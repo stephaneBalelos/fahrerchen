@@ -50,7 +50,7 @@ const { t } = useI18n({ useScope: "local" });
 const { t: g } = useI18n({ useScope: "global" });
 
 const courseSubscription = await useCourseSubscription(
-  props.bill.course_subscription_id
+  props.bill.course_subscription_id ?? undefined
 );
 </script>
 
