@@ -36,7 +36,7 @@ export type Database = {
     Tables: {
       activity_recurrence_rules: {
         Row: {
-          activity_id: string | null
+          activity_id: string
           id: string
           inserted_at: string
           is_valid: boolean
@@ -45,7 +45,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          activity_id?: string | null
+          activity_id: string
           id?: string
           inserted_at?: string
           is_valid?: boolean
@@ -54,7 +54,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          activity_id?: string | null
+          activity_id?: string
           id?: string
           inserted_at?: string
           is_valid?: boolean
@@ -137,24 +137,24 @@ export type Database = {
       }
       course_activities_combinations: {
         Row: {
-          activity_id: string | null
-          course_id: string | null
+          activity_id: string
+          course_id: string
           id: string
           organization_id: string
           price: number | null
           required: number | null
         }
         Insert: {
-          activity_id?: string | null
-          course_id?: string | null
+          activity_id: string
+          course_id: string
           id?: string
           organization_id: string
           price?: number | null
           required?: number | null
         }
         Update: {
-          activity_id?: string | null
-          course_id?: string | null
+          activity_id?: string
+          course_id?: string
           id?: string
           organization_id?: string
           price?: number | null
@@ -186,7 +186,7 @@ export type Database = {
       }
       course_activity_schedule_requests: {
         Row: {
-          activity_id: string | null
+          activity_id: string
           id: string
           inserted_at: string
           organization_id: string
@@ -194,10 +194,10 @@ export type Database = {
           schedule_id: string | null
           start_at: string
           status: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id: string | null
+          subscription_id: string
         }
         Insert: {
-          activity_id?: string | null
+          activity_id: string
           id?: string
           inserted_at?: string
           organization_id: string
@@ -205,10 +205,10 @@ export type Database = {
           schedule_id?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id?: string | null
+          subscription_id: string
         }
         Update: {
-          activity_id?: string | null
+          activity_id?: string
           id?: string
           inserted_at?: string
           organization_id?: string
@@ -216,7 +216,7 @@ export type Database = {
           schedule_id?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id?: string | null
+          subscription_id?: string
         }
         Relationships: [
           {
@@ -231,6 +231,13 @@ export type Database = {
             columns: ["organization_id", "activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_reque_organization_id_schedule_id_fkey"
+            columns: ["organization_id", "schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
             referencedColumns: ["organization_id", "id"]
           },
           {
@@ -251,7 +258,7 @@ export type Database = {
       }
       course_activity_schedules: {
         Row: {
-          activity_id: string | null
+          activity_id: string
           assigned_to: string | null
           attendees_count: number
           duration_minutes: number
@@ -264,7 +271,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          activity_id?: string | null
+          activity_id: string
           assigned_to?: string | null
           attendees_count?: number
           duration_minutes?: number
@@ -277,7 +284,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          activity_id?: string | null
+          activity_id?: string
           assigned_to?: string | null
           attendees_count?: number
           duration_minutes?: number
@@ -328,7 +335,7 @@ export type Database = {
           activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id: string | null
           course_activity_schedule_id: string | null
-          course_subscription_id: string | null
+          course_subscription_id: string
           id: string
           inserted_at: string
           organization_id: string
@@ -347,7 +354,7 @@ export type Database = {
           activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
-          course_subscription_id?: string | null
+          course_subscription_id: string
           id?: string
           inserted_at?: string
           organization_id: string
@@ -366,7 +373,7 @@ export type Database = {
           activity_type?: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
-          course_subscription_id?: string | null
+          course_subscription_id?: string
           id?: string
           inserted_at?: string
           organization_id?: string
@@ -420,20 +427,20 @@ export type Database = {
         Row: {
           id: string
           organization_id: string
-          schedule_id: string | null
-          subscription_id: string | null
+          schedule_id: string
+          subscription_id: string
         }
         Insert: {
           id?: string
           organization_id: string
-          schedule_id?: string | null
-          subscription_id?: string | null
+          schedule_id: string
+          subscription_id: string
         }
         Update: {
           id?: string
           organization_id?: string
-          schedule_id?: string | null
-          subscription_id?: string | null
+          schedule_id?: string
+          subscription_id?: string
         }
         Relationships: [
           {
@@ -499,22 +506,22 @@ export type Database = {
       }
       course_costs_combinations: {
         Row: {
-          cost_id: string | null
-          course_id: string | null
+          cost_id: string
+          course_id: string
           id: string
           organization_id: string
           price: number | null
         }
         Insert: {
-          cost_id?: string | null
-          course_id?: string | null
+          cost_id: string
+          course_id: string
           id?: string
           organization_id: string
           price?: number | null
         }
         Update: {
-          cost_id?: string | null
-          course_id?: string | null
+          cost_id?: string
+          course_id?: string
           id?: string
           organization_id?: string
           price?: number | null
@@ -583,20 +590,20 @@ export type Database = {
       }
       course_documents_combinations: {
         Row: {
-          course_id: string | null
-          document_id: string | null
+          course_id: string
+          document_id: string
           id: string
           organization_id: string
         }
         Insert: {
-          course_id?: string | null
-          document_id?: string | null
+          course_id: string
+          document_id: string
           id?: string
           organization_id: string
         }
         Update: {
-          course_id?: string | null
-          document_id?: string | null
+          course_id?: string
+          document_id?: string
           id?: string
           organization_id?: string
         }
@@ -661,22 +668,22 @@ export type Database = {
       }
       course_required_documents_combinations: {
         Row: {
-          course_id: string | null
+          course_id: string
           id: string
           organization_id: string
-          required_document_id: string | null
+          required_document_id: string
         }
         Insert: {
-          course_id?: string | null
+          course_id: string
           id?: string
           organization_id: string
-          required_document_id?: string | null
+          required_document_id: string
         }
         Update: {
-          course_id?: string | null
+          course_id?: string
           id?: string
           organization_id?: string
-          required_document_id?: string | null
+          required_document_id?: string
         }
         Relationships: [
           {
@@ -784,7 +791,7 @@ export type Database = {
         Row: {
           bill_number: string
           canceled_at: string | null
-          course_subscription_id: string | null
+          course_subscription_id: string
           created_at: string
           id: string
           organization_id: string
@@ -799,7 +806,7 @@ export type Database = {
         Insert: {
           bill_number: string
           canceled_at?: string | null
-          course_subscription_id?: string | null
+          course_subscription_id: string
           created_at?: string
           id?: string
           organization_id: string
@@ -814,7 +821,7 @@ export type Database = {
         Update: {
           bill_number?: string
           canceled_at?: string | null
-          course_subscription_id?: string | null
+          course_subscription_id?: string
           created_at?: string
           id?: string
           organization_id?: string
@@ -845,28 +852,28 @@ export type Database = {
       }
       course_subscription_documents: {
         Row: {
-          course_subscription_id: string | null
+          course_subscription_id: string
           created_at: string
           id: string
           organization_id: string
           path: string
-          required_document_id: string | null
+          required_document_id: string
         }
         Insert: {
-          course_subscription_id?: string | null
+          course_subscription_id: string
           created_at?: string
           id?: string
           organization_id: string
           path: string
-          required_document_id?: string | null
+          required_document_id: string
         }
         Update: {
-          course_subscription_id?: string | null
+          course_subscription_id?: string
           created_at?: string
           id?: string
           organization_id?: string
           path?: string
-          required_document_id?: string | null
+          required_document_id?: string
         }
         Relationships: [
           {
@@ -896,29 +903,29 @@ export type Database = {
         Row: {
           archived_at: string | null
           costs: number
-          course_id: string | null
+          course_id: string
           id: string
           inserted_at: string
           organization_id: string
-          student_id: string | null
+          student_id: string
         }
         Insert: {
           archived_at?: string | null
           costs?: number
-          course_id?: string | null
+          course_id: string
           id?: string
           inserted_at?: string
           organization_id: string
-          student_id?: string | null
+          student_id: string
         }
         Update: {
           archived_at?: string | null
           costs?: number
-          course_id?: string | null
+          course_id?: string
           id?: string
           inserted_at?: string
           organization_id?: string
-          student_id?: string | null
+          student_id?: string
         }
         Relationships: [
           {
@@ -1416,7 +1423,7 @@ export type Database = {
           lastname: string
           organization_id: string
           phone_number: string
-          requested_course_id: string | null
+          requested_course_id: string
           status: number
         }
         Insert: {
@@ -1433,7 +1440,7 @@ export type Database = {
           lastname: string
           organization_id: string
           phone_number: string
-          requested_course_id?: string | null
+          requested_course_id: string
           status?: number
         }
         Update: {
@@ -1450,7 +1457,7 @@ export type Database = {
           lastname?: string
           organization_id?: string
           phone_number?: string
-          requested_course_id?: string | null
+          requested_course_id?: string
           status?: number
         }
         Relationships: [
@@ -1511,10 +1518,6 @@ export type Database = {
       activity_allows_requests: {
         Args: { activity_id: string }
         Returns: boolean
-      }
-      add_course_to_allowed_courses: {
-        Args: { activity_id: string; course_id: string }
-        Returns: undefined
       }
       approve_schedule_request: {
         Args: { request_id: string }

@@ -1,8 +1,8 @@
 -- COURSE SUBSCRIPTION DOCUMENTS
 create table public.course_subscription_documents (
   id            uuid default uuid_generate_v4(),
-  course_subscription_id    uuid,
-  required_document_id  uuid,
+  course_subscription_id    uuid not null,
+  required_document_id  uuid not null,
   path         text not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,

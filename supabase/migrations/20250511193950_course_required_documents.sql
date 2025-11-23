@@ -32,8 +32,8 @@ create index idx_course_required_documents_organization_id on public.course_requ
 -- Course Required Documents Combinations
 create table public.course_required_documents_combinations (
   id uuid default uuid_generate_v4(),
-  course_id uuid,
-  required_document_id uuid,
+  course_id uuid not null,
+  required_document_id uuid not null,
   organization_id uuid references public.organizations on delete cascade not null,
   unique (course_id, required_document_id),
   primary key (organization_id, id),

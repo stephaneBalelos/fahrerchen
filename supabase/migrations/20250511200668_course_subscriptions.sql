@@ -2,8 +2,8 @@
 create table public.course_subscriptions (
   id            uuid default uuid_generate_v4(),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
-  course_id    uuid,
-  student_id    uuid,
+  course_id    uuid not null,
+  student_id    uuid not null,
   archived_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
   costs        numeric default 0 not null check (costs >= 0), -- The sum of all the bills

@@ -34,8 +34,8 @@ create index idx_course_costs_organization_id on public.course_costs(organizatio
 -- Course Costs Combinations
 create table public.course_costs_combinations (
   id            uuid default uuid_generate_v4(),
-  course_id    uuid,
-  cost_id      uuid,
+  course_id    uuid not null,
+  cost_id      uuid not null,
   price        numeric default null check (price >= 0),
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_id, cost_id),

@@ -7,8 +7,8 @@ alter type public.notification_type add value if not exists 'course_activity_sch
 
 create table course_activity_schedule_requests (
     id            uuid default uuid_generate_v4(),
-    activity_id   uuid,
-    subscription_id uuid,
+    activity_id   uuid not null,
+    subscription_id uuid not null,
     requested_by uuid references public.users on delete set null,
     start_at     timestamp with time zone not null,
     inserted_at  timestamp with time zone default now() not null,
@@ -17,7 +17,8 @@ create table course_activity_schedule_requests (
     organization_id uuid references public.organizations on delete cascade not null,
     primary key (organization_id, id),
     foreign key (organization_id, activity_id) references public.course_activities(organization_id, id) on delete cascade,
-    foreign key (organization_id, subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade
+    foreign key (organization_id, subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade,
+    foreign key (organization_id, schedule_id) references public.course_activity_schedules(organization_id, id) on delete cascade
 );
 comment on table public.course_activity_schedule_requests is 'Requests for scheduling course activities.';
 alter table public.course_activity_schedule_requests enable row level security;

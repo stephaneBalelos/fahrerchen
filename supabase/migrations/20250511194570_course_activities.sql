@@ -37,8 +37,8 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 -- COURSE ACTIVITIES COMBINATIONS
 create table public.course_activities_combinations (
   id            uuid default uuid_generate_v4(),
-  course_id    uuid,
-  activity_id    uuid,
+  course_id    uuid not null,
+  activity_id    uuid not null,
   price        numeric default null check (price >= 0),
   required     integer default null check (required >= 0),
   organization_id    uuid references public.organizations on delete cascade not null,
@@ -99,7 +99,7 @@ execute function public.populate_allowed_courses_on_activity_insert();
 -- Activities Recurrence Rules
 create table public.activity_recurrence_rules (
   id            uuid default uuid_generate_v4(),
-  activity_id    uuid,
+  activity_id    uuid not null,
   rrule         text not null, -- iCal RRULE format
   is_valid     boolean default true not null, -- Indicates if the recurrence rule is valid, will be set to false if parsing fails when trying to generate occurrences
   organization_id    uuid references public.organizations on delete cascade not null,

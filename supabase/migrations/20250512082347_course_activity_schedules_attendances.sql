@@ -16,7 +16,7 @@ create table public.course_activity_schedules_attendances (
   course_activity_id    uuid,
   course_activity_schedule_id    uuid,
   schedule_assigned_to_id uuid references public.users on delete set null,
-  course_subscription_id    uuid,
+  course_subscription_id    uuid not null,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_activity_schedule_id, course_subscription_id),

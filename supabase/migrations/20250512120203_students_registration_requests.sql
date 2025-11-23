@@ -12,7 +12,7 @@ create table public.students_registration_requests (
   address_city    text not null,
   address_country   text not null,
   has_a_license    boolean default false not null,
-  requested_course_id uuid,
+  requested_course_id uuid not null,
   status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (email, organization_id),

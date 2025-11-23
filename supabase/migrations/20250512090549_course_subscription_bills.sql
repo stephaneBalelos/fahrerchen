@@ -1,7 +1,7 @@
 -- COURSE SUBSCRIPTION BILLS
 create table public.course_subscription_bills (
   id            uuid default uuid_generate_v4(),
-  course_subscription_id    uuid,
+  course_subscription_id    uuid not null,
   -- The bill number is generated based on prefix "organization handle" + "year" + "month" and auto-incrementing number
   -- Example: organization-123-2024-01-1
   bill_number text not null unique check (bill_number ~ '^[a-z0-9\-]+-[0-9]{4}-[0-9]{2}-[0-9]+$'),

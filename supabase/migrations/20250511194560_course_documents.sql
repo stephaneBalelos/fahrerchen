@@ -83,8 +83,8 @@ execute procedure public.handle_course_documents_storage_ops();
 -- Course Documents Combinations
 create table public.course_documents_combinations (
   id            uuid default uuid_generate_v4(),
-  course_id    uuid,
-  document_id   uuid,
+  course_id    uuid not null,
+  document_id   uuid not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   unique (course_id, document_id),
   primary key (organization_id, id),
