@@ -6,6 +6,7 @@
     <template #links>
       <UButton
         v-if="isRequiredDocumentsSettingsSetupComplete"
+        data-label="next-step"
         color="primary"
         icon="i-heroicons-check-circle"
         @click="

@@ -16,6 +16,7 @@
         </div>
         <UButton
           v-if="organizationsStore.selectedOrganization"
+          data-label="next-step"
           :to="`/setup/${organizationsStore.selectedOrganization.id}/courses`"
         >
           {{ t("continue_setup") }}

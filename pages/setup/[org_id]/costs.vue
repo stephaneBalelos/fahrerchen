@@ -6,6 +6,7 @@
     <template #links>
       <UButton
         v-if="isCostSettingsSetupComplete"
+        data-label="next-step"
         color="primary"
         icon="i-heroicons-check-circle"
         @click="() => navigateTo(`/setup/${organizationsStore.selectedOrganization?.id}/billing`)"

@@ -1,6 +1,7 @@
 <template>
   <UModal>
     <UForm
+      id="create-organization-form"
       :schema="schema"
       :state="state"
       :validate-on="['blur', 'submit']"

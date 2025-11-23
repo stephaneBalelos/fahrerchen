@@ -2,7 +2,7 @@
   <UDashboardSection
     :title="t('course_activities')"
     :description="t('set_activities')"
-    class="px-4 py-6"
+    class="course-activities-list px-4 py-6"
   >
     <template #links>
       <UButton

@@ -29,10 +29,17 @@ function openCreateOrgModal() {
           :headline="t('organizations')"
           :title="t('my_organizations')"
           :description="t('description')"
-          :links="[
-            { label: t('create_new_organization'), click: () => openCreateOrgModal() },
-          ]"
-        />
+        >
+        <template #links>
+          <UButton
+          id="create-organization"
+          color="white"
+            @click="openCreateOrgModal()"
+          >
+            {{ t('create_new_organization') }}
+          </UButton>
+        </template>
+        </UPageHeader>
         <OrganizationCard
           v-for="org in organizationsStore.organizations"
           :key="org.id"

@@ -2,7 +2,7 @@
   <UDashboardCard
     v-if="organization"
     :key="organization.id"
-    class="mb-4 cursor-pointer"
+    class="organization-card mb-4 cursor-pointer"
     :title="organization.name"
     :ui="{ wrapper: 'relative group org-card' }"
   >
@@ -20,7 +20,8 @@
     <template #links>
       <UButton
         v-if="organization.setup_completed"
-        class="org-card-action"
+        data-label="go-to-organization"
+        class="go-to-organization-button"
         size="sm"
         color="primary"
         :to="`/my/${organization.id}`"
@@ -28,6 +29,7 @@
       />
       <UButton
         v-else
+        data-label="continue-setup"
         size="sm"
         color="primary"
         :label="t('continue_setup')"

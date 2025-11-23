@@ -6,6 +6,7 @@
     <template #links>
       <UButton
         v-if="isCourseSetupComplete"
+        data-label="next-step"
         color="primary"
         icon="i-heroicons-check-circle"
         @click="$emits('course-setup-completed')"
@@ -49,6 +50,7 @@
           <div class="flex justify-end gap-2">
             <UButton
               v-if="!course.is_active"
+              data-label="activate-course"
               size="sm"
               color="primary"
               icon="i-heroicons-plus-circle"
