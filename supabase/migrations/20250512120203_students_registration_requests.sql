@@ -69,3 +69,10 @@ $$ language plpgsql security invoker set search_path = '';
 create trigger on_registration_request_updated
   after update of status on public.students_registration_requests
   for each row execute procedure public.handle_registration_request_confirmation();
+
+
+-- Notifications
+-- Trigger for students_registration_requests table to create notifications when a new registration request is inserted
+create trigger students_registration_requests_insert_trigger
+    after insert on public.students_registration_requests
+    for each row execute procedure public.enqueue_notification_job('students_registration_requests.inserted');

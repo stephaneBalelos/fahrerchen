@@ -122,3 +122,10 @@ after update on public.course_activity_schedules
 for each row
 when (old.status is distinct from new.status and new.status = 'COMPLETED')
 execute procedure public.create_attendance_record_for_schedule();
+
+
+-- Notifications Trigger for course_activity_schedules_attendances table to create notifications when an attendance is inserted
+-- Trigger for course_activity_schedules_attendances table to create notifications when a new attendance is inserted
+create trigger course_activity_schedules_attendances_insert_trigger
+    after insert on public.course_activity_schedules_attendances
+    for each row execute procedure public.enqueue_notification_job('course_activity_schedules_attendances.inserted');

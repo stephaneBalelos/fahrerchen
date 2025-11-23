@@ -97,3 +97,9 @@ create policy "owner_can_delete_course_subscriptions" on public.course_subscript
 insert into public.role_permissions (role, permission) values ('owner', 'course_subscriptions.delete');
 
 create policy "user_can_see_their_own_course_subscriptions" on public.course_subscriptions for select to authenticated using ((select auth.uid()) = student_id);
+
+
+-- Trigger for course_subscriptions table to create notifications when a new subscription is inserted
+create trigger course_subscriptions_insert_trigger
+    after insert on public.course_subscriptions
+    for each row execute procedure public.enqueue_notification_job('course_subscriptions.inserted');

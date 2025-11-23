@@ -410,3 +410,24 @@ create trigger before_insert_course_subscription_bills
 before insert on public.course_subscription_bills
 for each row
 execute procedure public.set_vat_rate_and_amount();
+
+
+-- Notifications
+-- Trigger for course_subscription_bills table to create notifications when a bill's paid_at is updated
+create trigger course_subscription_bills_paid_at_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.paid_at <> new.paid_at)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.paid_at.updated');
+
+-- Trigger for course_subscription_bills table to create notifications when a bill's ready_to_pay is updated
+create trigger course_subscription_bills_ready_to_pay_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.ready_to_pay <> new.ready_to_pay)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.ready_to_pay.updated');
+
+
+-- Trigger for course_subscription_bills table to create notifications when a bill's canceled_at is updated
+create trigger course_subscription_bills_canceled_at_update_trigger
+    after update on public.course_subscription_bills
+    for each row when (old.canceled_at <> new.canceled_at)
+    execute procedure public.enqueue_notification_job('course_subscription_bills.canceled_at.updated');

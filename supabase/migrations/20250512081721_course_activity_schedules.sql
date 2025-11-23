@@ -257,3 +257,38 @@ create trigger trg_delete_schedules_on_recurrence_rule_delete
 before delete on public.activity_recurrence_rules
 for each row
 execute function public.delete_schedules_on_recurrence_rule_delete();
+
+
+-- Notifications Triggers for Course Activity Schedules
+-- Trigger for course_activity_schedules_attendees table to create notifications when a new attendee is inserted
+create trigger course_activity_schedules_attendees_insert_trigger
+    after insert on public.course_activity_schedules_attendees
+    for each row execute procedure public.enqueue_notification_job('course_activity_schedules_attendees.inserted');
+
+-- Trigger for course_activity_schedules_attendees table to create notifications when an attendee is removed
+create trigger course_activity_schedules_attendees_delete_trigger
+    after delete on public.course_activity_schedules_attendees
+    for each row execute procedure public.enqueue_notification_job('course_activity_schedules_attendees.removed');
+
+-- Trigger for course_activity_schedules table to create notifications when a schedule assigned_to is updated
+create trigger course_activity_schedules_assigned_to_update_trigger
+    after update on public.course_activity_schedules
+    for each row when ((old.assigned_to is null and new.assigned_to is not null) or (old.assigned_to <> new.assigned_to))
+    execute procedure public.enqueue_notification_job('course_activity_schedules.assigned_to.updated');
+
+-- Trigger for course_activity_schedules table to create notifications when a schedule's status is updated
+create trigger course_activity_schedules_status_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.status <> new.status)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.status.updated');
+
+-- Trigger for course_activity_schedules table to create notifications when a schedule's start time is updated
+create trigger course_activity_schedules_start_at_update_trigger
+    after update on public.course_activity_schedules
+    for each row when (old.start_at <> new.start_at)
+    execute procedure public.enqueue_notification_job('course_activity_schedules.start_at.updated');
+
+-- Trigger for course_activity_schedules table to create notifications when a schedule is deleted
+create trigger course_activity_schedules_delete_trigger
+    after delete on public.course_activity_schedules
+    for each row execute procedure public.enqueue_notification_job('course_activity_schedules.deleted');
