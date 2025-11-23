@@ -1,7 +1,7 @@
 -- COURSE SUBSCRIPTION BILLS
 create table public.course_subscription_bills (
-  id            uuid default uuid_generate_v4() primary key,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  course_subscription_id    uuid,
   -- The bill number is generated based on prefix "organization handle" + "year" + "month" and auto-incrementing number
   -- Example: organization-123-2024-01-1
   bill_number text not null unique check (bill_number ~ '^[a-z0-9\-]+-[0-9]{4}-[0-9]{2}-[0-9]+$'),
@@ -16,7 +16,9 @@ create table public.course_subscription_bills (
   vat_rate numeric(5, 2) default 0.0 not null check (vat_rate >= 0.0 and vat_rate <= 100.0),
   vat_amount numeric(10, 2) default 0.0 not null check (vat_amount >= 0.0),
   total_with_vat numeric(10, 2) generated always as (total + (total * (vat_rate / 100))) stored,
-  check ((paid_at is not null and canceled_at is null) or (paid_at is null and canceled_at is not null) or (paid_at is null and canceled_at is null))
+  check ((paid_at is not null and canceled_at is null) or (paid_at is null and canceled_at is not null) or (paid_at is null and canceled_at is null)),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade
 );
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
 alter table public.course_subscription_bills enable row level security;
@@ -25,12 +27,12 @@ grant update (paid_at, ready_to_pay, stripe_payment_intent_id, canceled_at) on t
 
 -- COURSE SUBSCRIPTION BILL ITEMS
 create table public.course_subscription_bill_items (
-  id            uuid default uuid_generate_v4() primary key,
-  bill_id      uuid references public.course_subscription_bills on delete cascade,
-  course_cost_id    uuid references public.course_costs on delete set null,
-  course_activity_attendance_id    uuid references public.course_activity_schedules_attendances on delete set null,
+  id            uuid default uuid_generate_v4(),
+  bill_id      uuid,
+  course_cost_id    uuid,
+  course_activity_attendance_id    uuid,
   activity_type  public.activity_types,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  course_subscription_id    uuid,
   title        text not null,
   description   text not null,
   price       numeric default 0 not null, -- price can be negative if the attendance was refunded or a payment adjustment is made
@@ -40,7 +42,12 @@ create table public.course_subscription_bill_items (
     (course_cost_id is not null and course_activity_attendance_id is null) or
     (course_cost_id is null and course_activity_attendance_id is not null) or
     (course_cost_id is null and course_activity_attendance_id is null)
-  ) -- either cost_id or attendance_id can be set, but not both
+  ), -- either cost_id or attendance_id can be set, but not both
+  primary key (organization_id, id),
+  foreign key (organization_id, bill_id) references public.course_subscription_bills(organization_id, id) on delete cascade,
+  foreign key (organization_id, course_subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade,
+  foreign key (organization_id, course_cost_id) references public.course_costs(organization_id, id) on delete set null,
+  foreign key (organization_id, course_activity_attendance_id) references public.course_activity_schedules_attendances(organization_id, id) on delete set null
 );
 comment on table public.course_subscription_bill_items is 'COURSE SUBSCRIPTION BILL ITEMS.';
 alter table public.course_subscription_bill_items enable row level security;

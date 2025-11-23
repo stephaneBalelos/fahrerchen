@@ -95,7 +95,7 @@ export const useCourseActivitySchedules = () => {
 
         let q = client
             .from("course_activity_schedules")
-            .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:activity_id(*)")
+            .select("*, user:assigned_to(*), course_activity_schedules_attendees(id, subscription_id), activity:course_activities(*)")
 
         q = q.eq("organization_id", query.organization_id)
 
@@ -207,7 +207,7 @@ export const useCourseActivitySchedules = () => {
     const getCourseActivitySchedulesRequestById = async (id: string) => {
         const { data, error } = await client
             .from("course_activity_schedule_requests")
-            .select("*, user:requested_by(*), subscription:subscription_id(*, student:students(*), course:courses(*)), activity:activity_id(*)")
+            .select("*, user:requested_by(*), subscription:course_subscriptions(*, student:students(*), course:courses(*)), activity:course_activities(*)")
             .eq("id", id)
             .single()
 
@@ -220,7 +220,7 @@ export const useCourseActivitySchedules = () => {
     const fetchCourseActivitySchedulesRequests = async (query: CourseActivitySchedulesRequestQuery) => {
         let q = client
             .from("course_activity_schedule_requests")
-            .select("*, user:requested_by(*), subscription:subscription_id(*, student:students(*), course:courses(*)), activity:activity_id(*)")
+            .select("*, user:requested_by(*), subscription:course_subscriptions(*, student:students(*), course:courses(*)), activity:course_activities(*)")
             .eq("organization_id", query.organization_id)
             .eq("status", query.status)
 

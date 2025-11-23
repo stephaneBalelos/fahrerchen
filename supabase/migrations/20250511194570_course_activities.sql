@@ -1,6 +1,6 @@
 -- COURSE ACTIVITIES
 create table public.course_activities (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   name          text not null,
   description   text not null,
   activity_type  public.activity_types not null,
@@ -12,12 +12,13 @@ create table public.course_activities (
   inserted_at  timestamptz default now() not null,
   updated_at  timestamptz default now() not null,
   duration_minutes int default 45 not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  primary key (organization_id, id)
 );
 comment on table public.course_activities is 'COURSE ACTIVITIES.';
 alter table public.course_activities enable row level security;
 revoke update on table public.course_activities from authenticated, anon;
-grant update (name, description, activity_type, required, price, sorting_order, allow_self_registration, allow_requests) on table public.course_activities to authenticated;
+grant update (name, description, activity_type, required, price, sorting_order, allow_self_registration, allow_requests, duration_minutes, updated_at) on table public.course_activities to authenticated;
 
 -- COURSE ACTIVITIES POLICIES
 create policy "owner_manager_teacher_student_can_see_course_activities" on public.course_activities for select to authenticated using (public.authorize('course_activities.read', organization_id));
@@ -35,13 +36,16 @@ insert into public.role_permissions (role, permission) values ('owner', 'course_
 
 -- COURSE ACTIVITIES COMBINATIONS
 create table public.course_activities_combinations (
-  id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
-  activity_id    uuid references public.course_activities on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  course_id    uuid,
+  activity_id    uuid,
   price        numeric default null check (price >= 0),
   required     integer default null check (required >= 0),
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_id, activity_id)
+  unique (course_id, activity_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_id) references public.courses(organization_id, id) on delete cascade,
+  foreign key (organization_id, activity_id) references public.course_activities(organization_id, id) on delete cascade
 );
 comment on table public.course_activities_combinations is 'COURSE ACTIVITIES COMBINATIONS.';
 alter table public.course_activities_combinations enable row level security;
@@ -118,13 +122,16 @@ execute function public.populate_allowed_courses_on_activity_insert();
 
 -- Activities Recurrence Rules
 create table public.activity_recurrence_rules (
-  id            uuid default uuid_generate_v4() primary key,
-  activity_id    uuid references public.course_activities on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  activity_id    uuid,
   rrule         text not null, -- iCal RRULE format
   is_valid     boolean default true not null, -- Indicates if the recurrence rule is valid, will be set to false if parsing fails when trying to generate occurrences
   organization_id    uuid references public.organizations on delete cascade not null,
   inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null
+  updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique (activity_id, rrule),
+  primary key (organization_id, id),
+  foreign key (organization_id, activity_id) references public.course_activities(organization_id, id) on delete cascade
 );
 comment on table public.activity_recurrence_rules is 'Recurrence rules for course activities.';
 alter table public.activity_recurrence_rules enable row level security;

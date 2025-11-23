@@ -1,6 +1,6 @@
 -- STUDENTS
 create table public.students (
-  id          uuid default uuid_generate_v4() primary key,
+  id          uuid default uuid_generate_v4(),
   email       text not null unique,
   firstname    text not null,
   lastname    text not null,
@@ -17,7 +17,8 @@ create table public.students (
   organization_id    uuid references public.organizations on delete cascade not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   unique (user_id, organization_id),
-  unique (email, organization_id)
+  unique (email, organization_id),
+  primary key (organization_id, id)
 );
 comment on table public.students is 'Profile data for each student.';
 alter table public.students enable row level security;

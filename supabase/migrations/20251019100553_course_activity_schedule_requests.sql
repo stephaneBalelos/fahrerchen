@@ -6,15 +6,18 @@ alter type public.notification_type add value if not exists 'course_activity_sch
 alter type public.notification_type add value if not exists 'course_activity_schedule_requests.deleted';
 
 create table course_activity_schedule_requests (
-    id            uuid default uuid_generate_v4() primary key,
-    activity_id   uuid references public.course_activities on delete cascade not null,
-    subscription_id uuid references public.course_subscriptions on delete cascade not null,
+    id            uuid default uuid_generate_v4(),
+    activity_id   uuid,
+    subscription_id uuid,
     requested_by uuid references public.users on delete set null,
     start_at     timestamp with time zone not null,
     inserted_at  timestamp with time zone default now() not null,
     status       public.schedule_request_statuses default 'pending'::public.schedule_request_statuses not null,
-    schedule_id uuid references public.course_activity_schedules on delete cascade,
-    organization_id uuid references public.organizations on delete cascade not null
+    schedule_id uuid,
+    organization_id uuid references public.organizations on delete cascade not null,
+    primary key (organization_id, id),
+    foreign key (organization_id, activity_id) references public.course_activities(organization_id, id) on delete cascade,
+    foreign key (organization_id, subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade
 );
 comment on table public.course_activity_schedule_requests is 'Requests for scheduling course activities.';
 alter table public.course_activity_schedule_requests enable row level security;
@@ -83,6 +86,10 @@ begin
     insert into public.course_activity_schedules (activity_id, organization_id, start_at, assigned_to, duration_minutes)
     values (request_record.activity_id, request_record.organization_id, request_record.start_at, (select auth.uid()), 45)
     returning id into s_id;
+
+    -- Insert default attendees for the created schedule
+    insert into public.course_activity_schedules_attendees (schedule_id, subscription_id, organization_id)
+    values (s_id, request_record.subscription_id, request_record.organization_id);
 
     -- Link the created schedule to the request
     update public.course_activity_schedule_requests

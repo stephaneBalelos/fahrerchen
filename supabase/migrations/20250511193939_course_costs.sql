@@ -1,12 +1,13 @@
 -- COURSE COSTS
 create table public.course_costs (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   name          text not null,
   description   text not null,
   price        numeric default 0 not null check (price >= 0),
   inserted_at  timestamptz default now() not null,
   updated_at  timestamptz default now() not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  primary key (organization_id, id)
 );
 comment on table public.course_costs is 'COURSE COSTS.';
 alter table public.course_costs enable row level security;
@@ -32,12 +33,15 @@ create index idx_course_costs_organization_id on public.course_costs(organizatio
 
 -- Course Costs Combinations
 create table public.course_costs_combinations (
-  id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
-  cost_id      uuid references public.course_costs on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  course_id    uuid,
+  cost_id      uuid,
   price        numeric default null check (price >= 0),
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_id, cost_id)
+  unique (course_id, cost_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_id) references public.courses(organization_id, id) on delete cascade,
+  foreign key (organization_id, cost_id) references public.course_costs(organization_id, id) on delete cascade
 );
 comment on table public.course_costs_combinations is 'COURSE COSTS COMBINATIONS.';
 alter table public.course_costs_combinations enable row level security;

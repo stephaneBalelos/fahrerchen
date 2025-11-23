@@ -1,7 +1,7 @@
 -- COURSE ACTIVITY SCHEDULES
 create table public.course_activity_schedules (
-  id            uuid default uuid_generate_v4() primary key,
-  activity_id    uuid references public.course_activities on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  activity_id    uuid,
   assigned_to   uuid references public.users on delete set null,
   organization_id    uuid references public.organizations on delete cascade not null,
   status        public.schedule_status default 'PLANNED'::public.schedule_status not null,
@@ -9,8 +9,11 @@ create table public.course_activity_schedules (
   duration_minutes int not null default 45,
   inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  recurrence_rule_id uuid references public.activity_recurrence_rules on delete set null,
-  attendees_count int default 0 not null
+  recurrence_rule_id uuid,
+  attendees_count int default 0 not null,
+  primary key (organization_id, id),
+  foreign key (organization_id, activity_id) references public.course_activities(organization_id, id) on delete cascade,
+  foreign key (organization_id, recurrence_rule_id) references public.activity_recurrence_rules(organization_id, id) on delete set null
 );
 comment on table public.course_activity_schedules is 'ACTIVITY SCHEDULES.';
 alter table public.course_activity_schedules enable row level security;
@@ -20,10 +23,13 @@ grant update (assigned_to, status, start_at, duration_minutes, updated_at) on ta
 
 -- COURSE ACTIVITY SCHEDULES ATTENDEES
 create table public.course_activity_schedules_attendees (
-  id            uuid default uuid_generate_v4() primary key,
-  schedule_id   uuid references public.course_activity_schedules on delete cascade not null,
-  subscription_id uuid references public.course_subscriptions on delete cascade not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  id            uuid default uuid_generate_v4(),
+  schedule_id   uuid,
+  subscription_id uuid,
+  organization_id    uuid references public.organizations on delete cascade not null,
+  primary key (organization_id, id),
+  foreign key (organization_id, schedule_id) references public.course_activity_schedules(organization_id, id) on delete cascade,
+  foreign key (organization_id, subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade
 );
 comment on table public.course_activity_schedules_attendees is 'Join table for course activity schedules and their attendees (course subscriptions).';
 alter table public.course_activity_schedules_attendees enable row level security;

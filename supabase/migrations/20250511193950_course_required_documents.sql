@@ -1,11 +1,12 @@
 -- COURSE REQUIRED DOCUMENTS
 create table public.course_required_documents (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   name          text not null,
   description   text not null,
   inserted_at  timestamptz default now() not null,
   updated_at  timestamptz default now() not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  primary key (organization_id, id)
 );
 comment on table public.course_required_documents is 'COURSE REQUIRED DOCUMENTS.';
 alter table public.course_required_documents enable row level security;
@@ -30,11 +31,14 @@ create index idx_course_required_documents_organization_id on public.course_requ
 
 -- Course Required Documents Combinations
 create table public.course_required_documents_combinations (
-  id uuid default uuid_generate_v4() primary key,
-  course_id uuid references public.courses on delete cascade not null,
-  required_document_id uuid references public.course_required_documents on delete cascade not null,
+  id uuid default uuid_generate_v4(),
+  course_id uuid,
+  required_document_id uuid,
   organization_id uuid references public.organizations on delete cascade not null,
-  unique (course_id, required_document_id)
+  unique (course_id, required_document_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_id) references public.courses(organization_id, id) on delete cascade,
+  foreign key (organization_id, required_document_id) references public.course_required_documents(organization_id, id) on delete cascade
 );
 comment on table public.course_required_documents_combinations is 'COURSE REQUIRED DOCUMENTS COMBINATIONS.';
 alter table public.course_required_documents_combinations enable row level security;

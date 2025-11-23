@@ -1,13 +1,16 @@
 -- COURSES SUBSCRIPTIONS
 create table public.course_subscriptions (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
-  course_id    uuid references public.courses on delete cascade not null,
-  student_id    uuid references public.students on delete cascade not null,
+  course_id    uuid,
+  student_id    uuid,
   archived_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
   costs        numeric default 0 not null check (costs >= 0), -- The sum of all the bills
-  unique (course_id, student_id) -- unique constraint to prevent multiple subscriptions for the same course and student
+  unique (course_id, student_id), -- unique constraint to prevent multiple subscriptions for the same course and student
+  primary key (organization_id, id),
+  foreign key (organization_id, course_id) references public.courses(organization_id, id) on delete cascade,
+  foreign key (organization_id, student_id) references public.students(organization_id, id) on delete cascade
 );
 comment on table public.course_subscriptions is 'COURSES AVAILABLE.';
 alter table public.course_subscriptions enable row level security;

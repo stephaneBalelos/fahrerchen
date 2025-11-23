@@ -36,7 +36,7 @@ export type Database = {
     Tables: {
       activity_recurrence_rules: {
         Row: {
-          activity_id: string
+          activity_id: string | null
           id: string
           inserted_at: string
           is_valid: boolean
@@ -45,7 +45,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          activity_id: string
+          activity_id?: string | null
           id?: string
           inserted_at?: string
           is_valid?: boolean
@@ -54,7 +54,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          activity_id?: string
+          activity_id?: string | null
           id?: string
           inserted_at?: string
           is_valid?: boolean
@@ -64,11 +64,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "activity_recurrence_rules_activity_id_fkey"
-            columns: ["activity_id"]
+            foreignKeyName: "activity_recurrence_rules_organization_id_activity_id_fkey"
+            columns: ["organization_id", "activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "activity_recurrence_rules_organization_id_fkey"
@@ -137,24 +137,24 @@ export type Database = {
       }
       course_activities_combinations: {
         Row: {
-          activity_id: string
-          course_id: string
+          activity_id: string | null
+          course_id: string | null
           id: string
           organization_id: string
           price: number | null
           required: number | null
         }
         Insert: {
-          activity_id: string
-          course_id: string
+          activity_id?: string | null
+          course_id?: string | null
           id?: string
           organization_id: string
           price?: number | null
           required?: number | null
         }
         Update: {
-          activity_id?: string
-          course_id?: string
+          activity_id?: string | null
+          course_id?: string | null
           id?: string
           organization_id?: string
           price?: number | null
@@ -162,18 +162,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_activities_combinations_activity_id_fkey"
-            columns: ["activity_id"]
+            foreignKeyName: "course_activities_combinations_organization_id_activity_id_fkey"
+            columns: ["organization_id", "activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_activities_combinations_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: "course_activities_combinations_organization_id_course_id_fkey"
+            columns: ["organization_id", "course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_activities_combinations_organization_id_fkey"
@@ -186,7 +186,7 @@ export type Database = {
       }
       course_activity_schedule_requests: {
         Row: {
-          activity_id: string
+          activity_id: string | null
           id: string
           inserted_at: string
           organization_id: string
@@ -194,10 +194,10 @@ export type Database = {
           schedule_id: string | null
           start_at: string
           status: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id: string
+          subscription_id: string | null
         }
         Insert: {
-          activity_id: string
+          activity_id?: string | null
           id?: string
           inserted_at?: string
           organization_id: string
@@ -205,10 +205,10 @@ export type Database = {
           schedule_id?: string | null
           start_at: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id: string
+          subscription_id?: string | null
         }
         Update: {
-          activity_id?: string
+          activity_id?: string | null
           id?: string
           inserted_at?: string
           organization_id?: string
@@ -216,15 +216,22 @@ export type Database = {
           schedule_id?: string | null
           start_at?: string
           status?: Database["public"]["Enums"]["schedule_request_statuses"]
-          subscription_id?: string
+          subscription_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "course_activity_schedule_requests_activity_id_fkey"
-            columns: ["activity_id"]
+            foreignKeyName: "course_activity_schedule_requ_organization_id_subscription_fkey"
+            columns: ["organization_id", "subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedule_reque_organization_id_activity_id_fkey"
+            columns: ["organization_id", "activity_id"]
             isOneToOne: false
             referencedRelation: "course_activities"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_activity_schedule_requests_organization_id_fkey"
@@ -240,25 +247,11 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "course_activity_schedule_requests_schedule_id_fkey"
-            columns: ["schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedule_requests_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
         ]
       }
       course_activity_schedules: {
         Row: {
-          activity_id: string
+          activity_id: string | null
           assigned_to: string | null
           attendees_count: number
           duration_minutes: number
@@ -271,7 +264,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          activity_id: string
+          activity_id?: string | null
           assigned_to?: string | null
           attendees_count?: number
           duration_minutes?: number
@@ -284,7 +277,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          activity_id?: string
+          activity_id?: string | null
           assigned_to?: string | null
           attendees_count?: number
           duration_minutes?: number
@@ -298,18 +291,18 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_activity_schedules_activity_id_fkey"
-            columns: ["activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "course_activity_schedules_assigned_to_fkey"
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_organization_id_activity_id_fkey"
+            columns: ["organization_id", "activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_activity_schedules_organization_id_fkey"
@@ -319,11 +312,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_activity_schedules_recurrence_rule_id_fkey"
-            columns: ["recurrence_rule_id"]
+            foreignKeyName: "course_activity_schedules_organization_id_recurrence_rule__fkey"
+            columns: ["organization_id", "recurrence_rule_id"]
             isOneToOne: false
             referencedRelation: "activity_recurrence_rules"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
         ]
       }
@@ -335,7 +328,7 @@ export type Database = {
           activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id: string | null
           course_activity_schedule_id: string | null
-          course_subscription_id: string
+          course_subscription_id: string | null
           id: string
           inserted_at: string
           organization_id: string
@@ -354,7 +347,7 @@ export type Database = {
           activity_type: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
-          course_subscription_id: string
+          course_subscription_id?: string | null
           id?: string
           inserted_at?: string
           organization_id: string
@@ -373,7 +366,7 @@ export type Database = {
           activity_type?: Database["public"]["Enums"]["activity_types"]
           course_activity_id?: string | null
           course_activity_schedule_id?: string | null
-          course_subscription_id?: string
+          course_subscription_id?: string | null
           id?: string
           inserted_at?: string
           organization_id?: string
@@ -387,31 +380,31 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_activity_schedules_atte_course_activity_schedule_id_fkey"
-            columns: ["course_activity_schedule_id"]
+            foreignKeyName: "course_activity_schedules_at_organization_id_course_activ_fkey1"
+            columns: ["organization_id", "course_activity_schedule_id"]
             isOneToOne: false
             referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_att_organization_id_course_activ_fkey"
+            columns: ["organization_id", "course_activity_id"]
+            isOneToOne: false
+            referencedRelation: "course_activities"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_att_organization_id_course_subsc_fkey"
+            columns: ["organization_id", "course_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_activity_schedules_attendan_schedule_assigned_to_id_fkey"
             columns: ["schedule_assigned_to_id"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_attendanc_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_attendances_course_activity_id_fkey"
-            columns: ["course_activity_id"]
-            isOneToOne: false
-            referencedRelation: "course_activities"
             referencedColumns: ["id"]
           },
           {
@@ -427,41 +420,41 @@ export type Database = {
         Row: {
           id: string
           organization_id: string
-          schedule_id: string
-          subscription_id: string
+          schedule_id: string | null
+          subscription_id: string | null
         }
         Insert: {
           id?: string
           organization_id: string
-          schedule_id: string
-          subscription_id: string
+          schedule_id?: string | null
+          subscription_id?: string | null
         }
         Update: {
           id?: string
           organization_id?: string
-          schedule_id?: string
-          subscription_id?: string
+          schedule_id?: string | null
+          subscription_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "course_activity_schedules_att_organization_id_subscription_fkey"
+            columns: ["organization_id", "subscription_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscriptions"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_activity_schedules_atte_organization_id_schedule_id_fkey"
+            columns: ["organization_id", "schedule_id"]
+            isOneToOne: false
+            referencedRelation: "course_activity_schedules"
+            referencedColumns: ["organization_id", "id"]
+          },
           {
             foreignKeyName: "course_activity_schedules_attendees_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_attendees_schedule_id_fkey"
-            columns: ["schedule_id"]
-            isOneToOne: false
-            referencedRelation: "course_activity_schedules"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_activity_schedules_attendees_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -506,40 +499,40 @@ export type Database = {
       }
       course_costs_combinations: {
         Row: {
-          cost_id: string
-          course_id: string
+          cost_id: string | null
+          course_id: string | null
           id: string
           organization_id: string
           price: number | null
         }
         Insert: {
-          cost_id: string
-          course_id: string
+          cost_id?: string | null
+          course_id?: string | null
           id?: string
           organization_id: string
           price?: number | null
         }
         Update: {
-          cost_id?: string
-          course_id?: string
+          cost_id?: string | null
+          course_id?: string | null
           id?: string
           organization_id?: string
           price?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "course_costs_combinations_cost_id_fkey"
-            columns: ["cost_id"]
+            foreignKeyName: "course_costs_combinations_organization_id_cost_id_fkey"
+            columns: ["organization_id", "cost_id"]
             isOneToOne: false
             referencedRelation: "course_costs"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_costs_combinations_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: "course_costs_combinations_organization_id_course_id_fkey"
+            columns: ["organization_id", "course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_costs_combinations_organization_id_fkey"
@@ -590,37 +583,37 @@ export type Database = {
       }
       course_documents_combinations: {
         Row: {
-          course_id: string
-          document_id: string
+          course_id: string | null
+          document_id: string | null
           id: string
           organization_id: string
         }
         Insert: {
-          course_id: string
-          document_id: string
+          course_id?: string | null
+          document_id?: string | null
           id?: string
           organization_id: string
         }
         Update: {
-          course_id?: string
-          document_id?: string
+          course_id?: string | null
+          document_id?: string | null
           id?: string
           organization_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "course_documents_combinations_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: "course_documents_combinations_organization_id_course_id_fkey"
+            columns: ["organization_id", "course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_documents_combinations_document_id_fkey"
-            columns: ["document_id"]
+            foreignKeyName: "course_documents_combinations_organization_id_document_id_fkey"
+            columns: ["organization_id", "document_id"]
             isOneToOne: false
             referencedRelation: "course_documents"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_documents_combinations_organization_id_fkey"
@@ -668,37 +661,37 @@ export type Database = {
       }
       course_required_documents_combinations: {
         Row: {
-          course_id: string
+          course_id: string | null
           id: string
           organization_id: string
-          required_document_id: string
+          required_document_id: string | null
         }
         Insert: {
-          course_id: string
+          course_id?: string | null
           id?: string
           organization_id: string
-          required_document_id: string
+          required_document_id?: string | null
         }
         Update: {
-          course_id?: string
+          course_id?: string | null
           id?: string
           organization_id?: string
-          required_document_id?: string
+          required_document_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "course_required_documents_combination_required_document_id_fkey"
-            columns: ["required_document_id"]
+            foreignKeyName: "course_required_documents_com_organization_id_required_doc_fkey"
+            columns: ["organization_id", "required_document_id"]
             isOneToOne: false
             referencedRelation: "course_required_documents"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_required_documents_combinations_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: "course_required_documents_combin_organization_id_course_id_fkey"
+            columns: ["organization_id", "course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_required_documents_combinations_organization_id_fkey"
@@ -715,7 +708,7 @@ export type Database = {
           bill_id: string | null
           course_activity_attendance_id: string | null
           course_cost_id: string | null
-          course_subscription_id: string
+          course_subscription_id: string | null
           description: string
           id: string
           inserted_at: string
@@ -728,7 +721,7 @@ export type Database = {
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
-          course_subscription_id: string
+          course_subscription_id?: string | null
           description: string
           id?: string
           inserted_at?: string
@@ -741,7 +734,7 @@ export type Database = {
           bill_id?: string | null
           course_activity_attendance_id?: string | null
           course_cost_id?: string | null
-          course_subscription_id?: string
+          course_subscription_id?: string | null
           description?: string
           id?: string
           inserted_at?: string
@@ -751,32 +744,32 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_subscription_bill_item_course_activity_attendance_i_fkey"
-            columns: ["course_activity_attendance_id"]
+            foreignKeyName: "course_subscription_bill_item_organization_id_course_activ_fkey"
+            columns: ["organization_id", "course_activity_attendance_id"]
             isOneToOne: false
             referencedRelation: "course_activity_schedules_attendances"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_subscription_bill_items_bill_id_fkey"
-            columns: ["bill_id"]
-            isOneToOne: false
-            referencedRelation: "course_subscription_bills"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_subscription_bill_items_course_cost_id_fkey"
-            columns: ["course_cost_id"]
+            foreignKeyName: "course_subscription_bill_item_organization_id_course_cost__fkey"
+            columns: ["organization_id", "course_cost_id"]
             isOneToOne: false
             referencedRelation: "course_costs"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
-            foreignKeyName: "course_subscription_bill_items_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
+            foreignKeyName: "course_subscription_bill_item_organization_id_course_subsc_fkey"
+            columns: ["organization_id", "course_subscription_id"]
             isOneToOne: false
             referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "course_subscription_bill_items_organization_id_bill_id_fkey"
+            columns: ["organization_id", "bill_id"]
+            isOneToOne: false
+            referencedRelation: "course_subscription_bills"
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_subscription_bill_items_organization_id_fkey"
@@ -791,7 +784,7 @@ export type Database = {
         Row: {
           bill_number: string
           canceled_at: string | null
-          course_subscription_id: string
+          course_subscription_id: string | null
           created_at: string
           id: string
           organization_id: string
@@ -806,7 +799,7 @@ export type Database = {
         Insert: {
           bill_number: string
           canceled_at?: string | null
-          course_subscription_id: string
+          course_subscription_id?: string | null
           created_at?: string
           id?: string
           organization_id: string
@@ -821,7 +814,7 @@ export type Database = {
         Update: {
           bill_number?: string
           canceled_at?: string | null
-          course_subscription_id?: string
+          course_subscription_id?: string | null
           created_at?: string
           id?: string
           organization_id?: string
@@ -835,11 +828,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_subscription_bills_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
+            foreignKeyName: "course_subscription_bills_organization_id_course_subscript_fkey"
+            columns: ["organization_id", "course_subscription_id"]
             isOneToOne: false
             referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_subscription_bills_organization_id_fkey"
@@ -852,7 +845,7 @@ export type Database = {
       }
       course_subscription_documents: {
         Row: {
-          course_subscription_id: string
+          course_subscription_id: string | null
           created_at: string
           id: string
           organization_id: string
@@ -860,7 +853,7 @@ export type Database = {
           required_document_id: string | null
         }
         Insert: {
-          course_subscription_id: string
+          course_subscription_id?: string | null
           created_at?: string
           id?: string
           organization_id: string
@@ -868,7 +861,7 @@ export type Database = {
           required_document_id?: string | null
         }
         Update: {
-          course_subscription_id?: string
+          course_subscription_id?: string | null
           created_at?: string
           id?: string
           organization_id?: string
@@ -877,11 +870,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "course_subscription_documents_course_subscription_id_fkey"
-            columns: ["course_subscription_id"]
+            foreignKeyName: "course_subscription_documents_organization_id_course_subsc_fkey"
+            columns: ["organization_id", "course_subscription_id"]
             isOneToOne: false
             referencedRelation: "course_subscriptions"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_subscription_documents_organization_id_fkey"
@@ -891,11 +884,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_subscription_documents_required_document_id_fkey"
-            columns: ["required_document_id"]
+            foreignKeyName: "course_subscription_documents_organization_id_required_doc_fkey"
+            columns: ["organization_id", "required_document_id"]
             isOneToOne: false
             referencedRelation: "course_required_documents"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
         ]
       }
@@ -903,37 +896,37 @@ export type Database = {
         Row: {
           archived_at: string | null
           costs: number
-          course_id: string
+          course_id: string | null
           id: string
           inserted_at: string
           organization_id: string
-          student_id: string
+          student_id: string | null
         }
         Insert: {
           archived_at?: string | null
           costs?: number
-          course_id: string
+          course_id?: string | null
           id?: string
           inserted_at?: string
           organization_id: string
-          student_id: string
+          student_id?: string | null
         }
         Update: {
           archived_at?: string | null
           costs?: number
-          course_id?: string
+          course_id?: string | null
           id?: string
           inserted_at?: string
           organization_id?: string
-          student_id?: string
+          student_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "course_subscriptions_course_id_fkey"
-            columns: ["course_id"]
+            foreignKeyName: "course_subscriptions_organization_id_course_id_fkey"
+            columns: ["organization_id", "course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
           {
             foreignKeyName: "course_subscriptions_organization_id_fkey"
@@ -943,11 +936,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "course_subscriptions_student_id_fkey"
-            columns: ["student_id"]
+            foreignKeyName: "course_subscriptions_organization_id_student_id_fkey"
+            columns: ["organization_id", "student_id"]
             isOneToOne: false
             referencedRelation: "students"
-            referencedColumns: ["id"]
+            referencedColumns: ["organization_id", "id"]
           },
         ]
       }
@@ -1462,17 +1455,17 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "students_registration_request_organization_id_requested_co_fkey"
+            columns: ["organization_id", "requested_course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
             foreignKeyName: "students_registration_requests_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "students_registration_requests_requested_course_id_fkey"
-            columns: ["requested_course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]

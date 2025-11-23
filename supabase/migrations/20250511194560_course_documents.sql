@@ -1,13 +1,14 @@
 -- COURSE DOCUMENTS
 create table public.course_documents (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   name          text,
   description   text,
   path         text not null,
   inserted_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at  timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (path)
+  unique (path),
+  primary key (organization_id, id)
 );
 comment on table public.course_documents is 'COURSE DOCUMENTS MADE AVAILABLE FOR STUDENTS.';
 alter table public.course_documents enable row level security;
@@ -81,11 +82,14 @@ execute procedure public.handle_course_documents_storage_ops();
 
 -- Course Documents Combinations
 create table public.course_documents_combinations (
-  id            uuid default uuid_generate_v4() primary key,
-  course_id    uuid references public.courses on delete cascade not null,
-  document_id   uuid references public.course_documents on delete cascade not null,
+  id            uuid default uuid_generate_v4(),
+  course_id    uuid,
+  document_id   uuid,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_id, document_id)
+  unique (course_id, document_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_id) references public.courses(organization_id, id) on delete cascade,
+  foreign key (organization_id, document_id) references public.course_documents(organization_id, id) on delete cascade
 );
 comment on table public.course_documents_combinations is 'COURSE DOCUMENTS COMBINATIONS.';
 alter table public.course_documents_combinations enable row level security;

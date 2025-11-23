@@ -162,7 +162,10 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         if (error) {
             throw error
         }
-        return data.map(d => d.activity)
+        if (!data) {
+            return []
+        }
+        return data.map(d => d.activity ?? null) .filter(a => a !== null) as AppCourseActivity[]
     }
 
     const addCourseToAllowedCourses = async (activity_id: string, course_id: string): Promise<void> => {

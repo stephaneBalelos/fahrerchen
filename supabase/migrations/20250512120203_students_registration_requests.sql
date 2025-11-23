@@ -1,6 +1,6 @@
 -- STUDENTS REGISTRATION REQUESTS
 create table public.students_registration_requests (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   email         text not null,
   firstname      text not null,
@@ -12,10 +12,12 @@ create table public.students_registration_requests (
   address_city    text not null,
   address_country   text not null,
   has_a_license    boolean default false not null,
-  requested_course_id uuid references public.courses on delete set null,
+  requested_course_id uuid,
   status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (email, organization_id)
+  unique (email, organization_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, requested_course_id) references public.courses(organization_id, id) on delete set null
 );
 comment on table public.students_registration_requests is 'STUDENTS REGISTRATION REQUESTS.';
 alter table public.students_registration_requests enable row level security;

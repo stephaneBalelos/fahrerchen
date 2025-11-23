@@ -1,6 +1,6 @@
 -- COURSE ACTIVITY SCHEDULES ATTENDANCES
 create table public.course_activity_schedules_attendances (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   -- activity schedule data remains, in the case activity is deleted or edited
   activity_name  text not null,
   activity_description text not null,
@@ -13,13 +13,18 @@ create table public.course_activity_schedules_attendances (
   schedule_assigned_to_lastname text not null,
   -- activity schedule data ends
   successfully_completed boolean default false not null, -- if the activity was an EXAM, this field is set to true if the student passed the exam
-  course_activity_id    uuid references public.course_activities on delete set null,
-  course_activity_schedule_id    uuid references public.course_activity_schedules on delete set null,
+  course_activity_id    uuid,
+  course_activity_schedule_id    uuid,
   schedule_assigned_to_id uuid references public.users on delete set null,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
+  course_subscription_id    uuid,
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
-  unique (course_activity_schedule_id, course_subscription_id)
+  unique (course_activity_schedule_id, course_subscription_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_activity_id) references public.course_activities(organization_id, id) on delete set null,
+  foreign key (organization_id, course_activity_schedule_id) references public.course_activity_schedules(organization_id, id) on delete set null,
+  foreign key (organization_id, course_subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade
+
 );
 comment on table public.course_activity_schedules_attendances is 'COURSE ACTIVITY SCHEDULES ATTENDEES.';
 alter table public.course_activity_schedules_attendances enable row level security;

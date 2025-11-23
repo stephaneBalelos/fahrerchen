@@ -1,11 +1,15 @@
 -- COURSE SUBSCRIPTION DOCUMENTS
 create table public.course_subscription_documents (
-  id            uuid default uuid_generate_v4() primary key,
-  course_subscription_id    uuid references public.course_subscriptions on delete cascade not null,
-  required_document_id  uuid references public.course_required_documents on delete set null,
+  id            uuid default uuid_generate_v4(),
+  course_subscription_id    uuid,
+  required_document_id  uuid,
   path         text not null,
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
-  organization_id    uuid references public.organizations on delete cascade not null
+  organization_id    uuid references public.organizations on delete cascade not null,
+  unique (course_subscription_id, required_document_id),
+  primary key (organization_id, id),
+  foreign key (organization_id, course_subscription_id) references public.course_subscriptions(organization_id, id) on delete cascade,
+  foreign key (organization_id, required_document_id) references public.course_required_documents(organization_id, id) on delete cascade
 );
 comment on table public.course_subscription_documents is 'COURSE SUBSCRIPTION DOCUMENTS.';
 alter table public.course_subscription_documents enable row level security;

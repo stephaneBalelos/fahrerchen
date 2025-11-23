@@ -42,13 +42,14 @@ grant update (payment_methods) on table public.organizations_stripe_accounts to 
 
 -- ORGANIZATIONS INVITATIONS
 create table if not exists public.organizations_invitations (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   email         text not null,
   role         app_role not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   status        integer default 0 not null check (status >= 0 and status <= 2), -- 0: pending, 1: accepted, 2: rejected
-  unique (email, organization_id) 
+  unique (email, organization_id),
+  primary key (organization_id, id)
 );
 comment on table public.organizations_invitations is 'Invitations to join an organization.';
 alter table public.organizations_invitations enable row level security;
@@ -60,12 +61,14 @@ create index idx_organizations_invitations_organization_id on public.organizatio
 
 -- ORGANIZATION MEMBERS
 create table if not exists public.organization_members (
-  id            uuid default uuid_generate_v4() primary key,
+  id            uuid default uuid_generate_v4(),
   inserted_at   timestamp with time zone default timezone('utc'::text, now()) not null,
   organization_id    uuid references public.organizations on delete cascade not null,
   user_id    uuid references public.users on delete cascade not null,
   role     app_role not null,
-  unique (organization_id, user_id)
+  unique (organization_id, user_id),
+  primary key (organization_id, id)
+
 );
 comment on table public.organization_members is 'Members of each organization, users can be in multiple organizations.';
 alter table public.organization_members enable row level security;
