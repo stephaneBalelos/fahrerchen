@@ -10,7 +10,6 @@ create table public.course_subscription_bills (
   created_at    timestamp with time zone default timezone('utc'::text, now()) not null,
   paid_at       timestamp with time zone default null,
   ready_to_pay  boolean default false not null, -- if the bill is ready to be paid, the bill is should be locked
-  stripe_payment_intent_id  text, -- Stripe Payment Intent ID
   canceled_at   timestamp with time zone default null,
   organization_id    uuid references public.organizations on delete cascade not null,
   vat_rate numeric(5, 2) default 0.0 not null check (vat_rate >= 0.0 and vat_rate <= 100.0),
@@ -23,7 +22,7 @@ create table public.course_subscription_bills (
 comment on table public.course_subscription_bills is 'COURSE SUBSCRIPTION BILLS.';
 alter table public.course_subscription_bills enable row level security;
 revoke update on table public.course_subscription_bills from authenticated, anon;
-grant update (paid_at, ready_to_pay, stripe_payment_intent_id, canceled_at) on table public.course_subscription_bills to authenticated;
+grant update (paid_at, ready_to_pay, canceled_at) on table public.course_subscription_bills to authenticated;
 
 -- COURSE SUBSCRIPTION BILL ITEMS
 create table public.course_subscription_bill_items (

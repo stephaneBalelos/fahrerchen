@@ -1608,8 +1608,6 @@ export type Database = {
         | "organizations.create"
         | "organizations.update"
         | "organizations.delete"
-        | "organizations_stripe_accounts.read"
-        | "organizations_stripe_accounts.update"
         | "organization_members.read"
         | "organization_members.insert"
         | "organization_members.update"
@@ -1700,6 +1698,8 @@ export type Database = {
         | "course_activity_schedule_requests.create"
         | "course_activity_schedule_requests.update"
         | "course_activity_schedule_requests.delete"
+        | "organizations_stripe_accounts.read"
+        | "organizations_stripe_accounts.update"
       app_role: "owner" | "manager" | "teacher" | "student"
       course_type:
         | "AM"
@@ -2398,8 +2398,6 @@ export const Constants = {
         "organizations.create",
         "organizations.update",
         "organizations.delete",
-        "organizations_stripe_accounts.read",
-        "organizations_stripe_accounts.update",
         "organization_members.read",
         "organization_members.insert",
         "organization_members.update",
@@ -2490,6 +2488,8 @@ export const Constants = {
         "course_activity_schedule_requests.create",
         "course_activity_schedule_requests.update",
         "course_activity_schedule_requests.delete",
+        "organizations_stripe_accounts.read",
+        "organizations_stripe_accounts.update",
       ],
       app_role: ["owner", "manager", "teacher", "student"],
       course_type: [

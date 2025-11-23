@@ -29,17 +29,6 @@ grant update (name, description, avatar_path, email, phone_number, website, addr
 create index idx_organizations_owner_id on public.organizations(owner_id);
 create index idx_organizations_handle on public.organizations(handle);
 
--- ORGANIZATIONS STRIPE ACCOUNTS
-create table if not exists public.organizations_stripe_accounts (
-  id            uuid references public.organizations on delete restrict not null primary key,
-  stripe_account_id  text not null,
-  payment_methods    jsonb
-);
-comment on table public.organizations_stripe_accounts is 'Stripe account data for each organization.';
-alter table public.organizations_stripe_accounts enable row level security;
-revoke update on table public.organizations_stripe_accounts from authenticated, anon;
-grant update (payment_methods) on table public.organizations_stripe_accounts to authenticated;
-
 -- ORGANIZATIONS INVITATIONS
 create table if not exists public.organizations_invitations (
   id            uuid default uuid_generate_v4(),
@@ -176,29 +165,6 @@ values
 
 create policy "user_can_insert_organizations_only_if_they_are_main_owner" on public.organizations for insert to authenticated with check (owner_id = (select auth.uid()));
 create policy "main_owner_can_delete_organizations" on public.organizations for delete to authenticated using (public.is_main_owner(id));
-
-
--- Organizations Stripe Accounts Policies
-create policy "members_can_read_their_organizations_stripe_accounts" on public.organizations_stripe_accounts for select to authenticated using (public.authorize('organizations_stripe_accounts.read', id));
-insert into public.role_permissions
-    (role, permission)
-values 
-    ('owner', 'organizations_stripe_accounts.read'),
-    ('manager', 'organizations_stripe_accounts.read'),
-    ('teacher', 'organizations_stripe_accounts.read'),
-    ('student', 'organizations_stripe_accounts.read');
-
-
-create policy "main_owner_can_insert_organizations_stripe_accounts" on public.organizations_stripe_accounts for insert to authenticated with check (public.is_main_owner(id));
-
-create policy "owner_and_manager_can_update_organizations_stripe_accounts" on public.organizations_stripe_accounts for update to authenticated using (public.authorize('organizations_stripe_accounts.update', id));
-insert into public.role_permissions
-    (role, permission)
-values 
-    ('owner', 'organizations_stripe_accounts.update'),
-    ('manager', 'organizations_stripe_accounts.update');
-
-create policy "main_owner_can_delete_organizations_stripe_accounts" on public.organizations_stripe_accounts for delete to authenticated using (public.is_main_owner(id));
 
 -- Organizations Members Policies
 create policy "members_can_read_their_organizations_memberships" on public.organization_members for select to authenticated using (public.authorize('organization_members.read', organization_id));

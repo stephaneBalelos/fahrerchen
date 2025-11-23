@@ -2,9 +2,6 @@ alter type public.app_permission add value 'organizations.read';
 alter type public.app_permission add value 'organizations.create';
 alter type public.app_permission add value 'organizations.update';
 alter type public.app_permission add value 'organizations.delete';
-
-alter type public.app_permission add value 'organizations_stripe_accounts.read';
-alter type public.app_permission add value 'organizations_stripe_accounts.update';
 alter type public.app_permission add value 'organization_members.read';
 alter type public.app_permission add value 'organization_members.insert';
 alter type public.app_permission add value 'organization_members.update';
