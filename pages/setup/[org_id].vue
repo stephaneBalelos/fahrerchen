@@ -29,12 +29,10 @@
         <UColorModeButton />
       </template>
     </UHeader>
-    <UMain class="min-h-screen py-6">
-      <UContainer class="w-full">
-        <ClientOnly>
-          <NuxtPage />
-        </ClientOnly>
-      </UContainer>
+    <UMain class="relative flex flex-col">
+      <ClientOnly>
+        <NuxtPage />
+      </ClientOnly>
     </UMain>
   </div>
 </template>

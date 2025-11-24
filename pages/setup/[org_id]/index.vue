@@ -1,45 +1,67 @@
 <template>
-  <UDashboardCard class="py-2">
-    <template #header>
-      <div
-        class="flex items-center gap-4 justify-between border-b border-gray-200 dark:border-gray-700 pb-4 mb-4"
-      >
-        <div class="flex flex-col">
-          <h3
-            class="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
-          >
-            {{ t("driving_school_informations") }}
-          </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            {{ t("please_verify") }}
-          </p>
-        </div>
-        <UButton
-          v-if="organizationsStore.selectedOrganization"
-          data-label="next-step"
-          :to="`/setup/${organizationsStore.selectedOrganization.id}/courses`"
+  <div class="flex-1 flex flex-col h-full">
+    <div
+      class="w-full py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
+    >
+      <UContainer class="w-full">
+        <div
+          class="flex items-center gap-4 justify-between"
         >
-          {{ t("continue_setup") }}
-        </UButton>
+          <div class="flex flex-col">
+            <h3
+              class="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
+            >
+              {{ t("driving_school_informations") }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ t("please_verify") }}
+            </p>
+          </div>
+        </div>
+      </UContainer>
+    </div>
+    <div class="flex-1 relative">
+      <div class="absolute inset-0 py-8 overflow-y-auto">
+        <UContainer class="w-full">
+          <UDashboardCard>
+            <div
+              v-if="!organizationsStore.selectedOrganization"
+              class="space-y-2"
+            >
+              <USkeleton
+                v-if="organizationsStore.isLoading"
+                class="h-24 w-full"
+              />
+              <UAlert
+                v-else
+                icon="i-heroicons-exclamation-triangle-20-solid"
+                color="red"
+                variant="subtle"
+                :title="t('error_loading_organization')"
+                :description="t('error_loading_organization_description')"
+              />
+            </div>
+            <div v-if="organizationsStore.selectedOrganization">
+              <FormsEditOrganizationForm
+                :org-id="organizationsStore.selectedOrganization.id"
+              />
+            </div>
+          </UDashboardCard>
+        </UContainer>
       </div>
-    </template>
-    <div v-if="!organizationsStore.selectedOrganization" class="space-y-2">
-      <USkeleton v-if="organizationsStore.isLoading" class="h-24 w-full" />
-      <UAlert
-        v-else
-        icon="i-heroicons-exclamation-triangle-20-solid"
-        color="red"
-        variant="subtle"
-        :title="t('error_loading_organization')"
-        :description="t('error_loading_organization_description')"
-      />
     </div>
-    <div v-if="organizationsStore.selectedOrganization">
-      <FormsEditOrganizationForm
-        :org-id="organizationsStore.selectedOrganization.id"
-      />
+    <div
+      class="w-full relative py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end px-8"
+    >
+      <UButton
+        v-if="organizationsStore.selectedOrganization"
+        data-label="next-step"
+        :to="`/setup/${organizationsStore.selectedOrganization.id}/courses`"
+      >
+        {{ t("continue_setup") }}
+      </UButton>
     </div>
-  </UDashboardCard>
+  </div>
 </template>
 
 <script setup lang="ts">

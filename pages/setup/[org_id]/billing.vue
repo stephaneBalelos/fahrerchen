@@ -1,36 +1,39 @@
 <template>
-  <UPageHeader
-    :title="t('setup_your_course_activities')"
-    :description="t('setup_your_course_activities_description')"
-  >
-    <template #links>
-      <UButton
-        v-if="isBillingSettingsSetupComplete"
-        data-label="next-step"
-        color="primary"
-        icon="i-heroicons-check-circle"
-        @click="
-          () =>
-            navigateTo(
-              `/setup/${organizationsStore.selectedOrganization?.id}/required-documents`
-            )
-        "
-        >{{ t("continue") }}</UButton
-      >
-    </template>
-    <div v-if="organizationsStore.selectedOrganization" class="py-12">
-      <UDashboardSection
-        :title="t('billing_settings.label')"
-        :description="t('billing_settings.description')"
-        orientation="horizontal"
-        class="px-4"
-      >
-        <EditBillSettingsForm
-          :organization-id="organizationsStore.selectedOrganization.id"
+  <div class="flex-1 flex flex-col h-full">
+    <div
+      class="w-full py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
+    >
+      <UContainer class="w-full">
+        <UPageHeader
+          :title="t('billing_settings.label')"
+          :description="t('billing_settings.description')"
         />
-      </UDashboardSection>
+      </UContainer>
     </div>
-  </UPageHeader>
+    <div class="flex-1 relative">
+      <div class="absolute inset-0 py-8 overflow-y-auto">
+        <UContainer class="w-full">
+          <div v-if="organizationsStore.selectedOrganization" class="py-12">
+            <EditBillSettingsForm
+              :organization-id="organizationsStore.selectedOrganization.id"
+            />
+          </div>
+        </UContainer>
+      </div>
+    </div>
+    <div
+      class="w-full relative py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end px-8"
+    >
+      <UButton
+        v-if="organizationsStore.selectedOrganization"
+        :disabled="!isBillingSettingsSetupComplete"
+        data-label="next-step"
+        :to="`/setup/${organizationsStore.selectedOrganization.id}/required-documents`"
+      >
+        {{ t("continue_setup") }}
+      </UButton>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
