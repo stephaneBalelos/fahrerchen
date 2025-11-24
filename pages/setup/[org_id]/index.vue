@@ -42,7 +42,8 @@
               />
             </div>
             <div v-if="organizationsStore.selectedOrganization">
-              <FormsEditOrganizationForm
+              <SetupOrganizationSetup
+                ref="editOrgsForm"
                 :org-id="organizationsStore.selectedOrganization.id"
               />
             </div>
@@ -53,18 +54,23 @@
     <div
       class="w-full relative py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end px-8"
     >
-      <UButton
-        v-if="organizationsStore.selectedOrganization"
-        data-label="next-step"
-        :to="`/setup/${organizationsStore.selectedOrganization.id}/courses`"
-      >
-        {{ t("continue_setup") }}
-      </UButton>
+      <UContainer class="w-full flex justify-end">
+        <UButton
+          v-if="organizationsStore.selectedOrganization"
+          data-label="next-step"
+          @click="saveAndContinue"
+        >
+          {{ t("continue_setup") }}
+        </UButton>
+      </UContainer>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type OrganizationSetup from "~/components/setup/OrganizationSetup.vue";
+
+
 definePageMeta({
   layout: "default",
 });
@@ -74,6 +80,20 @@ const { t } = useI18n({
 });
 
 const organizationsStore = useUserOrganizationsStore();
+
+const editOrgsForm = ref<InstanceType<typeof OrganizationSetup> | null>();
+
+const saveAndContinue = async () => {
+  editOrgsForm.value?.onSubmit().then(() => {
+    // Successfully saved, navigation will be handled by the <UButton> 'to' prop
+    if (!organizationsStore.selectedOrganization) return;
+    navigateTo(`/setup/${organizationsStore.selectedOrganization.id}/courses`)
+  }).catch((error) => {
+    // Handle error (e.g., show notification)
+    console.error("Error saving organization:", error);
+  });
+};
+
 </script>
 
 <style></style>
