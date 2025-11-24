@@ -9,10 +9,10 @@
             <h3
               class="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
             >
-              {{ t("driving_school_informations") }}
+              {{ t('compose_your_courses')}}
             </h3>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              {{ t("please_verify") }}
+              {{ t('compose_your_courses_description') }}
             </p>
           </div>
         </div>
@@ -39,10 +39,11 @@
     >
       <UButton
         v-if="userOrganizationsStore.selectedOrganization"
+        :disabled="!isCourseSetupComplete"
         data-label="next-step"
         :to="`/setup/${userOrganizationsStore.selectedOrganization.id}/activities`"
       >
-        {{ t("continue_setup") }}
+        {{ t("continue_setup", { count: coursesStore.courses.filter(c => c.is_active).length }) }}
       </UButton>
     </div>
   </div>
@@ -50,12 +51,50 @@
 
 <script setup lang="ts">
 import CoursesSetup from "~/components/setup/CoursesSetup.vue";
+import { computedAsync } from "@vueuse/core";
+
+
+
 const userOrganizationsStore = useUserOrganizationsStore();
-// const coursesStore = useCoursesStore();
+const coursesStore = useCoursesStore();
 
 const { t } = useI18n({
   useScope: "local",
 });
+
+const isCourseSetupComplete = computedAsync(async () => {
+  const hasCourses = coursesStore.courses.length > 0;
+  // at least one course is active
+  const hasActiveCourse = coursesStore.courses.some((c) => c.is_active);
+  return hasCourses && hasActiveCourse;
+}, false);
 </script>
 
 <style scoped></style>
+
+<i18n lang="json">
+{
+  "de": {
+    "continue_setup": "Weiter mit {count} aktiven Kurs(en)",
+    "compose_your_courses": "Ihre Kursangebote zusammenstellen",
+    "compose_your_courses_description": "Wählen Sie die Führerscheinklassen aus, die Sie in Ihrer Fahrschule anbieten möchten. Sie können dies jederzeit anpassen.",
+    "activate_course": "Kurs aktivieren",
+    "driving_license_of_type": "Führerschein der Klasse {type}",
+    "course_setup_complete": "Weiter mit {count} aktiven Kurs(en)",
+    "course_activated": "Kurs aktiviert",
+    "failed_to_load_courses": "Fehler beim Laden der Kurse",
+    "failed_to_load_courses_description": "Es gab ein Problem beim Laden der Kurse. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht."
+  },
+  "en": {
+    "continue_setup": "Continue with {count} active course(s)",
+    "compose_your_courses": "Compose your course offerings",
+    "compose_your_courses_description": "Select and activate the types of driving license courses you want to offer at your driving school. You can always adjust this later.",
+    "activate_course": "Activate course",
+    "driving_license_of_type": "Driving license of type {type}",
+    "course_setup_complete": "Continue with {count} active course(s)",
+    "course_activated": "Course activated",
+    "failed_to_load_courses": "Failed to load courses",
+    "failed_to_load_courses_description": "There was a problem loading the courses. Please try again or contact support if the problem persists."
+  }
+}
+</i18n>
