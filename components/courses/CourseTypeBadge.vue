@@ -3,8 +3,8 @@
     :icon="COURSE_ICONS[props.type]"
     size="xs"
     color="primary"
-    :variant="'soft'"
-    >Class {{ props.type }}</UBadge
+    :variant="props.variant ?? 'soft'"
+    ><span class="font-bold">{{ g(`course_types.${props.type}.name`) }}</span></UBadge
   >
 </template>
 
@@ -14,7 +14,12 @@ import type { AppCourseType } from "~/types/app.types";
 
 type Props = {
   type: AppCourseType;
+  variant?: "solid" | "soft";
 };
+
+const { t:g } = useI18n({
+  useScope: "global",
+});
 
 const props = defineProps<Props>();
 </script>

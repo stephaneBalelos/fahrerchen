@@ -2,7 +2,7 @@
   <div>
     <div
       v-if="coursesStore.courses.length > 0"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 py-12"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
     >
       <UCard
         v-for="course in coursesStore.courses"

@@ -1,7 +1,7 @@
 <template>
   <div class="flex-1 flex flex-col h-full">
     <div
-      class="w-full py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
+      class="w-full py-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
     >
       <UContainer class="w-full">
         <div
@@ -9,7 +9,7 @@
         >
           <div class="flex flex-col">
             <h3
-              class="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
+              class="text-2xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
             >
               {{ t("driving_school_informations") }}
             </h3>

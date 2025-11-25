@@ -7,7 +7,7 @@
         <div class="flex items-center gap-4 justify-between">
           <div class="flex flex-col">
             <h3
-              class="text-xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
+              class="text-2xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
             >
               {{ t('compose_your_courses')}}
             </h3>
@@ -35,16 +35,27 @@
       </div>
     </div>
     <div
-      class="w-full relative py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end px-8"
+      class="w-full relative py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end items-end px-8 pb-6"
     >
-      <UButton
-        v-if="userOrganizationsStore.selectedOrganization"
-        :disabled="!isCourseSetupComplete"
-        data-label="next-step"
-        :to="`/setup/${userOrganizationsStore.selectedOrganization.id}/activities`"
-      >
-        {{ t("continue_setup", { count: coursesStore.courses.filter(c => c.is_active).length }) }}
-      </UButton>
+    <div class="flex flex-col gap-2 mr-8">
+      <span class="text-sm font-medium text-gray-400 dark:text-gray-400">
+        {{ t("selected_courses") }}
+      </span>
+
+      <div class="flex gap-2">
+        <CoursesCourseTypeBadge v-for="course in coursesStore.activeCourses" :key="course.id" :type="course.type" />
+      </div>
+    </div>
+      <div class="flex">
+        <UButton
+          v-if="userOrganizationsStore.selectedOrganization"
+          :disabled="!isCourseSetupComplete"
+          data-label="next-step"
+          :to="`/setup/${userOrganizationsStore.selectedOrganization.id}/activities`"
+        >
+          {{ t("continue_setup", { count: coursesStore.courses.filter(c => c.is_active).length }) }}
+        </UButton>
+      </div>
     </div>
   </div>
 </template>
@@ -76,6 +87,7 @@ const isCourseSetupComplete = computedAsync(async () => {
 {
   "de": {
     "continue_setup": "Weiter mit {count} aktiven Kurs(en)",
+    "selected_courses": "Ausgewählte Klassen",
     "compose_your_courses": "Ihre Kursangebote zusammenstellen",
     "compose_your_courses_description": "Wählen Sie die Führerscheinklassen aus, die Sie in Ihrer Fahrschule anbieten möchten. Sie können dies jederzeit anpassen.",
     "activate_course": "Kurs aktivieren",
@@ -87,6 +99,7 @@ const isCourseSetupComplete = computedAsync(async () => {
   },
   "en": {
     "continue_setup": "Continue with {count} active course(s)",
+    "selected_courses": "Selected classes",
     "compose_your_courses": "Compose your course offerings",
     "compose_your_courses_description": "Select and activate the types of driving license courses you want to offer at your driving school. You can always adjust this later.",
     "activate_course": "Activate course",
