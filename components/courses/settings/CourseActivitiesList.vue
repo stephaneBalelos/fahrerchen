@@ -1,19 +1,5 @@
 <template>
-  <UDashboardSection
-    :title="t('course_activities')"
-    :description="t('set_activities')"
-    class="course-activities-list px-4 py-6"
-  >
-    <template #links>
-      <UButton
-        color="primary"
-        icon="i-heroicons-plus"
-        variant="soft"
-        size="2xs"
-        @click="openEditActivityForm('')"
-        >{{ t("add_activity") }}</UButton
-      >
-    </template>
+  <div>
     <div
       v-if="courseActivitiesStore.courseActivities.length > 0"
       class="space-y-4"
@@ -25,8 +11,33 @@
         <template #header="{}">
           <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
             <div class="flex flex-col gap-1 grow">
+              <div>
+                <UBadge
+                  :color="ACTIVITY_COLORS[field.activity_type] || 'gray'"
+                  size="xs"
+                  class="mb-1"
+                >
+                  {{ g(`activities.types.${field.activity_type}.name`) }}
+                </UBadge>
+              </div>
               <p class="font-semibold">{{ field.name }}</p>
               <span class="text-sm text-gray-500">{{ field.description }}</span>
+            </div>
+            <div class="flex flex-grow items-center gap-8 justify-end mr-4">
+              <div class="flex flex-col items-end gap-1">
+                <p class="text-sm text-gray-500">{{ g(`activities.price`) }}</p>
+                <p class="font-medium break-all">
+                  {{ formatCurrency(field.price) }}
+                </p>
+              </div>
+              <div class="flex flex-col items-end gap-1">
+                <p class="text-sm text-gray-500">
+                  {{ g(`activities.required_attendance`) }}
+                </p>
+                <p class="font-medium break-all">
+                  {{ field.required > 0 ? field.required : "-" }}
+                </p>
+              </div>
             </div>
             <UButton
               color="gray"
@@ -42,60 +53,13 @@
             />
           </div>
         </template>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="flex flex-col gap-4">
-            <!-- Additional content can go here -->
-            <div class="flex flex-col gap-1">
-              <p class="text-sm text-gray-500">{{ g(`activities.price`) }}</p>
-              <p class="font-medium break-all">
-                {{ formatCurrency(field.price) }}
-              </p>
-            </div>
-            <div class="flex flex-col gap-1">
-              <p class="text-sm text-gray-500">{{ g(`activities.type`) }}</p>
-              <p class="font-medium break-all">
-                {{ g(`activities.types.${field.activity_type}.name`) }}
-              </p>
-            </div>
-            <div class="flex flex-col gap-1">
-              <p class="text-sm text-gray-500">
-                {{ g(`activities.allow_self_registration`) }}
-              </p>
-              <p class="font-medium break-all">
-                <UToggle
-                  on-icon="i-heroicons-check-20-solid"
-                  off-icon="i-heroicons-x-mark-20-solid"
-                  :model-value="field.allow_self_registration"
-                  @change="
-                    (value) =>
-                      courseActivitiesStore.updateCourseActivity(field.id, {
-                        allow_self_registration: value,
-                      })
-                  "
-                />
-              </p>
-            </div>
-            <div class="flex flex-col gap-1">
-              <p class="text-sm text-gray-500">
-                {{ g(`activities.required_attendance`) }}
-              </p>
-              <p class="font-medium break-all">
-                {{ field.required > 0 ? field.required : "-" }}
-              </p>
-            </div>
-            <div class="flex flex-col gap-1">
-              <CoursesSettingsCourseActivitiesRecurrenceWidget
-                :activity-id="field.id"
-                :activity-name="field.name"
-                :activity-description="field.description"
-                :organization-id="field.organization_id"
-              />
-            </div>
-          </div>
+        <div class="grid grid-cols-1 gap-4">
           <div class="flex flex-col gap-1 lg:col-span-2">
-            <p class="text-sm text-gray-500 mb-2">
-              {{ g(`activities.allowed_classes`) }}
-            </p>
+            <div class="flex justify-between">
+              <p class="text-sm text-gray-500 mb-2">
+                {{ g(`activities.allowed_classes`) }}
+              </p>
+            </div>
             <UCard
               :ui="{
                 base: 'overflow-hidden',
@@ -144,15 +108,15 @@
         },
       ]"
     />
-  </UDashboardSection>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { UToggle } from "#components";
 import EditCourseActivityForm from "~/components/forms/EditCourseActivityForm.vue";
 import BodyCollapseCard from "~/components/ui/Cards/BodyCollapseCard.vue";
 import { formatCurrency } from "~/utils/formatters";
 import ActivitiesAllowedCourseListItem from "./AllowedListItems/ActivitiesAllowedCourseListItem.vue";
+import { ACTIVITY_COLORS } from "~/constants";
 
 const slideover = useSlideover();
 const toast = useToast();
@@ -204,6 +168,8 @@ const createActivitiesFromTemplate = async () => {
     });
   }
 };
+
+
 </script>
 
 <style scoped></style>
@@ -218,7 +184,6 @@ const createActivitiesFromTemplate = async () => {
     "no_activities": "Keine Aktivitäten",
     "no_activities_description": "Es gibt keine Aktivitäten für diesen Kurs. Fügen Sie Aktivitäten hinzu.",
     "edit": "Bearbeiten",
-    "edit_recurrence_rules": "Wiederholungsregeln bearbeiten",
     "activity_saved": "Aktivität gespeichert",
     "activity_saved_description": "Die Aktivität wurde erfolgreich gespeichert.",
     "activity_deleted": "Aktivität gelöscht",
@@ -233,7 +198,6 @@ const createActivitiesFromTemplate = async () => {
     "no_activities": "No activities",
     "no_activities_description": "There are no activities for this course. Add activities.",
     "edit": "Edit",
-    "edit_recurrence_rules": "Edit Recurrence Rules",
     "activity_saved": "Activity saved",
     "activity_saved_description": "The Activity has been saved successfully.",
     "activity_deleted": "Activity deleted",

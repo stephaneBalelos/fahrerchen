@@ -1,26 +1,31 @@
 <template>
-
-    <div class="flex-1 flex flex-col h-full">
+  <div class="flex-1 flex flex-col h-full">
     <div
       class="w-full py-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800"
     >
-      <UContainer class="w-full">
-  <UPageHeader
-    :title="t('setup_your_course_activities')"
-    :description="t('setup_your_course_activities_description')"
-  />
+      <UContainer class="w-full max-w-6xl">
+        <div class="flex items-center gap-4 justify-between">
+          <div class="flex flex-col">
+            <h3
+              class="text-2xl font-semibold leading-6 text-gray-900 dark:text-white mb-2"
+            >
+              {{ t('setup_your_course_activities')}}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ t('setup_your_course_activities_description') }}
+            </p>
+          </div>
+        </div>
       </UContainer>
     </div>
     <div class="flex-1 relative">
-      <div class="absolute inset-0 py-8 overflow-y-auto">
-        <UContainer class="w-full">
-    <div 
-    v-if="organizationsStore.selectedOrganization"
-      class="py-12">
-      <CoursesSettingsCourseActivitiesList
-        :orgid="organizationsStore.selectedOrganization.id"
-      />
-    </div>
+      <div class="absolute inset-0 overflow-y-auto">
+        <UContainer class="w-full max-w-6xl">
+          <div v-if="organizationsStore.selectedOrganization" class="py-8">
+            <CoursesSettingsCourseActivitiesList
+              :orgid="organizationsStore.selectedOrganization.id"
+            />
+          </div>
         </UContainer>
       </div>
     </div>
@@ -29,7 +34,7 @@
     >
       <UButton
         v-if="organizationsStore.selectedOrganization"
-          :disabled="!isCourseActivitiesSetupComplete"
+        :disabled="!isCourseActivitiesSetupComplete"
         data-label="next-step"
         :to="`/setup/${organizationsStore.selectedOrganization.id}/costs`"
       >
@@ -40,24 +45,16 @@
 </template>
 
 <script setup lang="ts">
-
-
 const { t } = useI18n({
   useScope: "local",
 });
 
-
 const organizationsStore = useUserOrganizationsStore();
 const courseActivitiesStore = useCourseActivitiesStore();
 
-
 const isCourseActivitiesSetupComplete = computed(() => {
-  return (
-    courseActivitiesStore.courseActivities.length > 0
-  );
+  return courseActivitiesStore.courseActivities.length > 0;
 });
-
-
 </script>
 
 <style scoped></style>
@@ -67,13 +64,12 @@ const isCourseActivitiesSetupComplete = computed(() => {
   "de": {
     "setup_your_course_activities": "Richte deine Kursaktivitäten ein",
     "setup_your_course_activities_description": "Füge Aktivitäten zu deinem Kurs hinzu, um den Lernenden eine strukturierte Erfahrung zu bieten.",
-    "continue": "Weiter"
-    
+    "continue_setup": "Weiter"
   },
   "en": {
     "setup_your_course_activities": "Set up your course activities",
     "setup_your_course_activities_description": "Add activities to your course to provide learners with a structured experience.",
-    "continue": "Continue"
+    "continue_setup": "Continue"
   }
 }
 </i18n>
