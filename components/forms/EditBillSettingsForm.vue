@@ -6,14 +6,6 @@
       },
     }"
   >
-    <UAlert
-      v-if="status == 'success' && !data"
-      :title="t('billing_settings_not_configured')"
-      :description="t('billing_settings_not_configured_description')"
-      color="amber"
-      variant="soft"
-      icon="i-heroicons-exclamation-triangle-20-solid"
-    />
     <UForm
       v-if="status == 'success'"
       :schema="schema"
@@ -273,6 +265,7 @@ async function saveSettings() {
         invoice_subtitle: t("default_invoice_subtitle"),
         invoice_message: t("default_invoice_message"),
         invoice_footer: t("default_invoice_footer"),
+        auto_generate_invoices: false,
       });
     }
 
