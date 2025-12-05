@@ -117,7 +117,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
     const getAllowedCourseForActivity = async (id: string, course_id?: string) => {
         let query = supabase
             .from('course_activities_combinations')
-            .select('*, activity:course_activities(*)')
+            .select('*, activity:course_activities(*), course:courses(*)')
             .eq('activity_id', id)
 
         if (course_id) {
@@ -129,6 +129,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         if (error) {
             throw error
         }
+        console.log("Allowed courses for activity:", data)
         return data || []
     }
 

@@ -22,8 +22,8 @@
       <div class="absolute inset-0 overflow-y-auto">
         <UContainer class="w-full max-w-6xl">
           <div v-if="organizationsStore.selectedOrganization" class="py-8">
-            <CoursesSettingsCourseActivitiesList
-              :orgid="organizationsStore.selectedOrganization.id"
+            <CourseActivitiesSetup
+              :organization-id="organizationsStore.selectedOrganization.id"
             />
           </div>
         </UContainer>
@@ -45,6 +45,8 @@
 </template>
 
 <script setup lang="ts">
+import CourseActivitiesSetup from "~/components/setup/CourseActivitiesSetup.vue";
+
 const { t } = useI18n({
   useScope: "local",
 });
