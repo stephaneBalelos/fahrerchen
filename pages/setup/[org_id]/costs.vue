@@ -64,14 +64,14 @@ const isCostSettingsSetupComplete = computed(() => {
 <i18n lang="json">
 {
   "de": {
-    "setup_your_costs_settings": "Richte deine Kosten-Einstellungen ein",
-    "setup_your_costs_settings_description": "Lege die Kosten-Optionen für deine Kurse fest, um den Lernenden flexible Zugangsmöglichkeiten zu bieten.",
-    "continue": "Weiter"
+    "setup_your_costs_settings": "Einschreibung Kosten",
+    "setup_your_costs_settings_description": "Fügen Sie die Kosten hinzu, die bei bei der Einschreibung neuen Schülern anfallen sollen. Sie können Preisanpassungen je nach Ausbildungsklasse vornehmen.",
+    "continue_setup": "Weiter"
   },
   "en": {
-    "setup_your_costs_settings": "Set up your costs settings",
-    "setup_your_costs_settings_description": "Define the costs options for your courses to provide learners with flexible access.",
-    "continue": "Continue"
+    "setup_your_costs_settings": "Setup Your Costs Settings",
+    "setup_your_costs_settings_description": "Add the costs that should be incurred when enrolling new learners. You can make price adjustments based on the training class.",
+    "continue_setup": "Continue"
   }
 }
 </i18n>

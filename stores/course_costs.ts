@@ -75,6 +75,17 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         return await bulkCreateCourseCosts(template.costs)
     }
 
+    const getCourseCosts = async (organizationId: string) => {
+        const { data, error } = await supabase
+            .from('course_costs')
+            .select('*')
+            .eq('organization_id', organizationId)
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
     const getCourseCost = async (id: string): Promise<AppCourseCost | null> => {
         const { data, error } = await supabase
             .from('course_costs')
@@ -111,12 +122,12 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         await loadCourseCosts()
     }
 
-    const getAllowedCourseForCost = async (id: string, courseId?: string)=> {
+    const getAllowedCourseForCost = async (id: string, courseId?: string) => {
         let query = supabase
             .from('course_costs_combinations')
-            .select('*, cost:course_costs(*)')
+            .select('*, cost:course_costs(*), course:courses(*)')
             .eq('cost_id', id)
-            
+
         if (courseId) {
             query = query.eq('course_id', courseId)
         }
@@ -180,6 +191,19 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         }
     }
 
+    const getActiveCoursesWithCostCombinations = async (organization_id: string, cost_id: string) => {
+        const { data, error } = await supabase
+            .from('courses')
+            .select('*, course_costs_combinations(*)')
+            .eq('is_active', true)
+            .eq('organization_id', organization_id)
+            .eq('course_costs_combinations.cost_id', cost_id)
+        if (error) {
+            throw error
+        }
+        return data || []
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseCosts()
     }, { immediate: true })
@@ -191,12 +215,14 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         createCourseCost,
         updateCourseCost,
         createCourseCostsFromTemplate,
+        getCourseCosts,
         getCourseCost,
         deleteCourseCost,
         getAllowedCourseForCost,
         getCourseCostsForCourse,
         addCostToCourse,
         removeCostFromCourse,
-        updateCourseCostCombination
+        updateCourseCostCombination,
+        getActiveCoursesWithCostCombinations
     }
 })

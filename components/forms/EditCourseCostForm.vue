@@ -1,5 +1,11 @@
 <template>
-  <UDashboardSlideover :title="state.name">
+  <UDashboardSlideover>
+    <template #title>
+      <p v-if="state.name" class="text-lg font-bold">{{ state.name }}</p>
+      <p v-else class="text-lg font-bold text-gray-400 dark:text-gray-400">
+        {{ t("new_course_cost") }}
+      </p>
+    </template>
     <UForm
       ref="form"
       :state="state"
@@ -54,13 +60,32 @@
             :placeholder="t('form.price.placeholder')"
           />
         </UFormGroup>
+
+        <UFormGroup
+          v-if="props.organizationId && props.courseCostId"
+          :label="t('form.classes_settings')"
+          :description="t('form.classes_settings_desc')"
+          :ui="{ container: '' }"
+        >
+          <div class="py-6">
+            <CourseCostCombinationSettings
+              :organization-id="props.organizationId"
+              :cost-id="props.courseCostId"
+            />
+          </div>
+        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
     <template #footer>
-      <UButton @click="form?.submit()">
-        {{ t("save") }}
-      </UButton>
+      <div class="flex gap-4">
+        <UButton @click="form?.submit()">
+          {{ t("save") }}
+        </UButton>
+        <UButton color="gray" variant="ghost" @click="slideover.close()">
+          {{ t("cancel") }}
+        </UButton>
+      </div>
     </template>
   </UDashboardSlideover>
 </template>
@@ -68,8 +93,10 @@
 <script setup lang="ts">
 import type { AppCourseCost, CourseCostEdit } from "~/types/app.types";
 import type { Form } from "#ui/types";
+import CourseCostCombinationSettings from "../courses/settings/CourseCostCombinationSettings.vue";
 
 type Props = {
+  organizationId: string;
   courseCostId?: string;
 };
 type Emits = {
@@ -96,14 +123,14 @@ const state = reactive<CourseCostEdit>({
 onMounted(async () => {
   if (props.courseCostId) {
     try {
-          const data = await courseCostsStore.getCourseCost(props.courseCostId);
+      const data = await courseCostsStore.getCourseCost(props.courseCostId);
 
-    if (!data) {
-      throw new Error("Course cost not found");
-    }
-    state.name = data.name;
-    state.description = data.description;
-    state.price = data.price;
+      if (!data) {
+        throw new Error("Course cost not found");
+      }
+      state.name = data.name;
+      state.description = data.description;
+      state.price = data.price;
     } catch (error) {
       console.error("Error loading course cost:", error);
       // Handle error, e.g., show a notification
@@ -151,7 +178,7 @@ async function updateCourseCost(state: CourseCostEdit) {
 
 async function createCourseCost(state: CourseCostEdit) {
   try {
-     await courseCostsStore.createCourseCost({
+    await courseCostsStore.createCourseCost({
       name: state.name,
       description: state.description,
       price: state.price,
@@ -169,6 +196,7 @@ async function createCourseCost(state: CourseCostEdit) {
 <i18n lang="json">
 {
   "de": {
+    "new_course_cost": "Neue Kurskosten",
     "course_cost": "Kurskosten",
     "course_cost_description": "Hier können Sie die Kurskosten bearbeiten.",
     "form.name.label": "Name",
@@ -179,9 +207,12 @@ async function createCourseCost(state: CourseCostEdit) {
     "form.price.description": "Geben Sie den Preis des Kurses ein.",
     "form.price.placeholder": "0.00",
     "save": "Speichern",
-    "delete": "Löschen"
+    "cancel": "Abbrechen",
+    "form.classes_settings": "Ausbildungsklassen",
+    "form.classes_settings_desc": "Wählen Sie die Ausbildungsklassen, die diese Kurskosten enthalten sollen. Sie können auch spezifische Preise für jede Klasse festlegen."
   },
   "en": {
+    "new_course_cost": "New Course Cost",
     "course_cost": "Course Cost",
     "course_cost_description": "Edit the course cost here.",
     "form.name.label": "Name",
@@ -192,7 +223,9 @@ async function createCourseCost(state: CourseCostEdit) {
     "form.price.description": "Enter the price of the course.",
     "form.price.placeholder": "0.00",
     "save": "Save",
-    "delete": "Delete"
+    "cancel": "Cancel",
+    "form.classes_settings": "Class Settings",
+    "form.classes_settings_desc": "Select the training classes that should include these course costs. You can also set specific prices for each class."
   }
 }
 </i18n>

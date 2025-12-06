@@ -1,53 +1,11 @@
 <template>
-  <div v-if="courseCostsStore.courseCosts.length > 0" class="space-y-4">
-    <UiCardsBodyCollapseCard
-      v-for="field in courseCostsStore.courseCosts"
-      :key="field.id"
-    >
-      <template #header>
-        <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
-          <div class="flex flex-col gap-1 grow">
-            <p class="font-semibold">{{ field.name }}</p>
-            <span class="text-sm text-gray-500">{{ field.description }}</span>
-          </div>
-          <UButton
-            color="gray"
-            variant="solid"
-            @click.stop="openEditCourseCostForm(field.id)"
-            >{{ t("edit") }}</UButton
-          >
-          <UButton
-            color="red"
-            variant="soft"
-            :icon="'i-heroicons-trash'"
-            @click.stop="courseCostsStore.deleteCourseCost(field.id)"
-          />
-        </div>
-      </template>
-      <div class="flex flex-col gap-1">
-        <p class="text-sm text-gray-500 mb-2">
-          {{ g(`costs.allowed_classes`) }}
-        </p>
-        <UCard
-          :ui="{
-            body: {
-              padding: 'sm:p-0 py-0 px-0',
-            },
-          }"
-        >
-          <div
-            class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800"
-          >
-            <CostsAllowedCourseListItem
-              v-for="course in courseStore.activeCourses"
-              :key="field.id + course.id"
-              :course="course"
-              :cost-id="field.id"
-            />
-          </div>
-        </UCard>
-      </div>
-    </UiCardsBodyCollapseCard>
+  <div v-if="courseCosts && courseCosts.length > 0" class="space-y-4">
+    <CoursesCourseCard
+      v-for="cost in courseCosts"
+      :key="cost.id"
+      :cost="cost"
+      class="w-full"
+    />
   </div>
   <UAlert
     v-else
@@ -77,49 +35,27 @@
 </template>
 
 <script setup lang="ts">
-import EditCourseCostForm from "~/components/forms/EditCourseCostForm.vue";
-import CostsAllowedCourseListItem from "~/components/courses/settings/AllowedListItems/CostsAllowedCourseListItem.vue";
+import CoursesCourseCard from "~/components/courses/CourseCostCard.vue";
 
 type Props = {
   orgId: string;
-}
+};
 
-const _props = defineProps<Props>();
+const props = defineProps<Props>();
 
-const slideover = useSlideover();
+
+
 const toast = useToast();
 const { t } = useI18n({
   useScope: "local",
 });
 
-const { t: g } = useI18n({
-  useScope: "global",
-});
-
-const courseStore = useCoursesStore();
 const courseCostsStore = useCourseCostsStore();
 
-const openEditCourseCostForm = (id?: string) => {
-  slideover.open(EditCourseCostForm, {
-    courseCostId: id,
-    "onCost-saved": () => {
-      slideover.close();
-      toast.add({
-        title: t("cost_saved"),
-        description: t("cost_saved_description"),
-        color: "green",
-      });
-    },
-    "onCost-deleted": () => {
-      slideover.close();
-      toast.add({
-        title: t("cost_deleted"),
-        description: t("cost_deleted_description"),
-        color: "green",
-      });
-    },
-  });
-};
+const { data: courseCosts } = await useAsyncData(
+  `course_costs_for_organization_${props.orgId}`,
+  async () => await courseCostsStore.getCourseCosts(props.orgId)
+);
 
 const createCourseCostsFromTemplate = async () => {
   try {

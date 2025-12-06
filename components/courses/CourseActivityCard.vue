@@ -147,9 +147,9 @@ function openEditActivityForm() {
             "base_price": "Grundpreis",
             "base_required": "Basis pflichtanwesenheit",
             "max_attendees": "Maximale Teilnehmer",
-            "classes": "Kurse",
-            "no_classes_assigned_to_activity": "Keine Kurse dieser Aktivität zugewiesen",
-            "error_loading_classes": "Fehler beim Laden der Kurse"
+            "classes": "Klassen",
+            "no_classes_assigned_to_activity": "Keine Klassen dieser Aktivität zugewiesen",
+            "error_loading_classes": "Fehler beim Laden der Klassen"
         },
         "en": {
             "edit_activity": "Edit Activity",

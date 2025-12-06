@@ -65,12 +65,12 @@ const isCourseActivitiesSetupComplete = computed(() => {
 {
   "de": {
     "setup_your_course_activities": "Richte deine Kursaktivitäten ein",
-    "setup_your_course_activities_description": "Füge Aktivitäten zu deinem Kurs hinzu, um den Lernenden eine strukturierte Erfahrung zu bieten.",
+    "setup_your_course_activities_description": "Fügen Sie Aktivitäten hinzu, an den Ihre Schüler teilnehmen müssen, um die Ausbildung abzuschließen. Diese werden pro Teilnahme abgerechnet. Der Preis pro Teilnahme und die Anforderungen können je nach Ausbildungsklasse angepasst werden.",
     "continue_setup": "Weiter"
   },
   "en": {
     "setup_your_course_activities": "Set up your course activities",
-    "setup_your_course_activities_description": "Add activities to your course to provide learners with a structured experience.",
+    "setup_your_course_activities_description": "Add activities that your learners must participate in to complete the training. They are billed per participation. The price per participation and the requirements can be adjusted depending on the training class.",
     "continue_setup": "Continue"
   }
 }
