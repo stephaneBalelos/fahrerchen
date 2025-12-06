@@ -42,7 +42,7 @@
             <UButton
               color="gray"
               variant="solid"
-              @click.stop="openEditActivityForm(field.id)"
+              @click.stop="openEditActivityForm(field.organization_id, field.id)"
               >{{ t("edit") }}</UButton
             >
             <UButton
@@ -94,7 +94,7 @@
           icon: 'i-heroicons-plus',
           variant: 'soft',
           size: '2xs',
-          click: () => openEditActivityForm(''),
+          click: () => openEditActivityForm(props.organizationId),
         },
         {
           label: t('add_activity_from_template'),
@@ -118,6 +118,11 @@ import { formatCurrency } from "~/utils/formatters";
 import ActivitiesAllowedCourseListItem from "./AllowedListItems/ActivitiesAllowedCourseListItem.vue";
 import { ACTIVITY_COLORS } from "~/constants";
 
+type Props = {
+  organizationId: string;
+};
+
+const props = defineProps<Props>();
 const slideover = useSlideover();
 const toast = useToast();
 const { t } = useI18n({
@@ -130,8 +135,9 @@ const { t: g } = useI18n({
 const courseStore = useCoursesStore();
 const courseActivitiesStore = useCourseActivitiesStore();
 
-const openEditActivityForm = (id?: string) => {
+const openEditActivityForm = (organizationId: string, id?: string) => {
   slideover.open(EditCourseActivityForm, {
+    organizationId: organizationId,
     courseActivityId: id,
     "onActivity-saved": () => {
       slideover.close();

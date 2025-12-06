@@ -1,13 +1,20 @@
 <template>
-  <UCard>
+  <UCard
+    :ui="{
+      base: 'h-full flex flex-col',
+      body: {
+        base: 'flex-1'
+      }
+    }"
+  >
     <template #header>
       <div class="flex items-center gap-2">
-        <div class="flex items-center justify-between w-full">
+        <div class="flex items-center justify-between w-full gap-4">
           <div class="flex flex-col items-start">
             <h4 class="text-lg font-medium text-gray-900 dark:text-white">
               {{ activity.name }}
             </h4>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-gray-500 truncate max-w-md">
               {{ activity.description }}
             </p>
           </div>
@@ -111,6 +118,7 @@ const { data: allowedClasses, status, refresh } = useAsyncData(
 
 function openEditActivityForm() {
     slideover.open(EditCourseActivityForm, {
+        organizationId: props.activity.organization_id,
         courseActivityId: props.activity.id,
         "onActivity-saved": () => {
             slideover.close();

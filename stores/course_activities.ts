@@ -129,14 +129,13 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         if (error) {
             throw error
         }
-        console.log("Allowed courses for activity:", data)
         return data || []
     }
 
     const getCourseActivities = async (org_id: string, course_id?: string, search?: string): Promise<AppCourseActivity[]> => {
         let q = supabase
             .from("course_activities")
-            .select("*, course_activities_combinations!inner(*)")
+            .select("*, course_activities_combinations(*)")
             .eq("organization_id", org_id);
 
         if (search && search.length < 3) {
@@ -208,6 +207,19 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
             throw error
         }
     }
+
+    const getActiveCoursesWithActivityCombinations = async (organization_id: string, activity_id: string) => {
+        const { data, error } = await supabase
+            .from('courses')
+            .select('*, course_activities_combinations(*)')
+            .eq('is_active', true)
+            .eq('organization_id', organization_id)
+            .eq('course_activities_combinations.activity_id', activity_id)
+        if (error) {
+            throw error
+        }
+        return data || []
+    }   
 
     const getRecurrenceRulesForActivity = async (activity_id: string) => {
         const { data, error } = await supabase
@@ -295,6 +307,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         addCourseToAllowedCourses,
         removeCourseFromAllowedCourses,
         updateCourseActivityCombination,
+        getActiveCoursesWithActivityCombinations,
         getRecurrenceRulesForActivity,
         getRecurrenceRuleById,
         createRecurrenceRule,

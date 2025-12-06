@@ -73,10 +73,12 @@ const { data: activities, refresh } = await useAsyncData(
   }
 );
 
+console.log(activities.value?.length);
+
 function createCourseActivity() {
   slideover.open(EditCourseActivityForm, {
+    organizationId: props.organizationId,
     "onActivity-saved": () => {
-      slideover.close();
       refresh();
     },
     preventClose: true,
