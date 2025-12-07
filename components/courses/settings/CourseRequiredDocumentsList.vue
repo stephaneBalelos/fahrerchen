@@ -1,60 +1,33 @@
 <template>
   <div
-    v-if="courseRequiredDocumentsStore.courseRequiredDocuments.length > 0"
+    v-if="courseRequiredDocuments && courseRequiredDocuments.length > 0 && status === 'success'"
     class="space-y-4"
   >
-    <UiCardsBodyCollapseCard
-      v-for="field in courseRequiredDocumentsStore.courseRequiredDocuments"
-      :key="field.id"
+    <div
+      v-for="courseRequiredDocument in courseRequiredDocuments"
+      :key="courseRequiredDocument.id"
     >
-      <template #header>
-        <div class="flex items-center justify-between pt-4 first:pt-0 gap-2">
-          <div class="flex flex-col gap-1 grow">
-            <p class="font-semibold">{{ field.name }}</p>
-            <span class="text-sm text-gray-500">{{ field.description }}</span>
-          </div>
-          <UButton
-            color="gray"
-            variant="solid"
-            @click.stop="openEditCourseRequiredDocument(field.id)"
-            >{{ t("edit") }}</UButton
-          >
-          <UButton
-            color="red"
-            variant="soft"
-            :icon="'i-heroicons-trash'"
-            @click.stop="
-              courseRequiredDocumentsStore.deleteCourseRequiredDocument(
-                field.id
-              )
-            "
-          />
-        </div>
-      </template>
-      <div class="flex flex-col gap-1">
-        <p class="text-sm text-gray-500 mb-2">
-          {{ g(`required_documents.allowed_classes`) }}
-        </p>
-        <UCard
-          :ui="{
-            body: {
-              padding: 'sm:p-0 py-0 px-0',
-            },
-          }"
+      <CourseRequiredDocumentCard
+        :course-required-document="courseRequiredDocument"
+        @edit="openEditCourseRequiredDocumentForm"
+        @delete="deleteCourseRequiredDocument"
+      />
+    </div>
+    <div class="flex justify-center">
+      <div class="mt-4">
+        <UButton
+          color="black"
+          variant="solid"
+          :icon="'i-heroicons-plus-circle'"
+          @click="() => openEditCourseRequiredDocumentForm()"
         >
-          <div
-            class="grid grid-cols-1 divide-y divide-gray-200 dark:divide-gray-800"
-          >
-            <CoursesSettingsAllowedListItemsRequiredDocumentAllowedCourseItem
-              v-for="course in coursesStore.activeCourses"
-              :key="field.id + course.id"
-              :course="course"
-              :required-document-id="field.id"
-            />
-          </div>
-        </UCard>
+          {{ t("add_required_document") }}
+        </UButton>
       </div>
-    </UiCardsBodyCollapseCard>
+    </div>
+  </div>
+  <div v-else-if="status === 'pending'" class="space-y-4">
+    <USkeleton v-for="n in 3" :key="n"  class="h-24 w-full"/>
   </div>
   <UAlert
     v-else
@@ -84,33 +57,33 @@
 </template>
 
 <script setup lang="ts">
-import EditCourseRequirementFrom from "~/components/forms/EditCourseRequirementFrom.vue";
+import CourseRequiredDocumentCard from "~/components/courses/CourseRequiredDocumentCard.vue";
+import EditCourseRequirementForm from "~/components/forms/EditCourseRequirementForm.vue";
+
+type Props = {
+  organizationId: string;
+};
+
+const props = defineProps<Props>();
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-const { t: g } = useI18n({
-  useScope: "global",
-});
 
-const coursesStore = useCoursesStore();
 const courseRequiredDocumentsStore = useCourseRequiredDocumentsStore();
 const toast = useToast();
-
 const slideover = useSlideover();
 
-function openEditCourseRequiredDocument(id?: string) {
-  slideover.open(EditCourseRequirementFrom, {
-    courseRequiredDocumentId: id,
-    "onRequirement-created": () => {
-      slideover.close();
-    },
-    "onRequirement-saved": () => {
-      slideover.close();
-    },
-  });
-}
+
+const { data: courseRequiredDocuments, refresh, status } = await useAsyncData(
+  `course-required-documents-for-organization-${props.organizationId}`,
+  async () => {
+    return await courseRequiredDocumentsStore.getCourseRequiredDocuments(
+      props.organizationId
+    );
+  }
+);
 
 const createCourseRequiredDocumentsFromTemplate = async () => {
   try {
@@ -125,6 +98,41 @@ const createCourseRequiredDocumentsFromTemplate = async () => {
     toast.add({
       title: t("error_creating_required_documents"),
       description: t("error_creating_required_documents_description"),
+      color: "red",
+    });
+  }
+};
+
+const openEditCourseRequiredDocumentForm = (id?: string) => {
+  slideover.open(EditCourseRequirementForm, {
+    organizationId: props.organizationId,
+    courseRequiredDocumentId: id,
+    "onRequirement-saved": () => {
+      slideover.close();
+    },
+    "onRequirement-created": () => {
+      slideover.close();
+    },
+    "onVnodeUnmounted": () => {
+      refresh();
+    },
+  });
+};
+
+const deleteCourseRequiredDocument = async (id: string) => {
+  try {
+    await courseRequiredDocumentsStore.deleteCourseRequiredDocument(id);
+    toast.add({
+      title: t("required_document_deleted"),
+      description: t("required_document_deleted_description"),
+      color: "green",
+    });
+    refresh();
+  } catch (error) {
+    console.error("Error deleting required document:", error);
+    toast.add({
+      title: t("error_deleting_required_document"),
+      description: t("error_deleting_required_document_description"),
       color: "red",
     });
   }

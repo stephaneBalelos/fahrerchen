@@ -1,5 +1,11 @@
 <template>
-  <UDashboardSlideover :title="state.name">
+  <UDashboardSlideover>
+    <template #title>
+      <p v-if="state.name" class="text-lg font-bold">{{ state.name }}</p>
+      <p v-else class="text-lg font-bold text-gray-400 dark:text-gray-400">
+        {{ t("new_required_document") }}
+      </p>
+    </template>
     <UForm
       ref="form"
       :state="state"
@@ -36,12 +42,25 @@
             size="md"
           />
         </UFormGroup>
+        <UFormGroup
+          v-if="props.organizationId && props.courseRequiredDocumentId"
+          :label="t('form.classes_settings')"
+          :description="t('form.classes_settings_desc')"
+          :ui="{ container: '' }"
+        >
+          <div class="py-6">
+            <CourseRequiredDocumentCombinationSettings
+              :organization-id="props.organizationId"
+              :required-document-id="props.courseRequiredDocumentId"
+            />
+          </div>
+        </UFormGroup>
       </UDashboardSection>
     </UForm>
 
     <template #footer>
       <UButton @click="form?.submit()">
-        {{ t('save') }}
+        {{ t("save") }}
       </UButton>
       <!-- <UButton v-if="props.requirementid" variant="ghost" color="red" @click="deleteCourseRequirement">
         {{ t('delete') }}
@@ -52,37 +71,44 @@
 
 <script setup lang="ts">
 import type { CourseRequiredDocumentEdit } from "~/types/app.types";
-import type { Form} from "#ui/types";
+import type { Form } from "#ui/types";
+import CourseRequiredDocumentCombinationSettings from "~/components/courses/settings/CourseRequiredDocumentCombinationSettings.vue";
 
 type Props = {
+  organizationId: string;
   courseRequiredDocumentId?: string;
 };
 const slideover = useSlideover();
 const props = defineProps<Props>();
 const form = ref<Form<CourseRequiredDocumentEdit> | null>(null);
-const $emit = defineEmits(['requirement-saved', 'requirement-created']);
+const $emit = defineEmits([
+  "requirement-saved",
+  "requirement-created",
+  "requirement-deleted",
+]);
 const courseRequiredDocumentsStore = useCourseRequiredDocumentsStore();
 
 const state = reactive<CourseRequiredDocumentEdit>({
   name: "",
-  description: ""
+  description: "",
 });
 
 const { t } = useI18n({
   useScope: "local",
 });
 
-
 onMounted(async () => {
   if (props.courseRequiredDocumentId) {
     try {
-      const data = await courseRequiredDocumentsStore.getCourseRequiredDocument(props.courseRequiredDocumentId);
+      const data = await courseRequiredDocumentsStore.getCourseRequiredDocument(
+        props.courseRequiredDocumentId
+      );
 
-    if (!data) {
-      throw new Error("Course cost not found");
-    }
-    state.name = data.name;
-    state.description = data.description;
+      if (!data) {
+        throw new Error("Course cost not found");
+      }
+      state.name = data.name;
+      state.description = data.description;
     } catch (error) {
       console.error("Error loading course cost:", error);
       // Handle error, e.g., show a notification
@@ -113,8 +139,11 @@ const saveCourseRequirement = async () => {
 const updateCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
   if (!props.courseRequiredDocumentId) return;
   try {
-    await courseRequiredDocumentsStore.updateCourseRequiredDocument(props.courseRequiredDocumentId!, state);
-    $emit('requirement-saved');
+    await courseRequiredDocumentsStore.updateCourseRequiredDocument(
+      props.courseRequiredDocumentId!,
+      state
+    );
+    $emit("requirement-saved");
   } catch (error) {
     console.error(error);
     // Handle error, e.g., show a notification
@@ -124,7 +153,7 @@ const updateCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
 const createCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
   try {
     await courseRequiredDocumentsStore.createCourseRequiredDocument(state);
-    $emit('requirement-created');
+    $emit("requirement-created");
   } catch (error) {
     console.error(error);
     // Handle error, e.g., show a notification
@@ -137,6 +166,7 @@ const createCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
 <i18n lang="json">
 {
   "de": {
+    "new_required_document": "Neues erforderliches Dokument",
     "required_document": "Erforderliches Dokument",
     "required_document_description": "Beschreiben Sie das erforderliche Dokument, das die Teilnehmer:innen hochladen müssen, um den Kurs abzuschließen.",
     "form": {
@@ -147,12 +177,15 @@ const createCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
       "description": {
         "label": "Beschreibung",
         "description": "Beschreiben Sie das erforderliche Dokument."
-      }
+      },
+      "classes_settings": "Ausbildungsklassen Einstellungen",
+      "classes_settings_desc": "Wählen Sie die Ausbildungsklassen aus, für die dieses Dokument erforderlich ist."
     },
     "save": "Speichern",
     "delete": "Löschen"
   },
   "en": {
+    "new_required_document": "New Required Document",
     "required_document": "Required Document",
     "required_document_description": "Describe the required document that participants need to upload to complete the course.",
     "form": {
@@ -163,7 +196,9 @@ const createCourseRequirement = async (state: CourseRequiredDocumentEdit) => {
       "description": {
         "label": "Description",
         "description": "Describe the required document."
-      }
+      },
+      "classes_settings": "Classes Settings",
+      "classes_settings_desc": "Select the course classes for which this document is required."
     },
     "save": "Save",
     "delete": "Delete"

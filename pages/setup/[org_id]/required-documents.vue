@@ -25,7 +25,7 @@
             v-if="organizationsStore.selectedOrganization"
             class="divide-y"
           >
-            <CoursesSettingsCourseRequiredDocumentsList />
+            <CoursesSettingsCourseRequiredDocumentsList :organization-id="organizationsStore.selectedOrganization.id" />
           </div>
         </UContainer>
       </div>

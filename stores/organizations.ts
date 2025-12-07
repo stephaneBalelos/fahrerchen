@@ -10,6 +10,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     const selectedOrganizationMembers = ref<OrganizationMember[]>([])
     const config = useRuntimeConfig().public
     const selectedOrganizationId = ref<string | null>(null)
+    const organizationBillingSettings = ref<AppOrganizationBillingSettings | null>(null)
     const route = useRoute()
 
     const isLoading = ref(true)
@@ -178,6 +179,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
         if (org_id) {
             try {
                 selectedOrganizationMembers.value = await getOrganizationMembers(org_id as string)
+                organizationBillingSettings.value = await getOrganizationBillingSettings(org_id as string)
             } catch (error) {
                 console.error("Error loading organization members:", error)
             }
@@ -193,7 +195,7 @@ export const useUserOrganizationsStore = defineStore('userOrganizations', () => 
     }, { immediate: true })
 
     return {
-        organizations, selectedOrganizationId, selectedOrganizationMembers, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
+        organizations, selectedOrganizationId, selectedOrganizationMembers, organizationBillingSettings, loadOrganizationsMemberships, getOrganizationById, updateOrganizationById, createOrganization, relativePath, selectedOrganization, isLoading,
         getOrganizationBillingSettings, createBillingSettings, updateBillingSettings, getOrganizationMembers
     }
 

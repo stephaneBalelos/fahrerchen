@@ -22,12 +22,32 @@
             {
               variant: 'solid',
               color: 'gray',
+              label: t('go_to_course_management'),
+              click: () => navigateToAfterSetup('/courses'),
+            },
+          ]"
+          :title="t('course_management')"
+          :description="t('course_management_description')"
+        >
+          <template #icon>
+            <UAvatar
+              size="lg"
+              color="gray"
+              icon="i-heroicons-book-open-20-solid"
+            />
+          </template>
+        </UAlert>
+        <UAlert
+          :actions="[
+            {
+              variant: 'solid',
+              color: 'gray',
               label: t('go_to_online_payments'),
               click: () => navigateToAfterSetup('/settings/payments'),
             },
           ]"
-          :title="t('online_payements')"
-          :description="t('online_payements_description')"
+          :title="t('online_payments')"
+          :description="t('online_payments_description')"
         >
           <template #icon>
             <UAvatar
@@ -89,8 +109,11 @@ const navigateToAfterSetup = async (url: string) => {
     "setup_completed_description": "Deine Fahrschule ist bereit. Du kannst jetzt beginnen, deine Fahrschüler:innen, deinen Staff und deine Termine hinzuzufügen.",
     "setup_completed_next_steps": "Nächste Schritte",
     "setup_completed_next_steps_description": "Hier sind einige Vorschläge, was du als nächstes tun kannst um das Beste aus Karjolen herauszuholen.",
-    "online_payements": "Online Zahlungen",
-    "online_payements_description": "Richte Online Zahlungen ein, damit deine Fahrschüler:innen direkt online bezahlen können.",
+    "course_management": "Kursverwaltung & Planung",
+    "course_management_description": "Sehen Sie sich Ihre Kursangebote an und passen Sie die Details an.",
+    "go_to_course_management": "Zur Kursverwaltung",
+    "online_payments": "Online Zahlungen",
+    "online_payments_description": "Richte Online Zahlungen ein, damit deine Fahrschüler:innen direkt online bezahlen können.",
     "go_to_online_payments": "Zu den Online Zahlungen",
     "team_management": "Team Verwaltung",
     "team_management_description": "Füge dein Team hinzu und verwalte deren Rollen und Berechtigungen.",
@@ -101,8 +124,11 @@ const navigateToAfterSetup = async (url: string) => {
     "setup_completed_description": "Your driving school setup is now complete. You can now start adding courses and lessons to your organization.",
     "setup_completed_next_steps": "Next Steps",
     "setup_completed_next_steps_description": "Here are some suggestions for what you can do next to get the most out of Karjolen.",
-    "online_payements": "Online Payments",
-    "online_payements_description": "Set up online payments so your students can pay directly online.",
+    "course_management": "Course Management & Planning",
+    "course_management_description": "View your course offerings and adjust the details.",
+    "go_to_course_management": "Go to Course Management",
+    "online_payments": "Online Payments",
+    "online_payments_description": "Set up online payments so your students can pay directly online.",
     "go_to_online_payments": "Go to Online Payments",
     "team_management": "Team Management",
     "team_management_description": "Add your team and manage their roles and permissions.",

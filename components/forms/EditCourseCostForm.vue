@@ -100,7 +100,8 @@ type Props = {
   courseCostId?: string;
 };
 type Emits = {
-  (event: "cost-saved" | "cost-deleted", payload?: AppCourseCost): void;
+  (event: "cost-saved" | "cost-deleted" | "cost-created", payload?: AppCourseCost): void;
+  
 };
 
 const slideover = useSlideover();
@@ -178,12 +179,15 @@ async function updateCourseCost(state: CourseCostEdit) {
 
 async function createCourseCost(state: CourseCostEdit) {
   try {
-    await courseCostsStore.createCourseCost({
+    const newCourseCost = await courseCostsStore.createCourseCost({
       name: state.name,
       description: state.description,
       price: state.price,
     });
-    $emits("cost-saved");
+    if (!newCourseCost) {
+      throw new Error("Failed to create course cost");
+    }
+    $emits("cost-created");
   } catch (error) {
     console.error("Error creating course cost:", error);
     // Handle error, e.g., show a notification

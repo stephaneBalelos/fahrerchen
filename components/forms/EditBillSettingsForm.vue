@@ -131,6 +131,11 @@ const props = defineProps<{
   organizationId: string;
 }>();
 
+const $emits = defineEmits<{
+  (e: "saved"): void;
+}>();
+
+
 const organizationsStore = useUserOrganizationsStore();
 
 const schema = z.object({
@@ -284,6 +289,7 @@ async function saveSettings() {
     isSaving.value = false;
   } finally {
     await refresh();
+    $emits("saved");
     isSaving.value = false;
   }
 }

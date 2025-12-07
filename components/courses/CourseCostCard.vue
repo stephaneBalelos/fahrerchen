@@ -10,18 +10,22 @@
           {{ formatCurrency(props.cost.price) }}
         </div>
       </div>
-      <UButton
-        color="gray"
-        variant="solid"
-        @click.stop="openEditCourseCostForm()"
-        >{{ t("edit_cost") }}</UButton
-      >
-      <UButton
-        color="red"
-        variant="ghost"
-        :icon="'i-heroicons-trash'"
-        @click.stop="courseCostsStore.deleteCourseCost(props.cost.id)"
-      />
+      <UTooltip :text="t('edit_cost')" :popper="{ placement: 'top' }">
+        <UButton
+          color="white"
+          variant="solid"
+          icon="i-heroicons-pencil-square"
+          @click="$emits('edit', props.cost.id)"
+        />
+      </UTooltip>
+      <UTooltip :text="t('delete_cost')" :popper="{ placement: 'top' }">
+        <UButton
+          color="red"
+          variant="ghost"
+          :icon="'i-heroicons-trash'"
+          @click="$emits('delete', props.cost.id)"
+        />
+      </UTooltip>
     </div>
     <template #footer>
       <div class="flex gap-4">
@@ -59,7 +63,6 @@ import type { AppCourseCost } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 import CourseTypeBadge from "./CourseTypeBadge.vue";
 import { USkeleton } from "#components";
-import EditCourseCostForm from "../forms/EditCourseCostForm.vue";
 
 type Props = {
   cost: AppCourseCost;
@@ -70,37 +73,17 @@ const { t } = useI18n({
 });
 const props = defineProps<Props>();
 const courseCostsStore = useCourseCostsStore();
-const slideover = useSlideover();
-const emits = defineEmits<{
-  (e: "updated"): void;
+const $emits = defineEmits<{
+  (e: "edit" | "delete", id: string): void;
 }>();
 
 const {
   data: allowedClasses,
   status,
-  refresh,
 } = useAsyncData(`costs-allowed-classes-${props.cost.id}`, async () => {
   return courseCostsStore.getAllowedCourseForCost(props.cost.id);
 });
 
-function openEditCourseCostForm() {
-  slideover.open(EditCourseCostForm, {
-    organizationId: props.cost.organization_id,
-    courseCostId: props.cost.id,
-    "onCost-saved": () => {
-      slideover.close();
-      emits("updated");
-    },
-    "onCost-deleted": () => {
-      slideover.close();
-      emits("updated");
-    },
-    preventClose: true,
-    onVnodeUnmounted: () => {
-      refresh();
-    },
-  });
-}
 </script>
 
 <style scoped></style>
@@ -109,6 +92,7 @@ function openEditCourseCostForm() {
 {
   "de": {
     "edit_cost": "Kosten bearbeiten",
+    "delete_cost": "Kosten löschen",
     "not_specified": "Nicht angegeben",
     "course_type": "Kurstyp",
     "base_price": "Grundpreis",
@@ -118,6 +102,7 @@ function openEditCourseCostForm() {
   },
   "en": {
     "edit_cost": "Edit Cost",
+    "delete_cost": "Delete Cost",
     "not_specified": "Not specified",
     "course_type": "Course Type",
     "base_price": "Base Price",

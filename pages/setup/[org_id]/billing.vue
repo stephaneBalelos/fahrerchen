@@ -54,7 +54,7 @@ const { t } = useI18n({
 const organizationsStore = useUserOrganizationsStore();
 
 const isBillingSettingsSetupComplete = computed(() => {
-  return true;
+  return organizationsStore.organizationBillingSettings !== null;
 });
 </script>
 
@@ -63,8 +63,8 @@ const isBillingSettingsSetupComplete = computed(() => {
 <i18n lang="json">
 {
   "de": {
-    "setup_your_bill_information": "Richte deine Rechnungseinstellungen ein",
-    "setup_your_bill_information_description": "Passen Sie Ihre Rechnungseinstellungen an. Diese Einstellungen werden auf alle Rechnungen angewendet, die Sie erstellen.",
+    "setup_your_bill_information": "Rechnungserstellungen einrichten",
+    "setup_your_bill_information_description": "Damit Sie Ihre Rechnungen erstellen können, fügen Sie folgende Informationen hinzu. Diese Einstellungen gelten für alle von dieser Fahrschule erstellten Rechnungen.",
     "billing_settings": {
       "label": "Rechnungseinstellungen",
       "description": "Passen Sie die Rechnungseinstellungen für Ihre Organisation an."
@@ -73,7 +73,7 @@ const isBillingSettingsSetupComplete = computed(() => {
   },
   "en": {
     "setup_your_bill_information": "Set up your billing settings",
-    "setup_your_bill_information_description": "Adjust your billing settings. These settings will apply to all invoices you create.",
+    "setup_your_bill_information_description": "To create your invoices, add the following information. These settings apply to all invoices created by this driving school.",
     "billing_settings": {
       "label": "Billing Settings",
       "description": "Adjust the billing settings for your organization."

@@ -1,5 +1,5 @@
 import { getStandardCourseActivitiesTemplate, type StandardCourseActivitiesTemplate } from "~/constants"
-import type { AppCourseRequiredDocument, AppCourseRequiredDocumentCombination, CourseRequiredDocumentEdit } from "~/types/app.types"
+import type { AppCourseRequiredDocument, CourseRequiredDocumentEdit } from "~/types/app.types"
 
 export const useCourseRequiredDocumentsStore = defineStore('courseRequiredDocuments', () => {
     const supabase = useSupabaseClient()
@@ -77,6 +77,20 @@ export const useCourseRequiredDocumentsStore = defineStore('courseRequiredDocume
         await bulkCreateCourseRequiredDocuments(template.required_documents)
     }
 
+    const getCourseRequiredDocuments = async (organizationId: string): Promise<AppCourseRequiredDocument[]> => {
+        const { data, error } = await supabase
+            .from('course_required_documents')
+            .select('*')
+            .eq('organization_id', organizationId)
+            .order('inserted_at', { ascending: false })
+
+        if (error) {
+            console.error("Error loading course required documents:", error)
+            throw error
+        }
+        return data || []
+    }
+
     const getCourseRequiredDocument = async (id: string): Promise<AppCourseRequiredDocument | null> => {
         const { data, error } = await supabase
             .from('course_required_documents')
@@ -114,10 +128,10 @@ export const useCourseRequiredDocumentsStore = defineStore('courseRequiredDocume
         await loadCourseRequiredDocuments()
     }
 
-    const getAllowedCourseForRequiredDocument = async (id: string, courseId?: string): Promise<AppCourseRequiredDocumentCombination[]> => {
+    const getAllowedCourseForRequiredDocument = async (id: string, courseId?: string) => {
         let query = supabase
             .from('course_required_documents_combinations')
-            .select('*')
+            .select('*, course:courses(*)')
             .eq('required_document_id', id)
         if (courseId) {
             query = query.eq('course_id', courseId)
@@ -159,6 +173,21 @@ export const useCourseRequiredDocumentsStore = defineStore('courseRequiredDocume
         }
     }
 
+    const getActiveCoursesWithRequiredDocumentCombinations = async (organizationId: string, requiredDocumentId: string) => {
+        const { data, error } = await supabase
+            .from('courses')
+            .select('*, course_required_documents_combinations(*)')
+            .eq('is_active', true)
+            .eq('organization_id', organizationId)
+            .eq('course_required_documents_combinations.required_document_id', requiredDocumentId)
+
+        if (error) {
+            console.error("Error loading active courses with required document combinations:", error)
+            throw error
+        }
+        return data || []
+    }
+
     watch(() => userOrganizationsStore.selectedOrganization, async () => {
         await loadCourseRequiredDocuments()
     }, { immediate: true })
@@ -170,11 +199,13 @@ export const useCourseRequiredDocumentsStore = defineStore('courseRequiredDocume
         createCourseRequiredDocument,
         bulkCreateCourseRequiredDocuments,
         createCourseRequiredDocumentsFromTemplate,
+        getCourseRequiredDocuments,
         getCourseRequiredDocument,
         updateCourseRequiredDocument,
         deleteCourseRequiredDocument,
         getAllowedCourseForRequiredDocument,
         addRequiredDocumentToCourse,
-        removeRequiredDocumentFromCourse
+        removeRequiredDocumentFromCourse,
+        getActiveCoursesWithRequiredDocumentCombinations
     }
 })
