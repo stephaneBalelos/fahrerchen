@@ -1,5 +1,12 @@
 <template>
-  <UCard>
+  <UCard
+    :ui="{
+      base: 'flex flex-col h-full',
+      body: {
+        base: 'flex-1',
+      },
+    }"
+  >
     <template #header>
       <div class="flex justify-between items-center w-full">
         <div class="flex flex-col flex-1 items-start">
@@ -8,13 +15,21 @@
           </p>
           <!-- <p class="text-xs text-gray-500 truncate w-full">{{ g(`course_types.${d.type}.description`) }}</p> -->
         </div>
-        <!-- <UButton
+        <UButton
           color="white"
           size="xs"
           icon="i-heroicons-pencil"
-          @click="() => {}"
+          @click="() => { openEditCourseSlideover() }"
           >{{ t("open_course") }}</UButton
-        > -->
+        >
+      </div>
+    </template>
+    <div class="flex flex-col flex-1 gap-8">
+      <CourseCostsOverview :course-id="props.course.id" />
+      <CourseActivitiesOverview :course-id="props.course.id" />
+    </div>
+    <template #footer>
+      <div class="flex justify-between items-center gap-4">
         <div class="flex items-center gap-2">
           <UBadge
             v-if="props.course.is_active"
@@ -42,14 +57,6 @@
             }}
           </UBadge>
         </div>
-      </div>
-    </template>
-    <div class="flex flex-col gap-8">
-      <CourseCostsOverview :course-id="props.course.id" />
-      <CourseActivitiesOverview :course-id="props.course.id" />
-    </div>
-    <template #footer>
-      <div class="flex justify-end items-center gap-4">
         <div class="flex flex-col items-end">
           <p class="text-sm text-gray-500">
             {{ t("total_costs") }}
@@ -58,7 +65,10 @@
             v-if="totalPriceData !== null && status === 'success'"
             class="font-medium"
           >
-            {{ formatCurrency(totalPriceData) }} <span class="text-xs text-gray-500 ms-2">({{ t("without_vat") }})</span>
+            {{ formatCurrency(totalPriceData) }}
+            <span class="text-xs text-gray-500 ms-2"
+              >({{ t("without_vat") }})</span
+            >
           </p>
           <USkeleton v-else-if="status === 'pending'" />
           <p v-else-if="error" class="font-medium">
@@ -75,6 +85,7 @@ import type { AppCourse } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
 import CourseActivitiesOverview from "~/components/courses/CourseActivitiesOverview.vue";
 import CourseCostsOverview from "~/components/courses/CourseCostsOverview.vue";
+import EditCourseForm from "../forms/EditCourseForm.vue";
 
 type Props = {
   course: AppCourse;
@@ -90,6 +101,7 @@ const { t: g } = useI18n({
 const props = defineProps<Props>();
 const subscriptionStore = useSubscriptionStore();
 const client = useSupabaseClient();
+const sliderover = useSlideover();
 
 const $fetchTotalPrice = async (courseId: string) => {
   const { data, error } = await client
@@ -129,6 +141,12 @@ const {
 } = await useAsyncData(`total-price-${props.course.id}`, async () => {
   return await $fetchTotalPrice(props.course.id);
 });
+
+function openEditCourseSlideover() {
+  sliderover.open(EditCourseForm, {
+    course: props.course,
+  })
+}
 </script>
 
 <style scoped></style>

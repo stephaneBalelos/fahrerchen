@@ -132,7 +132,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         return data || []
     }
 
-    const getCourseActivities = async (org_id: string, course_id?: string, search?: string): Promise<AppCourseActivity[]> => {
+    const getCourseActivities = async (org_id: string, course_id?: string, search?: string) => {
         let q = supabase
             .from("course_activities")
             .select("*, course_activities_combinations(*)")
@@ -191,6 +191,17 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
             .delete()
             .eq('activity_id', activity_id)
             .eq('course_id', course_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
+    const removeCourseActivityCombination = async (combination_id: string) => {
+        const { error } = await supabase
+            .from('course_activities_combinations')
+            .delete()
+            .eq('id', combination_id)
 
         if (error) {
             throw error
@@ -306,6 +317,7 @@ export const useCourseActivitiesStore = defineStore('courseActivities', () => {
         getActivitiesForCourse,
         addCourseToAllowedCourses,
         removeCourseFromAllowedCourses,
+        removeCourseActivityCombination,
         updateCourseActivityCombination,
         getActiveCoursesWithActivityCombinations,
         getRecurrenceRulesForActivity,
