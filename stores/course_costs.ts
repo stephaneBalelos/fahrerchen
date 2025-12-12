@@ -75,11 +75,20 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         return await bulkCreateCourseCosts(template.costs)
     }
 
-    const getCourseCosts = async (organizationId: string) => {
-        const { data, error } = await supabase
+    const getCourseCosts = async (organizationId: string, course_id?: string, search?: string) => {
+        let q = supabase
             .from('course_costs')
-            .select('*')
+            .select('*, course_costs_combinations(*)')
             .eq('organization_id', organizationId)
+
+        if (search) {
+            q = q.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+        }
+        if (course_id) {
+            q = q.eq("course_costs_combinations.course_id", course_id);
+        }
+        q = q.order("name", { ascending: true }).limit(5);
+        const { data, error } = await q;
         if (error) {
             throw error
         }
@@ -180,6 +189,17 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         }
     }
 
+    const removeCourseCostCombination = async (combination_id: string) => {
+        const { error } = await supabase
+            .from('course_costs_combinations')
+            .delete()
+            .eq('id', combination_id)
+
+        if (error) {
+            throw error
+        }
+    }
+
     const updateCourseCostCombination = async (combination_id: string, data: Partial<CourseCostEdit>) => {
         const { error } = await supabase
             .from('course_costs_combinations')
@@ -222,6 +242,7 @@ export const useCourseCostsStore = defineStore('courseCosts', () => {
         getCourseCostsForCourse,
         addCostToCourse,
         removeCostFromCourse,
+        removeCourseCostCombination,
         updateCourseCostCombination,
         getActiveCoursesWithCostCombinations
     }
