@@ -1,67 +1,96 @@
 <template>
-  <UCard
-    :ui="{
-      body: {
-        padding: 'sm:p-4 p-4',
-      },
-    }"
-  >
-    <div class="flex">
-      <div class="flex flex-1 flex-col justify-center">
-        <p class="font-medium">
-          {{ props.activity.name }}
+  <EditInplaceCard :label="props.activity.name">
+    <div class="flex items-center">
+      <div class="flex items-center gap-4">
+        <p class="font-semibold">
+          {{
+            data
+              ? data.required !== null
+                ? data.required
+                : props.activity.required
+              : props.activity.required
+          }}
+        </p>
+        <p class="font-semibold">
+          {{
+            formatCurrency(
+              data
+                ? data.price !== null
+                  ? data.price
+                  : props.activity.price
+                : props.activity.price
+            )
+          }}
         </p>
       </div>
-      <UForm v-if="data" class="flex gap-6" :schema="schema" :state="state">
-        <div class="flex items-center gap-1 w-32">
-          <UInput
-            v-model="state.price"
-            type="number"
-            size="sm"
-            step="0.01"
-            min="0"
-            variant="none"
-            :placeholder="formatCurrency(data.activity.price)"
-            :disabled="!data || isUpdating"
-            @blur="
-              () => {
-                updateCombination();
-              }
-            "
-          >
-            <template #trailing>
-              <span :class="`text-sm ${state.price ? '' : 'text-gray-500'}`"
-                >€</span
-              >
-            </template>
-          </UInput>
-        </div>
-        <div class="flex items-center gap-1 w-32">
+    </div>
+    <template #editing>
+      <UForm
+        v-if="data"
+        class="flex-1 gap-6"
+        :schema="schema"
+        :state="state"
+      >
+        <div class="flex items-center gap-1">
           <UInput
             v-model="state.required"
+            :size="'sm'"
             type="number"
-            size="sm"
             step="1"
             min="0"
-            max="100"
-            variant="none"
-            :placeholder="data.activity.required?.toString() || ''"
-            :disabled="!data || isUpdating"
-            @blur="
-              () => {
-                updateCombination();
-              }
+            :placeholder="
+              (state.required
+                ? state.required
+                : props.activity.required
+              ).toString()
             "
+            :disabled="!data || isUpdating"
+          />
+          <UInput
+            v-model="state.price"
+            :icon="'i-heroicons-currency-euro'"
+            :size="'sm'"
+            type="number"
+            step="0.01"
+            min="0"
+            :placeholder="
+              (state.price ? state.price : props.activity.price).toString()
+            "
+            :disabled="!data || isUpdating"
           />
         </div>
       </UForm>
-      <div class="flex items-center ms-4">
+    </template>
+    <template #actions="{ isEditing, setIsEditing }">
+       <UTooltip v-if="!isEditing" :text="t('edit')">
+          <UButton
+            icon="i-heroicons-pencil-square"
+            color="gray"
+            variant="ghost"
+            :size="'2xs'"
+            :disabled="isUpdating || !data"
+            @click="() => setIsEditing(true)"
+          />
+        </UTooltip>
+        <UButton
+          v-else
+          :loading="isUpdating"
+          icon="i-heroicons-check"
+          color="green"
+          variant="soft"
+          :size="'2xs'"
+          :disabled="isUpdating || !data"
+          @click="() => {
+            updateCombination();
+            setIsEditing(false);
+          }"
+        />
         <UPopover mode="click">
           <UButton
             icon="i-heroicons-trash"
             color="red"
             variant="ghost"
-            size="sm"
+            :size="'2xs'"
             :disabled="isUpdating || !data"
           />
           <template #panel="{ close }">
@@ -94,15 +123,15 @@
             </div>
           </template>
         </UPopover>
-      </div>
-    </div>
-  </UCard>
+    </template>
+  </EditInplaceCard>
 </template>
 
 <script setup lang="ts">
 import z from "zod";
 import type { AppCourseActivity } from "~/types/app.types";
 import { formatCurrency } from "~/utils/formatters";
+import EditInplaceCard from "~/components/ui/Cards/EditInplaceCard.vue";
 
 type Props = {
   courseId: string;
@@ -121,7 +150,7 @@ const isUpdating = ref(false);
 
 const courseActivitiesStore = useCourseActivitiesStore();
 
-const { data } = await useAsyncData(
+const { data, refresh } = await useAsyncData(
   `course-activity-combinations-for-course-${props.courseId}-activity-${props.activity.id}`,
   () => {
     return courseActivitiesStore.getAllowedCourseForActivity(
@@ -131,7 +160,6 @@ const { data } = await useAsyncData(
   },
   {
     transform: (data) => {
-      console.log("Fetched course activity combination:", data);
       if (data.length > 0) {
         return data[0];
       }
@@ -162,14 +190,15 @@ const updateCombination = async () => {
   isUpdating.value = true;
   try {
     await courseActivitiesStore.updateCourseActivityCombination(data.value.id, {
-      price: state.price !== undefined ? state.price : null,
-      required: state.required !== undefined ? state.required : null,
+      price: state.price ? state.price : null,
+      required: state.required ? state.required : null,
     });
     $emits("updated", data.value.id);
   } catch (error) {
     console.error("Error updating course activity combination:", error);
   } finally {
     isUpdating.value = false;
+    refresh();
   }
 };
 
